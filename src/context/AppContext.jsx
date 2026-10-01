@@ -412,6 +412,16 @@ export function AppProvider({ children }) {
               appliedAt: a.applied_at
             })));
           }
+          if (data.settings && data.settings.length > 0) {
+            const mappedSettings = {};
+            data.settings.forEach(s => {
+              let val = s.key_value;
+              if (val === 'true') val = true;
+              else if (val === 'false') val = false;
+              mappedSettings[s.key_name] = val;
+            });
+            setPlatformSettings(prev => ({ ...prev, ...mappedSettings }));
+          }
         }
       })
       .catch(() => {});
@@ -1192,8 +1202,16 @@ export function AppProvider({ children }) {
   };
 
   const updatePlatformSettings = (newSettings) => {
-    setPlatformSettings(prev => ({ ...prev, ...newSettings }));
-    showToast('Sistem tənzimləmələri yadda saxlanıldı', 'success');
+    setPlatformSettings(prev => {
+      const merged = { ...prev, ...newSettings };
+      fetch('/api.php?action=save_settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(merged)
+      }).catch(() => {});
+      return merged;
+    });
+    showToast('Platforma parametrləri yeniləndi', 'success');
   };
 
   const updateSqlConfig = (newConfig) => {

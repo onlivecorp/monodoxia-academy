@@ -1,6 +1,6 @@
 import React from 'react';
 import { LanguageProvider } from './i18n/LanguageContext';
-import { AppProvider } from './context/AppContext';
+import { AppProvider, useApp } from './context/AppContext';
 
 import SafetyBanner from './components/SafetyBanner';
 import Header from './components/Header';
@@ -17,6 +17,7 @@ import FAQ from './components/FAQ';
 import Newsletter from './components/Newsletter';
 import Footer from './components/Footer';
 import ToastContainer from './components/ToastContainer';
+import MaintenanceScreen from './components/MaintenanceScreen';
 
 import AuthModal from './components/modals/AuthModal';
 import OnboardingModal from './components/modals/OnboardingModal';
@@ -28,40 +29,68 @@ import NewTopicModal from './components/modals/NewTopicModal';
 import ProfileModal from './components/modals/ProfileModal';
 import ApplicationModal from './components/modals/ApplicationModal';
 
+function AppContent() {
+  const { platformSettings, currentUser, setAuthModalOpen } = useApp();
+  const isMaintenance = Boolean(platformSettings?.maintenanceMode) && currentUser?.role !== 'Admin';
+
+  if (isMaintenance) {
+    return (
+      <div className="bg-[#071326] text-white min-h-screen flex flex-col justify-between">
+        <ToastContainer />
+        <MaintenanceScreen onAdminLogin={() => setAuthModalOpen(true)} />
+        <AuthModal />
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-background text-on-surface antialiased selection:bg-secondary-fixed selection:text-on-secondary-fixed min-h-screen flex flex-col justify-between">
+      <ToastContainer />
+
+      {/* Top Banner if Maintenance Mode is active but user is Admin */}
+      {Boolean(platformSettings?.maintenanceMode) && currentUser?.role === 'Admin' && (
+        <div className="bg-amber-600 text-white text-xs font-bold py-2 px-4 text-center sticky top-0 z-[100] flex items-center justify-center gap-2 shadow-md">
+          <span className="material-symbols-outlined text-[16px]">build</span>
+          <span>TEXNİKİ QULLUQ REJİMİ AKTİVDİR — Sayt hazırda yalnız Administratorlara açıqdır.</span>
+        </div>
+      )}
+
+      <SafetyBanner />
+      <Header />
+      <main>
+        <Hero />
+        <About />
+        <Areas />
+        <Academy />
+        <Club />
+        <Coaches />
+        <Community />
+        <Events />
+        <Testimonials />
+        <FAQ />
+        <Newsletter />
+      </main>
+      <Footer />
+
+      {/* Modals */}
+      <AuthModal />
+      <OnboardingModal />
+      <PlayerModal />
+      <CertificateModal />
+      <BookingModal />
+      <AdminModal />
+      <NewTopicModal />
+      <ProfileModal />
+      <ApplicationModal />
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <LanguageProvider>
       <AppProvider>
-        <div className="bg-background text-on-surface antialiased selection:bg-secondary-fixed selection:text-on-secondary-fixed min-h-screen flex flex-col justify-between">
-          <ToastContainer />
-          <SafetyBanner />
-          <Header />
-          <main>
-            <Hero />
-            <About />
-            <Areas />
-            <Academy />
-            <Club />
-            <Coaches />
-            <Community />
-            <Events />
-            <Testimonials />
-            <FAQ />
-            <Newsletter />
-          </main>
-          <Footer />
-
-          {/*  */}
-          <AuthModal />
-          <OnboardingModal />
-          <PlayerModal />
-          <CertificateModal />
-          <BookingModal />
-          <AdminModal />
-          <NewTopicModal />
-          <ProfileModal />
-          <ApplicationModal />
-        </div>
+        <AppContent />
       </AppProvider>
     </LanguageProvider>
   );

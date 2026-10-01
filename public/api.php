@@ -287,6 +287,26 @@ if ($action === 'delete_user' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     exit();
 }
 
+if ($action === 'save_settings' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $input = json_decode(file_get_contents('php://input'), true);
+    if (!$input) {
+        $input = $_POST;
+    }
+    if ($input && is_array($input)) {
+        $stmt = $pdo->prepare("
+            INSERT INTO mdx_settings (key_name, key_value)
+            VALUES (?, ?)
+            ON DUPLICATE KEY UPDATE key_value = VALUES(key_value)
+        ");
+        foreach ($input as $k => $v) {
+            $valStr = (is_array($v) || is_object($v)) ? json_encode($v, JSON_UNESCAPED_UNICODE) : (string)$v;
+            $stmt->execute([$k, $valStr]);
+        }
+    }
+    echo json_encode(['status' => 'success', 'message' => 'Parametrlər yadda saxlandı'], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
 // --------------------------------------------------------
 // 4. MÜRACİƏTLƏR VƏ QEYDİYYATLAR APİ ENDPOİNTLƏRİ
 // --------------------------------------------------------
