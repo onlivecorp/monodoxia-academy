@@ -355,6 +355,48 @@ export function AppProvider({ children }) {
   // Toasts
   const [toasts, setToasts] = useState([]);
 
+  // Live MySQL Hydration on App Mount
+  useEffect(() => {
+    fetch('/api.php?action=get_all')
+      .then(res => res.json())
+      .then(data => {
+        if (data?.status === 'success') {
+          if (data.users && data.users.length > 0) {
+            setUsersList(data.users.map(u => ({
+              id: u.id,
+              name: u.name,
+              email: u.email,
+              role: u.role || 'Tələbə',
+              tier: u.tier || 'Free',
+              status: u.status || 'Aktiv',
+              joinedDate: u.joined_date || (u.created_at ? u.created_at.split(' ')[0] : new Date().toISOString().split('T')[0])
+            })));
+          }
+          if (data.applications && data.applications.length > 0) {
+            setApplicationsList(data.applications.map(a => ({
+              id: a.id,
+              userId: a.user_id,
+              userName: a.user_name,
+              userEmail: a.user_email,
+              userPhone: a.user_phone,
+              targetType: a.target_type,
+              targetId: a.target_id,
+              targetTitle: a.target_title,
+              price: a.price,
+              status: a.status,
+              paymentStatus: a.payment_status,
+              attendanceStatus: a.attendance_status,
+              adminNote: a.admin_note,
+              formResponses: typeof a.form_responses === 'string' ? JSON.parse(a.form_responses || '{}') : (a.form_responses || {}),
+              userNote: a.user_note,
+              appliedAt: a.applied_at
+            })));
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   // LocalStorage Sync
   useEffect(() => {
     if (currentUser) {
@@ -486,15 +528,35 @@ export function AppProvider({ children }) {
       focusAreas: []
     };
     setCurrentUser(user);
-    setUsersList(prev => [...prev, {
+    const newEntry = {
       id: user.id,
-      name: `${user.firstName} ${user.lastName}`,
+      name: `${user.firstName} ${user.lastName}`.trim(),
       email: user.email,
       role: 'Tələbə',
       tier: 'Free',
       status: 'Aktiv',
       joinedDate: new Date().toISOString().split('T')[0]
-    }]);
+    };
+    setUsersList(prev => [newEntry, ...prev]);
+
+    // Save directly to MySQL database
+    try {
+      fetch('/api.php?action=register_user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: user.id,
+          name: newEntry.name,
+          email: user.email,
+          password: data.password || null,
+          role: 'Tələbə',
+          tier: 'Free',
+          status: 'Aktiv',
+          joined_date: newEntry.joinedDate
+        })
+      }).catch(err => console.warn('MySQL user sync error:', err));
+    } catch (e) {}
+
     setAuthModalOpen(false);
     showToast(`Xoş gəldiniz, ${user.firstName}! Hesabınız yaradıldı.`, 'success');
     setTimeout(() => {
@@ -914,6 +976,15 @@ export function AppProvider({ children }) {
   const updateUser = (id, updates) => {
     setUsersList(prev => prev.map(u => u.id === id ? { ...u, ...updates } : u));
     showToast('İstifadəçi məlumatı yeniləndi', 'success');
+    const target = usersList.find(u => u.id === id);
+    if (target) {
+      const merged = { ...target, ...updates };
+      fetch('/api.php?action=save_user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(merged)
+      }).catch(() => {});
+    }
   };
 
   const addUser = (newUser) => {
@@ -926,11 +997,23 @@ export function AppProvider({ children }) {
     };
     setUsersList(prev => [user, ...prev]);
     showToast(`İstifadəçi əlavə edildi: ${user.name}`, 'success');
+
+    fetch('/api.php?action=save_user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(user)
+    }).catch(() => {});
   };
 
   const deleteUser = (id) => {
     setUsersList(prev => prev.filter(u => u.id !== id));
     showToast('İstifadəçi silindi', 'info');
+
+    fetch('/api.php?action=delete_user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    }).catch(() => {});
   };
 
   const updateCourse = (id, updates) => {

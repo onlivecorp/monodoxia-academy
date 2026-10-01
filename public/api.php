@@ -213,6 +213,81 @@ if ($action === 'save_translation' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // --------------------------------------------------------
+// 3.5. İSTİFADƏÇİ ƏMƏLİYYATLARI (USERS APİ)
+// --------------------------------------------------------
+if ($action === 'get_users') {
+    $stmt = $pdo->query("SELECT id, name, email, role, tier, status, joined_date FROM mdx_users ORDER BY joined_date DESC");
+    $users = $stmt->fetchAll();
+    echo json_encode(['status' => 'success', 'users' => $users], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+if (($action === 'register_user' || $action === 'save_user') && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $input = json_decode(file_get_contents('php://input'), true);
+    if (!$input) {
+        $input = $_POST;
+    }
+    
+    $id = $input['id'] ?? ('usr_' . round(microtime(true) * 1000));
+    $name = trim($input['name'] ?? (($input['firstName'] ?? '') . ' ' . ($input['lastName'] ?? '')));
+    $email = trim($input['email'] ?? '');
+    $role = $input['role'] ?? 'Tələbə';
+    $tier = $input['tier'] ?? 'Free';
+    $status = $input['status'] ?? 'Aktiv';
+    $password = $input['password'] ?? null;
+    $password_hash = $password ? password_hash($password, PASSWORD_DEFAULT) : null;
+    $joined_date = $input['joined_date'] ?? $input['joinedDate'] ?? date('Y-m-d');
+
+    if (!$email) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Email tələb olunur'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    if (!$name) {
+        $name = explode('@', $email)[0];
+    }
+
+    $stmt = $pdo->prepare("
+        INSERT INTO mdx_users (id, name, email, password_hash, role, tier, status, joined_date)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE 
+            name = VALUES(name),
+            role = VALUES(role),
+            tier = VALUES(tier),
+            status = VALUES(status),
+            password_hash = COALESCE(VALUES(password_hash), password_hash)
+    ");
+    $stmt->execute([$id, $name, $email, $password_hash, $role, $tier, $status, $joined_date]);
+
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'İstifadəçi bazaya yazıldı',
+        'user' => [
+            'id' => $id,
+            'name' => $name,
+            'email' => $email,
+            'role' => $role,
+            'tier' => $tier,
+            'status' => $status,
+            'joined_date' => $joined_date
+        ]
+    ], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+if ($action === 'delete_user' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $input = json_decode(file_get_contents('php://input'), true);
+    $id = $input['id'] ?? null;
+    if ($id) {
+        $stmt = $pdo->prepare("DELETE FROM mdx_users WHERE id = ?");
+        $stmt->execute([$id]);
+    }
+    echo json_encode(['status' => 'success', 'message' => 'İstifadəçi silindi'], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+// --------------------------------------------------------
 // 4. MÜRACİƏTLƏR VƏ QEYDİYYATLAR APİ ENDPOİNTLƏRİ
 // --------------------------------------------------------
 if ($action === 'get_applications') {
