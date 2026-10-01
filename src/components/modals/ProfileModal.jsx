@@ -6,6 +6,7 @@ export default function ProfileModal() {
   const {
     profileModalOpen,
     setProfileModalOpen,
+    setAdminModalOpen,
     currentUser,
     userTier,
     certificates,
@@ -92,6 +93,15 @@ export default function ProfileModal() {
                   <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-secondary/15 text-secondary border border-secondary/20">
                     {userTier} Rezident
                   </span>
+                  {currentUser.role === 'Admin' && (
+                    <button
+                      onClick={() => { setProfileModalOpen(false); setAdminModalOpen(true); }}
+                      className="px-2 py-0.5 rounded text-[10px] font-bold bg-secondary text-on-secondary hover:bg-secondary/90 transition-colors flex items-center gap-1 shadow-sm"
+                    >
+                      <span className="material-symbols-outlined text-[12px]">admin_panel_settings</span>
+                      <span>İdarəetmə Paneli</span>
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

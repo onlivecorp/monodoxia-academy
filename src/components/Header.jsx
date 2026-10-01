@@ -79,16 +79,18 @@ export default function Header() {
         {/* RIGHT ACTION CONTROLS */}
         <div className="flex items-center space-x-3 sm:space-x-4 shrink-0">
           
-          {/* Admin Panel Quick Access */}
-          <button
-            onClick={() => setAdminModalOpen(true)}
-            className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-secondary/30 bg-secondary/5 text-secondary hover:bg-secondary/15 text-xs font-semibold whitespace-nowrap transition-colors"
-            title={t('nav_admin')}
-          >
-            <span className="material-symbols-outlined text-[16px]">admin_panel_settings</span>
-            <span className="hidden xl:inline">{t('nav_admin')}</span>
-            <span className="xl:hidden">Admin</span>
-          </button>
+          {/* Admin Panel Quick Access (Only for Admin) */}
+          {currentUser?.role === 'Admin' && (
+            <button
+              onClick={() => setAdminModalOpen(true)}
+              className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-secondary/30 bg-secondary/5 text-secondary hover:bg-secondary/15 text-xs font-semibold whitespace-nowrap transition-colors"
+              title={t('nav_admin')}
+            >
+              <span className="material-symbols-outlined text-[16px]">admin_panel_settings</span>
+              <span className="hidden xl:inline">{t('nav_admin')}</span>
+              <span className="xl:hidden">Admin</span>
+            </button>
+          )}
 
           {/* Divider */}
           <div className="hidden md:block w-[1px] h-6 bg-outline-variant/60"></div>
@@ -215,15 +217,17 @@ export default function Header() {
               </a>
             ))}
           </nav>
-          <div className="pt-2 border-t border-outline-variant flex items-center justify-between">
-            <button
-              onClick={() => { setAdminModalOpen(true); setMobileMenuOpen(false); }}
-              className="text-xs text-secondary font-semibold flex items-center gap-1.5"
-            >
-              <span className="material-symbols-outlined text-[16px]">admin_panel_settings</span>
-              <span>{t('nav_admin')}</span>
-            </button>
-          </div>
+          {currentUser?.role === 'Admin' && (
+            <div className="pt-2 border-t border-outline-variant flex items-center justify-between">
+              <button
+                onClick={() => { setAdminModalOpen(true); setMobileMenuOpen(false); }}
+                className="text-xs text-secondary font-semibold flex items-center gap-1.5"
+              >
+                <span className="material-symbols-outlined text-[16px]">admin_panel_settings</span>
+                <span>{t('nav_admin')}</span>
+              </button>
+            </div>
+          )}
         </div>
       )}
     </header>

@@ -9,6 +9,7 @@ import AdminCategoriesTab from './AdminCategoriesTab';
 
 export default function AdminModal() {
   const {
+    currentUser,
     adminModalOpen,
     setAdminModalOpen,
     applicationsList,
@@ -502,6 +503,8 @@ export default function AdminModal() {
     e.preventDefault();
     updatePlatformSettings(settingsForm);
   };
+
+  if (!adminModalOpen || currentUser?.role !== 'Admin') return null;
 
   return (
     <div className="fixed inset-0 z-50 admin-backdrop w-screen h-screen overflow-hidden">
