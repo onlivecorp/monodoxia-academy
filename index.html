@@ -361,53 +361,58 @@
     (function initSplash() {
       var sp = document.getElementById('splash');
       var n = document.getElementById('name');
-      if (!sp || !n) return;
+      if (!sp) return;
 
       var dismissed = false;
       function dismissSplash() {
         if (dismissed) return;
         dismissed = true;
-        sp.classList.add('done');
+        if (sp) {
+          sp.classList.add('done');
+          sp.style.opacity = '0';
+          sp.style.pointerEvents = 'none';
+        }
         document.body.classList.remove('splash-active');
         setTimeout(function() {
-          if (sp && sp.parentNode) sp.remove();
+          if (sp && sp.parentNode) sp.parentNode.removeChild(sp);
           document.dispatchEvent(new Event('splash:done'));
-        }, 900);
+        }, 600);
       }
 
-      // Allow tap/click to dismiss quickly if user desires
+      // Tap or click to dismiss immediately
       sp.addEventListener('click', dismissSplash);
+      window.addEventListener('keydown', dismissSplash);
 
-      'MONODOXIA'.split('').forEach(function(c, i) {
-        var s = document.createElement('span');
-        s.textContent = c;
-        s.style.animationDelay = (3 + i * .08) + 's';
-        n.appendChild(s);
-      });
+      // Hard safety timeout: Dismiss splash screen under any circumstance within 2.5s
+      setTimeout(dismissSplash, 2500);
+
+      if (n) {
+        'MONODOXIA'.split('').forEach(function(c, i) {
+          var s = document.createElement('span');
+          s.textContent = c;
+          s.style.animationDelay = (0.2 + i * 0.05) + 's';
+          n.appendChild(s);
+        });
+      }
 
       for (var i = 0; i < 14; i++) {
         var d = document.createElement('div');
         d.className = 'sparkle';
         d.style.left = (15 + Math.random() * 70) + '%';
         d.style.top = (50 + Math.random() * 40) + '%';
-        d.style.animationDelay = (2 + Math.random() * 4) + 's';
+        d.style.animationDelay = (0.5 + Math.random() * 2) + 's';
         sp.appendChild(d);
       }
 
       var f = sp.querySelector('#fill');
       var p = sp.querySelector('#pct');
       var t0 = null;
-      var D = 3200;
-      var S = 3600;
+      var D = 1400;
 
       function step(t) {
         if (dismissed) return;
         if (!t0) t0 = t;
-        var e = t - t0 - S;
-        if (e < 0) {
-          requestAnimationFrame(step);
-          return;
-        }
+        var e = t - t0;
         var k = Math.min(e / D, 1);
         var v = 1 - Math.pow(1 - k, 2.2);
         if (f) f.style.width = (v * 100) + '%';
@@ -416,7 +421,7 @@
         if (k < 1) {
           requestAnimationFrame(step);
         } else {
-          setTimeout(dismissSplash, 500);
+          setTimeout(dismissSplash, 300);
         }
       }
 
