@@ -416,8 +416,8 @@ export function AppProvider({ children }) {
             const mappedSettings = {};
             data.settings.forEach(s => {
               let val = s.key_value;
-              if (val === 'true') val = true;
-              else if (val === 'false') val = false;
+              if (val === 'true' || val === '1' || val === 1 || val === true) val = true;
+              else if (val === 'false' || val === '0' || val === 0 || val === false) val = false;
               mappedSettings[s.key_name] = val;
             });
             setPlatformSettings(prev => ({ ...prev, ...mappedSettings }));
