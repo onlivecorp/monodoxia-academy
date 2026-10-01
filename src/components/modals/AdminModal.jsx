@@ -151,6 +151,11 @@ export default function AdminModal() {
 
   // Settings State
   const [settingsForm, setSettingsForm] = useState(platformSettings);
+  const [maintTransLang, setMaintTransLang] = useState('az');
+
+  useEffect(() => {
+    setSettingsForm(platformSettings);
+  }, [platformSettings]);
 
   // CMS State – block editors
   const [cmsBlock, setCmsBlock] = useState('navbar');
@@ -2602,6 +2607,135 @@ export default function AdminModal() {
                       <input type="checkbox" checked={settingsForm.maintenanceMode} onChange={e=>setSettingsForm({...settingsForm,maintenanceMode:e.target.checked})} style={{accentColor:'#c5a059',width:'16px',height:'16px'}} />
                       <span style={{fontSize:'11px',color:settingsForm.maintenanceMode?'#b45309':'#64748b',fontWeight:700}}>{settingsForm.maintenanceMode?'AKTİV':'SÖNDÜRÜLÜB'}</span>
                     </label>
+                  </div>
+
+                  {/* Maintenance Mode Screen Content & Translations */}
+                  <div className="admin-card" style={{display:'flex',flexDirection:'column',gap:'14px'}}>
+                    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',borderBottom:'1px solid #e2e8f0',paddingBottom:'10px'}}>
+                      <div>
+                        <div style={{fontSize:'12px',fontWeight:700,color:'#0f172a',display:'flex',alignItems:'center',gap:'6px'}}>
+                          <span className="material-symbols-outlined" style={{fontSize:'16px',color:'#b45309'}}>edit_note</span>
+                          Texniki Qulluq Ekranı Mətnləri və Tərcümələri
+                        </div>
+                        <div style={{fontSize:'11px',color:'#64748b',marginTop:'2px'}}>
+                          Texniki qulluq zamanı ziyarətçilərə görünəcək başlıq, açıqlama və status mətnlərini dillər üzrə redaktə edin
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Language Selector Tabs */}
+                    <div style={{display:'flex',gap:'6px',flexWrap:'wrap'}}>
+                      {[
+                        { code: 'az', label: '🇦🇿 Azərbaycan (AZ)' },
+                        { code: 'en', label: '🇬🇧 English (EN)' },
+                        { code: 'ru', label: '🇷🇺 Русский (RU)' },
+                        { code: 'tr', label: '🇹🇷 Türkçe (TR)' }
+                      ].map(l => {
+                        const isCur = maintTransLang === l.code;
+                        return (
+                          <button
+                            key={l.code}
+                            type="button"
+                            onClick={() => setMaintTransLang(l.code)}
+                            style={{
+                              padding: '5px 12px',
+                              borderRadius: '6px',
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              border: isCur ? '1px solid #c5a059' : '1px solid #e2e8f0',
+                              background: isCur ? '#fffbeb' : '#ffffff',
+                              color: isCur ? '#b45309' : '#64748b',
+                              transition: 'all 0.15s ease'
+                            }}
+                          >
+                            {l.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Current Lang Input Fields */}
+                    <div style={{display:'flex',flexDirection:'column',gap:'12px',background:'#f8fafc',padding:'14px',borderRadius:'8px',border:'1px solid #e2e8f0'}}>
+                      <div>
+                        <label className="admin-label" style={{fontSize:'11px',fontWeight:600}}>
+                          Ekran Başlığı ({maintTransLang.toUpperCase()})
+                        </label>
+                        <input
+                          type="text"
+                          value={
+                            maintTransLang === 'az'
+                              ? (settingsForm.maintenanceTranslations?.az?.title || settingsForm.maintenanceTitle || '')
+                              : (settingsForm.maintenanceTranslations?.[maintTransLang]?.title || '')
+                          }
+                          onChange={e => {
+                            const val = e.target.value;
+                            const curTrans = { ...(settingsForm.maintenanceTranslations || {}) };
+                            curTrans[maintTransLang] = { ...(curTrans[maintTransLang] || {}), title: val };
+                            setSettingsForm({
+                              ...settingsForm,
+                              ...(maintTransLang === 'az' ? { maintenanceTitle: val } : {}),
+                              maintenanceTranslations: curTrans
+                            });
+                          }}
+                          className="admin-input"
+                          placeholder="Məs: Planlaşdırılmış Texniki Təkmilləşdirmə"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="admin-label" style={{fontSize:'11px',fontWeight:600}}>
+                          Açıqlama Mətni ({maintTransLang.toUpperCase()})
+                        </label>
+                        <textarea
+                          rows={3}
+                          value={
+                            maintTransLang === 'az'
+                              ? (settingsForm.maintenanceTranslations?.az?.desc || settingsForm.maintenanceDesc || '')
+                              : (settingsForm.maintenanceTranslations?.[maintTransLang]?.desc || '')
+                          }
+                          onChange={e => {
+                            const val = e.target.value;
+                            const curTrans = { ...(settingsForm.maintenanceTranslations || {}) };
+                            curTrans[maintTransLang] = { ...(curTrans[maintTransLang] || {}), desc: val };
+                            setSettingsForm({
+                              ...settingsForm,
+                              ...(maintTransLang === 'az' ? { maintenanceDesc: val } : {}),
+                              maintenanceTranslations: curTrans
+                            });
+                          }}
+                          className="admin-input"
+                          style={{resize:'vertical',minHeight:'75px'}}
+                          placeholder="Ziyarətçilərə göstəriləcək ətraflı məlumat..."
+                        />
+                      </div>
+
+                      <div>
+                        <label className="admin-label" style={{fontSize:'11px',fontWeight:600}}>
+                          Müddət / Status Qeydi ({maintTransLang.toUpperCase()})
+                        </label>
+                        <input
+                          type="text"
+                          value={
+                            maintTransLang === 'az'
+                              ? (settingsForm.maintenanceTranslations?.az?.notice || settingsForm.maintenanceNotice || '')
+                              : (settingsForm.maintenanceTranslations?.[maintTransLang]?.notice || '')
+                          }
+                          onChange={e => {
+                            const val = e.target.value;
+                            const curTrans = { ...(settingsForm.maintenanceTranslations || {}) };
+                            curTrans[maintTransLang] = { ...(curTrans[maintTransLang] || {}), notice: val };
+                            setSettingsForm({
+                              ...settingsForm,
+                              ...(maintTransLang === 'az' ? { maintenanceNotice: val } : {}),
+                              maintenanceTranslations: curTrans
+                            });
+                          }}
+                          className="admin-input"
+                          placeholder="Məs: Tezliklə Aktiv"
+                        />
+                      </div>
+                    </div>
                   </div>
 
                   <div>

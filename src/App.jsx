@@ -35,7 +35,7 @@ function AppContent() {
 
   if (isMaintenance) {
     return (
-      <div className="bg-[#071326] text-white min-h-screen flex flex-col justify-between">
+      <div className="bg-[#fbf9f5] text-[#1e293b] min-h-screen flex flex-col justify-between">
         <ToastContainer />
         <MaintenanceScreen onAdminLogin={() => setAuthModalOpen(true)} />
         <AuthModal />

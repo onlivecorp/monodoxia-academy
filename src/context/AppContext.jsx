@@ -29,7 +29,32 @@ const INITIAL_SETTINGS = {
   showSafetyBanner: true,
   safetyText: "Monodoxia Academy təhsil, fərdi inkişaf və kouçinq platformasıdır. Təqdim edilən proqramlar və materiallar tibbi, psixiatrik və ya kliniki diaqnostika və müalicəni əvəz etmir.",
   maintenanceMode: false,
-  allowRegistrations: true
+  allowRegistrations: true,
+  maintenanceTitle: "Planlaşdırılmış Texniki Təkmilləşdirmə",
+  maintenanceDesc: "Hörmətli ziyarətçi, Monodoxia Academy platformasında təhsil, analitika və təhlükəsizlik sistemlərini yeniləmək məqsədilə planlaşdırılmış texniki təkmilləşdirmə işləri aparılır. Sistem ən qısa zamanda yenidən tam fəaliyyətini bərpa edəcəkdir.",
+  maintenanceNotice: "Tezliklə Aktiv",
+  maintenanceTranslations: {
+    az: {
+      title: "Planlaşdırılmış Texniki Təkmilləşdirmə",
+      desc: "Hörmətli ziyarətçi, Monodoxia Academy platformasında təhsil, analitika və təhlükəsizlik sistemlərini yeniləmək məqsədilə planlaşdırılmış texniki təkmilləşdirmə işləri aparılır. Sistem ən qısa zamanda yenidən tam fəaliyyətini bərpa edəcəkdir.",
+      notice: "Tezliklə Aktiv"
+    },
+    en: {
+      title: "Scheduled System Maintenance",
+      desc: "Dear visitor, scheduled maintenance is currently underway to enhance learning, analytics, and security systems. We will be back online shortly.",
+      notice: "Back Soon"
+    },
+    ru: {
+      title: "Плановое техническое обслуживание",
+      desc: "Уважаемый посетитель, на платформе Monodoxia Academy проводятся плановые технические работы для улучшения систем безопасности и качества. Скоро мы вернемся к работе.",
+      notice: "Скоро открытие"
+    },
+    tr: {
+      title: "Planlı Bakım ve Güncelleme",
+      desc: "Değerli ziyaretçimiz, Monodoxia Academy platformunda eğitim, analitik ve güvenlik sistemlerini geliştirmek amacıyla teknik bakım çalışmaları yürütülmektedir. Çok yakında yeniden hizmetinizdeyiz.",
+      notice: "Yakında Aktif"
+    }
+  }
 };
 
 const INITIAL_CLUB_TIERS = [
@@ -418,6 +443,9 @@ export function AppProvider({ children }) {
               let val = s.key_value;
               if (val === 'true' || val === '1' || val === 1 || val === true) val = true;
               else if (val === 'false' || val === '0' || val === 0 || val === false) val = false;
+              else if (typeof val === 'string' && (val.startsWith('{') || val.startsWith('['))) {
+                try { val = JSON.parse(val); } catch (e) {}
+              }
               mappedSettings[s.key_name] = val;
             });
             setPlatformSettings(prev => ({ ...prev, ...mappedSettings }));
