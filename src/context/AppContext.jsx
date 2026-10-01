@@ -362,7 +362,7 @@ export function AppProvider({ children }) {
       .then(data => {
         if (data?.status === 'success') {
           if (data.users && data.users.length > 0) {
-            setUsersList(data.users.map(u => ({
+            const mappedUsers = data.users.map(u => ({
               id: u.id,
               name: u.name,
               email: u.email,
@@ -370,7 +370,27 @@ export function AppProvider({ children }) {
               tier: u.tier || 'Free',
               status: u.status || 'Aktiv',
               joinedDate: u.joined_date || (u.created_at ? u.created_at.split(' ')[0] : new Date().toISOString().split('T')[0])
-            })));
+            }));
+            setUsersList(mappedUsers);
+
+            // Sync current session with MySQL role and tier
+            setCurrentUser(prev => {
+              if (!prev || !prev.email) return prev;
+              const matched = mappedUsers.find(u => (u.email || '').toLowerCase() === prev.email.toLowerCase());
+              if (matched) {
+                const names = matched.name ? matched.name.split(' ') : [prev.firstName, prev.lastName];
+                return {
+                  ...prev,
+                  id: matched.id || prev.id,
+                  firstName: names[0] || prev.firstName,
+                  lastName: names.slice(1).join(' ') || prev.lastName,
+                  role: matched.role || prev.role,
+                  tier: matched.tier || prev.tier,
+                  status: matched.status || prev.status
+                };
+              }
+              return prev;
+            });
           }
           if (data.applications && data.applications.length > 0) {
             setApplicationsList(data.applications.map(a => ({
@@ -500,18 +520,22 @@ export function AppProvider({ children }) {
 
   // Auth Operations
   const login = (email, password) => {
+    const normalizedEmail = (email || '').trim().toLowerCase();
+    const existing = usersList.find(u => (u.email || '').toLowerCase() === normalizedEmail);
+    const names = existing?.name ? existing.name.split(' ') : [email.split('@')[0], ''];
     const user = {
-      id: 'usr_' + Date.now(),
-      firstName: email.split('@')[0],
-      lastName: 'Tələbə',
+      id: existing?.id || ('usr_' + Date.now()),
+      firstName: names[0] || email.split('@')[0],
+      lastName: names.slice(1).join(' ') || '',
       email: email,
-      role: email.includes('admin') ? 'Admin' : (email.includes('coach') ? 'Kouç' : 'Tələbə'),
+      role: existing?.role || (normalizedEmail.includes('admin') ? 'Admin' : (normalizedEmail.includes('coach') ? 'Kouç' : 'Tələbə')),
+      tier: existing?.tier || 'Free',
       country: 'Azərbaycan',
       city: 'Bakı'
     };
     setCurrentUser(user);
     setAuthModalOpen(false);
-    showToast(`Daxil oldunuz: ${user.firstName}`, 'success');
+    showToast(`Daxil oldunuz: ${user.firstName} (${user.role})`, 'success');
   };
 
   const register = (data) => {
