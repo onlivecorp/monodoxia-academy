@@ -1,0 +1,181 @@
+/* Monodoxia Academy Design System - Based on DESIGN.md (Serene Intellectual Editorial) */
+:root {
+  /* Colors */
+  --surface: #fbf9f5;
+  --surface-dim: #dbdad6;
+  --surface-bright: #fbf9f5;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f5f3ef;
+  --surface-container: #efeeea;
+  --surface-container-high: #eae8e4;
+  --surface-container-highest: #e4e2de;
+  --on-surface: #1b1c1a;
+  --on-surface-variant: #44474d;
+  --inverse-surface: #30312e;
+  --inverse-on-surface: #f2f0ed;
+  --outline: #75777e;
+  --outline-variant: #c5c6cd;
+  --surface-tint: #515f78;
+  
+  /* Primary Obsidian & Navy */
+  --primary: #070f1e;
+  --primary-core: #0a192f;
+  --primary-surface: #112240;
+  --on-primary: #ffffff;
+  --primary-container: #0d1c32;
+  --on-primary-container: #76849f;
+  
+  /* Secondary Noble Champagne Gold */
+  --secondary: #775a19;
+  --gold-deep: #9e782f;
+  --gold-core: #c5a059;
+  --gold-warm: #d4af37;
+  --gold-light: #dfbe77;
+  --secondary-container: #fed488;
+  --on-secondary-container: #785a1a;
+  --secondary-fixed: #ffdea5;
+  --on-secondary-fixed: #261900;
+  
+  /* Borders & Linework */
+  --border-champagne: #e6dfc6;
+  --border-subtle: #e2d9c8;
+  --navy-ghost: rgba(10, 25, 47, 0.08);
+
+  /* Shadows */
+  --shadow-subtle: 0 4px 20px -2px rgba(10, 25, 47, 0.04), 0 1px 3px 0 rgba(197, 160, 89, 0.08);
+  --shadow-hover: 0 12px 32px -4px rgba(10, 25, 47, 0.07), 0 2px 8px -1px rgba(197, 160, 89, 0.12);
+  --shadow-obsidian: 0 24px 48px -12px rgba(7, 15, 30, 0.45);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--surface-container-low);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--outline-variant);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-core);
+}
+
+/* Material Symbols */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+  display: inline-block;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+/* Utilities */
+.gold-glow {
+  box-shadow: var(--shadow-subtle);
+}
+.gold-glow-hover {
+  transition: all 0.3s ease;
+}
+.gold-glow-hover:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
+}
+.arch-frame {
+  border-top-left-radius: 10rem;
+  border-top-right-radius: 10rem;
+}
+
+/* Modal and Backdrop Styles */
+.modal-backdrop {
+  background-color: rgba(7, 15, 30, 0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.tab-active {
+  color: var(--primary-core);
+  border-bottom: 2px solid var(--gold-core);
+  font-weight: 600;
+}
+
+.badge-gold {
+  background: rgba(197, 160, 89, 0.12);
+  border: 1px solid rgba(197, 160, 89, 0.35);
+  color: var(--gold-deep);
+}
+
+/* Line clamp */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ADMIN PANEL — PREMIUM DARK ENTERPRISE UI
+═══════════════════════════════════════════════════════════════ */
+.admin-backdrop{position:fixed;inset:0;background:rgba(15,23,42,0.45);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:9999;}
+.admin-shell{background:#f8fafc;width:100vw;height:100vh;max-width:100vw;max-height:100vh;border-radius:0;border:none;box-shadow:none;display:flex;flex-direction:column;overflow:hidden;}
+.admin-topbar{background:#ffffff;border-bottom:1px solid #e2e8f0;box-shadow:0 1px 2px rgba(0,0,0,0.03);}
+.admin-sidebar{background:#ffffff;border-right:1px solid #e2e8f0;}
+.admin-nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:12px;font-weight:500;color:#475569;transition:all 0.15s ease;cursor:pointer;border:1px solid transparent;letter-spacing:0.01em;width:100%;text-align:left;background:none;}
+.admin-nav-item:hover{background:#f1f5f9;color:#0f172a;}
+.admin-nav-item.active{background:#fffbeb;color:#b45309;border-color:#fde68a;font-weight:700;box-shadow:0 1px 3px rgba(180,83,9,0.08);}
+.admin-content{background:#f8fafc;}
+.admin-stat-card{background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;position:relative;overflow:hidden;transition:all 0.2s ease;box-shadow:0 1px 3px rgba(0,0,0,0.03);}
+.admin-stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#b45309,#d4af37);}
+.admin-stat-card:hover{border-color:#cbd5e1;transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.05);}
+.admin-stat-value{font-size:24px;font-weight:700;font-family:'Playfair Display',Georgia,serif;color:#0f172a;line-height:1;margin-top:6px;}
+.admin-stat-label{font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:#64748b;font-weight:600;}
+.admin-card{background:#ffffff;border:1px solid #e2e8f0;border-radius:10px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,0.03);}
+.admin-card-elevated{background:#ffffff;border:2px solid #d4af37;border-radius:12px;padding:18px;box-shadow:0 4px 14px rgba(197,160,89,0.12);}
+.admin-input{width:100%;padding:9px 13px;background:#ffffff;border:1px solid #cbd5e1;border-radius:7px;font-size:12px;color:#0f172a;transition:all 0.15s ease;outline:none;font-family:inherit;}
+.admin-input:focus{border-color:#c5a059;box-shadow:0 0 0 3px rgba(197,160,89,0.18);}
+.admin-input::placeholder{color:#94a3b8;}
+.admin-select{width:100%;padding:9px 13px;background:#ffffff;border:1px solid #cbd5e1;border-radius:7px;font-size:12px;color:#0f172a;outline:none;cursor:pointer;transition:all 0.15s ease;font-family:inherit;}
+.admin-select:focus{border-color:#c5a059;box-shadow:0 0 0 3px rgba(197,160,89,0.18);}
+.admin-select option{background:#ffffff;color:#0f172a;}
+.admin-label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;font-weight:700;color:#475569;margin-bottom:5px;}
+.admin-btn-primary{padding:9px 18px;background:linear-gradient(135deg,#a17424 0%,#c5a059 100%);color:#ffffff;font-weight:700;font-size:11px;letter-spacing:0.04em;border-radius:7px;border:none;cursor:pointer;transition:all 0.15s ease;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 6px rgba(161,116,36,0.25);}
+.admin-btn-primary:hover{background:linear-gradient(135deg,#8c6218 0%,#b48c3b 100%);box-shadow:0 4px 10px rgba(161,116,36,0.35);transform:translateY(-1px);}
+.admin-btn-secondary{padding:8px 15px;background:#ffffff;color:#334155;font-weight:600;font-size:11px;border-radius:7px;border:1px solid #cbd5e1;cursor:pointer;transition:all 0.15s ease;display:inline-flex;align-items:center;gap:6px;}
+.admin-btn-secondary:hover{border-color:#94a3b8;background:#f8fafc;color:#0f172a;}
+.admin-btn-danger{padding:7px 12px;background:#fef2f2;color:#dc2626;font-weight:600;font-size:11px;border-radius:7px;border:1px solid #fecaca;cursor:pointer;transition:all 0.15s ease;display:inline-flex;align-items:center;gap:5px;}
+.admin-btn-danger:hover{background:#fee2e2;border-color:#fca5a5;}
+.admin-btn-edit{padding:7px 12px;background:#ffffff;color:#0f172a;font-weight:600;font-size:11px;border-radius:7px;border:1px solid #cbd5e1;cursor:pointer;transition:all 0.15s ease;display:inline-flex;align-items:center;gap:5px;}
+.admin-btn-edit:hover{border-color:#c5a059;color:#a17424;background:#fffdfa;}
+.admin-section-title{font-family:'Playfair Display',Georgia,serif;font-size:18px;font-weight:700;color:#0f172a;letter-spacing:-0.01em;}
+.admin-section-subtitle{font-size:12px;color:#64748b;margin-top:2px;line-height:1.5;}
+.admin-table{width:100%;border-collapse:collapse;}
+.admin-table thead tr{background:#f8fafc;border-bottom:1px solid #e2e8f0;}
+.admin-table thead th{padding:11px 16px;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;font-weight:700;color:#475569;text-align:left;}
+.admin-table tbody tr{border-bottom:1px solid #f1f5f9;transition:background 0.12s ease;}
+.admin-table tbody tr:hover{background:#f8fafc;}
+.admin-table tbody td{padding:12px 16px;font-size:12px;color:#1e293b;vertical-align:middle;}
+.admin-badge-gold{display:inline-flex;align-items:center;padding:2px 8px;background:#fef3c7;border:1px solid #fde68a;border-radius:4px;font-size:10px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:0.04em;}
+.admin-badge-green{display:inline-flex;align-items:center;padding:2px 8px;background:#dcfce7;border:1px solid #bbf7d0;border-radius:4px;font-size:10px;font-weight:700;color:#15803d;}
+.admin-badge-red{display:inline-flex;align-items:center;padding:2px 8px;background:#fee2e2;border:1px solid #fecaca;border-radius:4px;font-size:10px;font-weight:700;color:#b91c1c;}
+.admin-list-item{background:#ffffff;border:1px solid #e2e8f0;border-radius:10px;padding:16px;transition:all 0.15s ease;box-shadow:0 1px 3px rgba(0,0,0,0.02);}
+.admin-list-item:hover{border-color:#cbd5e1;box-shadow:0 3px 8px rgba(0,0,0,0.04);}
+.admin-cms-pill{padding:7px 15px;border-radius:100px;font-size:11px;font-weight:600;border:1px solid #cbd5e1;color:#475569;background:#ffffff;cursor:pointer;transition:all 0.15s ease;}
+.admin-cms-pill:hover{border-color:#94a3b8;color:#0f172a;}
+.admin-cms-pill.active{background:#fffbeb;border-color:#fde68a;color:#b45309;font-weight:700;box-shadow:0 1px 3px rgba(180,83,9,0.08);}
+.admin-edit-panel{background:#fffefb;border:1px solid rgba(197,160,89,0.35);border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(197,160,89,0.06);}
+.admin-scroll::-webkit-scrollbar{width:5px;}
+.admin-scroll::-webkit-scrollbar-track{background:transparent;}
+.admin-scroll::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px;}
+.admin-scroll::-webkit-scrollbar-thumb:hover{background:#94a3b8;}
+@keyframes admin-pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(22,163,74,0.4);}50%{opacity:0.8;box-shadow:0 0 0 4px rgba(22,163,74,0);}}
+.admin-live-dot{width:8px;height:8px;background:#16a34a;border-radius:50%;animation:admin-pulse 2s ease-in-out infinite;}
+.admin-code-block{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;padding:12px 16px;font-family:'JetBrains Mono','Fira Code','Courier New',monospace;font-size:11px;color:#0f172a;word-break:break-all;line-height:1.6;}
+.admin-count-badge{display:inline-flex;align-items:center;padding:4px 12px;background:#fffbeb;border:1px solid #fde68a;border-radius:100px;font-size:11px;font-weight:700;color:#b45309;}
+.admin-divider{height:1px;background:#e2e8f0;margin:14px 0;}

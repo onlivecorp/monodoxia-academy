@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html class="scroll-smooth" lang="az">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Monodoxia Academy | Fərdi İnkişaf və Psixologiya Mərkəzi</title>
+  
+  <!-- SEO & Social Meta Tags -->
+  <meta name="description" content="Monodoxia Academy — akademik psixologiya, daxili müdriklik və müasir kouçinq ekosistemi. Özünü tanı, inkişaf etdir, həyatını dəyiş."/>
+  <meta property="og:title" content="Monodoxia Academy | Fərdi İnkişaf və Psixologiya Mərkəzi"/>
+  <meta property="og:description" content="Akademik psixoloji tədqiqatları, qədim daxili müdrikliyi və müasir fərdi kouçinq metodologiyasını bir araya gətirən elit inkişaf ekosistemi."/>
+  <meta property="og:type" content="website"/>
+  <link rel="canonical" href="https://monodoxia.academy/"/>
+
+  <!-- Google Fonts & Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+  <!-- Splash Screen Styles -->
+  <style id="splash-styles">
+    :root {
+      --sp-bg: #fbf8f1;
+      --sp-navy: #05224a;
+      --sp-gold1: #8a6a1f;
+      --sp-gold2: #e6c565;
+      --sp-gold3: #b98d2c;
+      --sp-glow: rgba(201, 162, 58, 0.18);
+    }
+    body.splash-active {
+      overflow: hidden !important;
+    }
+    #splash {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 50% 38%, var(--sp-glow), transparent 60%), var(--sp-bg);
+      transition: opacity .9s ease, transform .9s ease, visibility .9s;
+      z-index: 999999;
+      font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    #splash.done {
+      opacity: 0;
+      transform: scale(1.06);
+      visibility: hidden;
+      pointer-events: none;
+    }
+    #splash .mark {
+      width: min(46vw, 260px, 34vh);
+      aspect-ratio: 1;
+      position: relative;
+    }
+    #splash .mark svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+    #splash .halo {
+      position: absolute;
+      inset: -20%;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--sp-glow), transparent 65%);
+      animation: sp-breathe 3.6s ease-in-out infinite;
+    }
+    #splash path, #splash circle {
+      vector-effect: non-scaling-stroke;
+    }
+    #splash .navy {
+      fill: var(--sp-navy);
+      stroke: var(--sp-navy);
+    }
+    #splash .gold {
+      fill: url(#g);
+      stroke: #c9a23a;
+    }
+    #splash .a1, #splash .a2, #splash .a3, #splash .a4, #splash .a5 {
+      stroke-width: 1.4;
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      fill-opacity: 0;
+      animation: sp-draw 1.8s cubic-bezier(.6, .1, .2, 1) forwards, sp-fillin .9s ease forwards;
+    }
+    #splash .a1 { animation-delay: .2s, 1.4s; }
+    #splash .a2 { animation-delay: .5s, 1.9s; }
+    #splash .a3 { animation-delay: .8s, 2.0s; }
+    #splash .a4 { animation-delay: 1s, 2.1s; }
+    #splash .a5 { animation-delay: 1.2s, 2.2s; }
+    #splash .dot {
+      transform-box: fill-box;
+      transform-origin: center;
+      opacity: 0;
+      animation: sp-pop .8s cubic-bezier(.3, 1.6, .5, 1) 2.2s forwards;
+    }
+    #splash .star {
+      transform-box: fill-box;
+      transform-origin: center;
+      opacity: 0;
+      stroke: none;
+      animation: sp-pop .9s cubic-bezier(.3, 1.6, .5, 1) 2.7s forwards, sp-twinkle 2.4s ease-in-out 3.6s infinite;
+    }
+    #splash .name {
+      margin-top: clamp(8px, 3vh, 28px);
+      font-size: clamp(30px, 8.4vw, 60px);
+      font-weight: 600;
+      letter-spacing: .02em;
+      color: var(--sp-navy);
+      display: flex;
+    }
+    #splash .name span {
+      opacity: 0;
+      transform: translateY(.5em);
+      filter: blur(6px);
+      animation: sp-rise .9s ease forwards;
+    }
+    #splash .sub {
+      display: flex;
+      align-items: center;
+      gap: clamp(10px, 2vw, 22px);
+      margin-top: 4px;
+      width: min(86vw, 520px);
+      opacity: 0;
+      animation: sp-fade 1s ease 3.4s forwards;
+    }
+    #splash .sub i {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #c9a23a);
+      transform: scaleX(0);
+      animation: sp-line 1s ease 3.5s forwards;
+    }
+    #splash .sub i:last-child {
+      background: linear-gradient(270deg, transparent, #c9a23a);
+      transform-origin: right;
+    }
+    #splash .sub i:first-child {
+      transform-origin: left;
+    }
+    #splash .sub b {
+      font-weight: 500;
+      font-size: clamp(14px, 3.6vw, 24px);
+      letter-spacing: .5em;
+      margin-right: -.5em;
+      background: linear-gradient(100deg, var(--sp-gold1), var(--sp-gold2), var(--sp-gold3), var(--sp-gold2));
+      background-size: 250% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: sp-shine 3s linear infinite;
+    }
+    #splash .tag {
+      font: 400 clamp(11px, 2.9vw, 15px) / 1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      letter-spacing: .08em;
+      color: var(--sp-navy);
+      opacity: 0;
+      margin-top: 14px;
+      animation: sp-fade 1s ease 4s forwards;
+      text-align: center;
+      padding: 0 16px;
+    }
+    #splash .bar {
+      width: min(60vw, 240px);
+      height: 2px;
+      background: rgba(201, 162, 58, 0.2);
+      margin-top: clamp(18px, 4vh, 36px);
+      border-radius: 2px;
+      overflow: hidden;
+      opacity: 0;
+      animation: sp-fade .6s ease 3.6s forwards;
+    }
+    #splash .bar div {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--sp-gold1), var(--sp-gold2));
+      box-shadow: 0 0 10px var(--sp-gold2);
+    }
+    #splash .pct {
+      font: 500 12px system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      letter-spacing: .3em;
+      color: var(--sp-gold3);
+      margin-top: 10px;
+      opacity: 0;
+      animation: sp-fade .6s ease 3.6s forwards;
+    }
+    #splash .sparkle {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--sp-gold2);
+      opacity: 0;
+      animation: sp-float 6s ease-in infinite;
+      pointer-events: none;
+    }
+    @keyframes sp-draw { to { stroke-dashoffset: 0; } }
+    @keyframes sp-fillin { to { fill-opacity: 1; stroke-width: 0; } }
+    @keyframes sp-pop { from { opacity: 0; transform: scale(0) rotate(-90deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
+    @keyframes sp-twinkle { 50% { transform: scale(1.25) rotate(20deg); filter: drop-shadow(0 0 8px #e6c565); } }
+    @keyframes sp-rise { to { opacity: 1; transform: none; filter: none; } }
+    @keyframes sp-fade { to { opacity: 1; } }
+    @keyframes sp-line { to { transform: scaleX(1); } }
+    @keyframes sp-shine { to { background-position: -250% 0; } }
+    @keyframes sp-breathe { 50% { transform: scale(1.12); opacity: .7; } }
+    @keyframes sp-float { 0% { opacity: 0; transform: translateY(0); } 20% { opacity: .9; } 100% { opacity: 0; transform: translateY(-120px); } }
+    @media (prefers-reduced-motion: reduce) {
+      #splash * { animation-duration: .01s !important; animation-delay: 0s !important; }
+    }
+  </style>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-primary-fixed-variant": "#39475f",
+            "surface-bright": "#fbf9f5",
+            "tertiary-container": "#091c31",
+            "secondary": "#775a19",
+            "surface-dim": "#dbdad6",
+            "inverse-primary": "#b9c7e4",
+            "secondary-fixed-dim": "#e9c176",
+            "tertiary": "#000000",
+            "surface-container-highest": "#e4e2de",
+            "surface-container-high": "#eae8e4",
+            "outline": "#75777e",
+            "on-secondary-container": "#785a1a",
+            "outline-variant": "#c5c6cd",
+            "on-primary-fixed": "#0d1c32",
+            "primary-fixed-dim": "#b9c7e4",
+            "on-tertiary": "#ffffff",
+            "inverse-on-surface": "#f2f0ed",
+            "on-secondary-fixed-variant": "#5d4201",
+            "on-error": "#ffffff",
+            "on-primary": "#ffffff",
+            "inverse-surface": "#30312e",
+            "surface-container-low": "#f5f3ef",
+            "error": "#ba1a1a",
+            "surface-variant": "#e4e2de",
+            "secondary-fixed": "#ffdea5",
+            "primary-container": "#0d1c32",
+            "on-error-container": "#93000a",
+            "on-tertiary-fixed": "#091c31",
+            "surface-container": "#efeeea",
+            "background": "#fbf9f5",
+            "secondary-container": "#fed488",
+            "primary-fixed": "#d6e3ff",
+            "surface-container-lowest": "#ffffff",
+            "tertiary-fixed": "#d3e4ff",
+            "on-secondary-fixed": "#261900",
+            "tertiary-fixed-dim": "#b6c8e4",
+            "on-secondary": "#ffffff",
+            "on-background": "#1b1c1a",
+            "primary": "#000000",
+            "on-surface": "#1b1c1a",
+            "on-surface-variant": "#44474d",
+            "on-primary-container": "#76849f",
+            "error-container": "#ffdad6",
+            "on-tertiary-fixed-variant": "#37485f",
+            "surface": "#fbf9f5",
+            "surface-tint": "#515f78",
+            "on-tertiary-container": "#74859f"
+          },
+          borderRadius: {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          spacing: {
+            "space-xs": "0.25rem",
+            "space-sm": "0.5rem",
+            "space-md": "1rem",
+            "space-lg": "1.75rem",
+            "space-xl": "2.5rem",
+            "space-2xl": "4rem",
+            "space-3xl": "6rem",
+            "gutter": "1.5rem",
+            "gutter-mobile": "1rem",
+            "margin": "3rem",
+            "margin-mobile": "1.25rem"
+          },
+          fontFamily: {
+            "quote-editorial": ["Playfair Display", "serif"],
+            "headline-lg": ["Playfair Display", "serif"],
+            "headline-xl": ["Playfair Display", "serif"],
+            "body-md": ["Plus Jakarta Sans", "sans-serif"],
+            "display-lg": ["Playfair Display", "serif"],
+            "label-sm": ["Plus Jakarta Sans", "sans-serif"],
+            "headline-xl-mobile": ["Playfair Display", "serif"],
+            "label-md": ["Plus Jakarta Sans", "sans-serif"],
+            "headline-sm": ["Playfair Display", "serif"],
+            "body-xl": ["Plus Jakarta Sans", "sans-serif"],
+            "headline-md": ["Playfair Display", "serif"],
+            "label-lg": ["Plus Jakarta Sans", "sans-serif"],
+            "display-xl": ["Playfair Display", "serif"],
+            "display-xl-mobile": ["Playfair Display", "serif"],
+            "display-lg-mobile": ["Playfair Display", "serif"],
+            "body-lg": ["Plus Jakarta Sans", "sans-serif"],
+            "body-sm": ["Plus Jakarta Sans", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Structured Data Schema.org -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "EducationalOrganization",
+    "name": "Monodoxia Academy",
+    "url": "https://monodoxia.academy",
+    "description": "Fərdi İnkişaf və Psixologiya Mərkəzi",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Nizami küçəsi 142",
+      "addressLocality": "Bakı",
+      "addressCountry": "AZ"
+    }
+  }
+  </script>
+</head>
+<body class="splash-active bg-background text-on-surface antialiased selection:bg-secondary-fixed selection:text-on-secondary-fixed min-h-screen">
+  <!-- Responsive Splash Screen -->
+  <div id="splash" aria-label="Yüklənir" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+    <div class="mark">
+      <div class="halo"></div>
+      <svg viewBox="150 220 680 620" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#8a6a1f"/>
+            <stop offset=".45" stop-color="#e6c565"/>
+            <stop offset="1" stop-color="#b98d2c"/>
+          </linearGradient>
+        </defs>
+        <path class="navy a1" pathLength="1" d="M450,531.7c-.2-.3-17.5-27.3-21.7-65.1-3.8-34.8,3.1-86.2,58-133.4.3-.4,35.4-37.5,124.9-46.1v-1.8c-.4,0-39.3-3.5-82.5,10.6-39.9,13-91.9,44.1-112.4,118.1-.2.6-15.9,64.5,32.2,118.8l1.5-1.1Z"/>
+        <path class="gold a2" pathLength="1" d="M519.4,549.3c17-16.4,35.5-29.9,57.2-38.6,7.3-2.9,15.8-5.9,23.1-9.4,29.3-13.6,54.8-31,66.9-62.4,17.7-43.1-8.5-83.3-47.3-102.4-66.4-32.4-138.8,13.3-170.7,72.5,28.3-37.2,71.3-69.3,119.6-68.6,29.9.5,59.3,16,75.3,41.3,12.1,18.7,9.9,40.4-1.2,58.9-7.5,12.6-18.3,22.5-31.1,29.8-13.7,8.3-27.8,14.3-42.9,20-24,9.6-45.7,25.9-63.5,43.9-35.8,35.5-60.3,78.5-88.5,119.2-18.6,26-38.3,52.2-65.8,69.2-6.8,4.2-14.1,7.8-21.6,10.6-7.5,3.1-15.4,5.1-23.3,7.2,34.5-2.5,64-17.5,88.8-41.4,47.4-45.1,77.6-105,125.1-149.8Z"/>
+        <path class="navy a3" pathLength="1" d="M753.4,481.2c-1.2-1.7-6.8-10.6-8.1-12.5-8.4-12.9-17-25.8-25.4-38.6,1.1-34.4-8.3-70.4-30.9-96.9,18,29,24.3,64.3,20.6,98v1.7c0,0,.8,1.5.8,1.5,10,17,20.1,34.5,30.3,51.4.4.8,1.7,2.6,2,3.4,1.2,2.4.7,5.4-1.1,7.4-2.8,3.5-6.5,8-9.3,11.5-1.9,2.4-2.4,5.7-1.4,8.6,0,0,.4,1.4.4,1.4.5,1.8,1.9,6.7,2.5,8.6.1.5.6,2,1,3.6-1.5,1.5-3.2,3.2-4,4.1-1,1-2.7,2.8-3.6,3.7-2.5,2.4-2.9,6.6-.9,9.5.7.9,3.4,4.2,5.8,7-.9,1.1-1.7,2-2.3,2.8-3.3,3.4-5.5,9.6-4.7,14.6,0,.6.3,1.8.4,2.5l4,23.5s0,.2,0,.4c0,0,0,0,0,0,0,.9-.7,2-1.3,2.7-.1.3-.4.5-.7.7-5.6,4.9-14.5,6.8-22.1,8.2-8.3,1.3-17.2,1.9-25.6,2.4-13.7,1.1-27.1,2.4-40.4,7.2-36.4,13.3-47.7,55.1-53.6,89.5,8.3-24.4,16.8-50.2,35.8-67.9,12.6-11.4,29.1-14.8,45.8-15.8,21.2-1.7,69.5,2.6,76.1-24.2.4-2.5.5-3.6-.2-6.6l.2.9-3.8-23.6s-.2-1.5-.2-1.5c-.2-1.7,0-2.1,1.3-3.7,1.3-1.5,4.5-5.4,5.8-6.8l.2-.3h.1c0-.1,0-.2,0-.2h0c.3-.5-.7.9.7-1,.8-1.4,1.2-3.1,1-4.7-.3-2.7-1.8-3.9-3.1-5.6,0,0-1.9-2.3-3.8-4.5,1.2-1.3,2.4-2.5,3.3-3.4.4-.4,2.1-2.2,2.6-2.7.1,0,.6-.6,1.4-2,.9-1.8.9-3.9.4-5.4-1.1-3.7-2.9-9.5-4-13.2-.1-.5-.4-1.4-.7-2.3,2.6-3.4,5.5-7.2,7.8-10.4,4.9-6.6,5-16.2.4-22.9ZM735.9,534.1s0,0,0,0c0,0,0,.1,0,.1,0,0,0,.2,0-.1ZM735.8,558.8c0,.1.2.2.2.3,0,0-.1-.2-.2-.3ZM737.6,527.3s0,0,0,0c.3-.3.3-.3.1-.1h0s0,0,0,0Z"/>
+        <path class="navy a4" pathLength="1" d="M530.2,636.1c-12.6-99.9,108.6-141.8,108.6-141.8,0,0-160.8,43.3-125.9,164.4,0,0,2.9,47.7,78.2,81.9,0,0-52.1-34.8-60.9-104.5Z"/>
+        <path class="gold star" pathLength="1" d="M660.7,347.9s4.1-44.2,40.5-44.2c0,0-40.5-4.4-40.5-44.2,0,39.9-40.5,44.2-40.5,44.2,36.4,0,40.5,44.2,40.5,44.2Z"/>
+        <circle class="gold dot" cx="274.5" cy="709.3" r="31.2" transform="translate(-155.6 82) rotate(-13.3)"/>
+      </svg>
+    </div>
+    <div class="name" id="name"></div>
+    <div class="sub"><i></i><b>ACADEMY</b><i></i></div>
+    <div class="tag">Fərdi İnkişaf və Psixologiya Mərkəzi</div>
+    <div class="bar"><div id="fill"></div></div>
+    <div class="pct" id="pct">0%</div>
+  </div>
+
+  <script>
+    (function initSplash() {
+      var sp = document.getElementById('splash');
+      var n = document.getElementById('name');
+      if (!sp || !n) return;
+
+      var dismissed = false;
+      function dismissSplash() {
+        if (dismissed) return;
+        dismissed = true;
+        sp.classList.add('done');
+        document.body.classList.remove('splash-active');
+        setTimeout(function() {
+          if (sp && sp.parentNode) sp.remove();
+          document.dispatchEvent(new Event('splash:done'));
+        }, 900);
+      }
+
+      // Allow tap/click to dismiss quickly if user desires
+      sp.addEventListener('click', dismissSplash);
+
+      'MONODOXIA'.split('').forEach(function(c, i) {
+        var s = document.createElement('span');
+        s.textContent = c;
+        s.style.animationDelay = (3 + i * .08) + 's';
+        n.appendChild(s);
+      });
+
+      for (var i = 0; i < 14; i++) {
+        var d = document.createElement('div');
+        d.className = 'sparkle';
+        d.style.left = (15 + Math.random() * 70) + '%';
+        d.style.top = (50 + Math.random() * 40) + '%';
+        d.style.animationDelay = (2 + Math.random() * 4) + 's';
+        sp.appendChild(d);
+      }
+
+      var f = sp.querySelector('#fill');
+      var p = sp.querySelector('#pct');
+      var t0 = null;
+      var D = 3200;
+      var S = 3600;
+
+      function step(t) {
+        if (dismissed) return;
+        if (!t0) t0 = t;
+        var e = t - t0 - S;
+        if (e < 0) {
+          requestAnimationFrame(step);
+          return;
+        }
+        var k = Math.min(e / D, 1);
+        var v = 1 - Math.pow(1 - k, 2.2);
+        if (f) f.style.width = (v * 100) + '%';
+        if (p) p.textContent = Math.round(v * 100) + '%';
+
+        if (k < 1) {
+          requestAnimationFrame(step);
+        } else {
+          setTimeout(dismissSplash, 500);
+        }
+      }
+
+      requestAnimationFrame(step);
+    })();
+  </script>
+
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+</html>

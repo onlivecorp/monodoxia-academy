@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="az"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Monodoxia Academy | Fərdi İnkişaf və Psixologiya Mərkəzi</title>
+<!-- Google Fonts & Material Symbols -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&amp;family=Plus+Jakarta+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-primary-fixed-variant": "#39475f",
+            "surface-bright": "#fbf9f5",
+            "tertiary-container": "#091c31",
+            "secondary": "#775a19",
+            "surface-dim": "#dbdad6",
+            "inverse-primary": "#b9c7e4",
+            "secondary-fixed-dim": "#e9c176",
+            "tertiary": "#000000",
+            "surface-container-highest": "#e4e2de",
+            "surface-container-high": "#eae8e4",
+            "outline": "#75777e",
+            "on-secondary-container": "#785a1a",
+            "outline-variant": "#c5c6cd",
+            "on-primary-fixed": "#0d1c32",
+            "primary-fixed-dim": "#b9c7e4",
+            "on-tertiary": "#ffffff",
+            "inverse-on-surface": "#f2f0ed",
+            "on-secondary-fixed-variant": "#5d4201",
+            "on-error": "#ffffff",
+            "on-primary": "#ffffff",
+            "inverse-surface": "#30312e",
+            "surface-container-low": "#f5f3ef",
+            "error": "#ba1a1a",
+            "surface-variant": "#e4e2de",
+            "secondary-fixed": "#ffdea5",
+            "primary-container": "#0d1c32",
+            "on-error-container": "#93000a",
+            "on-tertiary-fixed": "#091c31",
+            "surface-container": "#efeeea",
+            "background": "#fbf9f5",
+            "secondary-container": "#fed488",
+            "primary-fixed": "#d6e3ff",
+            "surface-container-lowest": "#ffffff",
+            "tertiary-fixed": "#d3e4ff",
+            "on-secondary-fixed": "#261900",
+            "tertiary-fixed-dim": "#b6c8e4",
+            "on-secondary": "#ffffff",
+            "on-background": "#1b1c1a",
+            "primary": "#000000",
+            "on-surface": "#1b1c1a",
+            "on-surface-variant": "#44474d",
+            "on-primary-container": "#76849f",
+            "error-container": "#ffdad6",
+            "on-tertiary-fixed-variant": "#37485f",
+            "surface": "#fbf9f5",
+            "surface-tint": "#515f78",
+            "on-tertiary-container": "#74859f"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-md": "1rem",
+            "space-3xl": "6rem",
+            "gutter-mobile": "1rem",
+            "margin": "3rem",
+            "space-xs": "0.25rem",
+            "space-2xl": "4rem",
+            "gutter": "1.5rem",
+            "margin-mobile": "1.25rem",
+            "space-lg": "1.75rem",
+            "space-xl": "2.5rem",
+            "space-sm": "0.5rem"
+          },
+          "fontFamily": {
+            "quote-editorial": ["Playfair Display"],
+            "headline-lg": ["Playfair Display"],
+            "headline-xl": ["Playfair Display"],
+            "body-md": ["Plus Jakarta Sans"],
+            "display-lg": ["Playfair Display"],
+            "label-sm": ["Plus Jakarta Sans"],
+            "headline-xl-mobile": ["Playfair Display"],
+            "label-md": ["Plus Jakarta Sans"],
+            "headline-sm": ["Playfair Display"],
+            "body-xl": ["Plus Jakarta Sans"],
+            "headline-md": ["Playfair Display"],
+            "label-lg": ["Plus Jakarta Sans"],
+            "display-xl": ["Playfair Display"],
+            "display-xl-mobile": ["Playfair Display"],
+            "display-lg-mobile": ["Playfair Display"],
+            "body-lg": ["Plus Jakarta Sans"],
+            "body-sm": ["Plus Jakarta Sans"]
+          },
+          "fontSize": {
+            "quote-editorial": ["24px", { "lineHeight": "38px", "letterSpacing": "0", "fontWeight": "400" }],
+            "headline-lg": ["28px", { "lineHeight": "38px", "letterSpacing": "-0.005em", "fontWeight": "600" }],
+            "headline-xl": ["36px", { "lineHeight": "46px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "22px", "letterSpacing": "0.005em", "fontWeight": "400" }],
+            "display-lg": ["44px", { "lineHeight": "54px", "letterSpacing": "-0.015em", "fontWeight": "500" }],
+            "label-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.08em", "fontWeight": "700" }],
+            "headline-xl-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "0", "fontWeight": "600" }],
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.06em", "fontWeight": "600" }],
+            "headline-sm": ["18px", { "lineHeight": "26px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+            "body-xl": ["18px", { "lineHeight": "30px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "headline-md": ["22px", { "lineHeight": "30px", "letterSpacing": "0", "fontWeight": "600" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.04em", "fontWeight": "600" }],
+            "display-xl": ["56px", { "lineHeight": "68px", "letterSpacing": "-0.02em", "fontWeight": "500" }],
+            "display-xl-mobile": ["38px", { "lineHeight": "48px", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+            "display-lg-mobile": ["32px", { "lineHeight": "42px", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+            "body-lg": ["16px", { "lineHeight": "26px", "letterSpacing": "0", "fontWeight": "400" }],
+            "body-sm": ["12px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "400" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .gold-glow {
+      box-shadow: 0 4px 20px -2px rgba(10, 25, 47, 0.04), 0 1px 3px 0 rgba(197, 160, 89, 0.08);
+    }
+    .gold-glow-hover:hover {
+      box-shadow: 0 12px 32px -4px rgba(10, 25, 47, 0.07), 0 2px 8px -1px rgba(197, 160, 89, 0.12);
+      transform: translateY(-2px);
+    }
+    .arch-frame {
+      border-top-left-radius: 12rem;
+      border-top-right-radius: 12rem;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased selection:bg-secondary-fixed selection:text-on-secondary-fixed">
+<!-- TOP APP BAR / NAVIGATION (From Shared Components JSON) -->
+<header class="w-full bg-surface dark:bg-surface-container-highest border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none sticky top-0 z-50 transition-all duration-200">
+<div class="max-w-7xl mx-auto h-20 px-gutter md:px-margin flex items-center justify-between">
+<!-- Brand Logo Anchor -->
+<a class="flex items-center gap-space-sm group" href="#">
+<img alt="Monodoxia Academy" class="h-10 md:h-12 w-auto object-contain transition-opacity duration-200 group-hover:opacity-90" src="https://lh3.googleusercontent.com/aida/AEtjO1Ud98aRG900y6U00sYKP3tPpJm2M8DOTtpOTm-yCKU1-KoIjXzck8LkNUZdIXLZCRhGkaBOPjFJI6jFegMuTxHL6Dm0z4tn4kd1uP-5Ww85geF1sh1ER7t3Oql4l_nLbT6KcbyVI7gdLHhrqv8JOeTfFP1KaLl4S8KCpZ713-fQYpNMUfE36W-Cz4-OXs9eSeAsw7TuNvQt0Fyc8jzIdOtN-9lJwrWssyk055OT8Oc3R6NR1QlJbq6WLA"/>
+</a>
+<!-- Desktop Navigation Links -->
+<nav class="hidden lg:flex items-center space-x-6 xl:space-x-8">
+<a class="border-b-2 border-secondary text-on-surface dark:text-inverse-on-surface font-semibold pb-1 font-label-md text-label-md transition-all duration-200" href="#akademiya">Akademiya</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-on-surface dark:hover:text-inverse-on-surface font-label-md text-label-md transition-colors hover:text-secondary duration-200" href="#koucinq">Kouçinq</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-on-surface dark:hover:text-inverse-on-surface font-label-md text-label-md transition-colors hover:text-secondary duration-200" href="#club">Coaching Club</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-on-surface dark:hover:text-inverse-on-surface font-label-md text-label-md transition-colors hover:text-secondary duration-200" href="#tedbirler">Tədbirlər</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-on-surface dark:hover:text-inverse-on-surface font-label-md text-label-md transition-colors hover:text-secondary duration-200" href="#icma">İcma</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-on-surface dark:hover:text-inverse-on-surface font-label-md text-label-md transition-colors hover:text-secondary duration-200" href="#haqqimizda">Haqqımızda</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-on-surface dark:hover:text-inverse-on-surface font-label-md text-label-md transition-colors hover:text-secondary duration-200" href="#bloq">Bloq</a>
+</nav>
+<!-- Action Group -->
+<div class="flex items-center space-x-4 md:space-x-5">
+<!-- Language Switcher -->
+<div class="relative group hidden sm:flex items-center">
+<button class="flex items-center space-x-1 text-on-surface-variant hover:text-secondary font-label-md text-label-md transition-colors">
+<span class="material-symbols-outlined text-[18px]">language</span>
+<span>AZ</span>
+<span class="material-symbols-outlined text-[16px]">expand_more</span>
+</button>
+<div class="absolute right-0 top-full mt-2 hidden group-hover:block bg-surface-container-lowest border border-outline-variant rounded shadow-lg py-1 w-20 z-50">
+<a class="block px-3 py-1 text-xs font-semibold text-secondary hover:bg-surface-container-low" href="#">AZ</a>
+<a class="block px-3 py-1 text-xs text-on-surface-variant hover:bg-surface-container-low" href="#">EN</a>
+<a class="block px-3 py-1 text-xs text-on-surface-variant hover:bg-surface-container-low" href="#">RU</a>
+<a class="block px-3 py-1 text-xs text-on-surface-variant hover:bg-surface-container-low" href="#">TR</a>
+</div>
+</div>
+<!-- Secondary: Daxil ol -->
+<a class="text-on-surface hover:text-secondary font-label-md text-label-md transition-colors duration-200" href="#daxil-ol">
+          Daxil ol
+        </a>
+<!-- Primary Luxury CTA: Qoşul -->
+<a class="bg-primary-container text-on-primary hover:bg-[#112240] px-5 py-2.5 rounded text-label-md font-label-md tracking-wider transition-all duration-200 shadow-sm flex items-center gap-1.5 border border-secondary/30" href="#qosul">
+<span>Qoşul</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</header>
+<!-- MAIN CANVAS -->
+<main>
+<!-- SECTION 1: HERO SECTION -->
+<section class="relative overflow-hidden pt-12 pb-20 md:pt-16 md:pb-28 border-b border-outline-variant/40 bg-surface">
+<div class="max-w-7xl mx-auto px-gutter md:px-margin">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10 items-center">
+<!-- Hero Copy Measure (7 Cols) -->
+<div class="lg:col-span-7 space-y-6 md:space-y-8">
+<!-- Sacred Badge -->
+<div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-secondary/30 bg-secondary/5">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm text-secondary tracking-widest uppercase">FƏRDİ İNKİŞAF VƏ PSİXOLOGİYA MƏRKƏZİ</span>
+</div>
+<!-- Majestic Headline -->
+<h1 class="font-display-xl text-display-xl-mobile md:text-display-xl text-primary leading-tight">
+              Özünü tanı.<br/>
+<span class="italic font-normal text-secondary">Özünü inkişaf etdir.</span><br/>
+              Həyatını dəyiş.
+            </h1>
+<!-- Supporting Paragraph -->
+<p class="font-body-xl text-body-xl text-on-surface-variant max-w-xl leading-relaxed">
+              Monodoxia Academy — akademik psixoloji tədqiqatları, qədim daxili müdrikliyi və müasir fərdi kouçinq metodologiyasını bir araya gətirən elit inkişaf ekosistemidir. Şüurlu fərqindəlik və dayanıqlı daxili sülh üçün təhlükəsiz intellektual liman.
+            </p>
+<!-- Dual Luxury CTAs -->
+<div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
+<a class="bg-primary-container text-on-primary hover:bg-[#112240] px-8 py-3.5 rounded text-label-lg font-label-lg tracking-wider text-center transition-all duration-200 border border-secondary/40 shadow-sm flex items-center justify-center gap-2" href="#kurslar">
+<span>Akademiyanı kəşf et</span>
+<span class="material-symbols-outlined text-[18px]">north_east</span>
+</a>
+<a class="bg-transparent hover:bg-secondary/5 text-primary border border-secondary px-7 py-3.5 rounded text-label-lg font-label-lg text-center transition-colors duration-200" href="#club">
+                Coaching Club ilə tanış ol
+              </a>
+</div>
+<!-- Trust Indicators -->
+<div class="pt-8 border-t border-outline-variant/30 grid grid-cols-3 gap-6 max-w-lg">
+<div>
+<div class="font-headline-md text-headline-md text-primary font-semibold">12,000+</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant mt-1 tracking-wider uppercase">Fərdi Tələbə</div>
+</div>
+<div class="border-l border-outline-variant/40 pl-6">
+<div class="font-headline-md text-headline-md text-secondary font-semibold">98%</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant mt-1 tracking-wider uppercase">Məmnuniyyət</div>
+</div>
+<div class="border-l border-outline-variant/40 pl-6">
+<div class="font-headline-md text-headline-md text-primary font-semibold">ICF &amp; PhD</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant mt-1 tracking-wider uppercase">Sertifikatlı Kouçlar</div>
+</div>
+</div>
+</div>
+<!-- Hero Architectural Framing (5 Cols) -->
+<div class="lg:col-span-5 relative flex justify-center">
+<div class="relative w-full max-w-md">
+<!-- Architectural Backdrop Glow -->
+<div class="absolute -inset-4 bg-secondary/10 rounded-full blur-2xl"></div>
+<!-- Arched Image Container -->
+<div class="relative bg-surface-container-lowest p-3 border border-outline-variant/60 shadow-xl rounded-t-[10rem] rounded-b-xl overflow-hidden">
+<div class="overflow-hidden rounded-t-[9.5rem] rounded-b-lg aspect-[4/5] bg-surface-container">
+<img alt="Meditative deep sanctuary setting" class="w-full h-full object-cover object-center filter contrast-[1.02] hover:scale-105 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBu6A42fLsKyb7QEyw763LYrM2DhMvrcMod35fdqpYFnlKrGTcsg11v2ljzwkebadfB8h3tfo-a23eJ2C1IgUxOWL0A7cON3aCvZ3irV6bqO5eStKS9edI_Qda-YAOeRR0EMqS_cCqNkoDRtBJgrns8bUxgLQjRFG1ZVUGF2Ob9e9CG4dgb2myU2AJgY2j8uSiSRSDuMt6yq1zuCRYVZhvt2-Eiq7WHllVLEpzNMbm6AuMR7CS-ijR7"/>
+</div>
+<!-- Floating Editorial Seal -->
+<div class="absolute bottom-6 left-6 right-6 bg-surface-bright/95 backdrop-blur-md p-4 rounded border border-secondary/30 text-center shadow-lg">
+<div class="font-quote-editorial text-sm italic text-secondary">"Daxili səssizlikdə bütün cavablar aşkarlanır."</div>
+<div class="font-label-sm text-[9px] tracking-widest text-on-surface-variant uppercase mt-1">Monodoxia Fəlsəfəsi</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 2: ABOUT MONODOXIA (Split Editorial Narrative) -->
+<section class="py-space-2xl md:py-space-3xl bg-surface-container-low border-b border-outline-variant/40" id="haqqimizda">
+<div class="max-w-7xl mx-auto px-gutter md:px-margin">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+<!-- Left: Editorial Still Life -->
+<div class="lg:col-span-5">
+<div class="relative p-2 bg-surface-container-lowest rounded border border-outline-variant/50 shadow-md">
+<div class="overflow-hidden rounded aspect-[4/3] bg-surface-container">
+<img alt="Still life of mindfulness journal and warm tea" class="w-full h-full object-cover filter brightness-[0.98]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfJ9v48nWJzTbw80sDrDtTVhJ3mvXbVUbCeHjTMi_Y-NUPyOTMrFxaSuOPQsSmEsuH1iFUesyI1GA23YGlZQlqzMJLdnrhTp12XLt8NPffBd1uWx8YenygyqGA2zja0D9d-rKVoNVykmJRjh03f9EEtW4IghPWZy_-gBbdmrV1VbwrBwzlJWS1Ixvco8e0IdrYq8AHbaR5Pdystz7aBbXr4cWkfac3BRp_ESWqbNA0K6eg7X2YuuMP"/>
+</div>
+<div class="p-4 flex items-center justify-between">
+<span class="font-label-md text-label-md text-secondary tracking-widest uppercase">Gündəlik Fərqindəlik</span>
+<span class="font-label-sm text-label-sm text-outline">01 / SÜKUT</span>
+</div>
+</div>
+</div>
+<!-- Right: Narrative & 4 Pillars -->
+<div class="lg:col-span-7 space-y-6">
+<div class="inline-flex items-center gap-2">
+<span class="w-8 h-[1px] bg-secondary"></span>
+<span class="font-label-md text-label-md text-secondary tracking-widest uppercase">Akademiyanın Məramı</span>
+</div>
+<h2 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl text-primary font-serif">
+              Daxili ahəngdarlıq və şüurlu həyat üçün elmi və mənəvi yanaşma.
+            </h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant leading-relaxed">
+              Biz inanırıq ki, əsl inkişaf səthi motivasiya ilə deyil, dərin psixoloji fərqindəlik və daxili mənliyin tədqiqi ilə mümkündür. Monodoxia Academy hər bir fərdin öz gizli potensialını kəşf edərək sabit, harmonik və mənalı bir həyat qurması üçün elmi metodlara əsaslanan bələdçidir.
+            </p>
+<!-- 4 Pillars Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4">
+<div class="p-5 rounded bg-surface-container-lowest border border-outline-variant/40 hover:border-secondary/50 transition-colors">
+<div class="w-8 h-8 rounded bg-secondary/10 text-secondary flex items-center justify-center mb-3">
+<span class="material-symbols-outlined text-[20px]">psychology</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary mb-1">Psixoloji Dərinlik</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Koqnitiv davranış, geştalt və dərinlik psixologiyasının tətbiqi əsasları.</p>
+</div>
+<div class="p-5 rounded bg-surface-container-lowest border border-outline-variant/40 hover:border-secondary/50 transition-colors">
+<div class="w-8 h-8 rounded bg-secondary/10 text-secondary flex items-center justify-center mb-3">
+<span class="material-symbols-outlined text-[20px]">supervisor_account</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary mb-1">Fərdi Kouçinq</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Beynəlxalq ICF standartlarına uyğun, hədəf və transformasiya yönümlü sessiyalar.</p>
+</div>
+<div class="p-5 rounded bg-surface-container-lowest border border-outline-variant/40 hover:border-secondary/50 transition-colors">
+<div class="w-8 h-8 rounded bg-secondary/10 text-secondary flex items-center justify-center mb-3">
+<span class="material-symbols-outlined text-[20px]">spa</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary mb-1">Mindfulness və Meditasiya</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Stresi azaldan, zehni aydınlaşdıran gündəlik şüurlu nəfəs və meditasiya təlimləri.</p>
+</div>
+<div class="p-5 rounded bg-surface-container-lowest border border-outline-variant/40 hover:border-secondary/50 transition-colors">
+<div class="w-8 h-8 rounded bg-secondary/10 text-secondary flex items-center justify-center mb-3">
+<span class="material-symbols-outlined text-[20px]">shield</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary mb-1">Təhlükəsiz Mühit</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Mühakiməsiz, konfidensial və intellektual böyüməyə təşviq edən etibarlı icma.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 3: 8 INKİŞAF İSTİQAMƏTİ (AREAS OF DEVELOPMENT) -->
+<section class="py-space-2xl md:py-space-3xl bg-surface border-b border-outline-variant/40">
+<div class="max-w-7xl mx-auto px-gutter md:px-margin">
+<!-- Section Header -->
+<div class="text-center max-w-2xl mx-auto space-y-3 mb-16">
+<span class="font-label-md text-label-md text-secondary tracking-widest uppercase">Fundamental Sahələr</span>
+<h2 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl text-primary font-serif">
+            8 Fərdi İnkişaf İstiqaməti
+          </h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">
+            Şəxsiyyətin hər bir qatını dərindən anlamaq və harmoniyaya çatdırmaq üçün hazırlanmış tematik modullar.
+          </p>
+</div>
+<!-- 8 Bento Grid Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Card 1 -->
+<div class="group bg-surface-container-lowest p-6 rounded border border-outline-variant/60 hover:border-secondary transition-all duration-300 gold-glow-hover flex flex-col justify-between">
+<div>
+<div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary mb-4 group-hover:bg-secondary group-hover:text-surface-bright transition-colors">
+<span class="material-symbols-outlined text-[22px]">psychology_alt</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline tracking-wider">01 / DƏRİNLİK</span>
+<h3 class="font-headline-sm text-headline-sm text-primary mt-1 mb-2">Psixologiya</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">İnsanın daxili strukturu, qorxular, travmalar və şüuraltı mexanizmlərin elmi analizi.</p>
+</div>
+<a class="inline-flex items-center text-secondary font-label-md text-label-md hover:underline gap-1" href="#psixologiya">
+<span>Kəşf et</span>
+<span class="material-symbols-outlined text-[16px]">arrow_right_alt</span>
+</a>
+</div>
+<!-- Card 2 -->
+<div class="group bg-surface-container-lowest p-6 rounded border border-outline-variant/60 hover:border-secondary transition-all duration-300 gold-glow-hover flex flex-col justify-between">
+<div>
+<div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary mb-4 group-hover:bg-secondary group-hover:text-surface-bright transition-colors">
+<span class="material-symbols-outlined text-[22px]">trending_up</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline tracking-wider">02 / İRƏLİLƏYİŞ</span>
+<h3 class="font-headline-sm text-headline-sm text-primary mt-1 mb-2">Şəxsi İnkişaf</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Məqsədyönlülük, intizam, vərdişlərin transformasiyası və potensialın tam realizasiyası.</p>
+</div>
+<a class="inline-flex items-center text-secondary font-label-md text-label-md hover:underline gap-1" href="#sexsi-inkisaf">
+<span>Kəşf et</span>
+<span class="material-symbols-outlined text-[16px]">arrow_right_alt</span>
+</a>
+</div>
+<!-- Card 3 -->
+<div class="group bg-surface-container-lowest p-6 rounded border border-outline-variant/60 hover:border-secondary transition-all duration-300 gold-glow-hover flex flex-col justify-between">
+<div>
+<div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary mb-4 group-hover:bg-secondary group-hover:text-surface-bright transition-colors">
+<span class="material-symbols-outlined text-[22px]">self_improvement</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline tracking-wider">03 / MƏNƏVİYYAT</span>
+<h3 class="font-headline-sm text-headline-sm text-primary mt-1 mb-2">Spiritual Coaching</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Həyatın ali məqsədi, ekzistensial suallar və daxili mənəvi güclə təmas.</p>
+</div>
+<a class="inline-flex items-center text-secondary font-label-md text-label-md hover:underline gap-1" href="#spiritual">
+<span>Kəşf et</span>
+<span class="material-symbols-outlined text-[16px]">arrow_right_alt</span>
+</a>
+</div>
+<!-- Card 4 -->
+<div class="group bg-surface-container-lowest p-6 rounded border border-outline-variant/60 hover:border-secondary transition-all duration-300 gold-glow-hover flex flex-col justify-between">
+<div>
+<div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary mb-4 group-hover:bg-secondary group-hover:text-surface-bright transition-colors">
+<span class="material-symbols-outlined text-[22px]">nest_eco_leaf</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline tracking-wider">04 / FƏRQİNDƏLİK</span>
+<h3 class="font-headline-sm text-headline-sm text-primary mt-1 mb-2">Mindfulness</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">İndiki zamanda yaşamaq bacarığı, avtopilotdan çıxış və təmkinli baxış.</p>
+</div>
+<a class="inline-flex items-center text-secondary font-label-md text-label-md hover:underline gap-1" href="#mindfulness">
+<span>Kəşf et</span>
+<span class="material-symbols-outlined text-[16px]">arrow_right_alt</span>
+</a>
+</div>
+<!-- Card 5 -->
+<div class="group bg-surface-container-lowest p-6 rounded border border-outline-variant/60 hover:border-secondary transition-all duration-300 gold-glow-hover flex flex-col justify-between">
+<div>
+<div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary mb-4 group-hover:bg-secondary group-hover:text-surface-bright transition-colors">
+<span class="material-symbols-outlined text-[22px]">lens_blur</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline tracking-wider">05 / SÜKUT</span>
+<h3 class="font-headline-sm text-headline-sm text-primary mt-1 mb-2">Meditasiya</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Nəfəs texnikaları, bədən skanı və beynin neyron harmoniyasını bərpa edən praktika.</p>
+</div>
+<a class="inline-flex items-center text-secondary font-label-md text-label-md hover:underline gap-1" href="#meditasiya">
+<span>Kəşf et</span>
+<span class="material-symbols-outlined text-[16px]">arrow_right_alt</span>
+</a>
+</div>
+<!-- Card 6 -->
+<div class="group bg-surface-container-lowest p-6 rounded border border-outline-variant/60 hover:border-secondary transition-all duration-300 gold-glow-hover flex flex-col justify-between">
+<div>
+<div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary mb-4 group-hover:bg-secondary group-hover:text-surface-bright transition-colors">
+<span class="material-symbols-outlined text-[22px]">diversity_1</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline tracking-wider">06 / ƏLAQƏ</span>
+<h3 class="font-headline-sm text-headline-sm text-primary mt-1 mb-2">Münasibətlər</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Partnyor, ailə və cəmiyyətlə sağlam sərhədlər, güvən və dərin emosional bağ.</p>
+</div>
+<a class="inline-flex items-center text-secondary font-label-md text-label-md hover:underline gap-1" href="#munasibetler">
+<span>Kəşf et</span>
+<span class="material-symbols-outlined text-[16px]">arrow_right_alt</span>
+</a>
+</div>
+<!-- Card 7 -->
+<div class="group bg-surface-container-lowest p-6 rounded border border-outline-variant/60 hover:border-secondary transition-all duration-300 gold-glow-hover flex flex-col justify-between">
+<div>
+<div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary mb-4 group-hover:bg-secondary group-hover:text-surface-bright transition-colors">
+<span class="material-symbols-outlined text-[22px]">favorite_border</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline tracking-wider">07 / EQ</span>
+<h3 class="font-headline-sm text-headline-sm text-primary mt-1 mb-2">Emosional İntellekt</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Emosiyaları tanımaq, adlandırmaq və idarə edərək müdrik qərarlar vermək sənəti.</p>
+</div>
+<a class="inline-flex items-center text-secondary font-label-md text-label-md hover:underline gap-1" href="#emosional">
+<span>Kəşf et</span>
+<span class="material-symbols-outlined text-[16px]">arrow_right_alt</span>
+</a>
+</div>
+<!-- Card 8 -->
+<div class="group bg-surface-container-lowest p-6 rounded border border-outline-variant/60 hover:border-secondary transition-all duration-300 gold-glow-hover flex flex-col justify-between">
+<div>
+<div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary mb-4 group-hover:bg-secondary group-hover:text-surface-bright transition-colors">
+<span class="material-symbols-outlined text-[22px]">fingerprint</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline tracking-wider">08 / İDENTİKLİK</span>
+<h3 class="font-headline-sm text-headline-sm text-primary mt-1 mb-2">Özünü Tanıma</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Maskalardan azad olaraq həqiqi dəyərlərini, istedadlarını və autentik kimliyini tapmaq.</p>
+</div>
+<a class="inline-flex items-center text-secondary font-label-md text-label-md hover:underline gap-1" href="#ozunu-tanima">
+<span>Kəşf et</span>
+<span class="material-symbols-outlined text-[16px]">arrow_right_alt</span>
+</a>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 4: COACHING ACADEMY (KURSLAR VƏ PROQRAMLAR) -->
+<section class="py-space-2xl md:py-space-3xl bg-surface-container-low border-b border-outline-variant/40" id="akademiya">
+<div class="max-w-7xl mx-auto px-gutter md:px-margin">
+<!-- Header with Filter Tabs -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+<div>
+<span class="font-label-md text-label-md text-secondary tracking-widest uppercase">Akademik Tədris</span>
+<h2 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl text-primary font-serif mt-1">
+              Kurslar və Sertifikasiya Proqramları
+            </h2>
+</div>
+<!-- Segmented Filter Tabs -->
+<div class="flex flex-wrap gap-2 border-b border-outline-variant/60 pb-2">
+<button class="px-4 py-1.5 rounded text-label-md font-label-md bg-primary-container text-on-primary">Bütün Proqramlar</button>
+<button class="px-4 py-1.5 rounded text-label-md font-label-md text-on-surface-variant hover:text-primary transition-colors">Psixologiya</button>
+<button class="px-4 py-1.5 rounded text-label-md font-label-md text-on-surface-variant hover:text-primary transition-colors">Emosional İntellekt</button>
+<button class="px-4 py-1.5 rounded text-label-md font-label-md text-on-surface-variant hover:text-primary transition-colors">Kouçinq</button>
+<button class="px-4 py-1.5 rounded text-label-md font-label-md text-on-surface-variant hover:text-primary transition-colors">Meditasiya</button>
+</div>
+</div>
+<!-- 4 Featured Course Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- Course Card 1 (Featured Flagship) -->
+<div class="bg-surface-container-lowest rounded border-t-2 border-t-secondary border-x border-b border-outline-variant/60 p-7 shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between mb-4">
+<span class="px-2.5 py-1 rounded bg-secondary/10 text-secondary font-label-sm text-label-sm font-semibold tracking-wider uppercase">SERTİFİKATLI KURS</span>
+<span class="font-label-sm text-label-sm text-outline">12 Həftə | 36 Dərs</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary font-serif mb-2">
+              Özünü Tanıma və Şüur Mühəndisliyi
+            </h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">
+              Şüuraltı inanc sistemlərinin yenidən proqramlaşdırılması, qorxuların aradan qaldırılması və ali mənliklə sinxronlaşma.
+            </p>
+<!-- Metadata & Progress Indicator -->
+<div class="space-y-4 pt-4 border-t border-outline-variant/30">
+<div class="flex items-center justify-between text-xs">
+<span class="text-on-surface-variant">Aparıcı Kouç: <strong class="text-primary font-medium">Dr. Leyla Əliyeva</strong></span>
+<span class="text-secondary font-semibold">Qrup qəbulu aktivdir</span>
+</div>
+<div>
+<div class="flex justify-between text-[11px] text-outline mb-1">
+<span>Qrup doluluğu</span>
+<span>78%</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full w-[78%]"></div>
+</div>
+</div>
+<div class="flex items-center justify-between pt-2">
+<span class="font-headline-sm text-headline-sm text-primary font-serif">₼ 640</span>
+<a class="px-5 py-2 rounded bg-primary-container text-on-primary hover:bg-[#112240] text-label-md font-label-md transition-colors" href="#qeydiyyat">Proqrama qoşul</a>
+</div>
+</div>
+</div>
+<!-- Course Card 2 -->
+<div class="bg-surface-container-lowest rounded border border-outline-variant/60 p-7 shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between mb-4">
+<span class="px-2.5 py-1 rounded bg-secondary/10 text-secondary font-label-sm text-label-sm font-semibold tracking-wider uppercase">TRANSFORMATİV</span>
+<span class="font-label-sm text-label-sm text-outline">8 Həftə | 24 Dərs</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary font-serif mb-2">
+              Emosional İntellekt və Daxili Azadlıq
+            </h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">
+              Emosiyaların nevroloji təməli, aqressiya və narahatlığın enerjiyə çevrilməsi, yüksək EQ liderlik bacarıqları.
+            </p>
+<div class="space-y-4 pt-4 border-t border-outline-variant/30">
+<div class="flex items-center justify-between text-xs">
+<span class="text-on-surface-variant">Aparıcı Kouç: <strong class="text-primary font-medium">Fərid Məmmədov</strong></span>
+<span class="text-secondary font-semibold">ICF Akkreditasiyalı</span>
+</div>
+<div>
+<div class="flex justify-between text-[11px] text-outline mb-1">
+<span>Qrup doluluğu</span>
+<span>92%</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full w-[92%]"></div>
+</div>
+</div>
+<div class="flex items-center justify-between pt-2">
+<span class="font-headline-sm text-headline-sm text-primary font-serif">₼ 480</span>
+<a class="px-5 py-2 rounded bg-primary-container text-on-primary hover:bg-[#112240] text-label-md font-label-md transition-colors" href="#qeydiyyat">Proqrama qoşul</a>
+</div>
+</div>
+</div>
+<!-- Course Card 3 -->
+<div class="bg-surface-container-lowest rounded border border-outline-variant/60 p-7 shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between mb-4">
+<span class="px-2.5 py-1 rounded bg-secondary/10 text-secondary font-label-sm text-label-sm font-semibold tracking-wider uppercase">DƏRİN İLİŞKİLƏR</span>
+<span class="font-label-sm text-label-sm text-outline">6 Həftə | 18 Dərs</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary font-serif mb-2">
+              Münasibətlərdə Sağlam Sərhədlər
+            </h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">
+              Asılılıqdan azadlıq, "Yox" demək sənəti, zəhərli dinamikaların təyini və autentik yaxınlıq yaratma təlimi.
+            </p>
+<div class="space-y-4 pt-4 border-t border-outline-variant/30">
+<div class="flex items-center justify-between text-xs">
+<span class="text-on-surface-variant">Aparıcı Kouç: <strong class="text-primary font-medium">Nərgiz Qasımova</strong></span>
+<span class="text-secondary font-semibold">Praktiki Təlim</span>
+</div>
+<div>
+<div class="flex justify-between text-[11px] text-outline mb-1">
+<span>Qrup doluluğu</span>
+<span>65%</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full w-[65%]"></div>
+</div>
+</div>
+<div class="flex items-center justify-between pt-2">
+<span class="font-headline-sm text-headline-sm text-primary font-serif">₼ 390</span>
+<a class="px-5 py-2 rounded bg-primary-container text-on-primary hover:bg-[#112240] text-label-md font-label-md transition-colors" href="#qeydiyyat">Proqrama qoşul</a>
+</div>
+</div>
+</div>
+<!-- Course Card 4 -->
+<div class="bg-surface-container-lowest rounded border border-outline-variant/60 p-7 shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between mb-4">
+<span class="px-2.5 py-1 rounded bg-secondary/10 text-secondary font-label-sm text-label-sm font-semibold tracking-wider uppercase">PRAKTİKUM</span>
+<span class="font-label-sm text-label-sm text-outline">4 Həftə | 16 Dərs</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary font-serif mb-2">
+              Mindfulness və Dərin Fərqindəlik
+            </h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">
+              Günlük stressin neyrobioloji idarəsi, somatik bədən praktikalari və zehni sükunət laboratoriyası.
+            </p>
+<div class="space-y-4 pt-4 border-t border-outline-variant/30">
+<div class="flex items-center justify-between text-xs">
+<span class="text-on-surface-variant">Aparıcı Kouç: <strong class="text-primary font-medium">Dr. Leyla Əliyeva</strong></span>
+<span class="text-secondary font-semibold">Canlı Meditasiyalar</span>
+</div>
+<div>
+<div class="flex justify-between text-[11px] text-outline mb-1">
+<span>Qrup doluluğu</span>
+<span>84%</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full w-[84%]"></div>
+</div>
+</div>
+<div class="flex items-center justify-between pt-2">
+<span class="font-headline-sm text-headline-sm text-primary font-serif">₼ 290</span>
+<a class="px-5 py-2 rounded bg-primary-container text-on-primary hover:bg-[#112240] text-label-md font-label-md transition-colors" href="#qeydiyyat">Proqrama qoşul</a>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-12 text-center">
+<a class="inline-flex items-center gap-2 border border-secondary text-primary hover:bg-secondary/10 px-8 py-3 rounded text-label-md font-label-md tracking-wider transition-colors" href="#kurslar">
+<span>Bütün kurslara bax (18 Proqram)</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</section>
+<!-- SECTION 5: COACHING CLUB (ÖZƏL ÜZVLÜK) -->
+<section class="py-space-2xl md:py-space-3xl bg-primary-container text-on-primary relative overflow-hidden" id="club">
+<!-- Ambient subtle gold circular accents -->
+<div class="absolute -right-32 -bottom-32 w-96 h-96 rounded-full bg-secondary/10 blur-3xl pointer-events-none"></div>
+<div class="max-w-7xl mx-auto px-gutter md:px-margin relative z-10">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+<div class="lg:col-span-7 space-y-6">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-secondary-fixed/40 bg-secondary-fixed/10">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed"></span>
+<span class="font-label-sm text-label-sm text-secondary-fixed tracking-widest uppercase">QAPALI İCMA ÜZVLÜYÜ</span>
+</div>
+<h2 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl font-serif text-surface-bright">
+              Monodoxia Coaching Club — Həmfikirlərin Seçilmiş Məkanı
+            </h2>
+<p class="font-body-lg text-body-lg text-on-primary-container leading-relaxed">
+              Davamlı inkişaf fərdi bir hadisə deyil, doğru mühitin bəhrəsidir. Coaching Club — dərin suallar verən, səthilikdən uzaq, bir-birinin təkamülünə töhfə verən seçkin şəxslərin qapalı ekosistemidir.
+            </p>
+<!-- Benefits List -->
+<ul class="space-y-4 pt-2">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary-fixed text-[20px] mt-0.5">verified</span>
+<span class="font-body-md text-body-md text-surface-bright"><strong>Həftəlik canlı mentorluq və mastermind sessiyaları:</strong> Təcrübəli mentorlarla birbaşa dialoq.</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary-fixed text-[20px] mt-0.5">verified</span>
+<span class="font-body-md text-body-md text-surface-bright"><strong>Özəl meditasiya və təcrübə arxivi:</strong> 100+ saatlıq audio və video bələdçilər.</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary-fixed text-[20px] mt-0.5">verified</span>
+<span class="font-body-md text-body-md text-surface-bright"><strong>Qapalı intellektual icma müzakirələri:</strong> Konfidensial təhlükəsiz platforma.</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary-fixed text-[20px] mt-0.5">verified</span>
+<span class="font-body-md text-body-md text-surface-bright"><strong>Oflayn tədbirlərə və retreat-lərə VIP giriş:</strong> Qapalı illik düşərgələr.</span>
+</li>
+</ul>
+<div class="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+<a class="bg-secondary-fixed text-on-secondary-fixed hover:bg-secondary-container px-8 py-3.5 rounded text-label-lg font-label-lg tracking-wider text-center transition-colors font-semibold" href="#kluba-qosul">
+                Kluba qoşul
+              </a>
+<span class="text-xs text-on-primary-container flex items-center gap-1 justify-center sm:justify-start">
+<span class="material-symbols-outlined text-[16px]">lock</span>
+                Məhdud sayda yer: Aylıq qəbul
+              </span>
+</div>
+</div>
+<!-- Membership Tier Card -->
+<div class="lg:col-span-5">
+<div class="bg-surface-bright text-on-surface p-8 rounded-lg border border-secondary/40 shadow-2xl relative">
+<div class="absolute -top-3 right-6 bg-secondary text-surface-bright px-3 py-1 rounded text-label-sm font-label-sm uppercase tracking-widest">
+                PREMIUM REZİDENT
+              </div>
+<h3 class="font-headline-md text-headline-md font-serif text-primary">Klub Rezidentliyi</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 mb-6">Aylıq və ya illik daxil olma paketi</p>
+<div class="py-4 border-y border-outline-variant/40 mb-6">
+<span class="font-display-lg text-display-lg text-primary font-serif">₼ 95</span>
+<span class="font-body-md text-body-md text-on-surface-variant">/ aylıq</span>
+<div class="text-xs text-secondary mt-1">İllik ödənişdə 2 ay hədiyyə</div>
+</div>
+<div class="space-y-3 mb-8">
+<div class="flex items-center gap-2 text-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-secondary text-[18px]">check_circle</span>
+<span>Bütün canlı klub tədbirləri</span>
+</div>
+<div class="flex items-center gap-2 text-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-secondary text-[18px]">check_circle</span>
+<span>Telegram VIP müzakirə otağı</span>
+</div>
+<div class="flex items-center gap-2 text-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-secondary text-[18px]">check_circle</span>
+<span>Kurslara 25% fərdi endirim</span>
+</div>
+<div class="flex items-center gap-2 text-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-secondary text-[18px]">check_circle</span>
+<span>Aylıq 1 fərdi diaqnostik sessiya</span>
+</div>
+</div>
+<a class="block w-full py-3 text-center bg-primary-container text-on-primary hover:bg-[#112240] rounded text-label-md font-label-md uppercase tracking-wider transition-colors" href="#uzv-ol">
+                Rezident ol
+              </a>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 6: EKSPERTLƏR VƏ KOUÇLAR -->
+<section class="py-space-2xl md:py-space-3xl bg-surface border-b border-outline-variant/40" id="koucinq">
+<div class="max-w-7xl mx-auto px-gutter md:px-margin">
+<div class="text-center max-w-2xl mx-auto space-y-3 mb-16">
+<span class="font-label-md text-label-md text-secondary tracking-widest uppercase">Akademik Heyət</span>
+<h2 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl text-primary font-serif">
+            Ekspertlər və Sertifikatlı Kouçlar
+          </h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">
+            Beynəlxalq təlim keçmiş, dərin nəzəri bilik və geniş praktiki təcrübəyə malik mütəxəssislərimiz.
+          </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Expert 1 -->
+<div class="bg-surface-container-lowest rounded border border-outline-variant/60 overflow-hidden group hover:border-secondary transition-colors">
+<div class="aspect-[4/4] bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Professional and serene portrait of a female psychology expert in warm editorial lighting, neutral linen tones, reflecting wisdom and intellectual authority within Monodoxia Academy." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCn9ZjfxW-PL-o_xZ9Me83EiOB9x_aaIbuIEYtOce00950-vB-hL99E3BUxNBeJriyWWNWGGDlnTJRCJGRwkjlEPSCAIQYPacFkDcUc0Gx7SG3u_LdP-yJ9ZvAxESWMhqm8PQ0_Jjk2lpNGCZW3k-pFcnjQ873cYwWNg72N95sYxMH-w5fpXfjJZfJo1LZC2K5AStfFo8Xfl-GQ968CVb_yfDTaqIDcMiTxISBiZMVtj4d_vRd_K_L3"/>
+</div>
+<div class="p-6">
+<div class="font-label-sm text-label-sm text-secondary tracking-widest uppercase mb-1">PhD Psixologiya | ICF PCC</div>
+<h3 class="font-headline-md text-headline-md font-serif text-primary">Dr. Leyla Əliyeva</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-2 mb-4">
+                14+ il tədqiqat və klinik təcrübə. Koqnitiv fərqindəlik və şüuraltı travmalar üzrə baş ekspert.
+              </p>
+<a class="w-full block py-2.5 text-center border border-secondary text-primary hover:bg-secondary hover:text-surface-bright rounded text-label-sm font-label-sm uppercase tracking-wider transition-colors" href="#sessiya-təyin-et">
+                Fərdi Sessiya Təyin Et
+              </a>
+</div>
+</div>
+<!-- Expert 2 -->
+<div class="bg-surface-container-lowest rounded border border-outline-variant/60 overflow-hidden group hover:border-secondary transition-colors">
+<div class="aspect-[4/4] bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Refined and intellectual portrait of a male leadership and emotional intelligence coach in an architectural warm minimalist studio, wearing bespoke dark navy attire." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdkVIgrGvOaJjxAlQWP_tOgF6MLIc1W_hVcrzQBsdy3Nmj3_bg1aNTtm-J7ngXIQHCb_HUk8Wgmb1fcNip_lsrL-Gmar-UetvxkeR45_vSt4q1wmYr827ItSKFD3KvdecV_H8wq93ilFYULT8I6h79AaRYC4hHvZXNqnITSxTBQyhdlEbyKM6jmxqnqbhzDwzEMCBH3hkOs9Ek7d1JxL4eWrgGao9MIfgwjA76wbSTi5zJlsf9FF_w"/>
+</div>
+<div class="p-6">
+<div class="font-label-sm text-label-sm text-secondary tracking-widest uppercase mb-1">ICF MCC Kouç | EQ Master</div>
+<h3 class="font-headline-md text-headline-md font-serif text-primary">Fərid Məmmədov</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-2 mb-4">
+                Top menecerlər və sahibkarlar üçün ekzekyutiv kouçinq, böhran idarəçiliyi və emosional liderlik.
+              </p>
+<a class="w-full block py-2.5 text-center border border-secondary text-primary hover:bg-secondary hover:text-surface-bright rounded text-label-sm font-label-sm uppercase tracking-wider transition-colors" href="#sessiya-təyin-et">
+                Fərdi Sessiya Təyin Et
+              </a>
+</div>
+</div>
+<!-- Expert 3 -->
+<div class="bg-surface-container-lowest rounded border border-outline-variant/60 overflow-hidden group hover:border-secondary transition-colors">
+<div class="aspect-[4/4] bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Editorial portrait of an empathetic woman mindfulness instructor surrounded by soft natural light and subtle champagne gold warmth, capturing gentle presence and deep psychological calm." src="https://lh3.googleusercontent.com/aida-public/AB6AXuApho0mk-jt09_EKWhr9Kr-rV4ni1mNVZ9NMTTJnSr7Io_rS9AF4YMxdvwdvNBSQ5niLnit1PKeNozwDdDlqiBGbJTz1MOiuOo8yyY1b3AbDK33_Lc-ZOXlb5WzmwRuSsfZWSPYV7fmbNuRtSts2hYeTZFmwlHsu99rLvjRaczoStwMfhP4xbjxoLfdcfKKedG3I9Wsc86Mw84ULdwPbgpzWaz6dnC5ZnLFz2n5VuHMa6K1rX1itB96"/>
+</div>
+<div class="p-6">
+<div class="font-label-sm text-label-sm text-secondary tracking-widest uppercase mb-1">Münasibət Kouçu | Somatik Təlimçi</div>
+<h3 class="font-headline-md text-headline-md font-serif text-primary">Nərgiz Qasımova</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-2 mb-4">
+                Cütlüklər və fərdlər üçün münasibət dinamikası, psixosomatika və affektiv tənzimləmə üzrə mütəxəssis.
+              </p>
+<a class="w-full block py-2.5 text-center border border-secondary text-primary hover:bg-secondary hover:text-surface-bright rounded text-label-sm font-label-sm uppercase tracking-wider transition-colors" href="#sessiya-təyin-et">
+                Fərdi Sessiya Təyin Et
+              </a>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 7: İCMA VƏ MÜZAKİRƏLƏR (COMMUNITY PREVIEW) -->
+<section class="py-space-2xl md:py-space-3xl bg-surface-container-low border-b border-outline-variant/40" id="icma">
+<div class="max-w-7xl mx-auto px-gutter md:px-margin">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+<div class="lg:col-span-5 space-y-6">
+<span class="font-label-md text-label-md text-secondary tracking-widest uppercase">Təhlükəsiz Məkan</span>
+<h2 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl text-primary font-serif">
+              Şüurlu İcma və Dərin Dialoqlar
+            </h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">
+              Monodoxia İcmasında biz gündəlik səs-küydən uzaqlaşır, fərdi böhranları və zənginləşmə yollarını birlikdə çözürük.
+            </p>
+<div class="space-y-3 pt-2">
+<div class="flex items-center gap-3 text-sm text-on-surface">
+<span class="material-symbols-outlined text-secondary">verified_user</span>
+<span>Konfidensiallıq və qarşılıqlı hörmət etikası</span>
+</div>
+<div class="flex items-center gap-3 text-sm text-on-surface">
+<span class="material-symbols-outlined text-secondary">forum</span>
+<span>Hər həftə yeni fəlsəfi və psixoloji mövzu müzakirəsi</span>
+</div>
+</div>
+<a class="inline-flex items-center gap-2 px-6 py-3 rounded bg-primary-container text-on-primary hover:bg-[#112240] text-label-md font-label-md transition-colors" href="#icmaya-qosul">
+<span>İcmaya qoşulmaq üçün müraciət</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+<!-- Community Topics Card List -->
+<div class="lg:col-span-7 space-y-4">
+<div class="bg-surface-container-lowest p-5 rounded border border-outline-variant/60 shadow-sm hover:border-secondary/50 transition-colors">
+<div class="flex items-center justify-between text-xs text-outline mb-2">
+<span class="text-secondary font-semibold">Günün Müzakirəsi</span>
+<span>42 şərh • 18 dəq əvvəl</span>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-primary mb-1">
+                "Qüsursuzluq tələsi: Niyə mükəmməllik axtarışı bizi daxili sülhdən məhrum edir?"
+              </h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                Moderatör: Dr. Leyla Əliyeva. Tələbələr perfeksionizmin arxasında gizlənən uğursuzluq qorxusunu müzakirə edir.
+              </p>
+</div>
+<div class="bg-surface-container-lowest p-5 rounded border border-outline-variant/60 shadow-sm hover:border-secondary/50 transition-colors">
+<div class="flex items-center justify-between text-xs text-outline mb-2">
+<span class="text-secondary font-semibold">Təcrübə Paylaşımı</span>
+<span>67 şərh • 2 saat əvvəl</span>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-primary mb-1">
+                "Səhər 20 dəqiqəlik sükut təcrübəsi: Bir ay ərzində qavrayış necə dəyişdi?"
+              </h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                İcma üzvü Elmir Həsənli özünün 30 günlük meditasiya və gündəlik tutma qeydlərini bölüşür.
+              </p>
+</div>
+<div class="bg-surface-container-lowest p-5 rounded border border-outline-variant/60 shadow-sm hover:border-secondary/50 transition-colors">
+<div class="flex items-center justify-between text-xs text-outline mb-2">
+<span class="text-secondary font-semibold">Kitab Klubu</span>
+<span>89 şərh • Dünən</span>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-primary mb-1">
+                "Viktor Frankl - Həyatın mənasını axtararkən: Ekzistensial dözümlülük dərsləri"
+              </h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                Aylıq birgə mütaliə çərçivəsində loqoterapiya prinsiplərinin müasir çağırışlara tətbiqi.
+              </p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 8: YAXINLAŞAN TƏDBİRLƏR VƏ MASTERKLASLAR -->
+<section class="py-space-2xl md:py-space-3xl bg-surface border-b border-outline-variant/40" id="tedbirler">
+<div class="max-w-7xl mx-auto px-gutter md:px-margin">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
+<div>
+<span class="font-label-md text-label-md text-secondary tracking-widest uppercase">Təqvim</span>
+<h2 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl text-primary font-serif mt-1">
+              Yaxınlaşan Tədbirlər və Masterklaslar
+            </h2>
+</div>
+<a class="text-secondary hover:underline font-label-md text-label-md flex items-center gap-1" href="#butun-tedbirler">
+<span>Bütün tədbir təqvimi</span>
+<span class="material-symbols-outlined text-[16px]">calendar_month</span>
+</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Event 1 -->
+<div class="bg-surface-container-lowest p-6 rounded border border-outline-variant/60 hover:border-secondary transition-all duration-300 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="px-2.5 py-0.5 rounded bg-secondary/10 text-secondary font-label-sm text-label-sm uppercase font-semibold">CANLI VEBİNAR</span>
+<span class="font-label-sm text-label-sm text-outline">15 NOYABR, 20:00</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary mb-2">
+                "Şüuraltı Proqramlar: Keçmişin Təsiri və Azadlıq"
+              </h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-6">
+                İnteraktiv sual-cavab formatında keçmiş qorxuların aradan qaldırılması texnikaları.
+              </p>
+</div>
+<div class="pt-4 border-t border-outline-variant/30 flex items-center justify-between">
+<span class="text-xs text-on-surface-variant font-medium">Spiker: Dr. Leyla Əliyeva</span>
+<a class="text-secondary hover:underline text-xs font-semibold" href="#qeyd">Qeydiyyatdan keç</a>
+</div>
+</div>
+<!-- Event 2 -->
+<div class="bg-surface-container-lowest p-6 rounded border border-outline-variant/60 hover:border-secondary transition-all duration-300 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="px-2.5 py-0.5 rounded bg-primary-container text-surface-bright font-label-sm text-label-sm uppercase font-semibold">OFLAYN SEMİNAR</span>
+<span class="font-label-sm text-label-sm text-outline">22 NOYABR, 18:30</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary mb-2">
+                "Böhranda Dayanıqlıq: Liderlik və Zehni Güc"
+              </h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-6">
+                Bakı mərkəzində elit networking və psixoloji resursların bərpası sessiyası.
+              </p>
+</div>
+<div class="pt-4 border-t border-outline-variant/30 flex items-center justify-between">
+<span class="text-xs text-on-surface-variant font-medium">Spiker: Fərid Məmmədov</span>
+<a class="text-secondary hover:underline text-xs font-semibold" href="#qeyd">Qeydiyyatdan keç</a>
+</div>
+</div>
+<!-- Event 3 -->
+<div class="bg-surface-container-lowest p-6 rounded border border-outline-variant/60 hover:border-secondary transition-all duration-300 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="px-2.5 py-0.5 rounded bg-secondary/10 text-secondary font-label-sm text-label-sm uppercase font-semibold">MEDİTASİYA GECƏSİ</span>
+<span class="font-label-sm text-label-sm text-outline">30 NOYABR, 21:00</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary mb-2">
+                "Dolunay və Sükunət: Somatik Təmizlənmə"
+              </h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-6">
+                Dərin nəfəs və səs terapiyası ilə bədəndəki gərginliyin azad edilməsi praktikası.
+              </p>
+</div>
+<div class="pt-4 border-t border-outline-variant/30 flex items-center justify-between">
+<span class="text-xs text-on-surface-variant font-medium">Spiker: Nərgiz Qasımova</span>
+<a class="text-secondary hover:underline text-xs font-semibold" href="#qeyd">Qeydiyyatdan keç</a>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 9: TƏLƏBƏ TƏCRÜBƏLƏRİ (TESTIMONIALS) -->
+<section class="py-space-2xl md:py-space-3xl bg-surface-container-low border-b border-outline-variant/40">
+<div class="max-w-7xl mx-auto px-gutter md:px-margin">
+<div class="text-center max-w-2xl mx-auto space-y-3 mb-16">
+<span class="font-label-md text-label-md text-secondary tracking-widest uppercase">Dəyişim Hekayələri</span>
+<h2 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl text-primary font-serif">
+            Fikirlər və Transformasiya Təcrübələri
+          </h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<div class="bg-surface-container-lowest p-8 rounded border border-outline-variant/50 relative flex flex-col justify-between shadow-sm">
+<div>
+<span class="material-symbols-outlined text-secondary/40 text-[36px] mb-4">format_quote</span>
+<p class="font-quote-editorial text-quote-editorial text-primary mb-6">
+                "Monodoxia mənim üçün sadəcə kurs olmadı. İllərdir daşıdığım daxili narahatlığı kökündən anlamağıma və özümlə barışmağıma imkan verdi."
+              </p>
+</div>
+<div class="pt-4 border-t border-outline-variant/30">
+<div class="font-label-md text-label-md text-primary font-semibold">Aysel Məcidova</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">Memar &amp; Şəxsi İnkişaf Məzunu</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-8 rounded border border-outline-variant/50 relative flex flex-col justify-between shadow-sm">
+<div>
+<span class="material-symbols-outlined text-secondary/40 text-[36px] mb-4">format_quote</span>
+<p class="font-quote-editorial text-quote-editorial text-primary mb-6">
+                "Liderlikdə emosional intellektin nə qədər həlledici olduğunu burada kəşf etdim. Komandama və ailəmə yanaşmam büsbütün müdrikləşdi."
+              </p>
+</div>
+<div class="pt-4 border-t border-outline-variant/30">
+<div class="font-label-md text-label-md text-primary font-semibold">Tural İsmayılov</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">Şirkət Təsisçisi &amp; Klub Rezidenti</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-8 rounded border border-outline-variant/50 relative flex flex-col justify-between shadow-sm">
+<div>
+<span class="material-symbols-outlined text-secondary/40 text-[36px] mb-4">format_quote</span>
+<p class="font-quote-editorial text-quote-editorial text-primary mb-6">
+                "Buradakı intellektual etika və təhlükəsizlik hissi heç bir başqa platformada yoxdur. Səthi motivasiyadan uzaq, saf elmi və mənəvi zəmin."
+              </p>
+</div>
+<div class="pt-4 border-t border-outline-variant/30">
+<div class="font-label-md text-label-md text-primary font-semibold">Kəmalə Rüstəmova</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">Filoloq &amp; Psixologiya Tələbəsi</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 10: FAQ (TEZ-TEZ VERİLƏN SUALLAR) -->
+<section class="py-space-2xl md:py-space-3xl bg-surface border-b border-outline-variant/40">
+<div class="max-w-4xl mx-auto px-gutter md:px-margin">
+<div class="text-center space-y-3 mb-14">
+<span class="font-label-md text-label-md text-secondary tracking-widest uppercase">Aydınlıq</span>
+<h2 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl text-primary font-serif">
+            Tez-tez Verilən Suallar
+          </h2>
+</div>
+<div class="space-y-4">
+<details class="group bg-surface-container-lowest p-6 rounded border border-outline-variant/60 [&amp;_summary::-webkit-details-marker]:hidden" open="">
+<summary class="flex items-center justify-between cursor-pointer font-headline-sm text-headline-sm text-primary">
+<span>Akademiya proqramlarına qatılmaq üçün ilkin psixoloji baza lazımdırmı?</span>
+<span class="material-symbols-outlined group-open:rotate-180 transition-transform text-secondary">expand_more</span>
+</summary>
+<p class="font-body-md text-body-md text-on-surface-variant mt-4 leading-relaxed">
+              Xeyr, proqramlarımız fundamental səviyyədən başlayaraq dərindən mənimsəniləcək strukturda hazırlanıb. Həm yeni başlayanlar, həm də artıq təcrübəsi olan mütəxəssislər üçün pilləli modullar təklif olunur.
+            </p>
+</details>
+<details class="group bg-surface-container-lowest p-6 rounded border border-outline-variant/60 [&amp;_summary::-webkit-details-marker]:hidden">
+<summary class="flex items-center justify-between cursor-pointer font-headline-sm text-headline-sm text-primary">
+<span>Fərdi kouçinq sessiyaları necə təşkil olunur və konfidensiallıq necə qorunur?</span>
+<span class="material-symbols-outlined group-open:rotate-180 transition-transform text-secondary">expand_more</span>
+</summary>
+<p class="font-body-md text-body-md text-on-surface-variant mt-4 leading-relaxed">
+              Bütün kouçinq prosesi Beynəlxalq Kouçinq Federasiyasının (ICF) ciddi etik kodeksi və məxfilik sazişi əsasında aparılır. Görüşlər həm qapalı onlayn video otaqlarda, həm də mərkəzimizin ofisində fərdi olaraq keçirilir.
+            </p>
+</details>
+<details class="group bg-surface-container-lowest p-6 rounded border border-outline-variant/60 [&amp;_summary::-webkit-details-marker]:hidden">
+<summary class="flex items-center justify-between cursor-pointer font-headline-sm text-headline-sm text-primary">
+<span>Kursları bitirdikdən sonra beynəlxalq sertifikat verilirmi?</span>
+<span class="material-symbols-outlined group-open:rotate-180 transition-transform text-secondary">expand_more</span>
+</summary>
+<p class="font-body-md text-body-md text-on-surface-variant mt-4 leading-relaxed">
+              Bəli, müvafiq imtahan və praktiki tapşırıqları uğurla tamamlayan tələbələrə Monodoxia Academy-nin rəsmi lisenziyalı və beynəlxalq səviyyədə tanınan QR kodlu sertifikatları təqdim olunur.
+            </p>
+</details>
+<details class="group bg-surface-container-lowest p-6 rounded border border-outline-variant/60 [&amp;_summary::-webkit-details-marker]:hidden">
+<summary class="flex items-center justify-between cursor-pointer font-headline-sm text-headline-sm text-primary">
+<span>Monodoxia Coaching Club üzvlüyünə kimlər qəbul edilir?</span>
+<span class="material-symbols-outlined group-open:rotate-180 transition-transform text-secondary">expand_more</span>
+</summary>
+<p class="font-body-md text-body-md text-on-surface-variant mt-4 leading-relaxed">
+              Klubumuz daxili mədəniyyətini və etik təhlükəsizliyini qorumaq məqsədilə hər bir namizədlə qısa tanışlıq sorğusu keçirir. İntellektual inkişafa və konstruktiv dialoqa açıq hər bir fərd üzv ola bilər.
+            </p>
+</details>
+</div>
+</div>
+</section>
+<!-- SECTION 11: BÜLLETEN VƏ DƏRİN İNKİŞAF ÇAĞIRIŞI -->
+<section class="py-space-2xl md:py-space-3xl bg-surface-container text-center relative overflow-hidden">
+<div class="max-w-3xl mx-auto px-gutter md:px-margin space-y-6">
+<span class="font-label-md text-label-md text-secondary tracking-widest uppercase">İlk Addım</span>
+<h2 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl text-primary font-serif">
+          Öz inkişaf yolunda növbəti addımı at.
+        </h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">
+          Hər həftə yayımlanan eksklüziv psixoloji analizlər, meditasiya qeydləri və xüsusi dərslərdən ilk xəbərdar olmaq üçün bülletenimizə abunə ol.
+        </p>
+<!-- Luxury Input Form -->
+<form class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto pt-4" onsubmit="event.preventDefault();">
+<input class="flex-1 px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded focus:border-secondary focus:ring-1 focus:ring-secondary text-sm outline-none text-primary placeholder-outline" placeholder="Elektron poçt ünvanınız" required="" type="email"/>
+<button class="bg-primary-container text-on-primary hover:bg-[#112240] px-7 py-3 rounded text-label-md font-label-md tracking-wider transition-colors border border-secondary/40 whitespace-nowrap" type="submit">
+            Abunə ol
+          </button>
+</form>
+<div class="text-xs text-outline pt-1">Heç bir spam yoxdur. İstənilən vaxt abunəlikdən çıxa bilərsiniz.</div>
+</div>
+</section>
+</main>
+<!-- GRAND EDITORIAL FOOTER (From Shared Components JSON) -->
+<footer class="bg-primary-container dark:bg-tertiary-container text-on-primary-container dark:text-on-tertiary-container border-t border-outline dark:border-outline-variant">
+<div class="w-full px-gutter md:px-margin py-space-2xl max-w-7xl mx-auto flex flex-col gap-space-xl">
+<!-- Top Row: Brand & Main Navigation Columns -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10">
+<!-- Brand Info (5 Cols) -->
+<div class="lg:col-span-5 space-y-4">
+<a class="inline-block" href="#">
+<img alt="Monodoxia Academy" class="h-10 md:h-12 w-auto object-contain brightness-0 invert" src="https://lh3.googleusercontent.com/aida/AEtjO1Ud98aRG900y6U00sYKP3tPpJm2M8DOTtpOTm-yCKU1-KoIjXzck8LkNUZdIXLZCRhGkaBOPjFJI6jFegMuTxHL6Dm0z4tn4kd1uP-5Ww85geF1sh1ER7t3Oql4l_nLbT6KcbyVI7gdLHhrqv8JOeTfFP1KaLl4S8KCpZ713-fQYpNMUfE36W-Cz4-OXs9eSeAsw7TuNvQt0Fyc8jzIdOtN-9lJwrWssyk055OT8Oc3R6NR1QlJbq6WLA"/>
+</a>
+<p class="font-body-md text-body-md text-on-primary-container max-w-sm leading-relaxed">
+            Fərdi İnkişaf və Psixologiya Mərkəzi. İnsanın daxili azadlığı, şüur transformasiyası və ahəngdar varlığı üçün etibarlı akademik platforma.
+          </p>
+<div class="flex items-center space-x-4 pt-2">
+<a class="text-on-primary-container hover:text-secondary-fixed transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">psychology</span>
+</a>
+<a class="text-on-primary-container hover:text-secondary-fixed transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">public</span>
+</a>
+<a class="text-on-primary-container hover:text-secondary-fixed transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">mail</span>
+</a>
+</div>
+</div>
+<!-- Links Group 1 (3 Cols) -->
+<div class="lg:col-span-3 space-y-3">
+<div class="font-label-sm text-label-sm text-secondary-fixed tracking-widest uppercase">NAVİQASİYA</div>
+<ul class="space-y-2 font-body-md text-body-md">
+<li><a class="hover:text-on-primary transition-colors text-secondary-fixed font-medium" href="#akademiya">Akademiya</a></li>
+<li><a class="text-on-primary-container hover:text-on-primary transition-colors" href="#koucinq">Kouçinq</a></li>
+<li><a class="text-on-primary-container hover:text-on-primary transition-colors" href="#club">Coaching Club</a></li>
+<li><a class="text-on-primary-container hover:text-on-primary transition-colors" href="#tedbirler">Tədbirlər</a></li>
+<li><a class="text-on-primary-container hover:text-on-primary transition-colors" href="#icma">İcma</a></li>
+</ul>
+</div>
+<!-- Links Group 2 & Contacts (4 Cols) -->
+<div class="lg:col-span-4 space-y-3">
+<div class="font-label-sm text-label-sm text-secondary-fixed tracking-widest uppercase">ƏLAQƏ VƏ ÜNVAN</div>
+<p class="font-body-md text-body-md text-on-primary-container">
+            Nizami küçəsi 142, İntellektual İnkişaf Mərkəzi, Bakı, Azərbaycan
+          </p>
+<p class="font-body-md text-body-md text-on-primary-container">
+            Əlaqə: contact@monodoxia.academy<br/>
+            Tel: +994 (12) 490 88 00
+          </p>
+<div class="pt-2 flex items-center space-x-3 text-xs">
+<a class="text-on-primary-container hover:text-on-primary transition-colors underline" href="#privacy">Məxfilik Siyasəti</a>
+<span>•</span>
+<a class="text-on-primary-container hover:text-on-primary transition-colors underline" href="#terms">İstifadə Şərtləri</a>
+</div>
+</div>
+</div>
+<!-- Bottom Row: Copyright -->
+<div class="border-t border-outline/30 pt-6 flex flex-col md:flex-row items-center justify-between text-xs text-on-primary-container gap-4">
+<div>
+          © 2025 Monodoxia Academy. Fərdi İnkişaf və Psixologiya Mərkəzi. Bütün hüquqlar qorunur.
+        </div>
+<div class="flex items-center space-x-4">
+<span class="text-secondary-fixed">AZ</span>
+<span class="hover:text-on-primary cursor-pointer">EN</span>
+<span class="hover:text-on-primary cursor-pointer">RU</span>
+<span class="hover:text-on-primary cursor-pointer">TR</span>
+</div>
+</div>
+</div>
+</footer>
+</body></html>
