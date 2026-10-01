@@ -85,25 +85,25 @@
       stroke-dasharray: 1;
       stroke-dashoffset: 1;
       fill-opacity: 0;
-      animation: sp-draw 1.8s cubic-bezier(.6, .1, .2, 1) forwards, sp-fillin .9s ease forwards;
+      animation: sp-draw 1.0s cubic-bezier(.6, .1, .2, 1) forwards, sp-fillin .6s ease forwards;
     }
-    #splash .a1 { animation-delay: .2s, 1.4s; }
-    #splash .a2 { animation-delay: .5s, 1.9s; }
-    #splash .a3 { animation-delay: .8s, 2.0s; }
-    #splash .a4 { animation-delay: 1s, 2.1s; }
-    #splash .a5 { animation-delay: 1.2s, 2.2s; }
+    #splash .a1 { animation-delay: .05s, .7s; }
+    #splash .a2 { animation-delay: .15s, .85s; }
+    #splash .a3 { animation-delay: .25s, .95s; }
+    #splash .a4 { animation-delay: .35s, 1.05s; }
+    #splash .a5 { animation-delay: .45s, 1.15s; }
     #splash .dot {
       transform-box: fill-box;
       transform-origin: center;
       opacity: 0;
-      animation: sp-pop .8s cubic-bezier(.3, 1.6, .5, 1) 2.2s forwards;
+      animation: sp-pop .5s cubic-bezier(.3, 1.6, .5, 1) .6s forwards;
     }
     #splash .star {
       transform-box: fill-box;
       transform-origin: center;
       opacity: 0;
       stroke: none;
-      animation: sp-pop .9s cubic-bezier(.3, 1.6, .5, 1) 2.7s forwards, sp-twinkle 2.4s ease-in-out 3.6s infinite;
+      animation: sp-pop .6s cubic-bezier(.3, 1.6, .5, 1) .8s forwards, sp-twinkle 2s ease-in-out 1.4s infinite;
     }
     #splash .name {
       margin-top: clamp(8px, 3vh, 28px);
@@ -117,7 +117,7 @@
       opacity: 0;
       transform: translateY(.5em);
       filter: blur(6px);
-      animation: sp-rise .9s ease forwards;
+      animation: sp-rise .7s ease forwards;
     }
     #splash .sub {
       display: flex;
@@ -126,14 +126,14 @@
       margin-top: 4px;
       width: min(86vw, 520px);
       opacity: 0;
-      animation: sp-fade 1s ease 3.4s forwards;
+      animation: sp-fade .7s ease .9s forwards;
     }
     #splash .sub i {
       flex: 1;
       height: 1px;
       background: linear-gradient(90deg, transparent, #c9a23a);
       transform: scaleX(0);
-      animation: sp-line 1s ease 3.5s forwards;
+      animation: sp-line .7s ease .95s forwards;
     }
     #splash .sub i:last-child {
       background: linear-gradient(270deg, transparent, #c9a23a);
@@ -160,7 +160,7 @@
       color: var(--sp-navy);
       opacity: 0;
       margin-top: 14px;
-      animation: sp-fade 1s ease 4s forwards;
+      animation: sp-fade .7s ease 1.1s forwards;
       text-align: center;
       padding: 0 16px;
     }
@@ -172,7 +172,7 @@
       border-radius: 2px;
       overflow: hidden;
       opacity: 0;
-      animation: sp-fade .6s ease 3.6s forwards;
+      animation: sp-fade .4s ease .2s forwards;
     }
     #splash .bar div {
       height: 100%;
@@ -186,7 +186,7 @@
       color: var(--sp-gold3);
       margin-top: 10px;
       opacity: 0;
-      animation: sp-fade .6s ease 3.6s forwards;
+      animation: sp-fade .4s ease .2s forwards;
     }
     #splash .sparkle {
       position: absolute;
@@ -383,14 +383,14 @@
       sp.addEventListener('click', dismissSplash);
       window.addEventListener('keydown', dismissSplash);
 
-      // Hard safety timeout: Dismiss splash screen under any circumstance within 2.5s
-      setTimeout(dismissSplash, 2500);
+      // Hard safety timeout: Dismiss splash screen under any circumstance within 3.5s
+      setTimeout(dismissSplash, 3500);
 
       if (n) {
         'MONODOXIA'.split('').forEach(function(c, i) {
           var s = document.createElement('span');
           s.textContent = c;
-          s.style.animationDelay = (0.2 + i * 0.05) + 's';
+          s.style.animationDelay = (0.3 + i * 0.04) + 's';
           n.appendChild(s);
         });
       }
@@ -400,14 +400,14 @@
         d.className = 'sparkle';
         d.style.left = (15 + Math.random() * 70) + '%';
         d.style.top = (50 + Math.random() * 40) + '%';
-        d.style.animationDelay = (0.5 + Math.random() * 2) + 's';
+        d.style.animationDelay = (0.3 + Math.random() * 1.5) + 's';
         sp.appendChild(d);
       }
 
       var f = sp.querySelector('#fill');
       var p = sp.querySelector('#pct');
       var t0 = null;
-      var D = 1400;
+      var D = 2000;
 
       function step(t) {
         if (dismissed) return;
@@ -421,7 +421,7 @@
         if (k < 1) {
           requestAnimationFrame(step);
         } else {
-          setTimeout(dismissSplash, 300);
+          setTimeout(dismissSplash, 350);
         }
       }
 

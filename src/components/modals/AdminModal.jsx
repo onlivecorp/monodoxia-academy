@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { MultiLangEditor, LanguageTabs, TranslationStatus, LocalizedField, LocalizedArrayField } from '../../i18n/TranslationComponents';
