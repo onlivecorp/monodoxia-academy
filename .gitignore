@@ -18,10 +18,7 @@ dist-ssr/
 .env.test.local
 .env.production.local
 
-# Database Configuration with Credentials
-# (Use db_config.example.php for template)
-db_config.php
-public/db_config.php
+# Database Configuration Templates
 !db_config.example.php
 !public/db_config.example.php
 
