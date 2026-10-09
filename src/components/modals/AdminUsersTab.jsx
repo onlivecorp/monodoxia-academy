@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import AdminInlineTranslator from './AdminInlineTranslator';
 import AdminConfirmModal from './AdminConfirmModal';
+import AdminPopupModal from './AdminPopupModal';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -119,182 +120,141 @@ export default function AdminUsersTab() {
         onCancel={() => setUserToDelete(null)}
       />
 
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
-        <div>
-          <h4 className="admin-section-title">İstifadəçilər & RBAC İdarəetməsi</h4>
-          <p className="admin-section-subtitle">Platforma üzvlərini, rolları, giriş icazələrini və abunəlik paketlərini idarə edin</p>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span className="admin-count-badge">{filteredUsers.length} / {usersList.length} istifadəçi</span>
-          <button
-            type="button"
-            onClick={() => setShowAddForm(!showAddForm)}
-            className="admin-btn-primary"
-            style={{ fontSize: '11px', padding: '7px 14px' }}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
-              {showAddForm ? 'close' : 'person_add'}
-            </span>
-            <span>{showAddForm ? 'Bağla' : 'Yeni İstifadəçi'}</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Edit User Panel */}
-      {editingUser && (
-        <form onSubmit={handleSaveEditUser} className="admin-edit-panel" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '10px', borderBottom: '1px solid rgba(197,160,89,0.2)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span className="material-symbols-outlined" style={{ color: '#b45309', fontSize: '20px' }}>manage_accounts</span>
-              <h5 style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>
-                İstifadəçini Redaktə Et: <span style={{ color: '#b45309' }}>"{editingUser.name}"</span>
-              </h5>
+      {/* Edit User Popup Modal */}
+      <AdminPopupModal
+        isOpen={Boolean(editingUser)}
+        title={editingUser ? `İstifadəçini Redaktə Et: "${editingUser.name}"` : 'İstifadəçini Redaktə Et'}
+        icon="manage_accounts"
+        onClose={() => setEditingUser(null)}
+      >
+        {editingUser && (
+          <form onSubmit={handleSaveEditUser} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+              <div>
+                <label className="admin-label">Ad və Soyad *</label>
+                <input
+                  type="text"
+                  required
+                  value={editingUser.name}
+                  onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
+                  className="admin-input"
+                />
+              </div>
+              <div>
+                <label className="admin-label">Elektron Poçt (Email) *</label>
+                <input
+                  type="email"
+                  required
+                  value={editingUser.email}
+                  onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
+                  className="admin-input"
+                />
+              </div>
+              <div>
+                <label className="admin-label">Əlaqə Nömrəsi (Telefon)</label>
+                <input
+                  type="text"
+                  placeholder="+994 50 123 45 67"
+                  value={editingUser.phone || ''}
+                  onChange={(e) => setEditingUser({ ...editingUser, phone: e.target.value })}
+                  className="admin-input"
+                />
+              </div>
             </div>
-            <button
-              type="button"
-              onClick={() => setEditingUser(null)}
-              className="admin-btn-secondary"
-              style={{ padding: '4px 10px', fontSize: '11px' }}
-            >
-              Ləğv Et ✕
-            </button>
-          </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+              <div>
+                <label className="admin-label">Rol & Səlahiyyət</label>
+                <select
+                  value={editingUser.role}
+                  onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
+                  className="admin-select"
+                >
+                  <option>Tələbə</option>
+                  <option>Kouç</option>
+                  <option>Moderator</option>
+                  <option>Admin</option>
+                </select>
+              </div>
+              <div>
+                <label className="admin-label">Abunəlik Paketi (Tier)</label>
+                <select
+                  value={editingUser.tier}
+                  onChange={(e) => setEditingUser({ ...editingUser, tier: e.target.value })}
+                  className="admin-select"
+                >
+                  <option>Free</option>
+                  <option>Basic</option>
+                  <option>Premium</option>
+                  <option>VIP</option>
+                </select>
+              </div>
+              <div>
+                <label className="admin-label">Hesab Statusu</label>
+                <select
+                  value={editingUser.status || 'Aktiv'}
+                  onChange={(e) => setEditingUser({ ...editingUser, status: e.target.value })}
+                  className="admin-select"
+                >
+                  <option value="Aktiv">Aktiv</option>
+                  <option value="Bloklanıb">Bloklanıb</option>
+                  <option value="Gözləmədə">Gözləmədə</option>
+                </select>
+              </div>
+            </div>
+
             <div>
-              <label className="admin-label">Ad və Soyad</label>
+              <label className="admin-label">Admin Qeydləri</label>
               <input
                 type="text"
-                required
-                value={editingUser.name}
-                onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
+                placeholder="Xüsusi tələbə qeydi, korporativ müqavilə nömrəsi..."
+                value={editingUser.notes || ''}
+                onChange={(e) => setEditingUser({ ...editingUser, notes: e.target.value })}
                 className="admin-input"
               />
             </div>
-            <div>
-              <label className="admin-label">Elektron Poçt (Email)</label>
-              <input
-                type="email"
-                required
-                value={editingUser.email}
-                onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
-                className="admin-input"
-              />
-            </div>
-            <div>
-              <label className="admin-label">Əlaqə Nömrəsi (Telefon)</label>
-              <input
-                type="text"
-                placeholder="+994 50 123 45 67"
-                value={editingUser.phone || ''}
-                onChange={(e) => setEditingUser({ ...editingUser, phone: e.target.value })}
-                className="admin-input"
-              />
-            </div>
-          </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
-            <div>
-              <label className="admin-label">Rol & Səlahiyyət</label>
-              <select
-                value={editingUser.role}
-                onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
-                className="admin-select"
-              >
-                <option>Tələbə</option>
-                <option>Kouç</option>
-                <option>Moderator</option>
-                <option>Admin</option>
-              </select>
-            </div>
-            <div>
-              <label className="admin-label">Abunəlik Paketi (Tier)</label>
-              <select
-                value={editingUser.tier}
-                onChange={(e) => setEditingUser({ ...editingUser, tier: e.target.value })}
-                className="admin-select"
-              >
-                <option>Free</option>
-                <option>Basic</option>
-                <option>Premium</option>
-                <option>VIP</option>
-              </select>
-            </div>
-            <div>
-              <label className="admin-label">Hesab Statusu</label>
-              <select
-                value={editingUser.status || 'Aktiv'}
-                onChange={(e) => setEditingUser({ ...editingUser, status: e.target.value })}
-                className="admin-select"
-              >
-                <option value="Aktiv">Aktiv</option>
-                <option value="Bloklanıb">Bloklanıb</option>
-                <option value="Gözləmədə">Gözləmədə</option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label className="admin-label">Admin Qeydləri</label>
-            <input
-              type="text"
-              placeholder="Xüsusi tələbə qeydi, korporativ müqavilə nömrəsi..."
-              value={editingUser.notes || ''}
-              onChange={(e) => setEditingUser({ ...editingUser, notes: e.target.value })}
-              className="admin-input"
+            {/* Inline Translations Panel - User */}
+            <AdminInlineTranslator
+              item={editingUser}
+              fields={[
+                { key: 'name', label: 'Ad və Soyad' },
+                { key: 'role', label: 'Rol & Səlahiyyət' },
+                { key: 'tier', label: 'Abunəlik Paketi' },
+                { key: 'notes', label: 'Admin Qeydləri', type: 'textarea' }
+              ]}
+              activeLang={userTransLang}
+              setActiveLang={setUserTransLang}
+              onUpdate={(updates) => setEditingUser({ ...editingUser, ...updates })}
+              isOpen={userTransOpen}
+              setIsOpen={setUserTransOpen}
             />
-          </div>
 
-          {/* Inline Translations Panel - User */}
-          <AdminInlineTranslator
-            item={editingUser}
-            fields={[
-              { key: 'name', label: 'Ad və Soyad' },
-              { key: 'role', label: 'Rol & Səlahiyyət' },
-              { key: 'tier', label: 'Abunəlik Paketi' },
-              { key: 'notes', label: 'Admin Qeydləri', type: 'textarea' }
-            ]}
-            activeLang={userTransLang}
-            setActiveLang={setUserTransLang}
-            onUpdate={(updates) => setEditingUser({ ...editingUser, ...updates })}
-            isOpen={userTransOpen}
-            setIsOpen={setUserTransOpen}
-          />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px', paddingTop: '10px', borderTop: '1px solid #e2e8f0' }}>
+              <button
+                type="button"
+                onClick={() => setEditingUser(null)}
+                className="admin-btn-secondary"
+              >
+                Ləğv Et
+              </button>
+              <button type="submit" className="admin-btn-primary">
+                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>check</span>
+                <span>Dəyişiklikləri Yadda Saxla</span>
+              </button>
+            </div>
+          </form>
+        )}
+      </AdminPopupModal>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', paddingTop: '4px' }}>
-            <button type="submit" className="admin-btn-primary">
-              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>check</span>
-              <span>Dəyişiklikləri Yadda Saxla</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setEditingUser(null)}
-              className="admin-btn-secondary"
-            >
-              Ləğv Et
-            </button>
-          </div>
-        </form>
-      )}
-
-      {/* Add User Form (Collapsible) */}
-      {showAddForm && (
-        <form onSubmit={handleCreateUser} className="admin-card animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', gap: '14px', border: '1px solid #c5a059' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <h5 style={{ fontSize: '12px', fontWeight: 700, color: '#c5a059', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>person_add</span>
-              <span>Yeni İstifadəçi Əlavə Et</span>
-            </h5>
-            <button
-              type="button"
-              onClick={() => setShowAddForm(false)}
-              className="text-slate-400 hover:text-slate-600 text-xs"
-            >
-              ✕
-            </button>
-          </div>
-
+      {/* Add User Popup Modal */}
+      <AdminPopupModal
+        isOpen={showAddForm}
+        title="Yeni İstifadəçi Əlavə Et"
+        icon="person_add"
+        onClose={() => setShowAddForm(false)}
+      >
+        <form onSubmit={handleCreateUser} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
             <div>
               <label className="admin-label">Ad Soyad *</label>
@@ -362,11 +322,7 @@ export default function AdminUsersTab() {
             setIsOpen={setNewUserTransOpen}
           />
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', paddingTop: '4px' }}>
-            <button type="submit" className="admin-btn-primary">
-              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>person_add</span>
-              <span>İstifadəçini Əlavə Et</span>
-            </button>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px', paddingTop: '10px', borderTop: '1px solid #e2e8f0' }}>
             <button
               type="button"
               onClick={() => setShowAddForm(false)}
@@ -374,9 +330,33 @@ export default function AdminUsersTab() {
             >
               Ləğv Et
             </button>
+            <button type="submit" className="admin-btn-primary">
+              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>person_add</span>
+              <span>İstifadəçini Əlavə Et</span>
+            </button>
           </div>
         </form>
-      )}
+      </AdminPopupModal>
+
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+        <div>
+          <h4 className="admin-section-title">İstifadəçilər & RBAC İdarəetməsi</h4>
+          <p className="admin-section-subtitle">Platforma üzvlərini, rolları, giriş icazələrini və abunəlik paketlərini idarə edin</p>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span className="admin-count-badge">{filteredUsers.length} / {usersList.length} istifadəçi</span>
+          <button
+            type="button"
+            onClick={() => setShowAddForm(true)}
+            className="admin-btn-primary"
+            style={{ fontSize: '11px', padding: '7px 14px' }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>person_add</span>
+            <span>Yeni İstifadəçi</span>
+          </button>
+        </div>
+      </div>
 
       {/* Search & Filter Toolbar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>

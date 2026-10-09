@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import AdminInlineTranslator from './AdminInlineTranslator';
 import AdminConfirmModal from './AdminConfirmModal';
+import AdminPopupModal from './AdminPopupModal';
 
 const ITEMS_PER_PAGE = 8;
 
@@ -138,191 +139,170 @@ export default function AdminCoursesTab() {
             className="admin-btn-primary"
             style={{ fontSize: '11px', padding: '7px 14px' }}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
-              {showAddForm ? 'close' : 'add_circle'}
-            </span>
-            <span>{showAddForm ? 'Bağla' : 'Yeni Kurs'}</span>
+            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>add_circle</span>
+            <span>Yeni Kurs</span>
           </button>
         </div>
       </div>
 
-      {/* Edit Course Panel */}
-      {editingCourse && (
-        <form onSubmit={handleSaveEditCourse} className="admin-edit-panel" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '10px', borderBottom: '1px solid rgba(197,160,89,0.2)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span className="material-symbols-outlined" style={{ color: '#b45309', fontSize: '20px' }}>edit_note</span>
-              <h5 style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>
-                Kursu Redaktə Et: <span style={{ color: '#b45309' }}>"{editingCourse.title}"</span>
-              </h5>
+      {/* Edit Course Popup Modal */}
+      <AdminPopupModal
+        isOpen={Boolean(editingCourse)}
+        title={editingCourse ? `Kursu Redaktə Et: "${editingCourse.title}"` : 'Kursu Redaktə Et'}
+        icon="edit_note"
+        onClose={() => setEditingCourse(null)}
+      >
+        {editingCourse && (
+          <form onSubmit={handleSaveEditCourse} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+              <div style={{ gridColumn: 'span 2' }}>
+                <label className="admin-label">Kursun Başlığı *</label>
+                <input
+                  type="text"
+                  required
+                  value={editingCourse.title}
+                  onChange={(e) => setEditingCourse({ ...editingCourse, title: e.target.value })}
+                  className="admin-input"
+                />
+              </div>
+              <div>
+                <label className="admin-label">Qiymət *</label>
+                <input
+                  type="text"
+                  required
+                  value={editingCourse.price}
+                  onChange={(e) => setEditingCourse({ ...editingCourse, price: e.target.value })}
+                  className="admin-input"
+                  style={{ fontWeight: 700, color: '#c5a059', fontFamily: "'Playfair Display',serif" }}
+                />
+              </div>
             </div>
-            <button
-              type="button"
-              onClick={() => setEditingCourse(null)}
-              className="admin-btn-secondary"
-              style={{ padding: '4px 10px', fontSize: '11px' }}
-            >
-              Ləğv Et ✕
-            </button>
-          </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
-            <div style={{ gridColumn: 'span 2' }}>
-              <label className="admin-label">Kursun Başlığı *</label>
-              <input
-                type="text"
-                required
-                value={editingCourse.title}
-                onChange={(e) => setEditingCourse({ ...editingCourse, title: e.target.value })}
-                className="admin-input"
-              />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+              <div>
+                <label className="admin-label">Kateqoriya (Mərkəzləşdirilmiş)</label>
+                <select
+                  value={editingCourse.category}
+                  onChange={(e) => setEditingCourse({ ...editingCourse, category: e.target.value })}
+                  className="admin-select"
+                >
+                  {courseCategories.map(cat => (
+                    <option key={cat.key} value={cat.key}>
+                      {cat.name} ({cat.key})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="admin-label">Aparıcı Kouç</label>
+                <input
+                  type="text"
+                  value={editingCourse.instructor}
+                  onChange={(e) => setEditingCourse({ ...editingCourse, instructor: e.target.value })}
+                  className="admin-input"
+                />
+              </div>
+              <div>
+                <label className="admin-label">Müddət</label>
+                <input
+                  type="text"
+                  value={editingCourse.duration}
+                  onChange={(e) => setEditingCourse({ ...editingCourse, duration: e.target.value })}
+                  className="admin-input"
+                />
+              </div>
+              <div>
+                <label className="admin-label">Nişan (Badge)</label>
+                <input
+                  type="text"
+                  value={editingCourse.badge}
+                  onChange={(e) => setEditingCourse({ ...editingCourse, badge: e.target.value })}
+                  className="admin-input"
+                />
+              </div>
             </div>
-            <div>
-              <label className="admin-label">Qiymət</label>
-              <input
-                type="text"
-                required
-                value={editingCourse.price}
-                onChange={(e) => setEditingCourse({ ...editingCourse, price: e.target.value })}
-                className="admin-input"
-                style={{ fontWeight: 700, color: '#c5a059', fontFamily: "'Playfair Display',serif" }}
-              />
-            </div>
-          </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
-            <div>
-              <label className="admin-label">Kateqoriya (Mərkəzləşdirilmiş)</label>
-              <select
-                value={editingCourse.category}
-                onChange={(e) => setEditingCourse({ ...editingCourse, category: e.target.value })}
-                className="admin-select"
-              >
-                {courseCategories.map(cat => (
-                  <option key={cat.key} value={cat.key}>
-                    {cat.name} ({cat.key})
-                  </option>
-                ))}
-              </select>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+              <div>
+                <label className="admin-label">Status</label>
+                <select
+                  value={editingCourse.status}
+                  onChange={(e) => setEditingCourse({ ...editingCourse, status: e.target.value })}
+                  className="admin-select"
+                >
+                  <option value="Qrup qəbulu aktivdir">Qrup qəbulu aktivdir</option>
+                  <option value="Tezliklə">Tezliklə</option>
+                  <option value="Tam Dolub">Tam Dolub</option>
+                  <option value="Bağlanıb">Bağlanıb</option>
+                </select>
+              </div>
+              <div>
+                <label className="admin-label">Doluluq Faizi (0-100%)</label>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={editingCourse.occupancy ?? 0}
+                  onChange={(e) => setEditingCourse({ ...editingCourse, occupancy: Number(e.target.value) })}
+                  className="admin-input"
+                />
+              </div>
             </div>
-            <div>
-              <label className="admin-label">Aparıcı Kouç</label>
-              <input
-                type="text"
-                value={editingCourse.instructor}
-                onChange={(e) => setEditingCourse({ ...editingCourse, instructor: e.target.value })}
-                className="admin-input"
-              />
-            </div>
-            <div>
-              <label className="admin-label">Müddət</label>
-              <input
-                type="text"
-                value={editingCourse.duration}
-                onChange={(e) => setEditingCourse({ ...editingCourse, duration: e.target.value })}
-                className="admin-input"
-              />
-            </div>
-            <div>
-              <label className="admin-label">Nişan (Badge)</label>
-              <input
-                type="text"
-                value={editingCourse.badge}
-                onChange={(e) => setEditingCourse({ ...editingCourse, badge: e.target.value })}
-                className="admin-input"
-              />
-            </div>
-          </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
             <div>
-              <label className="admin-label">Status</label>
-              <select
-                value={editingCourse.status}
-                onChange={(e) => setEditingCourse({ ...editingCourse, status: e.target.value })}
-                className="admin-select"
-              >
-                <option value="Qrup qəbulu aktivdir">Qrup qəbulu aktivdir</option>
-                <option value="Tezliklə">Tezliklə</option>
-                <option value="Tam Dolub">Tam Dolub</option>
-                <option value="Bağlanıb">Bağlanıb</option>
-              </select>
-            </div>
-            <div>
-              <label className="admin-label">Doluluq Faizi (0-100%)</label>
-              <input
-                type="number"
-                min="0"
-                max="100"
-                value={editingCourse.occupancy ?? 0}
-                onChange={(e) => setEditingCourse({ ...editingCourse, occupancy: Number(e.target.value) })}
+              <label className="admin-label">Təsvir</label>
+              <textarea
+                rows="3"
+                value={editingCourse.description}
+                onChange={(e) => setEditingCourse({ ...editingCourse, description: e.target.value })}
                 className="admin-input"
+                style={{ resize: 'vertical' }}
               />
             </div>
-          </div>
 
-          <div>
-            <label className="admin-label">Təsvir</label>
-            <textarea
-              rows="3"
-              value={editingCourse.description}
-              onChange={(e) => setEditingCourse({ ...editingCourse, description: e.target.value })}
-              className="admin-input"
-              style={{ resize: 'vertical' }}
+            {/* Inline Translations Panel - Course */}
+            <AdminInlineTranslator
+              item={editingCourse}
+              fields={[
+                { key: 'title', label: 'Kurs Başlığı' },
+                { key: 'description', label: 'Təsvir', type: 'textarea', rows: 3 },
+                { key: 'instructor', label: 'Aparıcı Kouç' },
+                { key: 'duration', label: 'Müddət' },
+                { key: 'badge', label: 'Nişan (Badge)' },
+                { key: 'status', label: 'Status' }
+              ]}
+              activeLang={editCourseTransLang}
+              setActiveLang={setEditCourseTransLang}
+              onUpdate={(updates) => setEditingCourse({ ...editingCourse, ...updates })}
+              isOpen={editCourseTransOpen}
+              setIsOpen={setEditCourseTransOpen}
             />
-          </div>
 
-          {/* Inline Translations Panel - Course */}
-          <AdminInlineTranslator
-            item={editingCourse}
-            fields={[
-              { key: 'title', label: 'Kurs Başlığı' },
-              { key: 'description', label: 'Təsvir', type: 'textarea', rows: 3 },
-              { key: 'instructor', label: 'Aparıcı Kouç' },
-              { key: 'duration', label: 'Müddət' },
-              { key: 'badge', label: 'Nişan (Badge)' },
-              { key: 'status', label: 'Status' }
-            ]}
-            activeLang={editCourseTransLang}
-            setActiveLang={setEditCourseTransLang}
-            onUpdate={(updates) => setEditingCourse({ ...editingCourse, ...updates })}
-            isOpen={editCourseTransOpen}
-            setIsOpen={setEditCourseTransOpen}
-          />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
+              <button
+                type="button"
+                onClick={() => setEditingCourse(null)}
+                className="admin-btn-secondary"
+              >
+                Ləğv Et
+              </button>
+              <button type="submit" className="admin-btn-primary">
+                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>check</span>
+                <span>Dəyişiklikləri Yadda Saxla</span>
+              </button>
+            </div>
+          </form>
+        )}
+      </AdminPopupModal>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', paddingTop: '4px' }}>
-            <button type="submit" className="admin-btn-primary">
-              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>check</span>
-              <span>Dəyişiklikləri Yadda Saxla</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setEditingCourse(null)}
-              className="admin-btn-secondary"
-            >
-              Ləğv Et
-            </button>
-          </div>
-        </form>
-      )}
-
-      {/* Add Course Form (Collapsible) */}
-      {showAddForm && (
-        <form onSubmit={handleCreateCourse} className="admin-card animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', gap: '14px', border: '1px solid #c5a059' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <h5 style={{ fontSize: '12px', fontWeight: 700, color: '#c5a059', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add_circle</span>
-              <span>Yeni Kurs Əlavə Et</span>
-            </h5>
-            <button
-              type="button"
-              onClick={() => setShowAddForm(false)}
-              className="text-slate-400 hover:text-slate-600 text-xs"
-            >
-              ✕
-            </button>
-          </div>
-
+      {/* Add Course Popup Modal */}
+      <AdminPopupModal
+        isOpen={showAddForm}
+        title="Yeni Kurs Əlavə Et"
+        icon="add_circle"
+        onClose={() => setShowAddForm(false)}
+      >
+        <form onSubmit={handleCreateCourse} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
             <div style={{ gridColumn: 'span 2' }}>
               <label className="admin-label">Kursun Başlığı *</label>
@@ -437,11 +417,7 @@ export default function AdminCoursesTab() {
             setIsOpen={setNewCourseTransOpen}
           />
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', paddingTop: '4px' }}>
-            <button type="submit" className="admin-btn-primary">
-              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>add</span>
-              <span>Kursu Əlavə Et</span>
-            </button>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
             <button
               type="button"
               onClick={() => setShowAddForm(false)}
@@ -449,9 +425,13 @@ export default function AdminCoursesTab() {
             >
               Ləğv Et
             </button>
+            <button type="submit" className="admin-btn-primary">
+              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>add</span>
+              <span>Kursu Əlavə Et</span>
+            </button>
           </div>
         </form>
-      )}
+      </AdminPopupModal>
 
       {/* Filter & Search Toolbar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>

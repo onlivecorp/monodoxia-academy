@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../i18n/LanguageContext';
+import AdminPopupModal from './AdminPopupModal';
 
 export default function AdminCategoriesTab() {
   const {
@@ -177,14 +178,13 @@ export default function AdminCategoriesTab() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <button
-            onClick={() => setNewCategoryOpen(!newCategoryOpen)}
+            type="button"
+            onClick={() => setNewCategoryOpen(true)}
             className="admin-btn-primary"
             style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
-              {newCategoryOpen ? 'close' : 'add'}
-            </span>
-            <span>{newCategoryOpen ? 'Formu Bağla' : 'Yeni Kateqoriya Əlavə Et'}</span>
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add_circle</span>
+            <span>Yeni Kateqoriya Əlavə Et</span>
           </button>
         </div>
       </div>
@@ -207,24 +207,14 @@ export default function AdminCategoriesTab() {
         </div>
       </div>
 
-      {/* NEW CATEGORY FORM PANEL */}
-      {newCategoryOpen && (
-        <form onSubmit={handleCreateCategory} className="admin-edit-panel" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '10px', borderBottom: '1px solid rgba(197,160,89,0.2)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span className="material-symbols-outlined" style={{ color: '#b45309', fontSize: '20px' }}>add_circle</span>
-              <h5 style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>
-                Yeni Kateqoriya Yarat
-              </h5>
-            </div>
-            <button
-              type="button"
-              onClick={() => setNewCategoryOpen(false)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>close</span>
-            </button>
-          </div>
+      {/* NEW CATEGORY POPUP MODAL */}
+      <AdminPopupModal
+        isOpen={newCategoryOpen}
+        title="Yeni Kateqoriya Yarat"
+        icon="add_circle"
+        onClose={() => setNewCategoryOpen(false)}
+      >
+        <form onSubmit={handleCreateCategory} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
             <div>
@@ -390,11 +380,7 @@ export default function AdminCategoriesTab() {
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', paddingTop: '6px' }}>
-            <button type="submit" className="admin-btn-primary">
-              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>check</span>
-              <span>Kateqoriyanı Yarat və Yadda Saxla</span>
-            </button>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
             <button
               type="button"
               onClick={() => setNewCategoryOpen(false)}
@@ -402,28 +388,23 @@ export default function AdminCategoriesTab() {
             >
               Ləğv Et
             </button>
-          </div>
-        </form>
-      )}
-
-      {/* EDIT CATEGORY MODAL / PANEL */}
-      {editingCategory && (
-        <form onSubmit={handleSaveEditCategory} className="admin-edit-panel" style={{ display: 'flex', flexDirection: 'column', gap: '16px', background: '#fefce8', borderColor: '#fef08a' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '10px', borderBottom: '1px solid rgba(197,160,89,0.3)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span className="material-symbols-outlined" style={{ color: '#b45309', fontSize: '20px' }}>edit</span>
-              <h5 style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>
-                Kateqoriyanı Redaktə Et: <span style={{ color: '#b45309' }}>"{editingCategory.name}"</span>
-              </h5>
-            </div>
-            <button
-              type="button"
-              onClick={() => setEditingCategory(null)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>close</span>
+            <button type="submit" className="admin-btn-primary">
+              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>check</span>
+              <span>Kateqoriyanı Yarat və Yadda Saxla</span>
             </button>
           </div>
+        </form>
+      </AdminPopupModal>
+
+      {/* EDIT CATEGORY POPUP MODAL */}
+      <AdminPopupModal
+        isOpen={Boolean(editingCategory)}
+        title={editingCategory ? `Kateqoriyanı Redaktə Et: "${editingCategory.name}"` : 'Kateqoriyanı Redaktə Et'}
+        icon="edit"
+        onClose={() => setEditingCategory(null)}
+      >
+        {editingCategory && (
+          <form onSubmit={handleSaveEditCategory} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
             <div>
@@ -577,11 +558,7 @@ export default function AdminCategoriesTab() {
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', paddingTop: '6px' }}>
-            <button type="submit" className="admin-btn-primary">
-              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>check</span>
-              <span>Dəyişiklikləri Yadda Saxla</span>
-            </button>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
             <button
               type="button"
               onClick={() => setEditingCategory(null)}
@@ -589,9 +566,14 @@ export default function AdminCategoriesTab() {
             >
               Ləğv Et
             </button>
+            <button type="submit" className="admin-btn-primary">
+              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>check</span>
+              <span>Dəyişiklikləri Yadda Saxla</span>
+            </button>
           </div>
         </form>
       )}
+      </AdminPopupModal>
 
       {/* Filter and Search Bar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>

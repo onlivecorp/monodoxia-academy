@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import AdminInlineTranslator from './AdminInlineTranslator';
 import AdminConfirmModal from './AdminConfirmModal';
+import AdminPopupModal from './AdminPopupModal';
 
 const ITEMS_PER_PAGE = 8;
 
@@ -127,170 +128,149 @@ export default function AdminEventsTab() {
           <span className="admin-count-badge">Cəmi: {eventsList.length} tədbir</span>
           <button
             type="button"
-            onClick={() => setShowAddForm(!showAddForm)}
+            onClick={() => setShowAddForm(true)}
             className="admin-btn-primary"
             style={{ fontSize: '11px', padding: '7px 14px' }}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
-              {showAddForm ? 'close' : 'add_circle'}
-            </span>
-            <span>{showAddForm ? 'Bağla' : 'Yeni Tədbir'}</span>
+            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>add_circle</span>
+            <span>Yeni Tədbir</span>
           </button>
         </div>
       </div>
 
-      {/* Edit Event Panel */}
-      {editingEvent && (
-        <form onSubmit={handleSaveEditEvent} className="admin-edit-panel" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '10px', borderBottom: '1px solid rgba(197,160,89,0.2)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span className="material-symbols-outlined" style={{ color: '#b45309', fontSize: '20px' }}>edit_calendar</span>
-              <h5 style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>
-                Tədbiri Redaktə Et: <span style={{ color: '#b45309' }}>"{editingEvent.title}"</span>
-              </h5>
+      {/* Edit Event Popup Modal */}
+      <AdminPopupModal
+        isOpen={Boolean(editingEvent)}
+        title={editingEvent ? `Tədbiri Redaktə Et: "${editingEvent.title}"` : 'Tədbiri Redaktə Et'}
+        icon="edit_calendar"
+        onClose={() => setEditingEvent(null)}
+      >
+        {editingEvent && (
+          <form onSubmit={handleSaveEditEvent} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+              <div style={{ gridColumn: 'span 2' }}>
+                <label className="admin-label">Tədbir Başlığı *</label>
+                <input
+                  type="text"
+                  required
+                  value={editingEvent.title}
+                  onChange={(e) => setEditingEvent({ ...editingEvent, title: e.target.value })}
+                  className="admin-input"
+                />
+              </div>
+              <div>
+                <label className="admin-label">Format / Növ</label>
+                <select
+                  value={editingEvent.typeBadge}
+                  onChange={(e) => setEditingEvent({ ...editingEvent, typeBadge: e.target.value })}
+                  className="admin-select"
+                >
+                  <option value="VEBİNAR">VEBİNAR</option>
+                  <option value="MASTERKLAS">MASTERKLAS</option>
+                  <option value="CANLI SESSİYA">CANLI SESSİYA</option>
+                  <option value="SEMİNAR">SEMİNAR</option>
+                  <option value="MEDİTASİYA">MEDİTASİYA</option>
+                </select>
+              </div>
             </div>
-            <button
-              type="button"
-              onClick={() => setEditingEvent(null)}
-              className="admin-btn-secondary"
-              style={{ padding: '4px 10px', fontSize: '11px' }}
-            >
-              Ləğv Et ✕
-            </button>
-          </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
-            <div style={{ gridColumn: 'span 2' }}>
-              <label className="admin-label">Tədbir Başlığı *</label>
-              <input
-                type="text"
-                required
-                value={editingEvent.title}
-                onChange={(e) => setEditingEvent({ ...editingEvent, title: e.target.value })}
-                className="admin-input"
-              />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+              <div style={{ gridColumn: 'span 2' }}>
+                <label className="admin-label">Tarix və Saat *</label>
+                <input
+                  type="text"
+                  required
+                  value={editingEvent.datetime}
+                  onChange={(e) => setEditingEvent({ ...editingEvent, datetime: e.target.value })}
+                  placeholder="məsələn: 18 DEKABR, 20:00"
+                  className="admin-input"
+                />
+              </div>
+              <div>
+                <label className="admin-label">Spiker / Aparıcı</label>
+                <input
+                  type="text"
+                  value={editingEvent.speaker}
+                  onChange={(e) => setEditingEvent({ ...editingEvent, speaker: e.target.value })}
+                  className="admin-input"
+                />
+              </div>
+              <div>
+                <label className="admin-label">Maksimum Yer (Limit)</label>
+                <input
+                  type="number"
+                  value={editingEvent.capacity}
+                  onChange={(e) => setEditingEvent({ ...editingEvent, capacity: Number(e.target.value) })}
+                  className="admin-input"
+                  style={{ fontFamily: 'monospace' }}
+                />
+              </div>
             </div>
-            <div>
-              <label className="admin-label">Format / Növ</label>
-              <select
-                value={editingEvent.typeBadge}
-                onChange={(e) => setEditingEvent({ ...editingEvent, typeBadge: e.target.value })}
-                className="admin-select"
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+              <div>
+                <label className="admin-label">Qeydiyyatlı Sayı</label>
+                <input
+                  type="number"
+                  value={editingEvent.registered || 0}
+                  onChange={(e) => setEditingEvent({ ...editingEvent, registered: Number(e.target.value) })}
+                  className="admin-input"
+                  style={{ fontFamily: 'monospace' }}
+                />
+              </div>
+              <div style={{ gridColumn: 'span 2' }}>
+                <label className="admin-label">Qısa Təsvir</label>
+                <input
+                  type="text"
+                  value={editingEvent.desc || ''}
+                  onChange={(e) => setEditingEvent({ ...editingEvent, desc: e.target.value })}
+                  className="admin-input"
+                />
+              </div>
+            </div>
+
+            {/* Inline Translations Panel - Events */}
+            <AdminInlineTranslator
+              item={editingEvent}
+              fields={[
+                { key: 'title', label: 'Tədbir Başlığı' },
+                { key: 'desc', label: 'Qısa Təsvir', type: 'textarea' },
+                { key: 'speaker', label: 'Spiker' },
+                { key: 'datetime', label: 'Tarix və Saat' },
+                { key: 'typeBadge', label: 'Format / Növ Nişanı' }
+              ]}
+              activeLang={editEventTransLang}
+              setActiveLang={setEditEventTransLang}
+              onUpdate={(updates) => setEditingEvent({ ...editingEvent, ...updates })}
+              isOpen={editEventTransOpen}
+              setIsOpen={setEditEventTransOpen}
+            />
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
+              <button
+                type="button"
+                onClick={() => setEditingEvent(null)}
+                className="admin-btn-secondary"
               >
-                <option value="VEBİNAR">VEBİNAR</option>
-                <option value="MASTERKLAS">MASTERKLAS</option>
-                <option value="CANLI SESSİYA">CANLI SESSİYA</option>
-                <option value="SEMİNAR">SEMİNAR</option>
-                <option value="MEDİTASİYA">MEDİTASİYA</option>
-              </select>
+                Ləğv Et
+              </button>
+              <button type="submit" className="admin-btn-primary">
+                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>check</span>
+                <span>Dəyişiklikləri Yadda Saxla</span>
+              </button>
             </div>
-          </div>
+          </form>
+        )}
+      </AdminPopupModal>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
-            <div style={{ gridColumn: 'span 2' }}>
-              <label className="admin-label">Tarix və Saat *</label>
-              <input
-                type="text"
-                required
-                value={editingEvent.datetime}
-                onChange={(e) => setEditingEvent({ ...editingEvent, datetime: e.target.value })}
-                placeholder="məsələn: 18 DEKABR, 20:00"
-                className="admin-input"
-              />
-            </div>
-            <div>
-              <label className="admin-label">Spiker / Aparıcı</label>
-              <input
-                type="text"
-                value={editingEvent.speaker}
-                onChange={(e) => setEditingEvent({ ...editingEvent, speaker: e.target.value })}
-                className="admin-input"
-              />
-            </div>
-            <div>
-              <label className="admin-label">Maksimum Yer (Limit)</label>
-              <input
-                type="number"
-                value={editingEvent.capacity}
-                onChange={(e) => setEditingEvent({ ...editingEvent, capacity: Number(e.target.value) })}
-                className="admin-input"
-                style={{ fontFamily: 'monospace' }}
-              />
-            </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
-            <div>
-              <label className="admin-label">Qeydiyyatlı Sayı</label>
-              <input
-                type="number"
-                value={editingEvent.registered || 0}
-                onChange={(e) => setEditingEvent({ ...editingEvent, registered: Number(e.target.value) })}
-                className="admin-input"
-                style={{ fontFamily: 'monospace' }}
-              />
-            </div>
-            <div style={{ gridColumn: 'span 2' }}>
-              <label className="admin-label">Qısa Təsvir</label>
-              <input
-                type="text"
-                value={editingEvent.desc || ''}
-                onChange={(e) => setEditingEvent({ ...editingEvent, desc: e.target.value })}
-                className="admin-input"
-              />
-            </div>
-          </div>
-
-          {/* Inline Translations Panel - Events */}
-          <AdminInlineTranslator
-            item={editingEvent}
-            fields={[
-              { key: 'title', label: 'Tədbir Başlığı' },
-              { key: 'desc', label: 'Qısa Təsvir', type: 'textarea' },
-              { key: 'speaker', label: 'Spiker' },
-              { key: 'datetime', label: 'Tarix və Saat' },
-              { key: 'typeBadge', label: 'Format / Növ Nişanı' }
-            ]}
-            activeLang={editEventTransLang}
-            setActiveLang={setEditEventTransLang}
-            onUpdate={(updates) => setEditingEvent({ ...editingEvent, ...updates })}
-            isOpen={editEventTransOpen}
-            setIsOpen={setEditEventTransOpen}
-          />
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', paddingTop: '6px' }}>
-            <button type="submit" className="admin-btn-primary">
-              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>check</span>
-              <span>Dəyişiklikləri Yadda Saxla</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setEditingEvent(null)}
-              className="admin-btn-secondary"
-            >
-              Ləğv Et
-            </button>
-          </div>
-        </form>
-      )}
-
-      {/* Add Event Form (Collapsible) */}
-      {showAddForm && (
-        <form onSubmit={handleCreateEvent} className="admin-card animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', gap: '14px', border: '1px solid #c5a059' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <h5 style={{ fontSize: '12px', fontWeight: 700, color: '#c5a059', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add_circle</span>
-              <span>Yeni Tədbir Əlavə Et</span>
-            </h5>
-            <button
-              type="button"
-              onClick={() => setShowAddForm(false)}
-              className="text-slate-400 hover:text-slate-600 text-xs"
-            >
-              ✕
-            </button>
-          </div>
-
+      {/* Add Event Popup Modal */}
+      <AdminPopupModal
+        isOpen={showAddForm}
+        title="Yeni Tədbir Əlavə Et"
+        icon="add_circle"
+        onClose={() => setShowAddForm(false)}
+      >
+        <form onSubmit={handleCreateEvent} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
             <div style={{ gridColumn: 'span 2' }}>
               <label className="admin-label">Tədbir Başlığı *</label>
@@ -392,11 +372,7 @@ export default function AdminEventsTab() {
             setIsOpen={setNewEventTransOpen}
           />
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', paddingTop: '4px' }}>
-            <button type="submit" className="admin-btn-primary">
-              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>add</span>
-              <span>Tədbiri Təqvimə Əlavə Et</span>
-            </button>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
             <button
               type="button"
               onClick={() => setShowAddForm(false)}
@@ -404,9 +380,13 @@ export default function AdminEventsTab() {
             >
               Ləğv Et
             </button>
+            <button type="submit" className="admin-btn-primary">
+              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>add</span>
+              <span>Tədbiri Təqvimə Əlavə Et</span>
+            </button>
           </div>
         </form>
-      )}
+      </AdminPopupModal>
 
       {/* Search & Filter Toolbar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
