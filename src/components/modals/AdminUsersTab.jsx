@@ -14,7 +14,10 @@ export default function AdminUsersTab() {
     deleteUser,
     coachesList = [],
     addCoach,
-    showToast
+    showToast,
+    rolesList = [],
+    hasPermission,
+    currentUser
   } = useApp();
 
   // Search & Filter
@@ -170,11 +173,26 @@ export default function AdminUsersTab() {
                   onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
                   className="admin-select"
                 >
-                  <option>Tələbə</option>
-                  <option>Kouç</option>
-                  <option>Moderator</option>
-                  <option>Admin</option>
+                  {rolesList.map(r => (
+                    <option key={r.id} value={r.code}>{r.name} ({r.code})</option>
+                  ))}
                 </select>
+                {(() => {
+                  const selRole = rolesList.find(r => r.code === editingUser.role);
+                  if (!selRole) return null;
+                  const isSuper = selRole.permissions?.includes('*');
+                  return (
+                    <div style={{ marginTop: '6px', padding: '6px 8px', background: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0', fontSize: '11px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: selRole.color || '#b45309', fontWeight: 600 }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>shield</span>
+                        <span>{selRole.name}: {isSuper ? 'Bütün İcazələr' : `${selRole.permissions?.length || 0} icazə`}</span>
+                      </div>
+                      <div style={{ fontSize: '10px', color: '#64748b', marginTop: '2px' }}>
+                        {selRole.description || 'Xüsusi təsvir yoxdur.'}
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
               <div>
                 <label className="admin-label">Abunəlik Paketi (Tier)</label>
@@ -281,10 +299,9 @@ export default function AdminUsersTab() {
             <div>
               <label className="admin-label">Rol</label>
               <select value={newUserRole} onChange={e => setNewUserRole(e.target.value)} className="admin-select">
-                <option>Tələbə</option>
-                <option>Kouç</option>
-                <option>Moderator</option>
-                <option>Admin</option>
+                {rolesList.map(r => (
+                  <option key={r.id} value={r.code}>{r.name} ({r.code})</option>
+                ))}
               </select>
             </div>
             <div>
@@ -346,15 +363,17 @@ export default function AdminUsersTab() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span className="admin-count-badge">{filteredUsers.length} / {usersList.length} istifadəçi</span>
-          <button
-            type="button"
-            onClick={() => setShowAddForm(true)}
-            className="admin-btn-primary"
-            style={{ fontSize: '11px', padding: '7px 14px' }}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>person_add</span>
-            <span>Yeni İstifadəçi</span>
-          </button>
+          {(hasPermission?.('users.create') || currentUser?.role === 'Admin') && (
+            <button
+              type="button"
+              onClick={() => setShowAddForm(true)}
+              className="admin-btn-primary"
+              style={{ fontSize: '11px', padding: '7px 14px' }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>person_add</span>
+              <span>Yeni İstifadəçi</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -385,7 +404,7 @@ export default function AdminUsersTab() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-          {['All', 'Tələbə', 'Kouç', 'Moderator', 'Admin'].map(r => (
+          {['All', ...rolesList.map(r => r.code)].map(r => (
             <button
               key={r}
               type="button"
@@ -402,7 +421,7 @@ export default function AdminUsersTab() {
                 color: roleFilter === r ? '#b45309' : '#64748b'
               }}
             >
-              {r === 'All' ? 'Hamısı' : r}
+              {r === 'All' ? 'Hamısı' : (rolesList.find(role => role.code === r)?.name || r)}
             </button>
           ))}
         </div>
@@ -454,14 +473,14 @@ export default function AdminUsersTab() {
                   <td>
                     <select
                       value={u.role}
+                      disabled={!hasPermission?.('users.assign_role') && currentUser?.role !== 'Admin'}
                       onChange={e => updateUser(u.id, { role: e.target.value })}
                       className="admin-select"
                       style={{ width: 'auto', padding: '5px 8px', fontSize: '11px' }}
                     >
-                      <option>Tələbə</option>
-                      <option>Kouç</option>
-                      <option>Moderator</option>
-                      <option>Admin</option>
+                      {rolesList.map(r => (
+                        <option key={r.id} value={r.code}>{r.name}</option>
+                      ))}
                     </select>
                   </td>
                   <td>
@@ -519,25 +538,29 @@ export default function AdminUsersTab() {
                           <span>Ekspert Təyin Et</span>
                         </button>
                       )}
-                      <button
-                        type="button"
-                        onClick={() => setEditingUser(u)}
-                        className="admin-btn-edit"
-                        style={{ padding: '5px 10px' }}
-                        title="İstifadəçini redaktə et"
-                      >
-                        <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>edit</span>
-                        <span>Redaktə</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setUserToDelete(u)}
-                        className="admin-btn-danger"
-                        style={{ padding: '5px 8px' }}
-                        title="İstifadəçini sil"
-                      >
-                        <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>delete</span>
-                      </button>
+                      {(hasPermission?.('users.edit') || currentUser?.role === 'Admin') && (
+                        <button
+                          type="button"
+                          onClick={() => setEditingUser(u)}
+                          className="admin-btn-edit"
+                          style={{ padding: '5px 10px' }}
+                          title="İstifadəçini redaktə et"
+                        >
+                          <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>edit</span>
+                          <span>Redaktə</span>
+                        </button>
+                      )}
+                      {(hasPermission?.('users.delete') || currentUser?.role === 'Admin') && (
+                        <button
+                          type="button"
+                          onClick={() => setUserToDelete(u)}
+                          className="admin-btn-danger"
+                          style={{ padding: '5px 8px' }}
+                          title="İstifadəçini sil"
+                        >
+                          <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>delete</span>
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

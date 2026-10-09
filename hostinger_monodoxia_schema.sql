@@ -320,8 +320,36 @@ INSERT INTO `mdx_categories` (`id`, `slug`, `target_type`, `name`, `icon`, `tran
 ('cat-coaching', 'coaching', 'course', 'Kouçinq', 'trending_up', '{"az":{"name":"Kouçinq","desc":"Liderlik və inkişaf"},"en":{"name":"Coaching","desc":"Leadership and growth"},"tr":{"name":"Koçluk","desc":"Liderlik ve gelişim"},"ru":{"name":"Коучинг","desc":"Лидерство и развитие"}}'),
 ('cat-meditation', 'meditation', 'course', 'Meditasiya', 'self_improvement', '{"az":{"name":"Meditasiya","desc":"Sükut və nəfəs praktikaları"},"en":{"name":"Meditation","desc":"Stillness and breathwork"},"tr":{"name":"Meditasyon","desc":"Sessizlik ve nefes pratikleri"},"ru":{"name":"Медитация","desc":"Практики тишины и дыхания"}}');
 
+-- --------------------------------------------------------
+-- Cədvəl: mdx_roles (Rollar və İcazələr - RBAC)
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `mdx_roles`;
+CREATE TABLE `mdx_roles` (
+  `id` varchar(50) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `code` varchar(50) NOT NULL,
+  `description` text DEFAULT NULL,
+  `is_system` tinyint(1) NOT NULL DEFAULT 0,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `color` varchar(30) DEFAULT '#b45309',
+  `badge_class` varchar(100) DEFAULT NULL,
+  `permissions` longtext DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `code` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `mdx_roles` (`id`, `name`, `code`, `description`, `is_system`, `is_active`, `color`, `badge_class`, `permissions`) VALUES
+('role-admin', 'Super Admin', 'Admin', 'Bütün sistem modullarına və təhlükəsizlik tənzimləmələrinə tam məhdudiyyətsiz giriş hüququ.', 1, 1, '#b45309', 'bg-amber-100 text-amber-800 border-amber-300', '["*"]'),
+('role-moderator', 'Moderator', 'Moderator', 'Müraciətlərə, qeydiyyatlara, istifadəçilərə və icma müzakirələrinə operativ nəzarət və moderasiya hüququ.', 1, 1, '#2563eb', 'bg-blue-100 text-blue-800 border-blue-300', '["dashboard.view","applications.view","applications.approve","applications.reject","applications.export","registrations.view","registrations.export","users.view","users.edit","community.view","community.create","community.edit","community.delete","events.view"]'),
+('role-coach', 'Kouç & Ekspert', 'Kouç', 'Kurslar, dərslər, tədbirlər və icma sessiyalarını idarə etmək üçün tədris heyəti hüququ.', 1, 1, '#059669', 'bg-emerald-100 text-emerald-800 border-emerald-300', '["dashboard.view","courses.view","courses.create","courses.edit","courses.publish","events.view","events.create","events.edit","community.view","community.create","categories.view"]'),
+('role-editor', 'Məzmun Redaktoru', 'Məzmun Redaktoru', 'CMS məzmunları, tərcümələr, kateqoriyalar və bloq/forum idarəetmə hüququ.', 0, 1, '#7c3aed', 'bg-purple-100 text-purple-800 border-purple-300', '["dashboard.view","content.view","content.edit","translations.view","translations.edit","categories.view","categories.create","categories.edit","community.view","community.edit"]'),
+('role-student', 'Tələbə (İstifadəçi)', 'Tələbə', 'Platformanın standart tələbə və üzv hesabı. Yalnız öz dərslərinə və ictimai imkanlara giriş.', 1, 1, '#64748b', 'bg-slate-100 text-slate-800 border-slate-300', '[]');
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+

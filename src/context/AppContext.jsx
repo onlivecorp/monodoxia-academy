@@ -16,6 +16,11 @@ import {
   INITIAL_NOTIFICATIONS
 } from '../data/applicationData';
 import { INITIAL_CATEGORIES } from '../data/categoryData';
+import {
+  PERMISSION_MODULES,
+  ALL_PERMISSION_KEYS,
+  INITIAL_ROLES
+} from '../data/rbacData';
 
 const INITIAL_USERS = [
   { id: 'u7', name: 'Admin Baş Koordinator', email: 'admin@monodoxia.academy', role: 'Admin', tier: 'VIP', status: 'Aktiv', joinedDate: '2025-01-01' }
@@ -257,6 +262,18 @@ export function AppProvider({ children }) {
     return INITIAL_USERS;
   });
 
+  // Dynamic Roles & RBAC (Role-Based Access Control)
+  const [rolesList, setRolesList] = useState(() => {
+    const saved = localStorage.getItem('monodoxia_admin_roles');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {}
+    }
+    return INITIAL_ROLES;
+  });
+
   const [coursesList, setCoursesList] = useState(() => {
     const saved = localStorage.getItem('monodoxia_admin_courses');
     return saved ? JSON.parse(saved) : COURSES;
@@ -462,6 +479,22 @@ export function AppProvider({ children }) {
             }
             setPlatformSettings(prev => ({ ...prev, ...mappedSettings }));
           }
+          if (data.roles && data.roles.length > 0) {
+            const mappedRoles = data.roles.map(r => ({
+              id: r.id,
+              name: r.name,
+              code: r.code,
+              description: r.description,
+              isSystem: Boolean(Number(r.is_system)),
+              isActive: Boolean(Number(r.is_active ?? 1)),
+              color: r.color || '#b45309',
+              badgeClass: r.badge_class || 'bg-amber-100 text-amber-800 border-amber-300',
+              permissions: typeof r.permissions === 'string' ? JSON.parse(r.permissions || '[]') : (r.permissions || []),
+              createdAt: r.created_at ? r.created_at.split(' ')[0] : '2025-01-01',
+              updatedAt: r.updated_at ? r.updated_at.split(' ')[0] : '2025-01-01'
+            }));
+            setRolesList(mappedRoles);
+          }
         }
       })
       .catch(() => {});
@@ -475,6 +508,10 @@ export function AppProvider({ children }) {
       localStorage.removeItem('monodoxia_user');
     }
   }, [currentUser]);
+
+  useEffect(() => {
+    localStorage.setItem('monodoxia_admin_roles', JSON.stringify(rolesList));
+  }, [rolesList]);
 
   useEffect(() => {
     localStorage.setItem('monodoxia_progress', JSON.stringify(progress));
@@ -1080,6 +1117,20 @@ export function AppProvider({ children }) {
   };
 
   const deleteUser = (id) => {
+    // Prevent deleting the currently logged-in user or the last active Admin
+    if (currentUser?.id === id) {
+      showToast('Cari daxil olmuş admin hesabı silinə bilməz!', 'warning');
+      return;
+    }
+    const target = usersList.find(u => u.id === id);
+    if (target?.role === 'Admin') {
+      const remainingAdmins = usersList.filter(u => u.role === 'Admin' && u.id !== id);
+      if (remainingAdmins.length === 0) {
+        showToast('Sistemdəki yeganə Admin hesabı silinə bilməz!', 'warning');
+        return;
+      }
+    }
+
     setUsersList(prev => prev.filter(u => u.id !== id));
     showToast('İstifadəçi silindi', 'info');
 
@@ -1088,6 +1139,168 @@ export function AppProvider({ children }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id })
     }).catch(() => {});
+  };
+
+  // ========================================================
+  // RBAC (ROLE-BASED ACCESS CONTROL) SİSTEMİ
+  // ========================================================
+
+  const getUserEffectivePermissions = (user = currentUser) => {
+    if (!user) return [];
+    if (user.role === 'Admin') return ['*'];
+
+    const userRoles = Array.isArray(user.roles) && user.roles.length > 0
+      ? user.roles
+      : [user.role || 'Tələbə'];
+
+    if (userRoles.includes('Admin')) return ['*'];
+
+    const permsSet = new Set();
+    userRoles.forEach(rCodeOrId => {
+      const found = rolesList.find(r => r.code === rCodeOrId || r.id === rCodeOrId);
+      if (found && found.isActive !== false) {
+        if (found.permissions?.includes('*')) {
+          permsSet.add('*');
+        } else if (Array.isArray(found.permissions)) {
+          found.permissions.forEach(p => permsSet.add(p));
+        }
+      }
+    });
+
+    return Array.from(permsSet);
+  };
+
+  const hasPermission = (permissionKey, user = currentUser) => {
+    if (!user) return false;
+    if (user.role === 'Admin') return true;
+    const perms = getUserEffectivePermissions(user);
+    if (perms.includes('*')) return true;
+    if (perms.includes(permissionKey)) return true;
+    const [mod] = (permissionKey || '').split('.');
+    if (perms.includes(`${mod}.*`)) return true;
+    return false;
+  };
+
+  const canAccessAdmin = (user = currentUser) => {
+    if (!user) return false;
+    if (user.role === 'Admin') return true;
+    const perms = getUserEffectivePermissions(user);
+    if (perms.includes('*')) return true;
+    const adminViewPerms = [
+      'dashboard.view', 'applications.view', 'registrations.view',
+      'users.view', 'roles.view', 'courses.view', 'categories.view',
+      'club.view', 'events.view', 'community.view', 'translations.view',
+      'maintenance.view', 'content.view', 'database.view', 'settings.view'
+    ];
+    return adminViewPerms.some(vp => perms.includes(vp));
+  };
+
+  const addRole = (newRole) => {
+    const role = {
+      id: 'role-' + Date.now(),
+      name: (newRole.name || '').trim(),
+      code: (newRole.code || newRole.name || '').trim(),
+      description: newRole.description || '',
+      isSystem: false,
+      isActive: newRole.isActive !== undefined ? Boolean(newRole.isActive) : true,
+      color: newRole.color || '#b45309',
+      badgeClass: newRole.badgeClass || 'bg-amber-100 text-amber-800 border-amber-300',
+      permissions: Array.isArray(newRole.permissions) ? newRole.permissions : [],
+      createdAt: new Date().toISOString().split('T')[0],
+      updatedAt: new Date().toISOString().split('T')[0]
+    };
+
+    setRolesList(prev => [...prev, role]);
+    showToast(`Yeni rol yaradıldı: ${role.name}`, 'success');
+
+    try {
+      fetch('/api.php?action=save_role', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(role)
+      }).catch(() => {});
+    } catch (e) {}
+
+    return role;
+  };
+
+  const updateRole = (id, updates) => {
+    const existing = rolesList.find(r => r.id === id);
+    if (!existing) return;
+
+    let safeUpdates = { ...updates, updatedAt: new Date().toISOString().split('T')[0] };
+    // Critical safety: Super Admin role can never lose full privileges
+    if (existing.isSystem && existing.code === 'Admin') {
+      safeUpdates.isSystem = true;
+      safeUpdates.isActive = true;
+      safeUpdates.permissions = ['*'];
+    }
+
+    setRolesList(prev => prev.map(r => r.id === id ? { ...r, ...safeUpdates } : r));
+    showToast(`"${existing.name}" rolu yeniləndi`, 'success');
+
+    try {
+      fetch('/api.php?action=save_role', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...existing, ...safeUpdates })
+      }).catch(() => {});
+    } catch (e) {}
+  };
+
+  const deleteRole = (id) => {
+    const target = rolesList.find(r => r.id === id);
+    if (!target) return false;
+
+    if (target.isSystem || ['Admin', 'Tələbə', 'Kouç', 'Moderator'].includes(target.code)) {
+      showToast('Kritik sistem rolları silinə bilməz!', 'warning');
+      return false;
+    }
+
+    const assignedCount = usersList.filter(u => u.role === target.code || (Array.isArray(u.roles) && u.roles.includes(target.code))).length;
+    if (assignedCount > 0) {
+      showToast(`Bu rol hazırda ${assignedCount} istifadəçiyə təyin olunub. Silmədən öncə istifadəçilərin rolunu dəyişin.`, 'warning');
+      return false;
+    }
+
+    setRolesList(prev => prev.filter(r => r.id !== id));
+    showToast(`"${target.name}" rolu silindi`, 'info');
+
+    try {
+      fetch('/api.php?action=delete_role', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, code: target.code })
+      }).catch(() => {});
+    } catch (e) {}
+
+    return true;
+  };
+
+  const toggleRoleActive = (id) => {
+    const target = rolesList.find(r => r.id === id);
+    if (!target) return;
+    if (target.isSystem && target.code === 'Admin') {
+      showToast('Super Admin rolu deaktiv edilə bilməz!', 'warning');
+      return;
+    }
+    const newStatus = !target.isActive;
+    updateRole(id, { isActive: newStatus });
+  };
+
+  const duplicateRole = (id) => {
+    const source = rolesList.find(r => r.id === id);
+    if (!source) return;
+    const cloned = {
+      name: `${source.name} (Kopya)`,
+      code: `${source.code}_kopya_${Date.now().toString().slice(-4)}`,
+      description: source.description ? `${source.description} (Klonlanmış)` : '',
+      color: source.color || '#b45309',
+      badgeClass: source.badgeClass,
+      permissions: source.permissions ? [...source.permissions] : [],
+      isActive: true
+    };
+    addRole(cloned);
   };
 
   const updateCourse = (id, updates) => {
@@ -1558,6 +1771,18 @@ export function AppProvider({ children }) {
       updateCurrentUser,
       // Admin Operations
       updateUser, addUser, deleteUser,
+      // RBAC System
+      rolesList, setRolesList,
+      permissionModules: PERMISSION_MODULES,
+      allPermissions: ALL_PERMISSION_KEYS,
+      getUserEffectivePermissions,
+      hasPermission,
+      canAccessAdmin,
+      addRole,
+      updateRole,
+      deleteRole,
+      toggleRoleActive,
+      duplicateRole,
       updateCourse, addCourse, deleteCourse,
       categoriesList, getCategoryLabel, addCategory, updateCategory, deleteCategory,
       updateClubTier, addClubTier, deleteClubTier,

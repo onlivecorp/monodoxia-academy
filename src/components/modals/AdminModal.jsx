@@ -6,6 +6,7 @@ import AdminOverviewTab from './AdminOverviewTab';
 import AdminApplicationsTab from './AdminApplicationsTab';
 import AdminRegistrationsTab from './AdminRegistrationsTab';
 import AdminUsersTab from './AdminUsersTab';
+import AdminRolesTab from './AdminRolesTab';
 import AdminCoursesTab from './AdminCoursesTab';
 import AdminCategoriesTab from './AdminCategoriesTab';
 import AdminClubTab from './AdminClubTab';
@@ -24,7 +25,9 @@ export default function AdminModal() {
     adminModalOpen,
     setAdminModalOpen,
     platformSettings,
-    applicationsList = []
+    applicationsList = [],
+    hasPermission,
+    canAccessAdmin
   } = useApp();
 
   const [activeTab, setActiveTab] = useState('overview');
@@ -45,7 +48,7 @@ export default function AdminModal() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [adminModalOpen, setAdminModalOpen]);
 
-  if (!adminModalOpen || currentUser?.role !== 'Admin') return null;
+  if (!adminModalOpen || (!canAccessAdmin?.(currentUser) && currentUser?.role !== 'Admin')) return null;
 
   const pendingAppsCount = applicationsList.filter(a => a.status === 'Yeni' && !a.archived).length;
 
@@ -53,39 +56,54 @@ export default function AdminModal() {
     {
       group: 'Analitika',
       items: [
-        { id: 'overview', icon: 'dashboard', label: 'İcmal & Statistika' }
+        { id: 'overview', icon: 'dashboard', label: 'İcmal & Statistika', perm: 'dashboard.view' }
       ]
     },
     {
       group: 'İdarəetmə',
       items: [
-        { id: 'applications', icon: 'assignment', label: 'Müraciətlər', badge: pendingAppsCount > 0 ? pendingAppsCount : null },
-        { id: 'registrations', icon: 'how_to_reg', label: 'Qeydiyyatlar' },
-        { id: 'users', icon: 'group', label: 'İstifadəçilər & RBAC' },
-        { id: 'courses', icon: 'school', label: 'Kurslar & LMS' },
-        { id: 'categories', icon: 'category', label: 'Kateqoriyalar' },
-        { id: 'club', icon: 'card_membership', label: 'Club Tiers' },
-        { id: 'events', icon: 'event', label: 'Tədbirlər' },
-        { id: 'community', icon: 'forum', label: 'İcma & Forum' }
+        { id: 'applications', icon: 'assignment', label: 'Müraciətlər', perm: 'applications.view', badge: pendingAppsCount > 0 ? pendingAppsCount : null },
+        { id: 'registrations', icon: 'how_to_reg', label: 'Qeydiyyatlar', perm: 'registrations.view' },
+        { id: 'users', icon: 'group', label: 'İstifadəçilər', perm: 'users.view' },
+        { id: 'roles', icon: 'shield_person', label: 'Rollar & İcazələr (RBAC)', perm: 'roles.view' },
+        { id: 'courses', icon: 'school', label: 'Kurslar & LMS', perm: 'courses.view' },
+        { id: 'categories', icon: 'category', label: 'Kateqoriyalar', perm: 'categories.view' },
+        { id: 'club', icon: 'card_membership', label: 'Club Tiers', perm: 'club.view' },
+        { id: 'events', icon: 'event', label: 'Tədbirlər', perm: 'events.view' },
+        { id: 'community', icon: 'forum', label: 'İcma & Forum', perm: 'community.view' }
       ]
     },
     {
       group: 'Tərcümələr (i18n)',
       items: [
-        { id: 'static_translations', icon: 'spellcheck', label: 'Statik Çevrilər (UI)' },
-        { id: 'translations', icon: 'translate', label: 'Dinamik Məzmun Çevriləri' }
+        { id: 'static_translations', icon: 'spellcheck', label: 'Statik Çevrilər (UI)', perm: 'translations.view' },
+        { id: 'translations', icon: 'translate', label: 'Dinamik Məzmun Çevriləri', perm: 'translations.view' }
       ]
     },
     {
       group: 'Sistem & Rejimlər',
       items: [
-        { id: 'maintenance', icon: 'construction', label: 'Texniki Qulluq Ekranı', highlight: Boolean(platformSettings?.maintenanceMode) },
-        { id: 'content', icon: 'edit_document', label: 'Məzmun (CMS)' },
-        { id: 'database', icon: 'database', label: 'SQL Bazası' },
-        { id: 'settings', icon: 'settings', label: 'Ümumi Parametrlər' }
+        { id: 'maintenance', icon: 'construction', label: 'Texniki Qulluq Ekranı', perm: 'maintenance.view', highlight: Boolean(platformSettings?.maintenanceMode) },
+        { id: 'content', icon: 'edit_document', label: 'Məzmun (CMS)', perm: 'content.view' },
+        { id: 'database', icon: 'database', label: 'SQL Bazası', perm: 'database.view' },
+        { id: 'settings', icon: 'settings', label: 'Ümumi Parametrlər', perm: 'settings.view' }
       ]
     }
   ];
+
+  // Filter allowed navigation categories based on effective permissions
+  const allowedNavCategories = navCategories.map(cat => ({
+    ...cat,
+    items: cat.items.filter(item => hasPermission ? hasPermission(item.perm) : true)
+  })).filter(cat => cat.items.length > 0);
+
+  // Fallback to first available tab if current activeTab is not permitted
+  useEffect(() => {
+    const allAllowedItemIds = allowedNavCategories.flatMap(c => c.items.map(i => i.id));
+    if (allAllowedItemIds.length > 0 && !allAllowedItemIds.includes(activeTab)) {
+      setActiveTab(allAllowedItemIds[0]);
+    }
+  }, [allowedNavCategories, activeTab]);
 
   return (
     <div className="fixed inset-0 z-50 admin-backdrop w-screen h-screen overflow-hidden animate-fadeIn">
@@ -210,7 +228,7 @@ export default function AdminModal() {
               ? 'translate-x-0 absolute inset-y-0 left-0 w-[240px] shadow-2xl bg-white'
               : '-translate-x-full md:translate-x-0 md:static w-[220px]'
           }`}>
-            {navCategories.map((group, groupIdx) => (
+            {allowedNavCategories.map((group, groupIdx) => (
               <div key={groupIdx} className="flex flex-col gap-0.5">
                 <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#94a3b8', fontWeight: 700, padding: groupIdx === 0 ? '6px 12px 4px' : '12px 12px 4px' }}>
                   {group.group}
@@ -265,6 +283,10 @@ export default function AdminModal() {
 
             {activeTab === 'users' && (
               <AdminUsersTab />
+            )}
+
+            {activeTab === 'roles' && (
+              <AdminRolesTab />
             )}
 
             {activeTab === 'courses' && (

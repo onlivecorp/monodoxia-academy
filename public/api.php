@@ -130,6 +130,7 @@ if ($action === 'get_all') {
     $form_fields = $safeQuery("SELECT * FROM mdx_application_form_fields WHERE is_active = 1 ORDER BY sort_order ASC");
     $notifications = $safeQuery("SELECT * FROM mdx_notifications ORDER BY created_at DESC LIMIT 50");
     $categories = $safeQuery("SELECT * FROM mdx_categories ORDER BY created_at ASC");
+    $roles = $safeQuery("SELECT * FROM mdx_roles ORDER BY is_system DESC, name ASC");
 
     echo json_encode([
         'status' => 'success',
@@ -145,7 +146,8 @@ if ($action === 'get_all') {
         'applications' => $applications,
         'form_fields' => $form_fields,
         'notifications' => $notifications,
-        'categories' => $categories
+        'categories' => $categories,
+        'roles' => $roles
     ], JSON_UNESCAPED_UNICODE);
     exit();
 }
@@ -284,6 +286,226 @@ if ($action === 'delete_user' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$id]);
     }
     echo json_encode(['status' => 'success', 'message' => 'İstifadəçi silindi'], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+// --------------------------------------------------------
+// 3.6. ROLLAR VƏ İCAZƏLƏR APİ (RBAC - ROLE-BASED ACCESS CONTROL)
+// --------------------------------------------------------
+try {
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS `mdx_roles` (
+            `id` varchar(50) NOT NULL,
+            `name` varchar(100) NOT NULL,
+            `code` varchar(50) NOT NULL,
+            `description` text DEFAULT NULL,
+            `is_system` tinyint(1) NOT NULL DEFAULT 0,
+            `is_active` tinyint(1) NOT NULL DEFAULT 1,
+            `color` varchar(30) DEFAULT '#b45309',
+            `badge_class` varchar(100) DEFAULT NULL,
+            `permissions` longtext DEFAULT NULL,
+            `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `code` (`code`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ");
+
+    $checkCount = $pdo->query("SELECT COUNT(*) FROM mdx_roles")->fetchColumn();
+    if ($checkCount == 0) {
+        $initRoles = [
+            [
+                'id' => 'role-admin',
+                'name' => 'Super Admin',
+                'code' => 'Admin',
+                'description' => 'Bütün sistem modullarına və təhlükəsizlik tənzimləmələrinə tam məhdudiyyətsiz giriş hüququ.',
+                'is_system' => 1,
+                'is_active' => 1,
+                'color' => '#b45309',
+                'badge_class' => 'bg-amber-100 text-amber-800 border-amber-300',
+                'permissions' => json_encode(['*'], JSON_UNESCAPED_UNICODE)
+            ],
+            [
+                'id' => 'role-moderator',
+                'name' => 'Moderator',
+                'code' => 'Moderator',
+                'description' => 'Müraciətlərə, qeydiyyatlara, istifadəçilərə və icma müzakirələrinə operativ nəzarət və moderasiya hüququ.',
+                'is_system' => 1,
+                'is_active' => 1,
+                'color' => '#2563eb',
+                'badge_class' => 'bg-blue-100 text-blue-800 border-blue-300',
+                'permissions' => json_encode([
+                    'dashboard.view', 'applications.view', 'applications.approve', 'applications.reject', 'applications.export',
+                    'registrations.view', 'registrations.export', 'users.view', 'users.edit',
+                    'community.view', 'community.create', 'community.edit', 'community.delete', 'events.view'
+                ], JSON_UNESCAPED_UNICODE)
+            ],
+            [
+                'id' => 'role-coach',
+                'name' => 'Kouç & Ekspert',
+                'code' => 'Kouç',
+                'description' => 'Kurslar, dərslər, tədbirlər və icma sessiyalarını idarə etmək üçün tədris heyəti hüququ.',
+                'is_system' => 1,
+                'is_active' => 1,
+                'color' => '#059669',
+                'badge_class' => 'bg-emerald-100 text-emerald-800 border-emerald-300',
+                'permissions' => json_encode([
+                    'dashboard.view', 'courses.view', 'courses.create', 'courses.edit', 'courses.publish',
+                    'events.view', 'events.create', 'events.edit', 'community.view', 'community.create', 'categories.view'
+                ], JSON_UNESCAPED_UNICODE)
+            ],
+            [
+                'id' => 'role-editor',
+                'name' => 'Məzmun Redaktoru',
+                'code' => 'Məzmun Redaktoru',
+                'description' => 'CMS məzmunları, tərcümələr, kateqoriyalar və bloq/forum idarəetmə hüququ.',
+                'is_system' => 0,
+                'is_active' => 1,
+                'color' => '#7c3aed',
+                'badge_class' => 'bg-purple-100 text-purple-800 border-purple-300',
+                'permissions' => json_encode([
+                    'dashboard.view', 'content.view', 'content.edit', 'translations.view', 'translations.edit',
+                    'categories.view', 'categories.create', 'categories.edit', 'community.view', 'community.edit'
+                ], JSON_UNESCAPED_UNICODE)
+            ],
+            [
+                'id' => 'role-student',
+                'name' => 'Tələbə (İstifadəçi)',
+                'code' => 'Tələbə',
+                'description' => 'Platformanın standart tələbə və üzv hesabı. Yalnız öz dərslərinə və ictimai imkanlara giriş.',
+                'is_system' => 1,
+                'is_active' => 1,
+                'color' => '#64748b',
+                'badge_class' => 'bg-slate-100 text-slate-800 border-slate-300',
+                'permissions' => json_encode([], JSON_UNESCAPED_UNICODE)
+            ]
+        ];
+
+        $ins = $pdo->prepare("
+            INSERT INTO mdx_roles (id, name, code, description, is_system, is_active, color, badge_class, permissions)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ");
+        foreach ($initRoles as $r) {
+            $ins->execute([
+                $r['id'], $r['name'], $r['code'], $r['description'],
+                $r['is_system'], $r['is_active'], $r['color'], $r['badge_class'], $r['permissions']
+            ]);
+        }
+    }
+} catch (PDOException $e) {}
+
+if ($action === 'get_roles') {
+    try {
+        $stmt = $pdo->query("SELECT * FROM mdx_roles ORDER BY is_system DESC, name ASC");
+        $roles = $stmt->fetchAll();
+        foreach ($roles as &$r) {
+            if (!empty($r['permissions']) && is_string($r['permissions'])) {
+                $decoded = json_decode($r['permissions'], true);
+                if (is_array($decoded)) {
+                    $r['permissions'] = $decoded;
+                }
+            }
+        }
+        echo json_encode(['status' => 'success', 'roles' => $roles], JSON_UNESCAPED_UNICODE);
+    } catch (PDOException $e) {
+        http_response_code(500);
+        echo json_encode(['status' => 'error', 'message' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+    }
+    exit();
+}
+
+if ($action === 'save_role' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $input = json_decode(file_get_contents('php://input'), true);
+    if (!$input) {
+        $input = $_POST;
+    }
+
+    $id = trim($input['id'] ?? ('role-' . round(microtime(true) * 1000)));
+    $name = trim($input['name'] ?? '');
+    $code = trim($input['code'] ?? $name);
+    $description = trim($input['description'] ?? '');
+    $is_system = !empty($input['isSystem']) || !empty($input['is_system']) ? 1 : 0;
+    $is_active = isset($input['isActive']) ? ($input['isActive'] ? 1 : 0) : (isset($input['is_active']) ? ($input['is_active'] ? 1 : 0) : 1);
+    $color = $input['color'] ?? '#b45309';
+    $badge_class = $input['badgeClass'] ?? $input['badge_class'] ?? 'bg-amber-100 text-amber-800 border-amber-300';
+    $permissions = $input['permissions'] ?? [];
+    if (is_array($permissions)) {
+        $permissionsJson = json_encode($permissions, JSON_UNESCAPED_UNICODE);
+    } else {
+        $permissionsJson = (string)$permissions;
+    }
+
+    if (!$name || !$code) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Rol adı və kodu tələb olunur'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    // Təhlükəsizlik: Super Admin (Admin) rolu deaktiv edilə və ya səlahiyyətləri tam silinə bilməz
+    if ($code === 'Admin') {
+        $is_system = 1;
+        $is_active = 1;
+        $permissionsJson = json_encode(['*'], JSON_UNESCAPED_UNICODE);
+    }
+
+    $stmt = $pdo->prepare("
+        INSERT INTO mdx_roles (id, name, code, description, is_system, is_active, color, badge_class, permissions)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+            name = VALUES(name),
+            description = VALUES(description),
+            is_active = VALUES(is_active),
+            color = VALUES(color),
+            badge_class = VALUES(badge_class),
+            permissions = VALUES(permissions),
+            updated_at = CURRENT_TIMESTAMP
+    ");
+    $stmt->execute([$id, $name, $code, $description, $is_system, $is_active, $color, $badge_class, $permissionsJson]);
+
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'Rol məlumatları bazada yeniləndi',
+        'role' => [
+            'id' => $id,
+            'name' => $name,
+            'code' => $code,
+            'description' => $description,
+            'isSystem' => (bool)$is_system,
+            'isActive' => (bool)$is_active,
+            'color' => $color,
+            'badgeClass' => $badge_class,
+            'permissions' => is_array($permissions) ? $permissions : json_decode($permissionsJson, true)
+        ]
+    ], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+if ($action === 'delete_role' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $input = json_decode(file_get_contents('php://input'), true);
+    $id = $input['id'] ?? null;
+    $code = $input['code'] ?? null;
+
+    if (!$id && !$code) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Rol ID tələb olunur'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    $checkStmt = $pdo->prepare("SELECT * FROM mdx_roles WHERE id = ? OR code = ? LIMIT 1");
+    $checkStmt->execute([$id, $code]);
+    $roleRow = $checkStmt->fetch();
+
+    if ($roleRow) {
+        if ($roleRow['is_system'] == 1 || in_array($roleRow['code'], ['Admin', 'Tələbə', 'Kouç', 'Moderator'])) {
+            http_response_code(403);
+            echo json_encode(['status' => 'error', 'message' => 'Kritik sistem rolları silinə bilməz!'], JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+        $del = $pdo->prepare("DELETE FROM mdx_roles WHERE id = ?");
+        $del->execute([$roleRow['id']]);
+    }
+
+    echo json_encode(['status' => 'success', 'message' => 'Rol sistemdən silindi'], JSON_UNESCAPED_UNICODE);
     exit();
 }
 

@@ -14,7 +14,8 @@ export default function Header() {
     setProfileModalOpen,
     userNotifications,
     setActiveProfileTab,
-    homeContent
+    homeContent,
+    canAccessAdmin
   } = useApp();
 
   const logoUrl = homeContent?.navbar?.logoUrl;
@@ -79,8 +80,8 @@ export default function Header() {
         {/* RIGHT ACTION CONTROLS */}
         <div className="flex items-center space-x-3 sm:space-x-4 shrink-0">
           
-          {/* Admin Panel Quick Access (Only for Admin) */}
-          {currentUser?.role === 'Admin' && (
+          {/* Admin Panel Quick Access (For Admin & Authorized RBAC Roles) */}
+          {(currentUser?.role === 'Admin' || canAccessAdmin?.(currentUser)) && (
             <button
               onClick={() => setAdminModalOpen(true)}
               className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-secondary/30 bg-secondary/5 text-secondary hover:bg-secondary/15 text-xs font-semibold whitespace-nowrap transition-colors"
@@ -217,7 +218,7 @@ export default function Header() {
               </a>
             ))}
           </nav>
-          {currentUser?.role === 'Admin' && (
+          {(currentUser?.role === 'Admin' || canAccessAdmin?.(currentUser)) && (
             <div className="pt-2 border-t border-outline-variant flex items-center justify-between">
               <button
                 onClick={() => { setAdminModalOpen(true); setMobileMenuOpen(false); }}
