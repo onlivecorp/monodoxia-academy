@@ -26,6 +26,8 @@ const INITIAL_SETTINGS = {
   subtitle: "Fərdi İnkişaf və Psixologiya Mərkəzi",
   currency: "AZN (₼)",
   defaultLang: "az",
+  contactEmail: "contact@monodoxia.academy",
+  contactPhone: "+994 (12) 490 88 00",
   showSafetyBanner: true,
   safetyText: "Monodoxia Academy təhsil, fərdi inkişaf və kouçinq platformasıdır. Təqdim edilən proqramlar və materiallar tibbi, psixiatrik və ya kliniki diaqnostika və müalicəni əvəz etmir.",
   maintenanceMode: false,
@@ -448,6 +450,16 @@ export function AppProvider({ children }) {
               }
               mappedSettings[s.key_name] = val;
             });
+            const resolvedEmail = mappedSettings.contactEmail || mappedSettings.contact_email;
+            if (resolvedEmail) {
+              mappedSettings.contactEmail = resolvedEmail;
+              mappedSettings.contact_email = resolvedEmail;
+            }
+            const resolvedPhone = mappedSettings.contactPhone || mappedSettings.contact_phone;
+            if (resolvedPhone) {
+              mappedSettings.contactPhone = resolvedPhone;
+              mappedSettings.contact_phone = resolvedPhone;
+            }
             setPlatformSettings(prev => ({ ...prev, ...mappedSettings }));
           }
         }
@@ -1232,6 +1244,21 @@ export function AppProvider({ children }) {
   const updatePlatformSettings = (newSettings) => {
     setPlatformSettings(prev => {
       const merged = { ...prev, ...newSettings };
+      if (newSettings.contactEmail !== undefined) {
+        merged.contact_email = newSettings.contactEmail;
+      }
+      if (newSettings.contactPhone !== undefined) {
+        merged.contact_phone = newSettings.contactPhone;
+      }
+      if (newSettings.contact_email !== undefined && !newSettings.contactEmail) {
+        merged.contactEmail = newSettings.contact_email;
+      }
+      if (newSettings.contact_phone !== undefined && !newSettings.contactPhone) {
+        merged.contactPhone = newSettings.contact_phone;
+      }
+      try {
+        localStorage.setItem('monodoxia_admin_settings', JSON.stringify(merged));
+      } catch (e) {}
       fetch('/api.php?action=save_settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

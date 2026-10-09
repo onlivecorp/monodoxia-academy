@@ -6,6 +6,9 @@ import { getTranslationStatus, copyFromDefaultLanguage } from '../../i18n/locali
 import AdminApplicationsTab from './AdminApplicationsTab';
 import AdminRegistrationsTab from './AdminRegistrationsTab';
 import AdminCategoriesTab from './AdminCategoriesTab';
+import AdminComingSoonTab from './AdminComingSoonTab';
+import AdminMaintenanceTab from './AdminMaintenanceTab';
+import AdminStaticTranslationsTab from './AdminStaticTranslationsTab';
 
 export default function AdminModal() {
   const {
@@ -85,9 +88,28 @@ export default function AdminModal() {
   const [communityTransOpen, setCommunityTransOpen] = useState(false);
 
   // SQL Database state
-  const [dbForm, setDbForm] = useState(sqlConfig);
+  const defaultSql = {
+    engine: "MySQL / MariaDB (cPanel / DirectAdmin / Plesk)",
+    host: "localhost",
+    port: "3306",
+    database: "monodoxia_academy_db",
+    username: "monodoxia_user",
+    password: "",
+    charset: "utf8mb4_unicode_ci",
+    ssl: false,
+    tablePrefix: "mdx_",
+    status: "Qoşulub",
+    lastTested: new Date().toLocaleTimeString('az-AZ')
+  };
+  const [dbForm, setDbForm] = useState(() => ({ ...defaultSql, ...(sqlConfig || {}) }));
   const [showPassword, setShowPassword] = useState(false);
   const [isMigrating, setIsMigrating] = useState(false);
+
+  useEffect(() => {
+    if (sqlConfig) {
+      setDbForm(prev => ({ ...defaultSql, ...prev, ...sqlConfig }));
+    }
+  }, [sqlConfig]);
 
   // Search & Filter States
   const [userSearch, setUserSearch] = useState('');
@@ -157,8 +179,10 @@ export default function AdminModal() {
     setSettingsForm(platformSettings);
   }, [platformSettings]);
 
-  // CMS State – block editors
+  // CMS State – block editors & multilingual toolbar
   const [cmsBlock, setCmsBlock] = useState('navbar');
+  const [cmsLang, setCmsLang] = useState('az');
+  const [cmsShowAllLangs, setCmsShowAllLangs] = useState(false);
   const [cmsNavbar, setCmsNavbar] = useState(() => ({ ...(homeContent?.navbar || {}) }));
   const [cmsHero, setCmsHero] = useState(() => ({ ...(homeContent?.hero || {}) }));
   const [cmsAbout, setCmsAbout] = useState(() => ({ ...(homeContent?.about || {}) }));
@@ -172,6 +196,23 @@ export default function AdminModal() {
   const [cmsNewsletter, setCmsNewsletter] = useState(() => ({ ...(homeContent?.newsletter || {}) }));
   const [cmsFooter, setCmsFooter] = useState(() => ({ ...(homeContent?.footer || {}) }));
   const [editingCoach, setEditingCoach] = useState(null);
+
+  useEffect(() => {
+    if (homeContent) {
+      setCmsNavbar({ ...(homeContent.navbar || {}) });
+      setCmsHero({ ...(homeContent.hero || {}) });
+      setCmsAbout({ ...(homeContent.about || {}) });
+      setCmsAreas({ ...(homeContent.areas || {}) });
+      setCmsAcademy({ ...(homeContent.academy || {}) });
+      setCmsClub({ ...(homeContent.club || {}) });
+      setCmsCoaches({ ...(homeContent.coaches || {}) });
+      setCmsCommunity({ ...(homeContent.community || {}) });
+      setCmsTestimonials({ ...(homeContent.testimonials || {}) });
+      setCmsFaq({ ...(homeContent.faq || {}) });
+      setCmsNewsletter({ ...(homeContent.newsletter || {}) });
+      setCmsFooter({ ...(homeContent.footer || {}) });
+    }
+  }, [homeContent]);
   // CMS new testimonial / faq / coach forms
   const [newTestimonialQuote, setNewTestimonialQuote] = useState('');
   const [newTestimonialAuthor, setNewTestimonialAuthor] = useState('');
@@ -533,6 +574,30 @@ export default function AdminModal() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            {/* Quick access to Texniki Qulluq Ekranı */}
+            <button
+              type="button"
+              onClick={() => setActiveTab('maintenance')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '5px 12px',
+                background: platformSettings?.maintenanceMode ? '#fef3c7' : '#f8fafc',
+                border: platformSettings?.maintenanceMode ? '1px solid #fde68a' : '1px solid #e2e8f0',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '11px',
+                fontWeight: 700,
+                color: platformSettings?.maintenanceMode ? '#b45309' : '#334155',
+                transition: 'all 0.15s ease'
+              }}
+              title="Texniki Qulluq Ekranı Tənzimləmələri"
+            >
+              <span className="material-symbols-outlined" style={{fontSize:'16px',color:'#b45309'}}>construction</span>
+              <span>Texniki Qulluq Ekranı</span>
+            </button>
+
             {/* Live indicator */}
             <div style={{display:'flex',alignItems:'center',gap:'6px',padding:'4px 10px',background:'#dcfce7',border:'1px solid #bbf7d0',borderRadius:'100px'}}>
               <div className="admin-live-dot" />
@@ -585,19 +650,36 @@ export default function AdminModal() {
               </button>
             ))}
             <div style={{fontSize:'10px',textTransform:'uppercase',letterSpacing:'0.08em',color:'#94a3b8',fontWeight:700,padding:'12px 12px 4px'}}>
-              Sistem
+              Tərcümələr (i18n)
             </div>
             {[
-              { id: 'database', icon: 'database', label: 'SQL Bazası' },
-              { id: 'content', icon: 'edit_document', label: 'Məzmun (CMS)' },
-              { id: 'translations', icon: 'translate', label: 'i18n & Dillər' },
-              { id: 'settings', icon: 'settings', label: 'Parametrlər' },
+              { id: 'static_translations', icon: 'spellcheck', label: 'Statik Çevrilər (UI)' },
+              { id: 'translations', icon: 'translate', label: 'Dinamik Məzmun Çevriləri' },
             ].map(tab => (
               <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`admin-nav-item ${activeTab===tab.id?'active':''}` }>
                 <span className="material-symbols-outlined" style={{fontSize:'17px',flexShrink:0,color:activeTab===tab.id?'#b45309':'#64748b'}}>{tab.icon}</span>
                 <span>{tab.label}</span>
               </button>
             ))}
+            <div style={{fontSize:'10px',textTransform:'uppercase',letterSpacing:'0.08em',color:'#94a3b8',fontWeight:700,padding:'12px 12px 4px'}}>
+              Sistem & Rejimlər
+            </div>
+            {[
+              { id: 'maintenance', icon: 'construction', label: 'Texniki Qulluq Ekranı' },
+              { id: 'content', icon: 'edit_document', label: 'Məzmun (CMS)' },
+              { id: 'database', icon: 'database', label: 'SQL Bazası' },
+              { id: 'settings', icon: 'settings', label: 'Ümumi Parametrlər' },
+            ].map(tab => {
+              const isTabActive = tab.id === 'maintenance' 
+                ? (activeTab === 'maintenance' || activeTab === 'coming_soon')
+                : activeTab === tab.id;
+              return (
+                <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`admin-nav-item ${isTabActive ? 'active' : ''}`}>
+                  <span className="material-symbols-outlined" style={{fontSize:'17px',flexShrink:0,color:isTabActive ? '#b45309' : '#64748b'}}>{tab.icon}</span>
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
             {/* Sidebar footer */}
             <div style={{marginTop:'auto',padding:'12px',borderTop:'1px solid #e2e8f0'}}>
               <div style={{fontSize:'11px',color:'#94a3b8',textAlign:'center'}}>v2.0 · Monodoxia Platform</div>
@@ -678,12 +760,30 @@ export default function AdminModal() {
                   <div className="admin-card">
                     <div style={{fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.08em',fontWeight:700,color:'#64748b',marginBottom:'14px'}}>Sistem Statusu</div>
                     {[
-                      {label:'Etik Qeyri-Klinik Bildiriş',value:platformSettings.showSafetyBanner?'AKTİV':'DEAKTİV',ok:platformSettings.showSafetyBanner},
-                      {label:'Yeni Qeydiyyat Qəbulu',value:'AÇIQ',ok:true},
-                      {label:'Texniki Qulluq Rejimi',value:platformSettings.maintenanceMode?'AKTİV':'SÖNDÜRÜLÜB',ok:!platformSettings.maintenanceMode},
+                      {label:'Etik Qeyri-Klinik Bildiriş',value:platformSettings.showSafetyBanner?'AKTİV':'DEAKTİV',ok:platformSettings.showSafetyBanner,action:()=>setActiveTab('settings')},
+                      {label:'Yeni Qeydiyyat Qəbulu',value:'AÇIQ',ok:true,action:()=>setActiveTab('settings')},
+                      {label:'Texniki Qulluq Rejimi (Coming Soon)',value:platformSettings.maintenanceMode?'AKTİV':'SÖNDÜRÜLÜB',ok:!platformSettings.maintenanceMode,action:()=>setActiveTab('maintenance'),highlight:true},
                     ].map((row,i) => (
-                      <div key={i} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'9px 0',borderBottom: i<2 ? '1px solid #f1f5f9' : 'none'}}>
-                        <span style={{fontSize:'12px',color:'#334155'}}>{row.label}</span>
+                      <div
+                        key={i}
+                        onClick={row.action}
+                        style={{
+                          display:'flex',
+                          alignItems:'center',
+                          justifyContent:'space-between',
+                          padding:'9px 8px',
+                          borderRadius:'6px',
+                          cursor:row.action ? 'pointer' : 'default',
+                          background: row.highlight ? '#fffbeb' : 'transparent',
+                          borderBottom: i<2 ? '1px solid #f1f5f9' : 'none',
+                          transition: 'background 0.15s ease'
+                        }}
+                        title={row.action ? 'Tənzimləmək üçün klikləyin' : ''}
+                      >
+                        <span style={{fontSize:'12px',color:'#334155',display:'flex',alignItems:'center',gap:'6px'}}>
+                          {row.label}
+                          {row.action && <span className="material-symbols-outlined" style={{fontSize:'13px',color:'#b45309'}}>arrow_forward</span>}
+                        </span>
                         <span className={row.ok?'admin-badge-green':'admin-badge-red'}>{row.value}</span>
                       </div>
                     ))}
@@ -2288,13 +2388,13 @@ export default function AdminModal() {
                     <div className="admin-live-dot" style={{width:'10px',height:'10px'}} />
                     <div>
                       <div style={{fontSize:'13px',fontWeight:700,color:'#0f172a',display:'flex',alignItems:'center',gap:'8px'}}>
-                        <span>Status: <strong style={{color:'#15803d'}}>{sqlConfig.status}</strong></span>
+                        <span>Status: <strong style={{color:'#15803d'}}>{sqlConfig?.status || dbForm?.status || 'Qoşulub'}</strong></span>
                         <span className="admin-badge-gold">
-                          {dbForm.engine.split(' ')[0]} 8.0+
+                          {(dbForm?.engine || 'MySQL').split(' ')[0]} 8.0+
                         </span>
                       </div>
                       <div style={{fontSize:'11px',color:'#64748b',marginTop:'2px'}}>
-                        Server: <strong style={{color:'#0f172a',fontFamily:'monospace'}}>{dbForm.host}:{dbForm.port}</strong> • Baza: <strong style={{color:'#0f172a',fontFamily:'monospace'}}>{dbForm.database}</strong> • Son yoxlama: {sqlConfig.lastTested}
+                        Server: <strong style={{color:'#0f172a',fontFamily:'monospace'}}>{dbForm?.host || 'localhost'}:{dbForm?.port || '3306'}</strong> • Baza: <strong style={{color:'#0f172a',fontFamily:'monospace'}}>{dbForm?.database || 'monodoxia_db'}</strong> • Son yoxlama: {sqlConfig?.lastTested || dbForm?.lastTested || 'İndi'}
                       </div>
                     </div>
                   </div>
@@ -2526,14 +2626,14 @@ export default function AdminModal() {
                   </h5>
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(180px, 1fr))',gap:'10px'}}>
                     {[
-                      { name: `${dbForm.tablePrefix}users`, count: `${usersList.length} sətir`, desc: 'Tələbələr, rollar, icazələr' },
-                      { name: `${dbForm.tablePrefix}courses`, count: `${coursesList.length} sətir`, desc: 'Akademiya kursları, qiymətlər' },
-                      { name: `${dbForm.tablePrefix}applications`, count: `${(applicationsList || []).length} sətir`, desc: 'Kurs və tədbir müraciətləri' },
-                      { name: `${dbForm.tablePrefix}form_fields`, count: `${(formFieldsList || []).length} sətir`, desc: 'Dinamik müraciət sahələri' },
-                      { name: `${dbForm.tablePrefix}notifications`, count: `${(userNotifications || []).length} sətir`, desc: 'Sistem bildirişləri' },
-                      { name: `${dbForm.tablePrefix}club_tiers`, count: `${clubTiersList.length} sətir`, desc: 'Rezidentlik paketləri' },
-                      { name: `${dbForm.tablePrefix}events`, count: `${eventsList.length} sətir`, desc: 'Vebinarlar və qeydiyyatlar' },
-                      { name: `${dbForm.tablePrefix}community_posts`, count: `${communityTopics.length} sətir`, desc: 'İcma mövzuları və şərhlər' },
+                      { name: `${dbForm?.tablePrefix || 'mdx_'}users`, count: `${(usersList || []).length} sətir`, desc: 'Tələbələr, rollar, icazələr' },
+                      { name: `${dbForm?.tablePrefix || 'mdx_'}courses`, count: `${(coursesList || []).length} sətir`, desc: 'Akademiya kursları, qiymətlər' },
+                      { name: `${dbForm?.tablePrefix || 'mdx_'}applications`, count: `${(applicationsList || []).length} sətir`, desc: 'Kurs və tədbir müraciətləri' },
+                      { name: `${dbForm?.tablePrefix || 'mdx_'}categories`, count: `${(categoriesList || []).length} sətir`, desc: 'Kurs və məqalə kateqoriyaları' },
+                      { name: `${dbForm?.tablePrefix || 'mdx_'}testimonials`, count: `${(testimonialsList || []).length} sətir`, desc: 'Müştəri və tələbə rəyləri' },
+                      { name: `${dbForm?.tablePrefix || 'mdx_'}club_tiers`, count: `${(clubTiersList || []).length} sətir`, desc: 'Rezidentlik paketləri' },
+                      { name: `${dbForm?.tablePrefix || 'mdx_'}events`, count: `${(eventsList || []).length} sətir`, desc: 'Vebinarlar və qeydiyyatlar' },
+                      { name: `${dbForm?.tablePrefix || 'mdx_'}community_posts`, count: `${(communityTopics || []).length} sətir`, desc: 'İcma mövzuları və şərhlər' },
                     ].map(table => (
                       <div key={table.name} className="admin-card" style={{padding:'10px 12px'}}>
                         <div style={{fontFamily:'monospace',fontWeight:700,color:'#0f172a',display:'flex',alignItems:'center',gap:'6px',fontSize:'11px'}}>
@@ -2549,12 +2649,18 @@ export default function AdminModal() {
               </div>
             )}
 
-            {/* 7. SETTINGS TAB */}
+            {/* TAMİR / COMING SOON TAB */}
+            {(activeTab === 'maintenance' || activeTab === 'coming_soon') && <AdminMaintenanceTab />}
+
+            {/* STATIC UI TRANSLATIONS TAB */}
+            {activeTab === 'static_translations' && <AdminStaticTranslationsTab />}
+
+            {/* GENERAL SETTINGS TAB */}
             {activeTab === 'settings' && (
               <div style={{display:'flex',flexDirection:'column',gap:'20px'}}>
                 <div>
-                  <h4 className="admin-section-title">Qlobal Platforma Parametrləri</h4>
-                  <p className="admin-section-subtitle">Platforma adı, etik bildiriş, valyuta və texniki qulluq rejimini idarə edin</p>
+                  <h4 className="admin-section-title">Ümumi Platforma Parametrləri</h4>
+                  <p className="admin-section-subtitle">Platformanın rəsmi başlığı, şüarı, standart valyuta və etik təhlükəsizlik bildirişini idarə edin</p>
                 </div>
 
                 <form onSubmit={handleSaveSettings} style={{display:'flex',flexDirection:'column',gap:'16px',maxWidth:'680px'}}>
@@ -2574,7 +2680,7 @@ export default function AdminModal() {
                       <input type="text" value={settingsForm.currency} onChange={e=>setSettingsForm({...settingsForm,currency:e.target.value})} className="admin-input" />
                     </div>
                     <div>
-                      <label className="admin-label">Standart Dil</label>
+                      <label className="admin-label">Standart Sistem Dili</label>
                       <select value={settingsForm.defaultLang} onChange={e=>setSettingsForm({...settingsForm,defaultLang:e.target.value})} className="admin-select">
                         {(supportedLangs||[]).map(l=>(<option key={l.code} value={l.code}>{l.flag} {l.name} ({l.code.toUpperCase()})</option>))}
                       </select>
@@ -2595,147 +2701,6 @@ export default function AdminModal() {
                     </div>
                     <label className="admin-label">Bildiriş Mətni</label>
                     <textarea rows={3} value={settingsForm.safetyText} onChange={e=>setSettingsForm({...settingsForm,safetyText:e.target.value})} className="admin-input" style={{resize:'vertical',minHeight:'70px'}} />
-                  </div>
-
-                  {/* Maintenance Mode */}
-                  <div className="admin-card" style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:'16px'}}>
-                    <div>
-                      <div style={{fontSize:'12px',fontWeight:600,color:'#0f172a'}}>Texniki Qulluq Rejimi</div>
-                      <div style={{fontSize:'11px',color:'#64748b',marginTop:'2px'}}>Aktiv edildikdə ziyarətçilərə texniki yenilənmə bildirişi göstərilir</div>
-                    </div>
-                    <label style={{display:'flex',alignItems:'center',gap:'8px',cursor:'pointer',flexShrink:0}}>
-                      <input type="checkbox" checked={settingsForm.maintenanceMode} onChange={e=>setSettingsForm({...settingsForm,maintenanceMode:e.target.checked})} style={{accentColor:'#c5a059',width:'16px',height:'16px'}} />
-                      <span style={{fontSize:'11px',color:settingsForm.maintenanceMode?'#b45309':'#64748b',fontWeight:700}}>{settingsForm.maintenanceMode?'AKTİV':'SÖNDÜRÜLÜB'}</span>
-                    </label>
-                  </div>
-
-                  {/* Maintenance Mode Screen Content & Translations */}
-                  <div className="admin-card" style={{display:'flex',flexDirection:'column',gap:'14px'}}>
-                    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',borderBottom:'1px solid #e2e8f0',paddingBottom:'10px'}}>
-                      <div>
-                        <div style={{fontSize:'12px',fontWeight:700,color:'#0f172a',display:'flex',alignItems:'center',gap:'6px'}}>
-                          <span className="material-symbols-outlined" style={{fontSize:'16px',color:'#b45309'}}>edit_note</span>
-                          Texniki Qulluq Ekranı Mətnləri və Tərcümələri
-                        </div>
-                        <div style={{fontSize:'11px',color:'#64748b',marginTop:'2px'}}>
-                          Texniki qulluq zamanı ziyarətçilərə görünəcək başlıq, açıqlama və status mətnlərini dillər üzrə redaktə edin
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Language Selector Tabs */}
-                    <div style={{display:'flex',gap:'6px',flexWrap:'wrap'}}>
-                      {[
-                        { code: 'az', label: '🇦🇿 Azərbaycan (AZ)' },
-                        { code: 'en', label: '🇬🇧 English (EN)' },
-                        { code: 'ru', label: '🇷🇺 Русский (RU)' },
-                        { code: 'tr', label: '🇹🇷 Türkçe (TR)' }
-                      ].map(l => {
-                        const isCur = maintTransLang === l.code;
-                        return (
-                          <button
-                            key={l.code}
-                            type="button"
-                            onClick={() => setMaintTransLang(l.code)}
-                            style={{
-                              padding: '5px 12px',
-                              borderRadius: '6px',
-                              fontSize: '11px',
-                              fontWeight: 700,
-                              cursor: 'pointer',
-                              border: isCur ? '1px solid #c5a059' : '1px solid #e2e8f0',
-                              background: isCur ? '#fffbeb' : '#ffffff',
-                              color: isCur ? '#b45309' : '#64748b',
-                              transition: 'all 0.15s ease'
-                            }}
-                          >
-                            {l.label}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {/* Current Lang Input Fields */}
-                    <div style={{display:'flex',flexDirection:'column',gap:'12px',background:'#f8fafc',padding:'14px',borderRadius:'8px',border:'1px solid #e2e8f0'}}>
-                      <div>
-                        <label className="admin-label" style={{fontSize:'11px',fontWeight:600}}>
-                          Ekran Başlığı ({maintTransLang.toUpperCase()})
-                        </label>
-                        <input
-                          type="text"
-                          value={
-                            maintTransLang === 'az'
-                              ? (settingsForm.maintenanceTranslations?.az?.title || settingsForm.maintenanceTitle || '')
-                              : (settingsForm.maintenanceTranslations?.[maintTransLang]?.title || '')
-                          }
-                          onChange={e => {
-                            const val = e.target.value;
-                            const curTrans = { ...(settingsForm.maintenanceTranslations || {}) };
-                            curTrans[maintTransLang] = { ...(curTrans[maintTransLang] || {}), title: val };
-                            setSettingsForm({
-                              ...settingsForm,
-                              ...(maintTransLang === 'az' ? { maintenanceTitle: val } : {}),
-                              maintenanceTranslations: curTrans
-                            });
-                          }}
-                          className="admin-input"
-                          placeholder="Məs: Planlaşdırılmış Texniki Təkmilləşdirmə"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="admin-label" style={{fontSize:'11px',fontWeight:600}}>
-                          Açıqlama Mətni ({maintTransLang.toUpperCase()})
-                        </label>
-                        <textarea
-                          rows={3}
-                          value={
-                            maintTransLang === 'az'
-                              ? (settingsForm.maintenanceTranslations?.az?.desc || settingsForm.maintenanceDesc || '')
-                              : (settingsForm.maintenanceTranslations?.[maintTransLang]?.desc || '')
-                          }
-                          onChange={e => {
-                            const val = e.target.value;
-                            const curTrans = { ...(settingsForm.maintenanceTranslations || {}) };
-                            curTrans[maintTransLang] = { ...(curTrans[maintTransLang] || {}), desc: val };
-                            setSettingsForm({
-                              ...settingsForm,
-                              ...(maintTransLang === 'az' ? { maintenanceDesc: val } : {}),
-                              maintenanceTranslations: curTrans
-                            });
-                          }}
-                          className="admin-input"
-                          style={{resize:'vertical',minHeight:'75px'}}
-                          placeholder="Ziyarətçilərə göstəriləcək ətraflı məlumat..."
-                        />
-                      </div>
-
-                      <div>
-                        <label className="admin-label" style={{fontSize:'11px',fontWeight:600}}>
-                          Müddət / Status Qeydi ({maintTransLang.toUpperCase()})
-                        </label>
-                        <input
-                          type="text"
-                          value={
-                            maintTransLang === 'az'
-                              ? (settingsForm.maintenanceTranslations?.az?.notice || settingsForm.maintenanceNotice || '')
-                              : (settingsForm.maintenanceTranslations?.[maintTransLang]?.notice || '')
-                          }
-                          onChange={e => {
-                            const val = e.target.value;
-                            const curTrans = { ...(settingsForm.maintenanceTranslations || {}) };
-                            curTrans[maintTransLang] = { ...(curTrans[maintTransLang] || {}), notice: val };
-                            setSettingsForm({
-                              ...settingsForm,
-                              ...(maintTransLang === 'az' ? { maintenanceNotice: val } : {}),
-                              maintenanceTranslations: curTrans
-                            });
-                          }}
-                          className="admin-input"
-                          placeholder="Məs: Tezliklə Aktiv"
-                        />
-                      </div>
-                    </div>
                   </div>
 
                   <div>
@@ -2765,17 +2730,305 @@ export default function AdminModal() {
                 { id: 'footer', label: 'Footer & Loqo' },
               ];
 
-              const Field = ({ label, value, onChange, multiline }) => (
-                <div style={{display:'flex',flexDirection:'column',gap:'4px'}}>
-                  <label className="admin-label">{label}</label>
-                  {multiline
-                    ? <textarea rows="3" value={value || ''} onChange={e => onChange(e.target.value)}
-                        className="admin-input" style={{resize:'vertical'}} />
-                    : <input type="text" value={value || ''} onChange={e => onChange(e.target.value)}
-                        className="admin-input" />
+              const langs = supportedLangs || [
+                { code: 'az', name: 'Azərbaycan', flag: '🇦🇿' },
+                { code: 'en', name: 'English', flag: '🇬🇧' },
+                { code: 'tr', name: 'Türkçe', flag: '🇹🇷' },
+                { code: 'ru', name: 'Русский', flag: '🇷🇺' }
+              ];
+
+              const Field = ({
+                label,
+                block,
+                setBlock,
+                fieldKey,
+                value,
+                onChange,
+                multiline,
+                rows = 3,
+                isArray = false,
+                placeholder,
+                helpText
+              }) => {
+                const [localExpanded, setLocalExpanded] = useState(false);
+                const isExpanded = cmsShowAllLangs || localExpanded;
+                const isBlockMode = Boolean(block && fieldKey && setBlock);
+
+                const getLangVal = (langCode) => {
+                  if (!isBlockMode) {
+                    return langCode === 'az' ? (value || '') : '';
                   }
-                </div>
-              );
+                  const trans = block.translations || {};
+                  let val;
+                  if (langCode === 'az') {
+                    val = trans.az?.[fieldKey] !== undefined
+                      ? trans.az[fieldKey]
+                      : (block[fieldKey] !== undefined ? block[fieldKey] : '');
+                  } else {
+                    val = trans[langCode]?.[fieldKey] !== undefined ? trans[langCode][fieldKey] : '';
+                  }
+                  if (isArray) {
+                    return Array.isArray(val) ? val.join('\n') : (val || '');
+                  }
+                  return val !== undefined && val !== null ? String(val) : '';
+                };
+
+                const handleLangChange = (langCode, rawVal) => {
+                  if (!isBlockMode) {
+                    if (onChange) onChange(rawVal);
+                    return;
+                  }
+                  const finalVal = isArray
+                    ? rawVal.split('\n')
+                    : rawVal;
+
+                  setBlock(prev => {
+                    const prevTrans = prev?.translations || {};
+                    if (langCode === 'az') {
+                      return {
+                        ...prev,
+                        [fieldKey]: finalVal,
+                        translations: {
+                          ...prevTrans,
+                          az: { ...(prevTrans.az || {}), [fieldKey]: finalVal }
+                        }
+                      };
+                    }
+                    return {
+                      ...prev,
+                      translations: {
+                        ...prevTrans,
+                        [langCode]: { ...(prevTrans[langCode] || {}), [fieldKey]: finalVal }
+                      }
+                    };
+                  });
+                };
+
+                const copyFromAz = (targetLang) => {
+                  const azVal = getLangVal('az');
+                  if (azVal) {
+                    handleLangChange(targetLang, azVal);
+                    showToast(`AZ mətni ${targetLang.toUpperCase()} sahəsinə kopyalandı`, 'info');
+                  }
+                };
+
+                const azValue = getLangVal('az');
+
+                return (
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '5px',
+                    padding: isExpanded ? '10px 12px' : '0px',
+                    background: isExpanded ? '#fafaf9' : 'transparent',
+                    borderRadius: isExpanded ? '8px' : '0px',
+                    border: isExpanded ? '1px solid #e2e8f0' : 'none',
+                    transition: 'all 0.2s'
+                  }}>
+                    {/* Header: Label + Indicators + Expand */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <label className="admin-label" style={{ margin: 0 }}>{label}</label>
+                        {!isExpanded && (
+                          <span style={{
+                            fontSize: '10px',
+                            fontWeight: 700,
+                            padding: '1px 5px',
+                            borderRadius: '4px',
+                            background: cmsLang === 'az' ? '#f1f5f9' : '#fef3c7',
+                            color: cmsLang === 'az' ? '#475569' : '#b45309',
+                            textTransform: 'uppercase'
+                          }}>
+                            {cmsLang}
+                          </span>
+                        )}
+                        {isArray && (
+                          <span style={{ fontSize: '10px', color: '#94a3b8' }}>(hər sətirdə bir maddə)</span>
+                        )}
+                      </div>
+
+                      {isBlockMode && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          {/* Lang Status Dots */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                            {langs.map(l => {
+                              const v = getLangVal(l.code);
+                              const hasVal = v && String(v).trim() !== '';
+                              return (
+                                <span
+                                  key={l.code}
+                                  title={`${l.name} (${l.code.toUpperCase()}): ${hasVal ? 'Doldurulub' : 'Boşdur'}`}
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '2px',
+                                    fontSize: '10px',
+                                    color: '#64748b'
+                                  }}
+                                >
+                                  <span style={{
+                                    width: '6px',
+                                    height: '6px',
+                                    borderRadius: '50%',
+                                    background: hasVal ? '#22c55e' : (l.code === 'az' ? '#f87171' : '#cbd5e1')
+                                  }} />
+                                  <span style={{ textTransform: 'uppercase', fontSize: '9px', fontWeight: 700 }}>{l.code}</span>
+                                </span>
+                              );
+                            })}
+                          </div>
+
+                          {/* Toggle All 4 Langs for this field */}
+                          <button
+                            type="button"
+                            onClick={() => setLocalExpanded(!localExpanded)}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '3px',
+                              padding: '2px 7px',
+                              fontSize: '10px',
+                              fontWeight: 600,
+                              borderRadius: '4px',
+                              border: '1px solid #e2e8f0',
+                              background: localExpanded ? '#fffbeb' : '#ffffff',
+                              color: localExpanded ? '#b45309' : '#64748b',
+                              cursor: 'pointer'
+                            }}
+                            title="Bu sahə üçün bütün 4 dili göstər"
+                          >
+                            <span className="material-symbols-outlined" style={{ fontSize: '13px' }}>
+                              {localExpanded ? 'expand_less' : 'translate'}
+                            </span>
+                            <span>{localExpanded ? 'Yığcam' : '🌐 4 Dil'}</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {helpText && <p style={{ fontSize: '11px', color: '#64748b', margin: 0 }}>{helpText}</p>}
+
+                    {/* Inputs View */}
+                    {isExpanded ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '2px' }}>
+                        {langs.map(l => {
+                          const val = getLangVal(l.code);
+                          const isAz = l.code === 'az';
+                          return (
+                            <div key={l.code} style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <span style={{ fontSize: '11px', fontWeight: 600, color: '#334155', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  <span>{l.flag}</span>
+                                  <span>{l.name}</span>
+                                  <span style={{ fontSize: '10px', color: '#94a3b8' }}>({l.code.toUpperCase()}{isAz ? ' - Əsas' : ''})</span>
+                                </span>
+                                {!isAz && azValue && !val && (
+                                  <button
+                                    type="button"
+                                    onClick={() => copyFromAz(l.code)}
+                                    style={{
+                                      padding: '1px 6px',
+                                      fontSize: '10px',
+                                      color: '#b45309',
+                                      background: '#fffbeb',
+                                      border: '1px solid #fef3c7',
+                                      borderRadius: '4px',
+                                      cursor: 'pointer'
+                                    }}
+                                  >
+                                    🇦🇿 AZ-dən kopyala
+                                  </button>
+                                )}
+                              </div>
+                              {multiline || isArray ? (
+                                <textarea
+                                  rows={rows}
+                                  value={val}
+                                  onChange={e => handleLangChange(l.code, e.target.value)}
+                                  className="admin-input"
+                                  style={{ resize: 'vertical' }}
+                                  placeholder={placeholder ? `${placeholder} (${l.code.toUpperCase()})` : `${label} (${l.name})...`}
+                                />
+                              ) : (
+                                <input
+                                  type="text"
+                                  value={val}
+                                  onChange={e => handleLangChange(l.code, e.target.value)}
+                                  className="admin-input"
+                                  placeholder={placeholder ? `${placeholder} (${l.code.toUpperCase()})` : `${label} (${l.name})...`}
+                                />
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        {/* Reference box if active cmsLang !== 'az' */}
+                        {cmsLang !== 'az' && isBlockMode && (
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            justifyContent: 'space-between',
+                            gap: '8px',
+                            padding: '6px 10px',
+                            background: '#f8fafc',
+                            border: '1px dashed #cbd5e1',
+                            borderRadius: '6px',
+                            fontSize: '11px',
+                            color: '#475569'
+                          }}>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <span style={{ fontWeight: 600, color: '#0f172a' }}>🇦🇿 Orijinal (AZ): </span>
+                              <span style={{ fontStyle: 'italic', color: azValue ? '#334155' : '#94a3b8' }}>
+                                {azValue ? (azValue.length > 130 ? azValue.slice(0, 130) + '...' : azValue) : '(Hələ doldurulmayıb)'}
+                              </span>
+                            </div>
+                            {azValue && !getLangVal(cmsLang) && (
+                              <button
+                                type="button"
+                                onClick={() => copyFromAz(cmsLang)}
+                                style={{
+                                  padding: '2px 8px',
+                                  fontSize: '10px',
+                                  fontWeight: 600,
+                                  color: '#b45309',
+                                  background: '#fffbeb',
+                                  border: '1px solid #fef3c7',
+                                  borderRadius: '4px',
+                                  cursor: 'pointer',
+                                  whiteSpace: 'nowrap'
+                                }}
+                              >
+                                Kopyala
+                              </button>
+                            )}
+                          </div>
+                        )}
+
+                        {multiline || isArray ? (
+                          <textarea
+                            rows={rows}
+                            value={getLangVal(cmsLang)}
+                            onChange={e => handleLangChange(cmsLang, e.target.value)}
+                            className="admin-input"
+                            style={{ resize: 'vertical' }}
+                            placeholder={placeholder || `${label} (${cmsLang.toUpperCase()})...`}
+                          />
+                        ) : (
+                          <input
+                            type="text"
+                            value={getLangVal(cmsLang)}
+                            onChange={e => handleLangChange(cmsLang, e.target.value)}
+                            className="admin-input"
+                            placeholder={placeholder || `${label} (${cmsLang.toUpperCase()})...`}
+                          />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              };
 
               const ImageField = ({ label, value, onChange }) => {
                 const handleFileChange = (e) => {
@@ -2842,15 +3095,94 @@ export default function AdminModal() {
               };
 
               return (
-                <div style={{display:'flex',flexDirection:'column',gap:'22px'}}>
+                <div style={{display:'flex',flexDirection:'column',gap:'20px'}}>
                   <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',flexWrap:'wrap',gap:'12px'}}>
                     <div>
                       <h4 className="admin-section-title">Səhifə Məzmunu İdarəetməsi (CMS)</h4>
-                      <p className="admin-section-subtitle">Ana səhifənin bütün bloklarındakı yazı, şəkil və məzmunları birbaşa idarə edin</p>
+                      <p className="admin-section-subtitle">Ana səhifənin bütün bloklarındakı mətnləri sistemin bütün dəstəklədiyi dillərdə idarə edin</p>
                     </div>
                     <span className="admin-count-badge">
-                      12 Aktiv Blok
+                      12 Aktiv Blok · Çoxdilli (i18n)
                     </span>
+                  </div>
+
+                  {/* Multilingual Control Toolbar */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '10px',
+                    padding: '12px 14px',
+                    background: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '10px',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#b45309' }}>translate</span>
+                        <span>Məzmun Redaktə Dili:</span>
+                      </span>
+                      {langs.map(l => (
+                        <button
+                          key={l.code}
+                          type="button"
+                          onClick={() => setCmsLang(l.code)}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '6px 12px',
+                            borderRadius: '6px',
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            border: cmsLang === l.code ? '1.5px solid #d4af37' : '1px solid #e2e8f0',
+                            background: cmsLang === l.code ? '#fffbeb' : '#f8fafc',
+                            color: cmsLang === l.code ? '#b45309' : '#475569',
+                            transition: 'all 0.15s'
+                          }}
+                        >
+                          <span>{l.flag}</span>
+                          <span>{l.name}</span>
+                          <span style={{
+                            fontSize: '10px',
+                            fontWeight: 700,
+                            padding: '1px 5px',
+                            borderRadius: '4px',
+                            background: cmsLang === l.code ? '#fef3c7' : '#e2e8f0',
+                            color: cmsLang === l.code ? '#92400e' : '#64748b'
+                          }}>
+                            {l.code.toUpperCase()}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setCmsShowAllLangs(prev => !prev)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '6px 12px',
+                        borderRadius: '6px',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        border: cmsShowAllLangs ? '1.5px solid #b45309' : '1px solid #cbd5e1',
+                        background: cmsShowAllLangs ? '#fef3c7' : '#ffffff',
+                        color: cmsShowAllLangs ? '#92400e' : '#475569'
+                      }}
+                      title="Bütün dilləri eyni zamanda göstər və ya tək dil rejiminə keç"
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
+                        {cmsShowAllLangs ? 'splitscreen' : 'view_agenda'}
+                      </span>
+                      <span>{cmsShowAllLangs ? 'Bütün dillər açıqdır' : 'Bütün dilləri eyni vaxtda göstər'}</span>
+                    </button>
                   </div>
 
                   {/* Block Switcher */}
@@ -2885,37 +3217,37 @@ export default function AdminModal() {
                   {cmsBlock === 'hero' && (
                     <div className="bg-surface-container-lowest p-5 rounded-lg border border-outline-variant/60 space-y-4">
                       <h5 className="text-sm font-semibold text-primary border-b border-outline-variant/40 pb-2">Hero Bölməsi</h5>
-                      <Field label="Üst Etiket" value={cmsHero.badge} onChange={v => setCmsHero(p => ({ ...p, badge: v }))} />
+                      <Field label="Üst Etiket" block={cmsHero} setBlock={setCmsHero} fieldKey="badge" />
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <Field label="Başlıq Sətir 1" value={cmsHero.title1} onChange={v => setCmsHero(p => ({ ...p, title1: v }))} />
-                        <Field label="Başlıq Sətir 2 (İtalik)" value={cmsHero.title2} onChange={v => setCmsHero(p => ({ ...p, title2: v }))} />
-                        <Field label="Başlıq Sətir 3" value={cmsHero.title3} onChange={v => setCmsHero(p => ({ ...p, title3: v }))} />
+                        <Field label="Başlıq Sətir 1" block={cmsHero} setBlock={setCmsHero} fieldKey="title1" />
+                        <Field label="Başlıq Sətir 2 (İtalik)" block={cmsHero} setBlock={setCmsHero} fieldKey="title2" />
+                        <Field label="Başlıq Sətir 3" block={cmsHero} setBlock={setCmsHero} fieldKey="title3" />
                       </div>
-                      <Field label="Təsvir (desc)" value={cmsHero.desc} onChange={v => setCmsHero(p => ({ ...p, desc: v }))} multiline />
+                      <Field label="Təsvir (desc)" block={cmsHero} setBlock={setCmsHero} fieldKey="desc" multiline />
                       <ImageField
                         label="Hero Sağ Əsas Şəkil"
                         value={cmsHero.image}
                         onChange={v => setCmsHero(p => ({ ...p, image: v }))}
                       />
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <Field label="Şəkil Üzərində Sitat" value={cmsHero.quote} onChange={v => setCmsHero(p => ({ ...p, quote: v }))} />
-                        <Field label="Sitat Alt Yazısı" value={cmsHero.quoteSub} onChange={v => setCmsHero(p => ({ ...p, quoteSub: v }))} />
+                        <Field label="Şəkil Üzərində Sitat" block={cmsHero} setBlock={setCmsHero} fieldKey="quote" />
+                        <Field label="Sitat Alt Yazısı" block={cmsHero} setBlock={setCmsHero} fieldKey="quoteSub" />
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <Field label="Əsas Düymə Mətni" value={cmsHero.btnPrimaryText} onChange={v => setCmsHero(p => ({ ...p, btnPrimaryText: v }))} />
-                        <Field label="Əsas Düymə Linki" value={cmsHero.btnPrimaryLink} onChange={v => setCmsHero(p => ({ ...p, btnPrimaryLink: v }))} />
+                        <Field label="Əsas Düymə Mətni" block={cmsHero} setBlock={setCmsHero} fieldKey="btnPrimaryText" />
+                        <Field label="Əsas Düymə Linki" block={cmsHero} setBlock={setCmsHero} fieldKey="btnPrimaryLink" />
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <Field label="İkinci Düymə Mətni" value={cmsHero.btnSecondaryText} onChange={v => setCmsHero(p => ({ ...p, btnSecondaryText: v }))} />
-                        <Field label="İkinci Düymə Linki" value={cmsHero.btnSecondaryLink} onChange={v => setCmsHero(p => ({ ...p, btnSecondaryLink: v }))} />
+                        <Field label="İkinci Düymə Mətni" block={cmsHero} setBlock={setCmsHero} fieldKey="btnSecondaryText" />
+                        <Field label="İkinci Düymə Linki" block={cmsHero} setBlock={setCmsHero} fieldKey="btnSecondaryLink" />
                       </div>
                       <div className="grid grid-cols-3 gap-3">
-                        <Field label="Stat 1 (12,000+)" value={cmsHero.stat1Num} onChange={v => setCmsHero(p => ({ ...p, stat1Num: v }))} />
-                        <Field label="Stat 1 Etiketi" value={cmsHero.stat1Label} onChange={v => setCmsHero(p => ({ ...p, stat1Label: v }))} />
-                        <Field label="Stat 2 (98%)" value={cmsHero.stat2Num} onChange={v => setCmsHero(p => ({ ...p, stat2Num: v }))} />
-                        <Field label="Stat 2 Etiketi" value={cmsHero.stat2Label} onChange={v => setCmsHero(p => ({ ...p, stat2Label: v }))} />
-                        <Field label="Stat 3 (ICF & PhD)" value={cmsHero.stat3Num} onChange={v => setCmsHero(p => ({ ...p, stat3Num: v }))} />
-                        <Field label="Stat 3 Etiketi" value={cmsHero.stat3Label} onChange={v => setCmsHero(p => ({ ...p, stat3Label: v }))} />
+                        <Field label="Stat 1 (12,000+)" block={cmsHero} setBlock={setCmsHero} fieldKey="stat1Num" />
+                        <Field label="Stat 1 Etiketi" block={cmsHero} setBlock={setCmsHero} fieldKey="stat1Label" />
+                        <Field label="Stat 2 (98%)" block={cmsHero} setBlock={setCmsHero} fieldKey="stat2Num" />
+                        <Field label="Stat 2 Etiketi" block={cmsHero} setBlock={setCmsHero} fieldKey="stat2Label" />
+                        <Field label="Stat 3 (ICF & PhD)" block={cmsHero} setBlock={setCmsHero} fieldKey="stat3Num" />
+                        <Field label="Stat 3 Etiketi" block={cmsHero} setBlock={setCmsHero} fieldKey="stat3Label" />
                       </div>
                       <button onClick={() => saveBlock('hero', cmsHero)} className="px-5 py-2 bg-primary-container text-surface-bright hover:bg-[#112240] rounded text-xs font-semibold tracking-wider transition-colors">Yadda Saxla</button>
                     </div>
@@ -2925,17 +3257,17 @@ export default function AdminModal() {
                   {cmsBlock === 'about' && (
                     <div className="bg-surface-container-lowest p-5 rounded-lg border border-outline-variant/60 space-y-4">
                       <h5 className="text-sm font-semibold text-primary border-b border-outline-variant/40 pb-2">Haqqımızda Bölməsi</h5>
-                      <Field label="Üst Etiket" value={cmsAbout.badge} onChange={v => setCmsAbout(p => ({ ...p, badge: v }))} />
-                      <Field label="Başlıq" value={cmsAbout.title} onChange={v => setCmsAbout(p => ({ ...p, title: v }))} />
-                      <Field label="Mətn (desc)" value={cmsAbout.desc} onChange={v => setCmsAbout(p => ({ ...p, desc: v }))} multiline />
+                      <Field label="Üst Etiket" block={cmsAbout} setBlock={setCmsAbout} fieldKey="badge" />
+                      <Field label="Başlıq" block={cmsAbout} setBlock={setCmsAbout} fieldKey="title" />
+                      <Field label="Mətn (desc)" block={cmsAbout} setBlock={setCmsAbout} fieldKey="desc" multiline />
                       <ImageField
                         label="Haqqımızda Şəkli"
                         value={cmsAbout.image}
                         onChange={v => setCmsAbout(p => ({ ...p, image: v }))}
                       />
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <Field label="Şəkil Sol Etiketi" value={cmsAbout.imageBadgeLeft} onChange={v => setCmsAbout(p => ({ ...p, imageBadgeLeft: v }))} />
-                        <Field label="Şəkil Sağ Etiketi" value={cmsAbout.imageBadgeRight} onChange={v => setCmsAbout(p => ({ ...p, imageBadgeRight: v }))} />
+                        <Field label="Şəkil Sol Etiketi" block={cmsAbout} setBlock={setCmsAbout} fieldKey="imageBadgeLeft" />
+                        <Field label="Şəkil Sağ Etiketi" block={cmsAbout} setBlock={setCmsAbout} fieldKey="imageBadgeRight" />
                       </div>
                       <button onClick={() => saveBlock('about', cmsAbout)} className="px-5 py-2 bg-primary-container text-surface-bright hover:bg-[#112240] rounded text-xs font-semibold tracking-wider transition-colors">Yadda Saxla</button>
                     </div>
@@ -2945,9 +3277,9 @@ export default function AdminModal() {
                   {cmsBlock === 'areas' && (
                     <div className="bg-surface-container-lowest p-5 rounded-lg border border-outline-variant/60 space-y-4">
                       <h5 className="text-sm font-semibold text-primary border-b border-outline-variant/40 pb-2">Sahələr Bölməsi</h5>
-                      <Field label="Üst Etiket" value={cmsAreas.badge} onChange={v => setCmsAreas(p => ({ ...p, badge: v }))} />
-                      <Field label="Başlıq" value={cmsAreas.title} onChange={v => setCmsAreas(p => ({ ...p, title: v }))} />
-                      <Field label="Təsvir (desc)" value={cmsAreas.desc} onChange={v => setCmsAreas(p => ({ ...p, desc: v }))} multiline />
+                      <Field label="Üst Etiket" block={cmsAreas} setBlock={setCmsAreas} fieldKey="badge" />
+                      <Field label="Başlıq" block={cmsAreas} setBlock={setCmsAreas} fieldKey="title" />
+                      <Field label="Təsvir (desc)" block={cmsAreas} setBlock={setCmsAreas} fieldKey="desc" multiline />
                       <button onClick={() => saveBlock('areas', cmsAreas)} className="px-5 py-2 bg-primary-container text-surface-bright hover:bg-[#112240] rounded text-xs font-semibold tracking-wider transition-colors">Yadda Saxla</button>
                     </div>
                   )}
@@ -2956,10 +3288,10 @@ export default function AdminModal() {
                   {cmsBlock === 'academy' && (
                     <div className="bg-surface-container-lowest p-5 rounded-lg border border-outline-variant/60 space-y-4">
                       <h5 className="text-sm font-semibold text-primary border-b border-outline-variant/40 pb-2">Akademiya Bölməsi</h5>
-                      <Field label="Üst Etiket" value={cmsAcademy.badge} onChange={v => setCmsAcademy(p => ({ ...p, badge: v }))} />
-                      <Field label="Başlıq" value={cmsAcademy.title} onChange={v => setCmsAcademy(p => ({ ...p, title: v }))} />
-                      <Field label="Təsvir (desc)" value={cmsAcademy.desc} onChange={v => setCmsAcademy(p => ({ ...p, desc: v }))} multiline />
-                      <Field label="Düymə Mətni" value={cmsAcademy.ctaText} onChange={v => setCmsAcademy(p => ({ ...p, ctaText: v }))} />
+                      <Field label="Üst Etiket" block={cmsAcademy} setBlock={setCmsAcademy} fieldKey="badge" />
+                      <Field label="Başlıq" block={cmsAcademy} setBlock={setCmsAcademy} fieldKey="title" />
+                      <Field label="Təsvir (desc)" block={cmsAcademy} setBlock={setCmsAcademy} fieldKey="desc" multiline />
+                      <Field label="Düymə Mətni" block={cmsAcademy} setBlock={setCmsAcademy} fieldKey="ctaText" />
                       <button onClick={() => saveBlock('academy', cmsAcademy)} className="px-5 py-2 bg-primary-container text-surface-bright hover:bg-[#112240] rounded text-xs font-semibold tracking-wider transition-colors">Yadda Saxla</button>
                     </div>
                   )}
@@ -2968,12 +3300,12 @@ export default function AdminModal() {
                   {cmsBlock === 'club' && (
                     <div className="bg-surface-container-lowest p-5 rounded-lg border border-outline-variant/60 space-y-4">
                       <h5 className="text-sm font-semibold text-primary border-b border-outline-variant/40 pb-2">Klub Bölməsi</h5>
-                      <Field label="Üst Etiket" value={cmsClub.badge} onChange={v => setCmsClub(p => ({ ...p, badge: v }))} />
-                      <Field label="Başlıq" value={cmsClub.title} onChange={v => setCmsClub(p => ({ ...p, title: v }))} />
-                      <Field label="Təsvir (desc)" value={cmsClub.desc} onChange={v => setCmsClub(p => ({ ...p, desc: v }))} multiline />
+                      <Field label="Üst Etiket" block={cmsClub} setBlock={setCmsClub} fieldKey="badge" />
+                      <Field label="Başlıq" block={cmsClub} setBlock={setCmsClub} fieldKey="title" />
+                      <Field label="Təsvir (desc)" block={cmsClub} setBlock={setCmsClub} fieldKey="desc" multiline />
                       <ImageField label="Klub Şəkli (opsional)" value={cmsClub.image} onChange={v => setCmsClub(p => ({ ...p, image: v }))} />
-                      <Field label="Düymə Mətni" value={cmsClub.ctaBtnText} onChange={v => setCmsClub(p => ({ ...p, ctaBtnText: v }))} />
-                      <Field label="Məhdudiyyət Xəbərdarlığı" value={cmsClub.limitedText} onChange={v => setCmsClub(p => ({ ...p, limitedText: v }))} />
+                      <Field label="Düymə Mətni" block={cmsClub} setBlock={setCmsClub} fieldKey="ctaBtnText" />
+                      <Field label="Məhdudiyyət Xəbərdarlığı" block={cmsClub} setBlock={setCmsClub} fieldKey="limitedText" />
                       <button onClick={() => saveBlock('club', cmsClub)} className="px-5 py-2 bg-primary-container text-surface-bright hover:bg-[#112240] rounded text-xs font-semibold tracking-wider transition-colors">Yadda Saxla</button>
                     </div>
                   )}
@@ -2983,9 +3315,9 @@ export default function AdminModal() {
                     <div className="space-y-4">
                       <div className="bg-surface-container-lowest p-5 rounded-lg border border-outline-variant/60 space-y-4">
                         <h5 className="text-sm font-semibold text-primary border-b border-outline-variant/40 pb-2">Koçlar Bölməsi – Başlıq</h5>
-                        <Field label="Üst Etiket" value={cmsCoaches.badge} onChange={v => setCmsCoaches(p => ({ ...p, badge: v }))} />
-                        <Field label="Başlıq" value={cmsCoaches.title} onChange={v => setCmsCoaches(p => ({ ...p, title: v }))} />
-                        <Field label="Təsvir" value={cmsCoaches.desc} onChange={v => setCmsCoaches(p => ({ ...p, desc: v }))} multiline />
+                        <Field label="Üst Etiket" block={cmsCoaches} setBlock={setCmsCoaches} fieldKey="badge" />
+                        <Field label="Başlıq" block={cmsCoaches} setBlock={setCmsCoaches} fieldKey="title" />
+                        <Field label="Təsvir" block={cmsCoaches} setBlock={setCmsCoaches} fieldKey="desc" multiline />
                         <button onClick={() => saveBlock('coaches', cmsCoaches)} className="px-5 py-2 bg-primary-container text-surface-bright hover:bg-[#112240] rounded text-xs font-semibold tracking-wider transition-colors">Yadda Saxla</button>
                       </div>
 
@@ -3000,11 +3332,11 @@ export default function AdminModal() {
                                     <span className="text-xs font-semibold text-secondary">Koçu Redaktə Et</span>
                                     <button onClick={() => setEditingCoach(null)} className="text-xs text-outline hover:text-primary">Ləğv et</button>
                                   </div>
-                                  <Field label="Ad Soyad" value={editingCoach.name} onChange={v => setEditingCoach(p => ({ ...p, name: v }))} />
-                                  <Field label="Vəzifə / Başlıq" value={editingCoach.title} onChange={v => setEditingCoach(p => ({ ...p, title: v }))} />
-                                  <Field label="Bio" value={editingCoach.bio} onChange={v => setEditingCoach(p => ({ ...p, bio: v }))} multiline />
+                                  <Field label="Ad Soyad" block={editingCoach} setBlock={setEditingCoach} fieldKey="name" />
+                                  <Field label="Vəzifə / Başlıq" block={editingCoach} setBlock={setEditingCoach} fieldKey="title" />
+                                  <Field label="Bio" block={editingCoach} setBlock={setEditingCoach} fieldKey="bio" multiline />
                                   <ImageField label="Profil Şəkli" value={editingCoach.image} onChange={v => setEditingCoach(p => ({ ...p, image: v }))} />
-                                  <Field label="İxtisaslar (vergüllə)" value={Array.isArray(editingCoach.specialties) ? editingCoach.specialties.join(', ') : (editingCoach.specialties || '')} onChange={v => setEditingCoach(p => ({ ...p, specialties: v }))} />
+                                  <Field label="İxtisaslar (vergüllə)" block={editingCoach} setBlock={setEditingCoach} fieldKey="specialties" />
                                   <div className="flex gap-2">
                                     <button
                                       onClick={() => {
@@ -3121,17 +3453,19 @@ export default function AdminModal() {
                   {cmsBlock === 'community' && (
                     <div className="bg-surface-container-lowest p-5 rounded-lg border border-outline-variant/60 space-y-4">
                       <h5 className="text-sm font-semibold text-primary border-b border-outline-variant/40 pb-2">İcma Bölməsi</h5>
-                      <Field label="Üst Etiket" value={cmsCommunity.badge} onChange={v => setCmsCommunity(p => ({ ...p, badge: v }))} />
-                      <Field label="Başlıq" value={cmsCommunity.title} onChange={v => setCmsCommunity(p => ({ ...p, title: v }))} />
-                      <Field label="Təsvir" value={cmsCommunity.desc} onChange={v => setCmsCommunity(p => ({ ...p, desc: v }))} multiline />
-                      <Field label="Düymə Mətni" value={cmsCommunity.newTopicBtnText} onChange={v => setCmsCommunity(p => ({ ...p, newTopicBtnText: v }))} />
-                      <div className="space-y-1">
-                        <label className="block text-[11px] text-outline uppercase tracking-widest font-semibold">Xüsusiyyət Siyahısı (hər sətirdə bir)</label>
-                        <textarea rows="4"
-                          value={(cmsCommunity.bullets || []).join('\n')}
-                          onChange={e => setCmsCommunity(p => ({ ...p, bullets: e.target.value.split('\n') }))}
-                          className="w-full px-3 py-1.5 bg-surface-container-lowest border border-outline-variant rounded text-xs text-primary resize-y" />
-                      </div>
+                      <Field label="Üst Etiket" block={cmsCommunity} setBlock={setCmsCommunity} fieldKey="badge" />
+                      <Field label="Başlıq" block={cmsCommunity} setBlock={setCmsCommunity} fieldKey="title" />
+                      <Field label="Təsvir" block={cmsCommunity} setBlock={setCmsCommunity} fieldKey="desc" multiline />
+                      <Field label="Düymə Mətni" block={cmsCommunity} setBlock={setCmsCommunity} fieldKey="newTopicBtnText" />
+                      <Field
+                        label="Xüsusiyyət Siyahısı"
+                        block={cmsCommunity}
+                        setBlock={setCmsCommunity}
+                        fieldKey="bullets"
+                        multiline
+                        isArray={true}
+                        rows={4}
+                      />
                       <button onClick={() => saveBlock('community', cmsCommunity)} className="px-5 py-2 bg-primary-container text-surface-bright hover:bg-[#112240] rounded text-xs font-semibold tracking-wider transition-colors">Yadda Saxla</button>
                     </div>
                   )}
@@ -3141,8 +3475,8 @@ export default function AdminModal() {
                     <div className="space-y-4">
                       <div className="bg-surface-container-lowest p-5 rounded-lg border border-outline-variant/60 space-y-4">
                         <h5 className="text-sm font-semibold text-primary border-b border-outline-variant/40 pb-2">Rəylər – Başlıq</h5>
-                        <Field label="Üst Etiket" value={cmsTestimonials.badge} onChange={v => setCmsTestimonials(p => ({ ...p, badge: v }))} />
-                        <Field label="Başlıq" value={cmsTestimonials.title} onChange={v => setCmsTestimonials(p => ({ ...p, title: v }))} />
+                        <Field label="Üst Etiket" block={cmsTestimonials} setBlock={setCmsTestimonials} fieldKey="badge" />
+                        <Field label="Başlıq" block={cmsTestimonials} setBlock={setCmsTestimonials} fieldKey="title" />
                         <button onClick={() => saveBlock('testimonials', cmsTestimonials)} className="px-5 py-2 bg-primary-container text-surface-bright hover:bg-[#112240] rounded text-xs font-semibold tracking-wider transition-colors">Yadda Saxla</button>
                       </div>
                       <div className="bg-surface-container-lowest p-5 rounded-lg border border-outline-variant/60 space-y-4">
@@ -3176,8 +3510,8 @@ export default function AdminModal() {
                     <div className="space-y-4">
                       <div className="bg-surface-container-lowest p-5 rounded-lg border border-outline-variant/60 space-y-4">
                         <h5 className="text-sm font-semibold text-primary border-b border-outline-variant/40 pb-2">FAQ – Başlıq</h5>
-                        <Field label="Üst Etiket" value={cmsFaq.badge} onChange={v => setCmsFaq(p => ({ ...p, badge: v }))} />
-                        <Field label="Başlıq" value={cmsFaq.title} onChange={v => setCmsFaq(p => ({ ...p, title: v }))} />
+                        <Field label="Üst Etiket" block={cmsFaq} setBlock={setCmsFaq} fieldKey="badge" />
+                        <Field label="Başlıq" block={cmsFaq} setBlock={setCmsFaq} fieldKey="title" />
                         <button onClick={() => saveBlock('faq', cmsFaq)} className="px-5 py-2 bg-primary-container text-surface-bright hover:bg-[#112240] rounded text-xs font-semibold tracking-wider transition-colors">Yadda Saxla</button>
                       </div>
                       <div className="bg-surface-container-lowest p-5 rounded-lg border border-outline-variant/60 space-y-4">
@@ -3206,12 +3540,12 @@ export default function AdminModal() {
                   {cmsBlock === 'newsletter' && (
                     <div className="bg-surface-container-lowest p-5 rounded-lg border border-outline-variant/60 space-y-4">
                       <h5 className="text-sm font-semibold text-primary border-b border-outline-variant/40 pb-2">Bülletenə Abunəlik Bölməsi</h5>
-                      <Field label="Üst Etiket" value={cmsNewsletter.badge} onChange={v => setCmsNewsletter(p => ({ ...p, badge: v }))} />
-                      <Field label="Başlıq" value={cmsNewsletter.title} onChange={v => setCmsNewsletter(p => ({ ...p, title: v }))} />
-                      <Field label="Təsvir" value={cmsNewsletter.desc} onChange={v => setCmsNewsletter(p => ({ ...p, desc: v }))} multiline />
-                      <Field label="Placeholder (email)" value={cmsNewsletter.placeholder} onChange={v => setCmsNewsletter(p => ({ ...p, placeholder: v }))} />
-                      <Field label="Düymə Mətni" value={cmsNewsletter.btnText} onChange={v => setCmsNewsletter(p => ({ ...p, btnText: v }))} />
-                      <Field label="Disclaimer mətni" value={cmsNewsletter.disclaimer} onChange={v => setCmsNewsletter(p => ({ ...p, disclaimer: v }))} />
+                      <Field label="Üst Etiket" block={cmsNewsletter} setBlock={setCmsNewsletter} fieldKey="badge" />
+                      <Field label="Başlıq" block={cmsNewsletter} setBlock={setCmsNewsletter} fieldKey="title" />
+                      <Field label="Təsvir" block={cmsNewsletter} setBlock={setCmsNewsletter} fieldKey="desc" multiline />
+                      <Field label="Placeholder (email)" block={cmsNewsletter} setBlock={setCmsNewsletter} fieldKey="placeholder" />
+                      <Field label="Düymə Mətni" block={cmsNewsletter} setBlock={setCmsNewsletter} fieldKey="btnText" />
+                      <Field label="Disclaimer mətni" block={cmsNewsletter} setBlock={setCmsNewsletter} fieldKey="disclaimer" />
                       <button onClick={() => saveBlock('newsletter', cmsNewsletter)} className="px-5 py-2 bg-primary-container text-surface-bright hover:bg-[#112240] rounded text-xs font-semibold tracking-wider transition-colors">Yadda Saxla</button>
                     </div>
                   )}
@@ -3221,11 +3555,11 @@ export default function AdminModal() {
                     <div className="bg-surface-container-lowest p-5 rounded-lg border border-outline-variant/60 space-y-4">
                       <h5 className="text-sm font-semibold text-primary border-b border-outline-variant/40 pb-2">Footer Bölməsi</h5>
                       <ImageField label="Footer Loqo Şəkli" value={cmsFooter.logoUrl} onChange={v => setCmsFooter(p => ({ ...p, logoUrl: v }))} />
-                      <Field label="Təsvir (desc)" value={cmsFooter.desc} onChange={v => setCmsFooter(p => ({ ...p, desc: v }))} multiline />
-                      <Field label="Ünvan" value={cmsFooter.address} onChange={v => setCmsFooter(p => ({ ...p, address: v }))} />
-                      <Field label="E-poçt" value={cmsFooter.email} onChange={v => setCmsFooter(p => ({ ...p, email: v }))} />
-                      <Field label="Telefon" value={cmsFooter.phone} onChange={v => setCmsFooter(p => ({ ...p, phone: v }))} />
-                      <Field label="Copyright mətni" value={cmsFooter.copyright} onChange={v => setCmsFooter(p => ({ ...p, copyright: v }))} />
+                      <Field label="Təsvir (desc)" block={cmsFooter} setBlock={setCmsFooter} fieldKey="desc" multiline />
+                      <Field label="Ünvan" block={cmsFooter} setBlock={setCmsFooter} fieldKey="address" />
+                      <Field label="E-poçt" block={cmsFooter} setBlock={setCmsFooter} fieldKey="email" />
+                      <Field label="Telefon" block={cmsFooter} setBlock={setCmsFooter} fieldKey="phone" />
+                      <Field label="Copyright mətni" block={cmsFooter} setBlock={setCmsFooter} fieldKey="copyright" />
                       <button onClick={() => saveBlock('footer', cmsFooter)} className="px-5 py-2 bg-primary-container text-surface-bright hover:bg-[#112240] rounded text-xs font-semibold tracking-wider transition-colors">Yadda Saxla</button>
                     </div>
                   )}
@@ -3367,9 +3701,9 @@ export default function AdminModal() {
                     <div>
                       <h4 className="admin-section-title" style={{display:'flex',alignItems:'center',gap:'8px'}}>
                         <span className="material-symbols-outlined" style={{color:'#b45309'}}>translate</span>
-                        <span>Mərkəzi Tərcümə və Çoxdilli İdarəetmə (i18n)</span>
+                        <span>Dinamik Məzmun Çevriləri (Kurslar, Tədbirlər, Klub və s.)</span>
                       </h4>
-                      <p className="admin-section-subtitle">Bütün dinamik kursları, tədbirləri, kouçları, tarifləri və rəyləri AZ, EN, TR, RU dillərinə tərcümə edin</p>
+                      <p className="admin-section-subtitle">Əlavə edilə və dəyişdirilə bilən dinamik kursları, tədbirləri, kouçları, tarifləri və rəyləri AZ, EN, TR, RU dillərinə tərcümə edin</p>
                     </div>
 
                     {/* Language management badges */}

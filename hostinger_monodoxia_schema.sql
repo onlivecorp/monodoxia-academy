@@ -31,6 +31,8 @@ INSERT INTO `mdx_settings` (`key_name`, `key_value`) VALUES
 ('subtitle', 'Fərdi İnkişaf və Psixologiya Mərkəzi'),
 ('currency', 'AZN (₼)'),
 ('default_lang', 'az'),
+('contactEmail', 'contact@monodoxia.academy'),
+('contactPhone', '+994 (12) 490 88 00'),
 ('safety_banner_active', '1'),
 ('safety_text', 'Monodoxia Academy təhsil, fərdi inkişaf və kouçinq platformasıdır. Təqdim edilən proqramlar və materiallar tibbi, psixiatrik və ya kliniki diaqnostika və müalicəni əvəz etmir.'),
 ('maintenance_mode', '0');

@@ -411,7 +411,35 @@ export function LanguageProvider({ children }) {
     localStorage.setItem('monodoxia_supported_langs', JSON.stringify(supportedLangs));
   }, [supportedLangs]);
 
+  // Custom static translations overrides (editable in Admin Panel)
+  const [customTranslations, setCustomTranslations] = useState(() => {
+    const saved = localStorage.getItem('monodoxia_static_translations');
+    return saved ? JSON.parse(saved) : {};
+  });
+
+  const updateStaticTranslation = (langCode, key, value) => {
+    setCustomTranslations(prev => {
+      const next = {
+        ...prev,
+        [langCode]: {
+          ...(prev[langCode] || {}),
+          [key]: value
+        }
+      };
+      localStorage.setItem('monodoxia_static_translations', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const saveAllStaticTranslations = (newTranslations) => {
+    setCustomTranslations(newTranslations);
+    localStorage.setItem('monodoxia_static_translations', JSON.stringify(newTranslations));
+  };
+
   const t = (key) => {
+    if (customTranslations[lang]?.[key] !== undefined && customTranslations[lang][key] !== '') {
+      return customTranslations[lang][key];
+    }
     const dict = translations[lang] || translations[DEFAULT_LANGUAGE];
     return dict?.[key] || translations[DEFAULT_LANGUAGE]?.[key] || key;
   };
@@ -429,6 +457,10 @@ export function LanguageProvider({ children }) {
       setLang: changeLang,
       changeLang,
       t,
+      rawTranslations: translations,
+      customTranslations,
+      updateStaticTranslation,
+      saveAllStaticTranslations,
       supportedLangs,
       setSupportedLangs,
       defaultLang: DEFAULT_LANGUAGE

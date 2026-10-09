@@ -5,8 +5,10 @@ import { useApp } from '../context/AppContext';
 
 export default function Footer() {
   const { currentLang, defaultLang, changeLang, supportedLangs, t } = useLanguage();
-  const { homeContent } = useApp();
+  const { homeContent, platformSettings } = useApp();
   const footer = homeContent?.footer || {};
+  const contactEmail = platformSettings?.contactEmail || footer.email || 'contact@monodoxia.academy';
+  const contactPhone = platformSettings?.contactPhone || footer.phone || '+994 (12) 490 88 00';
 
   return (
     <footer className="bg-primary-container text-on-primary-container border-t border-outline">
@@ -50,8 +52,8 @@ export default function Footer() {
               {getLocalized(footer, 'address', currentLang, defaultLang) || 'Nizami küçəsi 142, İntellektual İnkişaf Mərkəzi, Bakı, Azərbaycan'}
             </p>
             <p className="font-body-md text-body-md text-on-primary-container">
-              Əlaqə: {footer.email || 'contact@monodoxia.academy'}<br/>
-              Tel: {footer.phone || '+994 (12) 490 88 00'}
+              Əlaqə: <a href={`mailto:${contactEmail}`} className="hover:text-secondary-fixed transition-colors underline">{contactEmail}</a><br/>
+              Tel: <a href={`tel:${contactPhone.replace(/\s+/g, '')}`} className="hover:text-secondary-fixed transition-colors">{contactPhone}</a>
             </p>
           </div>
         </div>

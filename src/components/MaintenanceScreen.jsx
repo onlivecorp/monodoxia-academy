@@ -4,7 +4,8 @@ import { useApp } from '../context/AppContext';
 
 export default function MaintenanceScreen({ onAdminLogin }) {
   const { lang, setLang, supportedLangs } = useLanguage();
-  const { platformSettings } = useApp();
+  const { platformSettings, homeContent } = useApp();
+  const footer = homeContent?.footer || {};
 
   // Multi-language maintenance texts from platformSettings with defaults
   const trans = platformSettings?.maintenanceTranslations?.[lang] || {};
@@ -13,6 +14,8 @@ export default function MaintenanceScreen({ onAdminLogin }) {
   const title = trans.title || platformSettings?.maintenanceTitle || azTrans.title || "Planlaşdırılmış Texniki Təkmilləşdirmə";
   const desc = trans.desc || platformSettings?.maintenanceDesc || azTrans.desc || "Hörmətli ziyarətçi, Monodoxia Academy platformasında təhsil, analitika və təhlükəsizlik sistemlərini yeniləmək məqsədilə planlaşdırılmış texniki təkmilləşdirmə işləri aparılır. Sistem ən qısa zamanda yenidən tam fəaliyyətini bərpa edəcəkdir.";
   const notice = trans.notice || platformSettings?.maintenanceNotice || azTrans.notice || "Tezliklə Aktiv";
+  const contactEmail = platformSettings?.contactEmail || platformSettings?.contact_email || footer.email || "contact@monodoxia.academy";
+  const contactPhone = platformSettings?.contactPhone || platformSettings?.contact_phone || footer.phone || "+994 (12) 490 88 00";
 
   return (
     <div className="min-h-screen w-full flex flex-col justify-between items-center bg-[#fbf9f5] text-[#1e293b] relative overflow-hidden select-none px-4 py-8">
@@ -115,12 +118,12 @@ export default function MaintenanceScreen({ onAdminLogin }) {
         <div className="pt-5 border-t border-[#e8dfcf] flex flex-col sm:flex-row items-center justify-center gap-4 text-xs text-[#64748b]">
           <span className="flex items-center gap-1.5 font-medium">
             <span className="material-symbols-outlined text-[16px] text-[#8a6a1f]">mail</span>
-            Əlaqə: <a href="mailto:contact@monodoxia.academy" className="text-[#05224a] font-semibold hover:text-[#8a6a1f] transition-colors underline">contact@monodoxia.academy</a>
+            Əlaqə: <a href={`mailto:${contactEmail}`} className="text-[#05224a] font-semibold hover:text-[#8a6a1f] transition-colors underline">{contactEmail}</a>
           </span>
           <span className="hidden sm:inline text-[#cbd5e1]">•</span>
           <span className="flex items-center gap-1.5 font-medium">
             <span className="material-symbols-outlined text-[16px] text-[#8a6a1f]">phone</span>
-            +994 (12) 490 88 00
+            <a href={`tel:${contactPhone.replace(/\s+/g, '')}`} className="hover:text-[#05224a] transition-colors">{contactPhone}</a>
           </span>
         </div>
       </main>
