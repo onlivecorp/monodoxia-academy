@@ -4,6 +4,48 @@ import AdminInlineTranslator from './AdminInlineTranslator';
 import AdminConfirmModal from './AdminConfirmModal';
 import AdminPopupModal from './AdminPopupModal';
 
+// Predefined payment periods and automatic translations across supported languages
+export const PERIOD_OPTIONS = [
+  { value: '/ aylıq', label: '/ aylıq' },
+  { value: 'Ömürlük', label: 'Ömürlük (Birbaşa)' },
+  { value: '/ rüblük', label: '/ rüblük (3 aylıq)' },
+  { value: '/ illik', label: '/ illik' }
+];
+
+export const PERIOD_TRANSLATIONS = {
+  '/ aylıq': {
+    az: '/ aylıq',
+    en: '/ monthly',
+    tr: '/ aylık',
+    ru: '/ месяц'
+  },
+  'Ömürlük': {
+    az: 'Ömürlük',
+    en: 'Lifetime',
+    tr: 'Ömür boyu',
+    ru: 'Бессрочно'
+  },
+  '/ rüblük': {
+    az: '/ rüblük',
+    en: '/ quarterly',
+    tr: '/ 3 aylık',
+    ru: '/ квартал'
+  },
+  '/ illik': {
+    az: '/ illik',
+    en: '/ yearly',
+    tr: '/ yıllık',
+    ru: '/ в год'
+  }
+};
+
+export const getPeriodOptionsForLang = (lang) => [
+  { value: PERIOD_TRANSLATIONS['/ aylıq'][lang] || '/ aylıq', label: `${PERIOD_TRANSLATIONS['/ aylıq'][lang] || '/ aylıq'} (/ aylıq)` },
+  { value: PERIOD_TRANSLATIONS['Ömürlük'][lang] || 'Ömürlük', label: `${PERIOD_TRANSLATIONS['Ömürlük'][lang] || 'Ömürlük'} (Ömürlük)` },
+  { value: PERIOD_TRANSLATIONS['/ rüblük'][lang] || '/ rüblük', label: `${PERIOD_TRANSLATIONS['/ rüblük'][lang] || '/ rüblük'} (/ rüblük)` },
+  { value: PERIOD_TRANSLATIONS['/ illik'][lang] || '/ illik', label: `${PERIOD_TRANSLATIONS['/ illik'][lang] || '/ illik'} (/ illik)` }
+];
+
 export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
   const {
     clubTiersList = [],
@@ -24,13 +66,18 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
     }
   }, [initialCreate, onResetInitialCreate]);
 
-  // Add Tier State
+  // Add Tier State with automatic default period translations
   const [newTierName, setNewTierName] = useState('');
   const [newTierPrice, setNewTierPrice] = useState('65');
   const [newTierPeriod, setNewTierPeriod] = useState('/ aylıq');
   const [newTierFeatures, setNewTierFeatures] = useState('');
   const [newTierPopular, setNewTierPopular] = useState(false);
-  const [newTierTranslations, setNewTierTranslations] = useState({});
+  const [newTierTranslations, setNewTierTranslations] = useState(() => ({
+    az: { period: '/ aylıq' },
+    en: { period: '/ monthly' },
+    tr: { period: '/ aylık' },
+    ru: { period: '/ месяц' }
+  }));
   const [newTierTransOpen, setNewTierTransOpen] = useState(false);
   const [newTierTransLang, setNewTierTransLang] = useState('en');
 
@@ -50,25 +97,75 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
     });
   }, [clubTiersList, searchTerm]);
 
+  // Sync period translations when new tier period changes
+  const handleNewTierPeriodChange = (val) => {
+    setNewTierPeriod(val);
+    const autoTrans = PERIOD_TRANSLATIONS[val];
+    if (autoTrans) {
+      setNewTierTranslations(prev => ({
+        ...prev,
+        az: { ...(prev?.az || {}), period: autoTrans.az },
+        en: { ...(prev?.en || {}), period: autoTrans.en },
+        tr: { ...(prev?.tr || {}), period: autoTrans.tr },
+        ru: { ...(prev?.ru || {}), period: autoTrans.ru }
+      }));
+    }
+  };
+
+  // Sync period translations when editing tier period changes
+  const handleEditTierPeriodChange = (val) => {
+    const autoTrans = PERIOD_TRANSLATIONS[val];
+    setEditingTier(prev => {
+      if (!prev) return null;
+      const curTrans = prev.translations || {};
+      return {
+        ...prev,
+        period: val,
+        translations: {
+          ...curTrans,
+          az: { ...(curTrans.az || {}), period: autoTrans?.az || val },
+          en: { ...(curTrans.en || {}), period: autoTrans?.en || val },
+          tr: { ...(curTrans.tr || {}), period: autoTrans?.tr || val },
+          ru: { ...(curTrans.ru || {}), period: autoTrans?.ru || val }
+        }
+      };
+    });
+  };
+
   const handleCreateClubTier = (e) => {
     e.preventDefault();
     if (!newTierName.trim() || !newTierPrice.trim()) {
       showToast('Zəhmət olmasa paketin adını və məbləğini qeyd edin', 'warning');
       return;
     }
+    const autoTrans = PERIOD_TRANSLATIONS[newTierPeriod] || {};
+    const mergedTranslations = {
+      ...newTierTranslations,
+      az: { ...(newTierTranslations.az || {}), period: newTierTranslations.az?.period || autoTrans.az || newTierPeriod },
+      en: { ...(newTierTranslations.en || {}), period: newTierTranslations.en?.period || autoTrans.en || newTierPeriod },
+      tr: { ...(newTierTranslations.tr || {}), period: newTierTranslations.tr?.period || autoTrans.tr || newTierPeriod },
+      ru: { ...(newTierTranslations.ru || {}), period: newTierTranslations.ru?.period || autoTrans.ru || newTierPeriod }
+    };
+
     addClubTier({
       name: newTierName.trim(),
       price: newTierPrice.trim(),
       period: newTierPeriod,
       popular: newTierPopular,
       features: newTierFeatures,
-      translations: newTierTranslations
+      translations: mergedTranslations
     });
     setNewTierName('');
     setNewTierPrice('65');
+    setNewTierPeriod('/ aylıq');
     setNewTierFeatures('');
     setNewTierPopular(false);
-    setNewTierTranslations({});
+    setNewTierTranslations({
+      az: { period: '/ aylıq' },
+      en: { period: '/ monthly' },
+      tr: { period: '/ aylık' },
+      ru: { period: '/ месяц' }
+    });
     setNewTierTransOpen(false);
     setShowAddForm(false);
   };
@@ -164,13 +261,12 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
                 <label className="admin-label">Ödəniş Dövrü</label>
                 <select
                   value={editingTier.period}
-                  onChange={(e) => setEditingTier({ ...editingTier, period: e.target.value })}
+                  onChange={(e) => handleEditTierPeriodChange(e.target.value)}
                   className="admin-select"
                 >
-                  <option value="/ aylıq">/ aylıq</option>
-                  <option value="Ömürlük">Ömürlük (Birbaşa)</option>
-                  <option value="/ rüblük">/ rüblük (3 aylıq)</option>
-                  <option value="/ illik">/ illik</option>
+                  {PERIOD_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -210,7 +306,12 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
               fields={[
                 { key: 'name', label: 'Paketin Adı' },
                 { key: 'price', label: 'Qiymət (mətn / valyuta)' },
-                { key: 'period', label: 'Ödəniş Dövrü (mətn)' },
+                {
+                  key: 'period',
+                  label: 'Ödəniş Dövrü',
+                  type: 'select',
+                  options: (lang) => getPeriodOptionsForLang(lang)
+                },
                 { key: 'features', label: 'İmtiyazlar (sətirbəsətir)', type: 'textarea', isArray: true }
               ]}
               activeLang={editTierTransLang}
@@ -273,13 +374,12 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
               <label className="admin-label">Ödəniş Dövrü</label>
               <select
                 value={newTierPeriod}
-                onChange={(e) => setNewTierPeriod(e.target.value)}
+                onChange={(e) => handleNewTierPeriodChange(e.target.value)}
                 className="admin-select"
               >
-                <option value="/ aylıq">/ aylıq</option>
-                <option value="Ömürlük">Ömürlük (Birbaşa)</option>
-                <option value="/ rüblük">/ rüblük (3 aylıq)</option>
-                <option value="/ illik">/ illik</option>
+                {PERIOD_OPTIONS.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -325,7 +425,12 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
             fields={[
               { key: 'name', label: 'Paketin Adı' },
               { key: 'price', label: 'Qiymət (mətn / valyuta)' },
-              { key: 'period', label: 'Ödəniş Dövrü (mətn)' },
+              {
+                key: 'period',
+                label: 'Ödəniş Dövrü',
+                type: 'select',
+                options: (lang) => getPeriodOptionsForLang(lang)
+              },
               { key: 'features', label: 'İmtiyazlar (sətirbəsətir)', type: 'textarea', isArray: true }
             ]}
             activeLang={newTierTransLang}
@@ -432,10 +537,21 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px', paddingTop: '10px', borderTop: '1px solid #e2e8f0' }}>
                 <button
                   type="button"
-                  onClick={() => setEditingTier({
-                    ...t,
-                    features: Array.isArray(t.features) ? t.features.join('\n') : t.features
-                  })}
+                  onClick={() => {
+                    const curTrans = t.translations || {};
+                    const autoTrans = PERIOD_TRANSLATIONS[t.period] || {};
+                    setEditingTier({
+                      ...t,
+                      features: Array.isArray(t.features) ? t.features.join('\n') : t.features,
+                      translations: {
+                        ...curTrans,
+                        az: { ...(curTrans.az || {}), period: curTrans.az?.period || autoTrans.az || t.period },
+                        en: { ...(curTrans.en || {}), period: curTrans.en?.period || autoTrans.en || t.period },
+                        tr: { ...(curTrans.tr || {}), period: curTrans.tr?.period || autoTrans.tr || t.period },
+                        ru: { ...(curTrans.ru || {}), period: curTrans.ru?.period || autoTrans.ru || t.period }
+                      }
+                    });
+                  }}
                   className="admin-btn-edit"
                   title="Paketi redaktə et"
                 >

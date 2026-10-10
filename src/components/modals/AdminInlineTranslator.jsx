@@ -126,7 +126,24 @@ export default function AdminInlineTranslator({
                     {f.label} <span style={{ color: '#c5a059', textTransform: 'uppercase' }}>({activeLang})</span>
                     {f.isArray && <span style={{ fontSize: '10px', color: '#94a3b8', marginLeft: '6px', fontWeight: 'normal' }}>(hər sətirdə bir maddə)</span>}
                   </label>
-                  {f.type === 'textarea' ? (
+                  {f.type === 'select' ? (
+                    <select
+                      value={val}
+                      onChange={e => handleChange(activeLang, f.key, e.target.value)}
+                      className="admin-select"
+                    >
+                      <option value="">-- {f.label} ({activeLang.toUpperCase()}) seçin --</option>
+                      {(typeof f.options === 'function' ? f.options(activeLang) : (f.options || [])).map(opt => {
+                        const optVal = typeof opt === 'object' ? opt.value : opt;
+                        const optLabel = typeof opt === 'object' ? opt.label : opt;
+                        return (
+                          <option key={optVal} value={optVal}>
+                            {optLabel}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  ) : f.type === 'textarea' ? (
                     <textarea
                       rows={f.rows || (f.isArray ? 3 : 2)}
                       value={val}

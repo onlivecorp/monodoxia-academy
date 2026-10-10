@@ -3,6 +3,7 @@ import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { MultiLangEditor, LocalizedArrayField } from '../../i18n/TranslationComponents';
 import { getTranslationStatus, copyFromDefaultLanguage } from '../../i18n/localize';
+import { getPeriodOptionsForLang } from './AdminClubTab';
 
 export default function AdminTranslationsTab() {
   const {
@@ -71,14 +72,17 @@ export default function AdminTranslationsTab() {
     club: [
       { key: 'name', label: 'Tarifin Adı', required: true },
       { key: 'price', label: 'Qiymət (mətn / valyuta)' },
-      { key: 'period', label: 'Müddət (Məs: / aylıq)' },
+      {
+        key: 'period',
+        label: 'Ödəniş Dövrü',
+        type: 'select',
+        options: (lang) => getPeriodOptionsForLang(lang)
+      },
       { key: 'features', label: 'İmtiyazlar (sətirbəsətir)', type: 'textarea', isArray: true }
     ],
     events: [
       { key: 'title', label: 'Tədbir Başlığı', required: true },
       { key: 'desc', label: 'Tədbir Təsviri', type: 'textarea' },
-      { key: 'speaker', label: 'Spiker' },
-      { key: 'datetime', label: 'Tarix və Saat' },
       { key: 'typeBadge', label: 'Növ Nişanı (Məs: CANLI VEBİNAR)' }
     ],
     coaches: [

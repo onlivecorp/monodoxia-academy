@@ -87,6 +87,7 @@ export function LocalizedField({
   translations = {},
   onChange,
   type = 'text',
+  options,
   placeholder = '',
   required = false,
   hint = ''
@@ -103,7 +104,22 @@ export function LocalizedField({
         {label}
         {required && <span className="text-red-500 ml-0.5">*</span>}
       </label>
-      {type === 'textarea' ? (
+      {type === 'select' ? (
+        <select
+          value={value}
+          onChange={handleChange}
+          className="w-full px-3 py-2 bg-surface-container border border-outline-variant rounded text-sm text-on-surface focus:outline-none focus:border-secondary"
+        >
+          <option value="">-- {label} ({lang.toUpperCase()}) seçin --</option>
+          {(typeof options === 'function' ? options(lang) : (options || [])).map(opt => {
+            const optVal = typeof opt === 'object' ? opt.value : opt;
+            const optLabel = typeof opt === 'object' ? opt.label : opt;
+            return (
+              <option key={optVal} value={optVal}>{optLabel}</option>
+            );
+          })}
+        </select>
+      ) : type === 'textarea' ? (
         <textarea
           value={value}
           onChange={handleChange}
@@ -165,6 +181,7 @@ export function MultiLangEditor({
             translations={translations}
             onChange={onTranslationChange}
             type={f.type || 'text'}
+            options={f.options}
             placeholder={f.placeholder || ''}
             required={f.required || false}
             hint={f.hint || ''}

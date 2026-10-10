@@ -6,9 +6,56 @@ import AdminPopupModal from './AdminPopupModal';
 
 const ITEMS_PER_PAGE = 8;
 
+const AZ_MONTHS = [
+  'YANVAR', 'FEVRAL', 'MART', 'APREL', 'MAY', 'İYUN',
+  'İYUL', 'AVQUST', 'SENTYABR', 'OKTYABR', 'NOYABR', 'DEKABR'
+];
+
+function parseToDateTimeLocal(str) {
+  if (!str) return '';
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(str)) {
+    return str.substring(0, 16);
+  }
+  const monthMap = {
+    'yanvar': 0, 'fevral': 1, 'mart': 2, 'aprel': 3, 'may': 4, 'iyun': 5,
+    'iyul': 6, 'avqust': 7, 'sentyabr': 8, 'oktyabr': 9, 'oktabr': 9, 'noyabr': 10, 'dekabr': 11
+  };
+  const match = String(str).match(/(\d{1,2})\s+([A-Za-zƏəİiIıÖöÜüÇçŞşĞğ]+)(?:,?\s*(\d{4}))?,?\s*(\d{1,2}):(\d{2})/i);
+  if (match) {
+    const day = parseInt(match[1], 10);
+    const mStr = match[2].toLowerCase().replace(/i̇/g, 'i');
+    const month = monthMap[mStr] !== undefined ? monthMap[mStr] : 10;
+    const year = match[3] ? parseInt(match[3], 10) : new Date().getFullYear();
+    const hours = parseInt(match[4], 10);
+    const mins = parseInt(match[5], 10);
+    const pad = n => String(n).padStart(2, '0');
+    return `${year}-${pad(month + 1)}-${pad(day)}T${pad(hours)}:${pad(mins)}`;
+  }
+  const d = new Date(str);
+  if (!isNaN(d.getTime())) {
+    const pad = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+  return '';
+}
+
+function formatEventDateTime(datetimeLocalStr) {
+  if (!datetimeLocalStr) return '';
+  const d = new Date(datetimeLocalStr);
+  if (isNaN(d.getTime())) return datetimeLocalStr;
+  const day = d.getDate();
+  const month = AZ_MONTHS[d.getMonth()] || 'YANVAR';
+  const hours = String(d.getHours()).padStart(2, '0');
+  const mins = String(d.getMinutes()).padStart(2, '0');
+  return `${day} ${month}, ${hours}:${mins}`;
+}
+
 export default function AdminEventsTab() {
   const {
     eventsList = [],
+    usersList = [],
+    coachesList = [],
+    coursesList = [],
     addEvent,
     updateEvent,
     deleteEvent,
@@ -21,9 +68,77 @@ export default function AdminEventsTab() {
   const [currentPage, setCurrentPage] = useState(1);
   const [showAddForm, setShowAddForm] = useState(false);
 
+  // Users & Coaches Options for Speaker Selection
+  const speakerOptions = useMemo(() => {
+    const list = [];
+    const seen = new Set();
+
+    // 1. Users from usersList (coaches first, then others)
+    const coaches = (usersList || []).filter(u => u.role === 'Kouç' || u.role === 'Spiker');
+    const others = (usersList || []).filter(u => u.role !== 'Kouç' && u.role !== 'Spiker');
+
+    [...coaches, ...others].forEach(u => {
+      const name = (u.name || `${u.firstName || ''} ${u.lastName || ''}`).trim();
+      if (name && !seen.has(name)) {
+        seen.add(name);
+        list.push({
+          id: u.id || name,
+          name,
+          role: u.role || 'İstifadəçi',
+          email: u.email || ''
+        });
+      }
+    });
+
+    // 2. Coaches from coachesList
+    (coachesList || []).forEach(c => {
+      const name = (c.name || '').trim();
+      if (name && !seen.has(name)) {
+        seen.add(name);
+        list.push({
+          id: c.id || name,
+          name,
+          role: c.title || 'Kouç',
+          email: c.email || ''
+        });
+      }
+    });
+
+    // 3. Fallback: instructors from existing courses
+    (coursesList || []).forEach(c => {
+      const name = (c.instructor || '').trim();
+      if (name && !seen.has(name)) {
+        seen.add(name);
+        list.push({
+          id: `inst-${name}`,
+          name,
+          role: 'Kouç',
+          email: ''
+        });
+      }
+    });
+
+    // 4. Fallback: speakers from existing events
+    (eventsList || []).forEach(e => {
+      const name = (e.speaker || '').trim();
+      if (name && !seen.has(name)) {
+        seen.add(name);
+        list.push({
+          id: `speaker-${name}`,
+          name,
+          role: 'Spiker',
+          email: ''
+        });
+      }
+    });
+
+    return list;
+  }, [usersList, coachesList, coursesList, eventsList]);
+
   // Add Event State
   const [newEventTitle, setNewEventTitle] = useState('');
   const [newEventSpeaker, setNewEventSpeaker] = useState('Dr. Leyla Əliyeva');
+  const [newEventRawDate, setNewEventRawDate] = useState('');
   const [newEventDate, setNewEventDate] = useState('');
   const [newEventCapacity, setNewEventCapacity] = useState('100');
   const [newEventTypeBadge, setNewEventTypeBadge] = useState('VEBİNAR');
@@ -34,6 +149,7 @@ export default function AdminEventsTab() {
 
   // Edit Event State
   const [editingEvent, setEditingEvent] = useState(null);
+  const [editEventRawDate, setEditEventRawDate] = useState('');
   const [editEventTransLang, setEditEventTransLang] = useState('en');
   const [editEventTransOpen, setEditEventTransOpen] = useState(false);
 
@@ -59,6 +175,27 @@ export default function AdminEventsTab() {
     return filteredEvents.slice(start, start + ITEMS_PER_PAGE);
   }, [filteredEvents, currentPage]);
 
+  const handleOpenEdit = (eventItem) => {
+    setEditingEvent(eventItem);
+    const raw = eventItem.rawDatetime || parseToDateTimeLocal(eventItem.datetime) || '';
+    setEditEventRawDate(raw);
+  };
+
+  const handleNewEventDateChange = (val) => {
+    setNewEventRawDate(val);
+    setNewEventDate(formatEventDateTime(val));
+  };
+
+  const handleEditEventDateChange = (val) => {
+    setEditEventRawDate(val);
+    const formatted = formatEventDateTime(val);
+    setEditingEvent(prev => ({
+      ...prev,
+      datetime: formatted,
+      rawDatetime: val
+    }));
+  };
+
   const handleCreateEvent = (e) => {
     e.preventDefault();
     if (!newEventTitle.trim() || !newEventDate.trim()) {
@@ -67,14 +204,17 @@ export default function AdminEventsTab() {
     }
     addEvent({
       title: newEventTitle.trim(),
-      speaker: newEventSpeaker,
+      speaker: newEventSpeaker || 'Dr. Leyla Əliyeva',
       datetime: newEventDate.trim(),
-      capacity: newEventCapacity,
+      rawDatetime: newEventRawDate,
+      capacity: Number(newEventCapacity) || 100,
+      registered: 0,
       typeBadge: newEventTypeBadge,
       desc: newEventDesc || 'İnteraktiv masterklas və praktiki sessiya.',
       translations: newEventTranslations
     });
     setNewEventTitle('');
+    setNewEventRawDate('');
     setNewEventDate('');
     setNewEventDesc('');
     setNewEventTranslations({});
@@ -89,13 +229,15 @@ export default function AdminEventsTab() {
       title: editingEvent.title,
       speaker: editingEvent.speaker,
       datetime: editingEvent.datetime,
+      rawDatetime: editEventRawDate,
       capacity: Number(editingEvent.capacity) || 100,
-      registered: Number(editingEvent.registered) || 0,
+      registered: editingEvent.registered !== undefined ? Number(editingEvent.registered) : 0,
       typeBadge: editingEvent.typeBadge,
       desc: editingEvent.desc,
       translations: editingEvent.translations || {}
     });
     setEditingEvent(null);
+    setEditEventRawDate('');
   };
 
   const confirmDelete = () => {
@@ -143,7 +285,7 @@ export default function AdminEventsTab() {
         isOpen={Boolean(editingEvent)}
         title={editingEvent ? `Tədbiri Redaktə Et: "${editingEvent.title}"` : 'Tədbiri Redaktə Et'}
         icon="edit_calendar"
-        onClose={() => setEditingEvent(null)}
+        onClose={() => { setEditingEvent(null); setEditEventRawDate(''); }}
       >
         {editingEvent && (
           <form onSubmit={handleSaveEditEvent} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -166,34 +308,55 @@ export default function AdminEventsTab() {
                   className="admin-select"
                 >
                   <option value="VEBİNAR">VEBİNAR</option>
+                  <option value="CANLI VEBİNAR">CANLI VEBİNAR</option>
                   <option value="MASTERKLAS">MASTERKLAS</option>
                   <option value="CANLI SESSİYA">CANLI SESSİYA</option>
                   <option value="SEMİNAR">SEMİNAR</option>
+                  <option value="OFLAYN SEMİNAR">OFLAYN SEMİNAR</option>
                   <option value="MEDİTASİYA">MEDİTASİYA</option>
+                  <option value="MEDİTASİYA GECƏSİ">MEDİTASİYA GECƏSİ</option>
+                  {editingEvent.typeBadge && !['VEBİNAR', 'CANLI VEBİNAR', 'MASTERKLAS', 'CANLI SESSİYA', 'SEMİNAR', 'OFLAYN SEMİNAR', 'MEDİTASİYA', 'MEDİTASİYA GECƏSİ'].includes(editingEvent.typeBadge) && (
+                    <option value={editingEvent.typeBadge}>{editingEvent.typeBadge}</option>
+                  )}
                 </select>
               </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
-              <div style={{ gridColumn: 'span 2' }}>
+              <div>
                 <label className="admin-label">Tarix və Saat *</label>
                 <input
-                  type="text"
+                  type="datetime-local"
                   required
-                  value={editingEvent.datetime}
-                  onChange={(e) => setEditingEvent({ ...editingEvent, datetime: e.target.value })}
-                  placeholder="məsələn: 18 DEKABR, 20:00"
+                  value={editEventRawDate || parseToDateTimeLocal(editingEvent.datetime) || ''}
+                  onChange={(e) => handleEditEventDateChange(e.target.value)}
                   className="admin-input"
                 />
+                {editingEvent.datetime && (
+                  <span style={{ fontSize: '11px', color: '#059669', fontWeight: 600, display: 'inline-block', marginTop: '4px' }}>
+                    ✓ Format: {editingEvent.datetime}
+                  </span>
+                )}
               </div>
               <div>
                 <label className="admin-label">Spiker / Aparıcı</label>
-                <input
-                  type="text"
-                  value={editingEvent.speaker}
+                <select
+                  value={editingEvent.speaker || ''}
                   onChange={(e) => setEditingEvent({ ...editingEvent, speaker: e.target.value })}
-                  className="admin-input"
-                />
+                  className="admin-select"
+                >
+                  <option value="">-- İstifadəçi / Spiker Seçin --</option>
+                  {editingEvent.speaker && !speakerOptions.some(u => u.name === editingEvent.speaker) && (
+                    <option value={editingEvent.speaker}>
+                      {editingEvent.speaker} (Mövcud)
+                    </option>
+                  )}
+                  {speakerOptions.map(u => (
+                    <option key={u.id} value={u.name}>
+                      {u.name} {u.role ? `(${u.role})` : ''} {u.email ? `— ${u.email}` : ''}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="admin-label">Maksimum Yer (Limit)</label>
@@ -207,26 +370,15 @@ export default function AdminEventsTab() {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
-              <div>
-                <label className="admin-label">Qeydiyyatlı Sayı</label>
-                <input
-                  type="number"
-                  value={editingEvent.registered || 0}
-                  onChange={(e) => setEditingEvent({ ...editingEvent, registered: Number(e.target.value) })}
-                  className="admin-input"
-                  style={{ fontFamily: 'monospace' }}
-                />
-              </div>
-              <div style={{ gridColumn: 'span 2' }}>
-                <label className="admin-label">Qısa Təsvir</label>
-                <input
-                  type="text"
-                  value={editingEvent.desc || ''}
-                  onChange={(e) => setEditingEvent({ ...editingEvent, desc: e.target.value })}
-                  className="admin-input"
-                />
-              </div>
+            <div>
+              <label className="admin-label">Qısa Təsvir</label>
+              <textarea
+                rows="2"
+                value={editingEvent.desc || ''}
+                onChange={(e) => setEditingEvent({ ...editingEvent, desc: e.target.value })}
+                className="admin-input"
+                style={{ resize: 'vertical' }}
+              />
             </div>
 
             {/* Inline Translations Panel - Events */}
@@ -235,8 +387,6 @@ export default function AdminEventsTab() {
               fields={[
                 { key: 'title', label: 'Tədbir Başlığı' },
                 { key: 'desc', label: 'Qısa Təsvir', type: 'textarea' },
-                { key: 'speaker', label: 'Spiker' },
-                { key: 'datetime', label: 'Tarix və Saat' },
                 { key: 'typeBadge', label: 'Format / Növ Nişanı' }
               ]}
               activeLang={editEventTransLang}
@@ -249,7 +399,7 @@ export default function AdminEventsTab() {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
               <button
                 type="button"
-                onClick={() => setEditingEvent(null)}
+                onClick={() => { setEditingEvent(null); setEditEventRawDate(''); }}
                 className="admin-btn-secondary"
               >
                 Ləğv Et
@@ -291,10 +441,13 @@ export default function AdminEventsTab() {
                 className="admin-select"
               >
                 <option value="VEBİNAR">VEBİNAR</option>
+                <option value="CANLI VEBİNAR">CANLI VEBİNAR</option>
                 <option value="MASTERKLAS">MASTERKLAS</option>
                 <option value="CANLI SESSİYA">CANLI SESSİYA</option>
                 <option value="SEMİNAR">SEMİNAR</option>
+                <option value="OFLAYN SEMİNAR">OFLAYN SEMİNAR</option>
                 <option value="MEDİTASİYA">MEDİTASİYA</option>
+                <option value="MEDİTASİYA GECƏSİ">MEDİTASİYA GECƏSİ</option>
               </select>
             </div>
           </div>
@@ -303,22 +456,35 @@ export default function AdminEventsTab() {
             <div>
               <label className="admin-label">Tarix və Saat *</label>
               <input
-                type="text"
+                type="datetime-local"
                 required
-                placeholder="18 DEKABR, 20:00"
-                value={newEventDate}
-                onChange={(e) => setNewEventDate(e.target.value)}
+                value={newEventRawDate}
+                onChange={(e) => handleNewEventDateChange(e.target.value)}
                 className="admin-input"
               />
+              {newEventDate && (
+                <span style={{ fontSize: '11px', color: '#059669', fontWeight: 600, display: 'inline-block', marginTop: '4px' }}>
+                  ✓ Format: {newEventDate}
+                </span>
+              )}
             </div>
             <div>
-              <label className="admin-label">Spiker</label>
-              <input
-                type="text"
+              <label className="admin-label">Spiker / Aparıcı</label>
+              <select
                 value={newEventSpeaker}
                 onChange={(e) => setNewEventSpeaker(e.target.value)}
-                className="admin-input"
-              />
+                className="admin-select"
+              >
+                <option value="">-- İstifadəçi / Spiker Seçin --</option>
+                {newEventSpeaker && !speakerOptions.some(u => u.name === newEventSpeaker) && (
+                  <option value={newEventSpeaker}>{newEventSpeaker}</option>
+                )}
+                {speakerOptions.map(u => (
+                  <option key={u.id} value={u.name}>
+                    {u.name} {u.role ? `(${u.role})` : ''} {u.email ? `— ${u.email}` : ''}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="admin-label">Maksimum İştirakçı Limiti</label>
@@ -349,16 +515,12 @@ export default function AdminEventsTab() {
             item={{
               title: newEventTitle,
               desc: newEventDesc,
-              speaker: newEventSpeaker,
-              datetime: newEventDate,
               typeBadge: newEventTypeBadge,
               translations: newEventTranslations
             }}
             fields={[
               { key: 'title', label: 'Tədbir Başlığı' },
               { key: 'desc', label: 'Qısa Təsvir', type: 'textarea' },
-              { key: 'speaker', label: 'Spiker' },
-              { key: 'datetime', label: 'Tarix və Saat' },
               { key: 'typeBadge', label: 'Format / Növ Nişanı' }
             ]}
             activeLang={newEventTransLang}
@@ -468,7 +630,7 @@ export default function AdminEventsTab() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
                 <button
                   type="button"
-                  onClick={() => setEditingEvent(e)}
+                  onClick={() => handleOpenEdit(e)}
                   className="admin-btn-edit"
                   title="Tədbiri redaktə et"
                 >
