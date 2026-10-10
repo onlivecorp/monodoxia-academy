@@ -469,6 +469,7 @@ if ($action === 'save_role' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE
             name = VALUES(name),
+            code = VALUES(code),
             description = VALUES(description),
             is_active = VALUES(is_active),
             color = VALUES(color),
@@ -478,6 +479,15 @@ if ($action === 'save_role' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             updated_at = CURRENT_TIMESTAMP
     ");
     $stmt->execute([$id, $name, $code, $description, $is_system, $is_active, $color, $badge_class, $permissionsJson, $translationsJson]);
+
+    // Cascade role code update to users if code changed
+    $old_code = trim($input['oldCode'] ?? $input['old_code'] ?? '');
+    if ($old_code && $old_code !== $code && $old_code !== 'Admin') {
+        try {
+            $userStmt = $pdo->prepare("UPDATE mdx_users SET role = ? WHERE role = ?");
+            $userStmt->execute([$code, $old_code]);
+        } catch (Exception $e) {}
+    }
 
     echo json_encode([
         'status' => 'success',

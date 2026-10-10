@@ -1235,16 +1235,56 @@ export function AppProvider({ children }) {
       safeUpdates.isSystem = true;
       safeUpdates.isActive = true;
       safeUpdates.permissions = ['*'];
+      safeUpdates.code = 'Admin';
     }
 
     setRolesList(prev => prev.map(r => r.id === id ? { ...r, ...safeUpdates } : r));
+
+    // Cascade role code update to users if code changed
+    if (safeUpdates.code && safeUpdates.code !== existing.code && existing.code !== 'Admin') {
+      const oldCode = existing.code;
+      const newCode = safeUpdates.code;
+
+      setUsersList(prev => prev.map(u => {
+        let changed = false;
+        let nextRole = u.role;
+        let nextRoles = u.roles;
+        if (u.role === oldCode) {
+          nextRole = newCode;
+          changed = true;
+        }
+        if (Array.isArray(u.roles) && u.roles.includes(oldCode)) {
+          nextRoles = u.roles.map(r => r === oldCode ? newCode : r);
+          changed = true;
+        }
+        return changed ? { ...u, role: nextRole, roles: nextRoles } : u;
+      }));
+
+      if (currentUser) {
+        let cuChanged = false;
+        let cuRole = currentUser.role;
+        let cuRoles = currentUser.roles;
+        if (currentUser.role === oldCode) {
+          cuRole = newCode;
+          cuChanged = true;
+        }
+        if (Array.isArray(currentUser.roles) && currentUser.roles.includes(oldCode)) {
+          cuRoles = currentUser.roles.map(r => r === oldCode ? newCode : r);
+          cuChanged = true;
+        }
+        if (cuChanged) {
+          setCurrentUser(prev => prev ? { ...prev, role: cuRole, roles: cuRoles } : prev);
+        }
+      }
+    }
+
     showToast(`"${existing.name}" rolu yeniləndi`, 'success');
 
     try {
       fetch('/api.php?action=save_role', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...existing, ...safeUpdates })
+        body: JSON.stringify({ ...existing, ...safeUpdates, oldCode: existing.code })
       }).catch(() => {});
     } catch (e) {}
   };

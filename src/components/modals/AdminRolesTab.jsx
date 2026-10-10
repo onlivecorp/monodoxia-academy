@@ -209,8 +209,16 @@ export default function AdminRolesTab({ initialCreate, onResetInitialCreate }) {
       return;
     }
 
+    const newCode = (formData.code.trim() || formData.name.trim());
+    if (newCode !== editingRole.code && rolesList.some(r => r.id !== editingRole.id && r.code.toLowerCase() === newCode.toLowerCase())) {
+      showToast(`"${newCode}" kodlu rol artıq mövcuddur. Fərqli kod daxil edin.`, 'warning');
+      return;
+    }
+
     updateRole(editingRole.id, {
       name: formData.name.trim(),
+      code: isSuperAdminEditing ? 'Admin' : newCode,
+      oldCode: editingRole.code,
       description: formData.description.trim(),
       color: formData.color,
       badgeClass: formData.badgeClass,
@@ -341,12 +349,12 @@ export default function AdminRolesTab({ initialCreate, onResetInitialCreate }) {
               <input
                 type="text"
                 required
-                disabled={Boolean(editingRole)}
+                disabled={isSuperAdminEditing}
                 placeholder="Məs: Koordinator"
                 value={formData.code}
                 onChange={e => setFormData({ ...formData, code: e.target.value })}
                 className="admin-input"
-                style={{ background: editingRole ? '#f1f5f9' : '#ffffff' }}
+                style={{ background: isSuperAdminEditing ? '#f1f5f9' : '#ffffff' }}
               />
             </div>
             <div>
