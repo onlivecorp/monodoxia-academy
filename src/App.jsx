@@ -30,7 +30,7 @@ import ProfileModal from './components/modals/ProfileModal';
 import ApplicationModal from './components/modals/ApplicationModal';
 
 function AppContent() {
-  const { platformSettings, currentUser, setAuthModalOpen, canAccessAdmin } = useApp();
+  const { platformSettings, currentUser, setAuthModalOpen, canAccessAdmin, adminModalOpen } = useApp();
   const isAdminUser = currentUser?.role === 'Admin' || Boolean(canAccessAdmin?.(currentUser));
   const isMaintenance = Boolean(platformSettings?.maintenanceMode) && !isAdminUser;
 
@@ -49,8 +49,8 @@ function AppContent() {
       <ToastContainer />
 
       {/* Top Banner if Maintenance Mode is active but user is Admin / Staff */}
-      {Boolean(platformSettings?.maintenanceMode) && isAdminUser && (
-        <div className="bg-amber-600 text-white text-xs font-bold py-2 px-4 text-center sticky top-0 z-[100] flex items-center justify-center gap-2 shadow-md">
+      {Boolean(platformSettings?.maintenanceMode) && isAdminUser && !adminModalOpen && (
+        <div className="bg-amber-600 text-white text-xs font-bold py-2 px-4 text-center relative z-30 flex items-center justify-center gap-2 shadow-sm">
           <span className="material-symbols-outlined text-[16px]">build</span>
           <span>TEXNİKİ QULLUQ REJİMİ AKTİVDİR — Sayt hazırda yalnız Administrator və Heyət üçün açıqdır.</span>
         </div>

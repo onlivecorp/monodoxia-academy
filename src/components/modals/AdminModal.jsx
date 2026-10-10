@@ -120,6 +120,14 @@ export default function AdminModal() {
     <div className="fixed inset-0 z-50 admin-backdrop w-screen h-screen overflow-hidden animate-fadeIn">
       <div className="admin-shell w-full h-full flex flex-col overflow-hidden">
 
+        {/* Top Banner if Maintenance Mode is active - sits at the very top, not overlapping topbar */}
+        {Boolean(platformSettings?.maintenanceMode) && (
+          <div className="bg-amber-600 text-white text-xs font-bold py-1.5 px-4 text-center shrink-0 flex items-center justify-center gap-2 shadow-sm select-none border-b border-amber-700/40">
+            <span className="material-symbols-outlined text-[15px]">build</span>
+            <span>TEXNİKİ QULLUQ REJİMİ AKTİVDİR — Sayt hazırda yalnız Administrator və Heyət üçün açıqdır.</span>
+          </div>
+        )}
+
         {/* TOPBAR */}
         <header className="admin-topbar h-[58px] px-4 md:px-6 flex items-center justify-between shrink-0 select-none">
           <div className="flex items-center gap-3">
