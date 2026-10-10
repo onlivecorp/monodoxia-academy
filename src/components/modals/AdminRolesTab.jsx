@@ -1,7 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import AdminPopupModal from './AdminPopupModal';
 import AdminConfirmModal from './AdminConfirmModal';
+import AdminInlineTranslator from './AdminInlineTranslator';
 
 const PRESET_COLORS = [
   { label: 'Qızılı', value: '#b45309', badge: 'bg-amber-100 text-amber-800 border-amber-300' },
@@ -13,7 +14,7 @@ const PRESET_COLORS = [
   { label: 'Qırmızı', value: '#dc2626', badge: 'bg-red-100 text-red-800 border-red-300' }
 ];
 
-export default function AdminRolesTab() {
+export default function AdminRolesTab({ initialCreate, onResetInitialCreate }) {
   const {
     rolesList = [],
     permissionModules = [],
@@ -38,6 +39,10 @@ export default function AdminRolesTab() {
   const [roleToDelete, setRoleToDelete] = useState(null);
   const [matrixOpen, setMatrixOpen] = useState(false);
 
+  // Translations States
+  const [roleTransLang, setRoleTransLang] = useState('en');
+  const [roleTransOpen, setRoleTransOpen] = useState(false);
+
   // Form States (for Create & Edit)
   const [formData, setFormData] = useState({
     name: '',
@@ -46,9 +51,18 @@ export default function AdminRolesTab() {
     color: '#b45309',
     badgeClass: 'bg-amber-100 text-amber-800 border-amber-300',
     isActive: true,
-    permissions: []
+    permissions: [],
+    translations: {}
   });
   const [permSearch, setPermSearch] = useState('');
+
+  // Handle external trigger to open Create Role modal
+  useEffect(() => {
+    if (initialCreate) {
+      handleOpenCreate();
+      if (onResetInitialCreate) onResetInitialCreate();
+    }
+  }, [initialCreate, onResetInitialCreate]);
 
   // Count assigned users for each role
   const getAssignedUsersCount = (roleCode) => {
@@ -86,9 +100,11 @@ export default function AdminRolesTab() {
       color: '#b45309',
       badgeClass: 'bg-amber-100 text-amber-800 border-amber-300',
       isActive: true,
-      permissions: []
+      permissions: [],
+      translations: {}
     });
     setPermSearch('');
+    setRoleTransOpen(false);
     setIsCreateOpen(true);
   };
 
@@ -102,9 +118,11 @@ export default function AdminRolesTab() {
       color: role.color || '#b45309',
       badgeClass: role.badgeClass || 'bg-amber-100 text-amber-800 border-amber-300',
       isActive: role.isActive !== false,
-      permissions: Array.isArray(role.permissions) ? [...role.permissions] : (role.permissions?.includes('*') ? ['*'] : [])
+      permissions: Array.isArray(role.permissions) ? [...role.permissions] : (role.permissions?.includes('*') ? ['*'] : []),
+      translations: role.translations || {}
     });
     setPermSearch('');
+    setRoleTransOpen(false);
   };
 
   // Form Permissions Management
@@ -175,7 +193,8 @@ export default function AdminRolesTab() {
       color: formData.color,
       badgeClass: formData.badgeClass,
       isActive: formData.isActive,
-      permissions: formData.permissions
+      permissions: formData.permissions,
+      translations: formData.translations || {}
     });
 
     setIsCreateOpen(false);
@@ -196,7 +215,8 @@ export default function AdminRolesTab() {
       color: formData.color,
       badgeClass: formData.badgeClass,
       isActive: isSuperAdminEditing ? true : formData.isActive,
-      permissions: isSuperAdminEditing ? ['*'] : formData.permissions
+      permissions: isSuperAdminEditing ? ['*'] : formData.permissions,
+      translations: formData.translations || {}
     });
 
     setEditingRole(null);
@@ -519,6 +539,28 @@ export default function AdminRolesTab() {
             </div>
           </div>
 
+          {/* Inline Multi-Language Translations */}
+          <AdminInlineTranslator
+            item={{
+              name: formData.name,
+              description: formData.description,
+              translations: formData.translations
+            }}
+            fields={[
+              { key: 'name', label: 'Rolun Adı' },
+              { key: 'description', label: 'Rolun Təsviri & Məqsədi', type: 'textarea' }
+            ]}
+            activeLang={roleTransLang}
+            setActiveLang={setRoleTransLang}
+            onUpdate={(updates) => {
+              if (updates.translations) {
+                setFormData(prev => ({ ...prev, translations: updates.translations }));
+              }
+            }}
+            isOpen={roleTransOpen}
+            setIsOpen={setRoleTransOpen}
+          />
+
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px', paddingTop: '10px', borderTop: '1px solid #e2e8f0' }}>
             <button
               type="button"
@@ -718,6 +760,11 @@ export default function AdminRolesTab() {
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    {role.translations && Object.keys(role.translations).length > 0 && (
+                      <span style={{ fontSize: '9px', fontWeight: 700, padding: '2px 6px', background: '#eff6ff', color: '#2563eb', borderRadius: '4px', border: '1px solid #bfdbfe' }} title="Çoxdilli tərcümələri mövcuddur">
+                        i18n
+                      </span>
+                    )}
                     {role.isSystem ? (
                       <span className="admin-badge-gold" style={{ fontSize: '9px', padding: '2px 6px' }}>SİSTEM</span>
                     ) : (

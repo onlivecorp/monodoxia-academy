@@ -24,6 +24,8 @@ export default function AdminTranslationsTab() {
     updateArea,
     communityTopics = [],
     updateTopic,
+    rolesList = [],
+    updateRole,
     showToast
   } = useApp();
 
@@ -35,9 +37,10 @@ export default function AdminTranslationsTab() {
   const [searchFilter, setSearchFilter] = useState('');
 
   const entities = [
-    { id: 'users', label: 'İstifadəçilər & RBAC', count: usersList.length },
-    { id: 'courses', label: 'Kurslar & LMS', count: coursesList.length },
+    { id: 'roles', label: 'Rollar & Səlahiyyətlər (RBAC)', count: rolesList.length },
     { id: 'club', label: 'Coaching Club Tiers', count: clubTiersList.length },
+    { id: 'users', label: 'İstifadəçilər & Profillər', count: usersList.length },
+    { id: 'courses', label: 'Kurslar & LMS', count: coursesList.length },
     { id: 'events', label: 'Tədbirlər & Vebinarlar', count: eventsList.length },
     { id: 'coaches', label: 'Mentorlar & Kouçlar', count: coachesList.length },
     { id: 'testimonials', label: 'Rəylər (Testimonials)', count: testimonialsList.length },
@@ -48,6 +51,10 @@ export default function AdminTranslationsTab() {
 
   // Entity field configurations
   const entityFieldConfigs = {
+    roles: [
+      { key: 'name', label: 'Rolun Adı', required: true },
+      { key: 'description', label: 'Rolun Təsviri & Məqsədi', type: 'textarea' }
+    ],
     users: [
       { key: 'name', label: 'Ad və Soyad', required: true },
       { key: 'role', label: 'Rol & Səlahiyyət' },
@@ -103,7 +110,8 @@ export default function AdminTranslationsTab() {
 
   // Get active entity items
   let currentItems = [];
-  if (transEntity === 'users') currentItems = usersList;
+  if (transEntity === 'roles') currentItems = rolesList;
+  else if (transEntity === 'users') currentItems = usersList;
   else if (transEntity === 'courses') currentItems = coursesList;
   else if (transEntity === 'club') currentItems = clubTiersList;
   else if (transEntity === 'events') currentItems = eventsList;
@@ -136,7 +144,8 @@ export default function AdminTranslationsTab() {
       }
     };
 
-    if (transEntity === 'users') updateUser(selectedItem.id, { translations: updatedTranslations });
+    if (transEntity === 'roles') updateRole(selectedItem.id, { translations: updatedTranslations });
+    else if (transEntity === 'users') updateUser(selectedItem.id, { translations: updatedTranslations });
     else if (transEntity === 'courses') updateCourse(selectedItem.id, { translations: updatedTranslations });
     else if (transEntity === 'club') updateClubTier(selectedItem.id, { translations: updatedTranslations });
     else if (transEntity === 'events') updateEvent(selectedItem.id, { translations: updatedTranslations });
@@ -150,7 +159,8 @@ export default function AdminTranslationsTab() {
   const handleCopyFromDefault = () => {
     if (!selectedItem) return;
     const copied = copyFromDefaultLanguage(selectedItem, fields.map(f => f.key), transActiveLang, defaultLang);
-    if (transEntity === 'users') updateUser(selectedItem.id, { translations: copied });
+    if (transEntity === 'roles') updateRole(selectedItem.id, { translations: copied });
+    else if (transEntity === 'users') updateUser(selectedItem.id, { translations: copied });
     else if (transEntity === 'courses') updateCourse(selectedItem.id, { translations: copied });
     else if (transEntity === 'club') updateClubTier(selectedItem.id, { translations: copied });
     else if (transEntity === 'events') updateEvent(selectedItem.id, { translations: copied });

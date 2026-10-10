@@ -32,10 +32,19 @@ export default function AdminModal() {
 
   const [activeTab, setActiveTab] = useState('overview');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [quickCreateOpen, setQuickCreateOpen] = useState(false);
+  const [initialCreateTarget, setInitialCreateTarget] = useState(null);
+
+  const handleQuickCreate = (targetTab) => {
+    setQuickCreateOpen(false);
+    setActiveTab(targetTab);
+    setInitialCreateTarget(targetTab);
+  };
 
   // Close mobile drawer on ESC or tab switch
   useEffect(() => {
     setMobileMenuOpen(false);
+    setQuickCreateOpen(false);
   }, [activeTab]);
 
   useEffect(() => {
@@ -158,6 +167,185 @@ export default function AdminModal() {
           </div>
 
           <div className="flex items-center gap-2 md:gap-3">
+            {/* Sürətli Yarat Menyu (Quick Create Dropdown) */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setQuickCreateOpen(!quickCreateOpen)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '5px 12px',
+                  background: 'linear-gradient(135deg, #b45309 0%, #d4af37 100%)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  color: '#ffffff',
+                  boxShadow: '0 2px 4px rgba(180,83,9,0.2)',
+                  transition: 'all 0.15s ease'
+                }}
+                title="Yeni Rol, Paket və ya Məzmun Yarat"
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>add_circle</span>
+                <span className="hidden sm:inline">Sürətli Yarat</span>
+                <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>
+                  {quickCreateOpen ? 'expand_less' : 'expand_more'}
+                </span>
+              </button>
+
+              {quickCreateOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setQuickCreateOpen(false)} />
+                  <div
+                    style={{
+                      position: 'absolute',
+                      right: 0,
+                      top: 'calc(100% + 6px)',
+                      width: '240px',
+                      background: '#ffffff',
+                      borderRadius: '10px',
+                      boxShadow: '0 10px 25px -5px rgba(0,0,0,0.15), 0 8px 10px -6px rgba(0,0,0,0.1)',
+                      border: '1px solid #e2e8f0',
+                      padding: '6px 0',
+                      zIndex: 50
+                    }}
+                    className="animate-fadeIn"
+                  >
+                    <div style={{ padding: '6px 12px 4px', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#94a3b8' }}>
+                      Sürətli Əlavə Etmə Menyu
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleQuickCreate('roles')}
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '8px 12px',
+                        border: 'none',
+                        background: 'transparent',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        transition: 'background 0.15s'
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#fffbeb'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#b45309' }}>shield_person</span>
+                      <div>
+                        <div style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>Rol & Səlahiyyət (RBAC)</div>
+                        <div style={{ fontSize: '10px', color: '#64748b' }}>Yeni rol, icazələr & tərcümələr</div>
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleQuickCreate('club')}
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '8px 12px',
+                        border: 'none',
+                        background: 'transparent',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        transition: 'background 0.15s'
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#fffbeb'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#b45309' }}>card_membership</span>
+                      <div>
+                        <div style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>Abunəlik Paketi (Tier)</div>
+                        <div style={{ fontSize: '10px', color: '#64748b' }}>Rezidentlik tarifi & imtiyazlar</div>
+                      </div>
+                    </button>
+
+                    <div style={{ height: '1px', background: '#f1f5f9', margin: '4px 0' }} />
+
+                    <button
+                      type="button"
+                      onClick={() => handleQuickCreate('courses')}
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '7px 12px',
+                        border: 'none',
+                        background: 'transparent',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        color: '#334155'
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#64748b' }}>school</span>
+                      <span>Yeni Kurs & LMS</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleQuickCreate('events')}
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '7px 12px',
+                        border: 'none',
+                        background: 'transparent',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        color: '#334155'
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#64748b' }}>event</span>
+                      <span>Yeni Tədbir</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleQuickCreate('users')}
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '7px 12px',
+                        border: 'none',
+                        background: 'transparent',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        color: '#334155'
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#64748b' }}>person_add</span>
+                      <span>İstifadəçi Əlavə Et</span>
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+
             {/* Quick access to Texniki Qulluq Ekranı */}
             <button
               type="button"
@@ -272,7 +460,7 @@ export default function AdminModal() {
           {/* MAIN CONTENT VIEW */}
           <main className="admin-content admin-scroll flex-1 p-4 md:p-6 overflow-y-auto">
             {activeTab === 'overview' && (
-              <AdminOverviewTab setActiveTab={setActiveTab} />
+              <AdminOverviewTab setActiveTab={setActiveTab} onQuickCreate={handleQuickCreate} />
             )}
 
             {activeTab === 'applications' && (
@@ -288,7 +476,10 @@ export default function AdminModal() {
             )}
 
             {activeTab === 'roles' && (
-              <AdminRolesTab />
+              <AdminRolesTab
+                initialCreate={initialCreateTarget === 'roles'}
+                onResetInitialCreate={() => setInitialCreateTarget(null)}
+              />
             )}
 
             {activeTab === 'courses' && (
@@ -300,7 +491,10 @@ export default function AdminModal() {
             )}
 
             {activeTab === 'club' && (
-              <AdminClubTab />
+              <AdminClubTab
+                initialCreate={initialCreateTarget === 'club'}
+                onResetInitialCreate={() => setInitialCreateTarget(null)}
+              />
             )}
 
             {activeTab === 'events' && (

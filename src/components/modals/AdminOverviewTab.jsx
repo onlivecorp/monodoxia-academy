@@ -1,7 +1,7 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
 
-export default function AdminOverviewTab({ setActiveTab }) {
+export default function AdminOverviewTab({ setActiveTab, onQuickCreate }) {
   const {
     applicationsList = [],
     usersList = [],
@@ -155,6 +155,24 @@ export default function AdminOverviewTab({ setActiveTab }) {
           <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>Sürətli Əməliyyatlar:</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            onClick={() => onQuickCreate ? onQuickCreate('roles') : setActiveTab('roles')}
+            className="admin-btn-secondary"
+            style={{ fontSize: '11px', padding: '6px 12px', background: '#fffbeb', borderColor: '#fde68a' }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '15px', color: '#b45309' }}>shield_person</span>
+            <span style={{ fontWeight: 700, color: '#92400e' }}>+ Yeni Rol & Səlahiyyət</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => onQuickCreate ? onQuickCreate('club') : setActiveTab('club')}
+            className="admin-btn-secondary"
+            style={{ fontSize: '11px', padding: '6px 12px', background: '#fffbeb', borderColor: '#fde68a' }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '15px', color: '#b45309' }}>card_membership</span>
+            <span style={{ fontWeight: 700, color: '#92400e' }}>+ Yeni Abunəlik Paketi</span>
+          </button>
           <button
             type="button"
             onClick={() => setActiveTab('courses')}

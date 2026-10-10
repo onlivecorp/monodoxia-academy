@@ -119,6 +119,7 @@ CREATE TABLE `mdx_club_tiers` (
   `popular` tinyint(1) NOT NULL DEFAULT 0,
   `features_json` text NOT NULL,
   `active` tinyint(1) NOT NULL DEFAULT 1,
+  `translations` longtext DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -334,6 +335,7 @@ CREATE TABLE `mdx_roles` (
   `color` varchar(30) DEFAULT '#b45309',
   `badge_class` varchar(100) DEFAULT NULL,
   `permissions` longtext DEFAULT NULL,
+  `translations` longtext DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),

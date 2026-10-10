@@ -1206,6 +1206,7 @@ export function AppProvider({ children }) {
       color: newRole.color || '#b45309',
       badgeClass: newRole.badgeClass || 'bg-amber-100 text-amber-800 border-amber-300',
       permissions: Array.isArray(newRole.permissions) ? newRole.permissions : [],
+      translations: newRole.translations || {},
       createdAt: new Date().toISOString().split('T')[0],
       updatedAt: new Date().toISOString().split('T')[0]
     };
@@ -1350,6 +1351,15 @@ export function AppProvider({ children }) {
         if (typeof updated.features === 'string') {
           updated.features = updated.features.split('\n').map(s => s.trim()).filter(Boolean);
         }
+
+        try {
+          fetch('/api.php?action=save_club_tier', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updated)
+          }).catch(() => {});
+        } catch (e) {}
+
         return updated;
       }
       return t;
@@ -1372,11 +1382,27 @@ export function AppProvider({ children }) {
     };
     setClubTiersList(prev => [...prev, tier]);
     showToast(`Yeni abunəlik paketi əlavə edildi: ${tier.name}`, 'success');
+
+    try {
+      fetch('/api.php?action=save_club_tier', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(tier)
+      }).catch(() => {});
+    } catch (e) {}
   };
 
   const deleteClubTier = (id) => {
     setClubTiersList(prev => prev.filter(t => t.id !== id));
     showToast('Abunəlik paketi silindi', 'info');
+
+    try {
+      fetch('/api.php?action=delete_club_tier', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      }).catch(() => {});
+    } catch (e) {}
   };
 
   const addEvent = (newEvent) => {

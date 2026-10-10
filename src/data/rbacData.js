@@ -194,6 +194,10 @@ export const INITIAL_ROLES = [
     color: '#b45309',
     badgeClass: 'bg-amber-100 text-amber-800 border-amber-300',
     permissions: ['*'], // '*' means full root access to all modules
+    translations: {
+      en: { name: 'Super Admin', description: 'Full root access to all system modules, finances, users, database and security.' },
+      ru: { name: 'Супер Администратор', description: 'Полный неограниченный доступ ко всем модулям системы, пользователям и настройкам.' }
+    },
     createdAt: '2025-01-01',
     updatedAt: '2025-01-01'
   },
@@ -222,6 +226,10 @@ export const INITIAL_ROLES = [
       'community.delete',
       'events.view'
     ],
+    translations: {
+      en: { name: 'Moderator', description: 'Operational control and moderation of applications, registrations, users, and community.' },
+      ru: { name: 'Модератор', description: 'Оперативный контроль и модерация заявок, регистраций, пользователей и сообщества.' }
+    },
     createdAt: '2025-01-01',
     updatedAt: '2025-01-01'
   },
@@ -247,6 +255,10 @@ export const INITIAL_ROLES = [
       'community.create',
       'categories.view'
     ],
+    translations: {
+      en: { name: 'Coach & Expert', description: 'Teaching faculty authority to manage courses, lessons, events and community sessions.' },
+      ru: { name: 'Коуч & Эксперт', description: 'Права преподавательского состава на управление курсами, уроками, мероприятиями и сообществом.' }
+    },
     createdAt: '2025-01-01',
     updatedAt: '2025-01-01'
   },
@@ -271,6 +283,10 @@ export const INITIAL_ROLES = [
       'community.view',
       'community.edit'
     ],
+    translations: {
+      en: { name: 'Content Editor', description: 'Authority for CMS content, translations, categories, and blog/forum management.' },
+      ru: { name: 'Редактор контента', description: 'Права на редактирование контента CMS, переводов, категорий и блога.' }
+    },
     createdAt: '2025-02-15',
     updatedAt: '2025-02-15'
   },
@@ -284,6 +300,10 @@ export const INITIAL_ROLES = [
     color: '#64748b',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-300',
     permissions: [],
+    translations: {
+      en: { name: 'Student (Member)', description: 'Standard platform student and member account with access to personal courses.' },
+      ru: { name: 'Студент (Пользователь)', description: 'Стандартный аккаунт студента с доступом к личным курсам и материалам.' }
+    },
     createdAt: '2025-01-01',
     updatedAt: '2025-01-01'
   }

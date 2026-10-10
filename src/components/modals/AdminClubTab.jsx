@@ -1,10 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import AdminInlineTranslator from './AdminInlineTranslator';
 import AdminConfirmModal from './AdminConfirmModal';
 import AdminPopupModal from './AdminPopupModal';
 
-export default function AdminClubTab() {
+export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
   const {
     clubTiersList = [],
     addClubTier,
@@ -15,6 +15,14 @@ export default function AdminClubTab() {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
+
+  // Handle external trigger to open Add Tier modal
+  useEffect(() => {
+    if (initialCreate) {
+      setShowAddForm(true);
+      if (onResetInitialCreate) onResetInitialCreate();
+    }
+  }, [initialCreate, onResetInitialCreate]);
 
   // Add Tier State
   const [newTierName, setNewTierName] = useState('');
@@ -391,9 +399,16 @@ export default function AdminClubTab() {
                   <h5 style={{ fontSize: '16px', fontWeight: 700, fontFamily: "'Playfair Display',serif", color: '#0f172a', margin: 0 }}>
                     {t.name}
                   </h5>
-                  {t.popular && (
-                    <span className="admin-badge-gold">POPULAR</span>
-                  )}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    {t.translations && Object.keys(t.translations).length > 0 && (
+                      <span style={{ fontSize: '9px', fontWeight: 700, padding: '2px 6px', background: '#eff6ff', color: '#2563eb', borderRadius: '4px', border: '1px solid #bfdbfe' }} title="Çoxdilli tərcümələri mövcuddur">
+                        i18n
+                      </span>
+                    )}
+                    {t.popular && (
+                      <span className="admin-badge-gold">POPULAR</span>
+                    )}
+                  </div>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', padding: '10px 0', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', marginBottom: '12px' }}>

@@ -394,6 +394,14 @@ try {
     }
 } catch (PDOException $e) {}
 
+// Avtomatik miqrasiya: translations sütunlarının yoxlanılması
+try {
+    $pdo->exec("ALTER TABLE mdx_roles ADD COLUMN translations LONGTEXT DEFAULT NULL");
+} catch (PDOException $e) {}
+try {
+    $pdo->exec("ALTER TABLE mdx_club_tiers ADD COLUMN translations LONGTEXT DEFAULT NULL");
+} catch (PDOException $e) {}
+
 if ($action === 'get_roles') {
     try {
         $stmt = $pdo->query("SELECT * FROM mdx_roles ORDER BY is_system DESC, name ASC");
@@ -403,6 +411,12 @@ if ($action === 'get_roles') {
                 $decoded = json_decode($r['permissions'], true);
                 if (is_array($decoded)) {
                     $r['permissions'] = $decoded;
+                }
+            }
+            if (!empty($r['translations']) && is_string($r['translations'])) {
+                $decodedTrans = json_decode($r['translations'], true);
+                if (is_array($decodedTrans)) {
+                    $r['translations'] = $decodedTrans;
                 }
             }
         }
@@ -434,6 +448,8 @@ if ($action === 'save_role' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $permissionsJson = (string)$permissions;
     }
+    $translations = $input['translations'] ?? [];
+    $translationsJson = is_array($translations) ? json_encode($translations, JSON_UNESCAPED_UNICODE) : (string)$translations;
 
     if (!$name || !$code) {
         http_response_code(400);
@@ -449,8 +465,8 @@ if ($action === 'save_role' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $stmt = $pdo->prepare("
-        INSERT INTO mdx_roles (id, name, code, description, is_system, is_active, color, badge_class, permissions)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO mdx_roles (id, name, code, description, is_system, is_active, color, badge_class, permissions, translations)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE
             name = VALUES(name),
             description = VALUES(description),
@@ -458,9 +474,10 @@ if ($action === 'save_role' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             color = VALUES(color),
             badge_class = VALUES(badge_class),
             permissions = VALUES(permissions),
+            translations = VALUES(translations),
             updated_at = CURRENT_TIMESTAMP
     ");
-    $stmt->execute([$id, $name, $code, $description, $is_system, $is_active, $color, $badge_class, $permissionsJson]);
+    $stmt->execute([$id, $name, $code, $description, $is_system, $is_active, $color, $badge_class, $permissionsJson, $translationsJson]);
 
     echo json_encode([
         'status' => 'success',
@@ -474,7 +491,8 @@ if ($action === 'save_role' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             'isActive' => (bool)$is_active,
             'color' => $color,
             'badgeClass' => $badge_class,
-            'permissions' => is_array($permissions) ? $permissions : json_decode($permissionsJson, true)
+            'permissions' => is_array($permissions) ? $permissions : json_decode($permissionsJson, true),
+            'translations' => is_array($translations) ? $translations : json_decode($translationsJson, true)
         ]
     ], JSON_UNESCAPED_UNICODE);
     exit();
@@ -506,6 +524,56 @@ if ($action === 'delete_role' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     echo json_encode(['status' => 'success', 'message' => 'Rol sistemdən silindi'], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+if ($action === 'save_club_tier' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $input = json_decode(file_get_contents('php://input'), true);
+    if (!$input) $input = $_POST;
+
+    $id = trim($input['id'] ?? ('tier-' . round(microtime(true) * 1000)));
+    $name = trim($input['name'] ?? '');
+    $price = trim($input['price'] ?? '0');
+    $period = trim($input['period'] ?? '/ aylıq');
+    $popular = !empty($input['popular']) ? 1 : 0;
+    $active = isset($input['active']) ? ($input['active'] ? 1 : 0) : 1;
+    $features = $input['features'] ?? [];
+    $featuresJson = is_array($features) ? json_encode($features, JSON_UNESCAPED_UNICODE) : (string)$features;
+    $translations = $input['translations'] ?? [];
+    $translationsJson = is_array($translations) ? json_encode($translations, JSON_UNESCAPED_UNICODE) : (string)$translations;
+
+    if (!$name) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Paket adı tələb olunur'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    $stmt = $pdo->prepare("
+        INSERT INTO mdx_club_tiers (id, name, price, period, popular, features_json, active, translations)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+            name = VALUES(name),
+            price = VALUES(price),
+            period = VALUES(period),
+            popular = VALUES(popular),
+            features_json = VALUES(features_json),
+            active = VALUES(active),
+            translations = VALUES(translations)
+    ");
+    $stmt->execute([$id, $name, $price, $period, $popular, $featuresJson, $active, $translationsJson]);
+
+    echo json_encode(['status' => 'success', 'message' => 'Abunəlik paketi bazada saxlanıldı'], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+if ($action === 'delete_club_tier' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $input = json_decode(file_get_contents('php://input'), true);
+    $id = $input['id'] ?? null;
+    if ($id) {
+        $del = $pdo->prepare("DELETE FROM mdx_club_tiers WHERE id = ?");
+        $del->execute([$id]);
+    }
+    echo json_encode(['status' => 'success', 'message' => 'Abunəlik paketi silindi'], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
