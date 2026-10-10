@@ -59,6 +59,7 @@ export default function Academy() {
             const courseDesc = getLocalized(c, 'description', currentLang, defaultLang);
             const courseBadge = getLocalized(c, 'badge', currentLang, defaultLang);
             const courseStatus = getLocalized(c, 'status', currentLang, defaultLang);
+            const courseDuration = getLocalized(c, 'duration', currentLang, defaultLang) || c.duration;
 
             return (
               <div
@@ -79,7 +80,7 @@ export default function Academy() {
                         </span>
                       )}
                     </div>
-                    <span className="font-label-sm text-label-sm text-outline">{c.duration}</span>
+                    <span className="font-label-sm text-label-sm text-outline">{courseDuration}</span>
                   </div>
                   <h3 className="font-headline-md text-headline-md text-primary font-serif mb-2">
                     {courseTitle}

@@ -3,6 +3,8 @@ import { useApp } from '../../context/AppContext';
 import AdminInlineTranslator from './AdminInlineTranslator';
 import AdminConfirmModal from './AdminConfirmModal';
 import AdminPopupModal from './AdminPopupModal';
+import AdminCourseCategoriesModal from './AdminCourseCategoriesModal';
+import { formatCourseDeadline, generateDeadlineTranslations, calculateOccupancy } from '../../utils/courseHelpers';
 
 const ITEMS_PER_PAGE = 8;
 
@@ -13,6 +15,7 @@ export default function AdminCoursesTab() {
     updateCourse,
     deleteCourse,
     categoriesList = [],
+    applicationsList = [],
     showToast
   } = useApp();
 
@@ -23,12 +26,18 @@ export default function AdminCoursesTab() {
   const [currentPage, setCurrentPage] = useState(1);
   const [showAddForm, setShowAddForm] = useState(false);
 
+  // Category Manager Modal State
+  const [categoriesModalOpen, setCategoriesModalOpen] = useState(false);
+  const [categoryModalTarget, setCategoryModalTarget] = useState(null); // 'edit' | 'create' | null
+
   // Add Course State
   const [newCourseTitle, setNewCourseTitle] = useState('');
   const [newCourseInstructor, setNewCourseInstructor] = useState('Dr. Leyla Əliyeva');
   const [newCoursePrice, setNewCoursePrice] = useState('₼ 450');
   const [newCourseCategory, setNewCourseCategory] = useState('psychology');
+  const [newCourseDeadline, setNewCourseDeadline] = useState('');
   const [newCourseDuration, setNewCourseDuration] = useState('8 Həftə');
+  const [newCourseMaxParticipants, setNewCourseMaxParticipants] = useState(30);
   const [newCourseBadge, setNewCourseBadge] = useState('AKREDİTASİYALI');
   const [newCourseDesc, setNewCourseDesc] = useState('');
   const [newCourseTranslations, setNewCourseTranslations] = useState({});
@@ -42,6 +51,35 @@ export default function AdminCoursesTab() {
 
   // Delete Confirmation State
   const [courseToDelete, setCourseToDelete] = useState(null);
+
+  // Helper: Count active applications for a given course
+  const getCourseApplicationsCount = (course) => {
+    if (!course) return 0;
+    return (applicationsList || []).filter(a =>
+      (a.targetId === course.id || a.targetTitle === course.title) &&
+      !a.archived &&
+      a.status !== 'İmtina'
+    ).length;
+  };
+
+  // Helper: Get effective total applicants (initial baseline + real-time applications)
+  const getCourseEffectiveApplicants = (course) => {
+    if (!course) return 0;
+    const realApps = getCourseApplicationsCount(course);
+    const maxP = course.maxParticipants || 30;
+    const baseline = course.initialParticipants !== undefined
+      ? course.initialParticipants
+      : (course.occupancy ? Math.round(((course.occupancy || 0) * maxP) / 100) : 0);
+    return baseline + realApps;
+  };
+
+  // Helper: Compute real-time occupancy percentage
+  const getCourseComputedOccupancy = (course) => {
+    if (!course) return 0;
+    const maxP = Math.max(1, course.maxParticipants || 30);
+    const totalApps = getCourseEffectiveApplicants(course);
+    return Math.min(100, Math.round((totalApps / maxP) * 100));
+  };
 
   // Filtered courses
   const filteredCourses = useMemo(() => {
@@ -62,24 +100,83 @@ export default function AdminCoursesTab() {
     return filteredCourses.slice(start, start + ITEMS_PER_PAGE);
   }, [filteredCourses, currentPage]);
 
+  // Handle deadline change for New Course
+  const handleNewCourseDeadlineChange = (val) => {
+    setNewCourseDeadline(val);
+    if (val) {
+      const azDuration = formatCourseDeadline(val, 'az');
+      setNewCourseDuration(azDuration);
+      const autoTrans = generateDeadlineTranslations(val);
+      setNewCourseTranslations(prev => ({
+        ...prev,
+        az: { ...(prev.az || {}), duration: autoTrans.az.duration },
+        en: { ...(prev.en || {}), duration: autoTrans.en.duration },
+        tr: { ...(prev.tr || {}), duration: autoTrans.tr.duration },
+        ru: { ...(prev.ru || {}), duration: autoTrans.ru.duration }
+      }));
+    }
+  };
+
+  // Handle deadline change for Editing Course
+  const handleEditCourseDeadlineChange = (val) => {
+    if (!editingCourse) return;
+    const azDuration = val ? formatCourseDeadline(val, 'az') : editingCourse.duration;
+    const autoTrans = val ? generateDeadlineTranslations(val) : {};
+    
+    setEditingCourse(prev => {
+      const curTrans = prev.translations || {};
+      return {
+        ...prev,
+        deadline: val,
+        duration: azDuration,
+        translations: {
+          ...curTrans,
+          az: { ...(curTrans.az || {}), duration: autoTrans.az?.duration || curTrans.az?.duration || azDuration },
+          en: { ...(curTrans.en || {}), duration: autoTrans.en?.duration || curTrans.en?.duration },
+          tr: { ...(curTrans.tr || {}), duration: autoTrans.tr?.duration || curTrans.tr?.duration },
+          ru: { ...(curTrans.ru || {}), duration: autoTrans.ru?.duration || curTrans.ru?.duration }
+        }
+      };
+    });
+  };
+
   const handleCreateCourse = (e) => {
     e.preventDefault();
     if (!newCourseTitle.trim()) {
       showToast('Zəhmət olmasa kursun başlığını daxil edin', 'warning');
       return;
     }
+
+    const maxP = Math.max(1, Number(newCourseMaxParticipants) || 30);
+    const durationText = newCourseDeadline ? formatCourseDeadline(newCourseDeadline, 'az') : newCourseDuration;
+    const autoTrans = newCourseDeadline ? generateDeadlineTranslations(newCourseDeadline) : {};
+
+    const mergedTranslations = {
+      ...newCourseTranslations,
+      az: { ...(newCourseTranslations.az || {}), duration: autoTrans.az?.duration || durationText },
+      en: { ...(newCourseTranslations.en || {}), duration: autoTrans.en?.duration || newCourseTranslations.en?.duration },
+      tr: { ...(newCourseTranslations.tr || {}), duration: autoTrans.tr?.duration || newCourseTranslations.tr?.duration },
+      ru: { ...(newCourseTranslations.ru || {}), duration: autoTrans.ru?.duration || newCourseTranslations.ru?.duration }
+    };
+
     addCourse({
       title: newCourseTitle.trim(),
       instructor: newCourseInstructor,
       price: newCoursePrice,
       category: newCourseCategory,
-      duration: newCourseDuration,
+      deadline: newCourseDeadline || null,
+      duration: durationText,
+      maxParticipants: maxP,
+      initialParticipants: 0,
+      occupancy: 0,
       badge: newCourseBadge,
       description: newCourseDesc || 'Praktiki dərslər, keyslər və beynəlxalq standartlara uyğun tədris planı.',
-      translations: newCourseTranslations
+      translations: mergedTranslations
     });
+
     setNewCourseTitle('');
     setNewCourseDesc('');
+    setNewCourseDeadline('');
     setNewCourseTranslations({});
     setNewCourseTransOpen(false);
     setShowAddForm(false);
@@ -88,15 +185,21 @@ export default function AdminCoursesTab() {
   const handleSaveEditCourse = (e) => {
     e.preventDefault();
     if (!editingCourse) return;
+
+    const computedOcc = getCourseComputedOccupancy(editingCourse);
+
     updateCourse(editingCourse.id, {
       title: editingCourse.title,
       instructor: editingCourse.instructor,
       price: editingCourse.price,
       category: editingCourse.category,
+      deadline: editingCourse.deadline || null,
       duration: editingCourse.duration,
+      maxParticipants: Math.max(1, Number(editingCourse.maxParticipants) || 30),
+      initialParticipants: editingCourse.initialParticipants,
+      occupancy: computedOcc,
       badge: editingCourse.badge,
       status: editingCourse.status,
-      occupancy: Number(editingCourse.occupancy) || 0,
       description: editingCourse.description,
       translations: editingCourse.translations || {}
     });
@@ -114,6 +217,24 @@ export default function AdminCoursesTab() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+      {/* Category Manager Modal */}
+      <AdminCourseCategoriesModal
+        isOpen={categoriesModalOpen}
+        onClose={() => {
+          setCategoriesModalOpen(false);
+          setCategoryModalTarget(null);
+        }}
+        onSelectCategory={(selectedCatKey) => {
+          if (categoryModalTarget === 'edit' && editingCourse) {
+            setEditingCourse(prev => ({ ...prev, category: selectedCatKey }));
+          } else if (categoryModalTarget === 'create') {
+            setNewCourseCategory(selectedCatKey);
+          }
+          setCategoriesModalOpen(false);
+          setCategoryModalTarget(null);
+        }}
+      />
+
       {/* Delete Confirmation Modal */}
       <AdminConfirmModal
         isOpen={Boolean(courseToDelete)}
@@ -132,6 +253,18 @@ export default function AdminCoursesTab() {
           <p className="admin-section-subtitle">Yeni kurslar yaradın, redaktə edin, qiymətləri, müəllimləri və tədris planını tənzimləyin</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <button
+            type="button"
+            onClick={() => {
+              setCategoryModalTarget(null);
+              setCategoriesModalOpen(true);
+            }}
+            className="admin-btn-secondary"
+            style={{ fontSize: '11px', padding: '7px 12px' }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#b45309' }}>category</span>
+            <span>Kateqoriyaları İdarə Et</span>
+          </button>
           <span className="admin-count-badge">Cəmi: {coursesList.length} kurs</span>
           <button
             type="button"
@@ -152,147 +285,241 @@ export default function AdminCoursesTab() {
         icon="edit_note"
         onClose={() => setEditingCourse(null)}
       >
-        {editingCourse && (
-          <form onSubmit={handleSaveEditCourse} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
-              <div style={{ gridColumn: 'span 2' }}>
-                <label className="admin-label">Kursun Başlığı *</label>
-                <input
-                  type="text"
-                  required
-                  value={editingCourse.title}
-                  onChange={(e) => setEditingCourse({ ...editingCourse, title: e.target.value })}
-                  className="admin-input"
-                />
-              </div>
-              <div>
-                <label className="admin-label">Qiymət *</label>
-                <input
-                  type="text"
-                  required
-                  value={editingCourse.price}
-                  onChange={(e) => setEditingCourse({ ...editingCourse, price: e.target.value })}
-                  className="admin-input"
-                  style={{ fontWeight: 700, color: '#c5a059', fontFamily: "'Playfair Display',serif" }}
-                />
-              </div>
-            </div>
+        {editingCourse && (() => {
+          const courseAppsCount = getCourseApplicationsCount(editingCourse);
+          const totalApps = getCourseEffectiveApplicants(editingCourse);
+          const maxP = Math.max(1, Number(editingCourse.maxParticipants) || 30);
+          const computedOcc = Math.min(100, Math.round((totalApps / maxP) * 100));
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
-              <div>
-                <label className="admin-label">Kateqoriya (Mərkəzləşdirilmiş)</label>
-                <select
-                  value={editingCourse.category}
-                  onChange={(e) => setEditingCourse({ ...editingCourse, category: e.target.value })}
-                  className="admin-select"
-                >
-                  {courseCategories.map(cat => (
-                    <option key={cat.key} value={cat.key}>
-                      {cat.name} ({cat.key})
-                    </option>
-                  ))}
-                </select>
+          return (
+            <form onSubmit={handleSaveEditCourse} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+                <div style={{ gridColumn: 'span 2' }}>
+                  <label className="admin-label">Kursun Başlığı *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingCourse.title}
+                    onChange={(e) => setEditingCourse({ ...editingCourse, title: e.target.value })}
+                    className="admin-input"
+                  />
+                </div>
+                <div>
+                  <label className="admin-label">Qiymət *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingCourse.price}
+                    onChange={(e) => setEditingCourse({ ...editingCourse, price: e.target.value })}
+                    className="admin-input"
+                    style={{ fontWeight: 700, color: '#c5a059', fontFamily: "'Playfair Display',serif" }}
+                  />
+                </div>
               </div>
-              <div>
-                <label className="admin-label">Aparıcı Kouç</label>
-                <input
-                  type="text"
-                  value={editingCourse.instructor}
-                  onChange={(e) => setEditingCourse({ ...editingCourse, instructor: e.target.value })}
-                  className="admin-input"
-                />
-              </div>
-              <div>
-                <label className="admin-label">Müddət</label>
-                <input
-                  type="text"
-                  value={editingCourse.duration}
-                  onChange={(e) => setEditingCourse({ ...editingCourse, duration: e.target.value })}
-                  className="admin-input"
-                />
-              </div>
-              <div>
-                <label className="admin-label">Nişan (Badge)</label>
-                <input
-                  type="text"
-                  value={editingCourse.badge}
-                  onChange={(e) => setEditingCourse({ ...editingCourse, badge: e.target.value })}
-                  className="admin-input"
-                />
-              </div>
-            </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
-              <div>
-                <label className="admin-label">Status</label>
-                <select
-                  value={editingCourse.status}
-                  onChange={(e) => setEditingCourse({ ...editingCourse, status: e.target.value })}
-                  className="admin-select"
-                >
-                  <option value="Qrup qəbulu aktivdir">Qrup qəbulu aktivdir</option>
-                  <option value="Tezliklə">Tezliklə</option>
-                  <option value="Tam Dolub">Tam Dolub</option>
-                  <option value="Bağlanıb">Bağlanıb</option>
-                </select>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+                {/* Centralized Category with quick modal trigger */}
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <label className="admin-label" style={{ margin: 0 }}>Kateqoriya (Mərkəzləşdirilmiş)</label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCategoryModalTarget('edit');
+                        setCategoriesModalOpen(true);
+                      }}
+                      className="admin-btn-secondary"
+                      style={{ fontSize: '10px', padding: '2px 6px', height: 'auto', color: '#b45309' }}
+                      title="Yeni kateqoriya əlavə et və ya tərcümələri tənzimlə"
+                    >
+                      + Yarat / İdarə Et
+                    </button>
+                  </div>
+                  <select
+                    value={editingCourse.category}
+                    onChange={(e) => setEditingCourse({ ...editingCourse, category: e.target.value })}
+                    className="admin-select"
+                  >
+                    {courseCategories.map(cat => (
+                      <option key={cat.key} value={cat.key}>
+                        {cat.name} ({cat.key})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="admin-label">Aparıcı Kouç</label>
+                  <input
+                    type="text"
+                    value={editingCourse.instructor}
+                    onChange={(e) => setEditingCourse({ ...editingCourse, instructor: e.target.value })}
+                    className="admin-input"
+                  />
+                </div>
+
+                {/* Müddət / Son Tarix via DateTime picker */}
+                <div>
+                  <label className="admin-label">Son Tarix & Saat (Müddət Formatı) *</label>
+                  <input
+                    type="datetime-local"
+                    value={editingCourse.deadline || ''}
+                    onChange={(e) => handleEditCourseDeadlineChange(e.target.value)}
+                    className="admin-input"
+                  />
+                  {editingCourse.deadline ? (
+                    <div style={{ marginTop: '6px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                      <div style={{ fontSize: '11px', color: '#0f172a', fontWeight: 600 }}>
+                        {formatCourseDeadline(editingCourse.deadline, 'az')}
+                      </div>
+                      <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: '9px', background: '#ecfdf5', color: '#059669', padding: '1px 5px', borderRadius: '4px' }}>
+                          ✓ AZ: {formatCourseDeadline(editingCourse.deadline, 'az')}
+                        </span>
+                        <span style={{ fontSize: '9px', background: '#ecfdf5', color: '#059669', padding: '1px 5px', borderRadius: '4px' }}>
+                          ✓ EN: {formatCourseDeadline(editingCourse.deadline, 'en')}
+                        </span>
+                        <span style={{ fontSize: '9px', background: '#ecfdf5', color: '#059669', padding: '1px 5px', borderRadius: '4px' }}>
+                          ✓ TR: {formatCourseDeadline(editingCourse.deadline, 'tr')}
+                        </span>
+                        <span style={{ fontSize: '9px', background: '#ecfdf5', color: '#059669', padding: '1px 5px', borderRadius: '4px' }}>
+                          ✓ RU: {formatCourseDeadline(editingCourse.deadline, 'ru')}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: '10px', color: '#64748b', marginTop: '4px' }}>
+                      Cari müddət: <strong>{editingCourse.duration}</strong>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="admin-label">Nişan (Badge)</label>
+                  <input
+                    type="text"
+                    value={editingCourse.badge}
+                    onChange={(e) => setEditingCourse({ ...editingCourse, badge: e.target.value })}
+                    className="admin-input"
+                  />
+                </div>
               </div>
+
+              {/* Status and Automatic Occupancy based on Max Participants & Applications */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+                <div>
+                  <label className="admin-label">Status</label>
+                  <select
+                    value={editingCourse.status}
+                    onChange={(e) => setEditingCourse({ ...editingCourse, status: e.target.value })}
+                    className="admin-select"
+                  >
+                    <option value="Qrup qəbulu aktivdir">Qrup qəbulu aktivdir</option>
+                    <option value="Tezliklə">Tezliklə</option>
+                    <option value="Tam Dolub">Tam Dolub</option>
+                    <option value="Bağlanıb">Bağlanıb</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="admin-label">Maksimum İştirakçı Tutumu (Yer Sayı) *</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={editingCourse.maxParticipants || 30}
+                    onChange={(e) => setEditingCourse({
+                      ...editingCourse,
+                      maxParticipants: Math.max(1, parseInt(e.target.value) || 1)
+                    })}
+                    className="admin-input"
+                  />
+                </div>
+
+                {/* Automatic Occupancy Readout Card */}
+                <div style={{
+                  gridColumn: 'span 2',
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '8px',
+                  padding: '12px 14px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '6px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#b45309' }}>analytics</span>
+                      <span style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>
+                        Avtomatik Doluluq Hesabatı (Manual Deyil)
+                      </span>
+                    </div>
+                    <strong style={{ fontSize: '13px', color: computedOcc >= 100 ? '#ef4444' : '#b45309' }}>
+                      %{computedOcc} Doluluq ({totalApps} / {maxP} nəfər)
+                    </strong>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div style={{ height: '7px', background: '#e2e8f0', borderRadius: '10px', overflow: 'hidden' }}>
+                    <div style={{
+                      height: '100%',
+                      width: `${Math.min(100, computedOcc)}%`,
+                      background: computedOcc >= 100 ? '#ef4444' : 'linear-gradient(90deg, #b45309, #d4af37)',
+                      borderRadius: '10px',
+                      transition: 'width 0.3s ease'
+                    }} />
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '11px', color: '#64748b' }}>
+                    <span>Sistemdəki aktiv müraciətlər: <strong>{courseAppsCount} nəfər</strong></span>
+                    <span>Qalan boş yer: <strong>{Math.max(0, maxP - totalApps)} nəfər</strong></span>
+                  </div>
+                </div>
+              </div>
+
               <div>
-                <label className="admin-label">Doluluq Faizi (0-100%)</label>
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={editingCourse.occupancy ?? 0}
-                  onChange={(e) => setEditingCourse({ ...editingCourse, occupancy: Number(e.target.value) })}
+                <label className="admin-label">Təsvir</label>
+                <textarea
+                  rows="3"
+                  value={editingCourse.description}
+                  onChange={(e) => setEditingCourse({ ...editingCourse, description: e.target.value })}
                   className="admin-input"
+                  style={{ resize: 'vertical' }}
                 />
               </div>
-            </div>
 
-            <div>
-              <label className="admin-label">Təsvir</label>
-              <textarea
-                rows="3"
-                value={editingCourse.description}
-                onChange={(e) => setEditingCourse({ ...editingCourse, description: e.target.value })}
-                className="admin-input"
-                style={{ resize: 'vertical' }}
+              {/* Inline Translations Panel - Course */}
+              <AdminInlineTranslator
+                item={editingCourse}
+                fields={[
+                  { key: 'title', label: 'Kurs Başlığı' },
+                  { key: 'description', label: 'Təsvir', type: 'textarea', rows: 3 },
+                  { key: 'instructor', label: 'Aparıcı Kouç' },
+                  { key: 'duration', label: 'Müddət / Son Tarix' },
+                  { key: 'badge', label: 'Nişan (Badge)' },
+                  { key: 'status', label: 'Status' }
+                ]}
+                activeLang={editCourseTransLang}
+                setActiveLang={setEditCourseTransLang}
+                onUpdate={(updates) => setEditingCourse({ ...editingCourse, ...updates })}
+                isOpen={editCourseTransOpen}
+                setIsOpen={setEditCourseTransOpen}
               />
-            </div>
 
-            {/* Inline Translations Panel - Course */}
-            <AdminInlineTranslator
-              item={editingCourse}
-              fields={[
-                { key: 'title', label: 'Kurs Başlığı' },
-                { key: 'description', label: 'Təsvir', type: 'textarea', rows: 3 },
-                { key: 'instructor', label: 'Aparıcı Kouç' },
-                { key: 'duration', label: 'Müddət' },
-                { key: 'badge', label: 'Nişan (Badge)' },
-                { key: 'status', label: 'Status' }
-              ]}
-              activeLang={editCourseTransLang}
-              setActiveLang={setEditCourseTransLang}
-              onUpdate={(updates) => setEditingCourse({ ...editingCourse, ...updates })}
-              isOpen={editCourseTransOpen}
-              setIsOpen={setEditCourseTransOpen}
-            />
-
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
-              <button
-                type="button"
-                onClick={() => setEditingCourse(null)}
-                className="admin-btn-secondary"
-              >
-                Ləğv Et
-              </button>
-              <button type="submit" className="admin-btn-primary">
-                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>check</span>
-                <span>Dəyişiklikləri Yadda Saxla</span>
-              </button>
-            </div>
-          </form>
-        )}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
+                <button
+                  type="button"
+                  onClick={() => setEditingCourse(null)}
+                  className="admin-btn-secondary"
+                >
+                  Ləğv Et
+                </button>
+                <button type="submit" className="admin-btn-primary">
+                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>check</span>
+                  <span>Dəyişiklikləri Yadda Saxla</span>
+                </button>
+              </div>
+            </form>
+          );
+        })()}
       </AdminPopupModal>
 
       {/* Add Course Popup Modal */}
@@ -330,7 +557,21 @@ export default function AdminCoursesTab() {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
             <div>
-              <label className="admin-label">Kateqoriya (Mərkəzləşdirilmiş)</label>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                <label className="admin-label" style={{ margin: 0 }}>Kateqoriya (Mərkəzləşdirilmiş)</label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCategoryModalTarget('create');
+                    setCategoriesModalOpen(true);
+                  }}
+                  className="admin-btn-secondary"
+                  style={{ fontSize: '10px', padding: '2px 6px', height: 'auto', color: '#b45309' }}
+                  title="Yeni kateqoriya yarat"
+                >
+                  + Yarat / İdarə Et
+                </button>
+              </div>
               <select
                 value={newCourseCategory}
                 onChange={(e) => setNewCourseCategory(e.target.value)}
@@ -353,14 +594,18 @@ export default function AdminCoursesTab() {
               />
             </div>
             <div>
-              <label className="admin-label">Müddət</label>
+              <label className="admin-label">Son Qeydiyyat Tarixi & Saatı (Müddət)</label>
               <input
-                type="text"
-                value={newCourseDuration}
-                onChange={(e) => setNewCourseDuration(e.target.value)}
-                placeholder="8 Həftə"
+                type="datetime-local"
+                value={newCourseDeadline}
+                onChange={(e) => handleNewCourseDeadlineChange(e.target.value)}
                 className="admin-input"
               />
+              {newCourseDeadline && (
+                <div style={{ fontSize: '10px', color: '#059669', marginTop: '4px' }}>
+                  ✓ Tərcümələr avtomatik generasiya olundu: {formatCourseDeadline(newCourseDeadline, 'az')}
+                </div>
+              )}
             </div>
             <div>
               <label className="admin-label">Nişan (Badge)</label>
@@ -371,6 +616,22 @@ export default function AdminCoursesTab() {
                 placeholder="AKREDİTASİYALI"
                 className="admin-input"
               />
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+            <div>
+              <label className="admin-label">Maksimum İştirakçı Tutumu *</label>
+              <input
+                type="number"
+                min="1"
+                value={newCourseMaxParticipants}
+                onChange={(e) => setNewCourseMaxParticipants(Math.max(1, parseInt(e.target.value) || 1))}
+                className="admin-input"
+              />
+              <span style={{ fontSize: '10px', color: '#64748b', display: 'block', marginTop: '4px' }}>
+                Doluluq faizi daxil olan müraciətlərə görə avtomatik hesablanacaq.
+              </span>
             </div>
           </div>
 
@@ -392,7 +653,7 @@ export default function AdminCoursesTab() {
               title: newCourseTitle,
               description: newCourseDesc,
               instructor: newCourseInstructor,
-              duration: newCourseDuration,
+              duration: newCourseDeadline ? formatCourseDeadline(newCourseDeadline, 'az') : newCourseDuration,
               category: newCourseCategory,
               price: newCoursePrice,
               badge: newCourseBadge,
@@ -403,7 +664,7 @@ export default function AdminCoursesTab() {
               { key: 'title', label: 'Kurs Başlığı' },
               { key: 'description', label: 'Təsvir', type: 'textarea', rows: 3 },
               { key: 'instructor', label: 'Aparıcı Kouç' },
-              { key: 'duration', label: 'Müddət' },
+              { key: 'duration', label: 'Müddət / Son Tarix' },
               { key: 'badge', label: 'Nişan (Badge)' }
             ]}
             activeLang={newCourseTransLang}
@@ -448,10 +709,10 @@ export default function AdminCoursesTab() {
           {searchTerm && (
             <button
               type="button"
-              onClick={() => { setSearchTerm(''); setCurrentPage(1); }}
+              onClick={() => setSearchTerm('')}
               style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}
             >
-              ✕
+              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>close</span>
             </button>
           )}
         </div>
@@ -461,7 +722,7 @@ export default function AdminCoursesTab() {
             value={categoryFilter}
             onChange={e => { setCategoryFilter(e.target.value); setCurrentPage(1); }}
             className="admin-select"
-            style={{ width: 'auto', padding: '6px 12px', fontSize: '11px' }}
+            style={{ minWidth: '150px' }}
           >
             <option value="all">Bütün Kateqoriyalar</option>
             {courseCategories.map(cat => (
@@ -473,7 +734,7 @@ export default function AdminCoursesTab() {
             value={statusFilter}
             onChange={e => { setStatusFilter(e.target.value); setCurrentPage(1); }}
             className="admin-select"
-            style={{ width: 'auto', padding: '6px 12px', fontSize: '11px' }}
+            style={{ minWidth: '150px' }}
           >
             <option value="all">Bütün Statuslar</option>
             <option value="Qrup qəbulu aktivdir">Qrup qəbulu aktivdir</option>
@@ -502,57 +763,71 @@ export default function AdminCoursesTab() {
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {paginatedCourses.map(c => (
-            <div key={c.id} className="admin-list-item" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
-              <div style={{ flex: 1, minWidth: '280px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
-                  <span className="admin-badge-gold">{c.badge || 'KURS'}</span>
-                  <span style={{ fontSize: '11px', color: '#64748b' }}>{c.duration}</span>
-                  <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '4px', background: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0' }}>
-                    {c.status}
-                  </span>
-                </div>
-                <h5 style={{ fontSize: '15px', fontWeight: 700, fontFamily: "'Playfair Display',serif", color: '#0f172a', margin: '0 0 4px 0' }}>
-                  {c.title}
-                </h5>
-                <p style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.5, margin: '0 0 10px 0', maxWidth: '700px' }}>
-                  {c.description}
-                </p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '11px', color: '#64748b', flexWrap: 'wrap' }}>
-                  <span>Kouç: <strong style={{ color: '#0f172a' }}>{c.instructor}</strong></span>
-                  <span>•</span>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    Doluluq: <strong style={{ color: '#b45309' }}>{c.occupancy || 0}%</strong>
-                    <span style={{ display: 'inline-block', width: '48px', height: '5px', background: '#e2e8f0', borderRadius: '10px', overflow: 'hidden' }}>
-                      <span style={{ display: 'block', height: '100%', width: `${Math.min(c.occupancy || 0, 100)}%`, background: 'linear-gradient(90deg,#b45309,#d4af37)', borderRadius: '10px' }} />
+          {paginatedCourses.map(c => {
+            const courseApps = getCourseApplicationsCount(c);
+            const totalApps = getCourseEffectiveApplicants(c);
+            const maxP = c.maxParticipants || 30;
+            const occupancy = getCourseComputedOccupancy(c);
+
+            return (
+              <div key={c.id} className="admin-list-item" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+                <div style={{ flex: 1, minWidth: '280px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
+                    <span className="admin-badge-gold">{c.badge || 'KURS'}</span>
+                    <span style={{ fontSize: '11px', color: '#64748b' }}>{c.duration}</span>
+                    <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '4px', background: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0' }}>
+                      {c.status}
                     </span>
-                  </span>
-                  <span>•</span>
-                  <span>Qiymət: <strong style={{ color: '#b45309', fontFamily: "'Playfair Display',serif", fontSize: '13px' }}>{c.price}</strong></span>
+                  </div>
+                  <h5 style={{ fontSize: '15px', fontWeight: 700, fontFamily: "'Playfair Display',serif", color: '#0f172a', margin: '0 0 4px 0' }}>
+                    {c.title}
+                  </h5>
+                  <p style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.5, margin: '0 0 10px 0', maxWidth: '700px' }}>
+                    {c.description}
+                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '11px', color: '#64748b', flexWrap: 'wrap' }}>
+                    <span>Kouç: <strong style={{ color: '#0f172a' }}>{c.instructor}</strong></span>
+                    <span>•</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      Doluluq: <strong style={{ color: occupancy >= 100 ? '#ef4444' : '#b45309' }}>%{occupancy}</strong>
+                      <span style={{ color: '#94a3b8', fontSize: '10px' }}>({totalApps}/{maxP})</span>
+                      <span style={{ display: 'inline-block', width: '48px', height: '5px', background: '#e2e8f0', borderRadius: '10px', overflow: 'hidden' }}>
+                        <span style={{
+                          display: 'block',
+                          height: '100%',
+                          width: `${Math.min(occupancy, 100)}%`,
+                          background: occupancy >= 100 ? '#ef4444' : 'linear-gradient(90deg,#b45309,#d4af37)',
+                          borderRadius: '10px'
+                        }} />
+                      </span>
+                    </span>
+                    <span>•</span>
+                    <span>Qiymət: <strong style={{ color: '#b45309', fontFamily: "'Playfair Display',serif", fontSize: '13px' }}>{c.price}</strong></span>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                  <button
+                    type="button"
+                    onClick={() => setEditingCourse(c)}
+                    className="admin-btn-edit"
+                    title="Kursu redaktə et"
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>edit</span>
+                    <span>Redaktə</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCourseToDelete(c)}
+                    className="admin-btn-danger"
+                    title="Sil"
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>delete</span>
+                    <span>Sil</span>
+                  </button>
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                <button
-                  type="button"
-                  onClick={() => setEditingCourse(c)}
-                  className="admin-btn-edit"
-                  title="Kursu redaktə et"
-                >
-                  <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>edit</span>
-                  <span>Redaktə</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCourseToDelete(c)}
-                  className="admin-btn-danger"
-                  title="Sil"
-                >
-                  <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>delete</span>
-                  <span>Sil</span>
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -578,14 +853,15 @@ export default function AdminCoursesTab() {
                 type="button"
                 onClick={() => setCurrentPage(page)}
                 style={{
-                  padding: '4px 9px',
+                  width: '28px',
+                  height: '28px',
                   borderRadius: '6px',
+                  border: currentPage === page ? '1px solid #b45309' : '1px solid #cbd5e1',
+                  background: currentPage === page ? '#b45309' : '#ffffff',
+                  color: currentPage === page ? '#ffffff' : '#475569',
                   fontSize: '11px',
-                  fontWeight: currentPage === page ? 700 : 500,
-                  cursor: 'pointer',
-                  border: currentPage === page ? '1px solid #fde68a' : '1px solid #e2e8f0',
-                  background: currentPage === page ? '#fffbeb' : '#ffffff',
-                  color: currentPage === page ? '#b45309' : '#64748b'
+                  fontWeight: 600,
+                  cursor: 'pointer'
                 }}
               >
                 {page}
