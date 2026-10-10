@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 
 // Tab Components
@@ -48,62 +48,64 @@ export default function AdminModal() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [adminModalOpen, setAdminModalOpen]);
 
-  if (!adminModalOpen || (!canAccessAdmin?.(currentUser) && currentUser?.role !== 'Admin')) return null;
-
   const pendingAppsCount = applicationsList.filter(a => a.status === 'Yeni' && !a.archived).length;
 
-  const navCategories = [
-    {
-      group: 'Analitika',
-      items: [
-        { id: 'overview', icon: 'dashboard', label: 'İcmal & Statistika', perm: 'dashboard.view' }
-      ]
-    },
-    {
-      group: 'İdarəetmə',
-      items: [
-        { id: 'applications', icon: 'assignment', label: 'Müraciətlər', perm: 'applications.view', badge: pendingAppsCount > 0 ? pendingAppsCount : null },
-        { id: 'registrations', icon: 'how_to_reg', label: 'Qeydiyyatlar', perm: 'registrations.view' },
-        { id: 'users', icon: 'group', label: 'İstifadəçilər', perm: 'users.view' },
-        { id: 'roles', icon: 'shield_person', label: 'Rollar & İcazələr (RBAC)', perm: 'roles.view' },
-        { id: 'courses', icon: 'school', label: 'Kurslar & LMS', perm: 'courses.view' },
-        { id: 'categories', icon: 'category', label: 'Kateqoriyalar', perm: 'categories.view' },
-        { id: 'club', icon: 'card_membership', label: 'Club Tiers', perm: 'club.view' },
-        { id: 'events', icon: 'event', label: 'Tədbirlər', perm: 'events.view' },
-        { id: 'community', icon: 'forum', label: 'İcma & Forum', perm: 'community.view' }
-      ]
-    },
-    {
-      group: 'Tərcümələr (i18n)',
-      items: [
-        { id: 'static_translations', icon: 'spellcheck', label: 'Statik Çevrilər (UI)', perm: 'translations.view' },
-        { id: 'translations', icon: 'translate', label: 'Dinamik Məzmun Çevriləri', perm: 'translations.view' }
-      ]
-    },
-    {
-      group: 'Sistem & Rejimlər',
-      items: [
-        { id: 'maintenance', icon: 'construction', label: 'Texniki Qulluq Ekranı', perm: 'maintenance.view', highlight: Boolean(platformSettings?.maintenanceMode) },
-        { id: 'content', icon: 'edit_document', label: 'Məzmun (CMS)', perm: 'content.view' },
-        { id: 'database', icon: 'database', label: 'SQL Bazası', perm: 'database.view' },
-        { id: 'settings', icon: 'settings', label: 'Ümumi Parametrlər', perm: 'settings.view' }
-      ]
-    }
-  ];
+  const allowedNavCategories = useMemo(() => {
+    const navCategories = [
+      {
+        group: 'Analitika',
+        items: [
+          { id: 'overview', icon: 'dashboard', label: 'İcmal & Statistika', perm: 'dashboard.view' }
+        ]
+      },
+      {
+        group: 'İdarəetmə',
+        items: [
+          { id: 'applications', icon: 'assignment', label: 'Müraciətlər', perm: 'applications.view', badge: pendingAppsCount > 0 ? pendingAppsCount : null },
+          { id: 'registrations', icon: 'how_to_reg', label: 'Qeydiyyatlar', perm: 'registrations.view' },
+          { id: 'users', icon: 'group', label: 'İstifadəçilər', perm: 'users.view' },
+          { id: 'roles', icon: 'shield_person', label: 'Rollar & İcazələr (RBAC)', perm: 'roles.view' },
+          { id: 'courses', icon: 'school', label: 'Kurslar & LMS', perm: 'courses.view' },
+          { id: 'categories', icon: 'category', label: 'Kateqoriyalar', perm: 'categories.view' },
+          { id: 'club', icon: 'card_membership', label: 'Club Tiers', perm: 'club.view' },
+          { id: 'events', icon: 'event', label: 'Tədbirlər', perm: 'events.view' },
+          { id: 'community', icon: 'forum', label: 'İcma & Forum', perm: 'community.view' }
+        ]
+      },
+      {
+        group: 'Tərcümələr (i18n)',
+        items: [
+          { id: 'static_translations', icon: 'spellcheck', label: 'Statik Çevrilər (UI)', perm: 'translations.view' },
+          { id: 'translations', icon: 'translate', label: 'Dinamik Məzmun Çevriləri', perm: 'translations.view' }
+        ]
+      },
+      {
+        group: 'Sistem & Rejimlər',
+        items: [
+          { id: 'maintenance', icon: 'construction', label: 'Texniki Qulluq Ekranı', perm: 'maintenance.view', highlight: Boolean(platformSettings?.maintenanceMode) },
+          { id: 'content', icon: 'edit_document', label: 'Məzmun (CMS)', perm: 'content.view' },
+          { id: 'database', icon: 'database', label: 'SQL Bazası', perm: 'database.view' },
+          { id: 'settings', icon: 'settings', label: 'Ümumi Parametrlər', perm: 'settings.view' }
+        ]
+      }
+    ];
 
-  // Filter allowed navigation categories based on effective permissions
-  const allowedNavCategories = navCategories.map(cat => ({
-    ...cat,
-    items: cat.items.filter(item => hasPermission ? hasPermission(item.perm) : true)
-  })).filter(cat => cat.items.length > 0);
+    return navCategories.map(cat => ({
+      ...cat,
+      items: cat.items.filter(item => hasPermission ? hasPermission(item.perm) : true)
+    })).filter(cat => cat.items.length > 0);
+  }, [hasPermission, pendingAppsCount, platformSettings?.maintenanceMode]);
 
   // Fallback to first available tab if current activeTab is not permitted
   useEffect(() => {
+    if (!adminModalOpen) return;
     const allAllowedItemIds = allowedNavCategories.flatMap(c => c.items.map(i => i.id));
     if (allAllowedItemIds.length > 0 && !allAllowedItemIds.includes(activeTab)) {
       setActiveTab(allAllowedItemIds[0]);
     }
-  }, [allowedNavCategories, activeTab]);
+  }, [adminModalOpen, allowedNavCategories, activeTab]);
+
+  if (!adminModalOpen || (!canAccessAdmin?.(currentUser) && currentUser?.role !== 'Admin')) return null;
 
   return (
     <div className="fixed inset-0 z-50 admin-backdrop w-screen h-screen overflow-hidden animate-fadeIn">
