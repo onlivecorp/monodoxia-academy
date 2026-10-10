@@ -64,8 +64,6 @@ export default function AdminTranslationsTab() {
     courses: [
       { key: 'title', label: 'Kursun Adı', required: true },
       { key: 'description', label: 'Təsvir', type: 'textarea' },
-      { key: 'instructor', label: 'Aparıcı Kouç' },
-      { key: 'duration', label: 'Müddət' },
       { key: 'price', label: 'Qiymət' },
       { key: 'badge', label: 'Etiket / Nişan (Badge)' },
       { key: 'status', label: 'Status Mətni' }

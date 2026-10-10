@@ -16,6 +16,8 @@ export default function AdminCoursesTab() {
     deleteCourse,
     categoriesList = [],
     applicationsList = [],
+    usersList = [],
+    coachesList = [],
     showToast
   } = useApp();
 
@@ -32,7 +34,7 @@ export default function AdminCoursesTab() {
 
   // Add Course State
   const [newCourseTitle, setNewCourseTitle] = useState('');
-  const [newCourseInstructor, setNewCourseInstructor] = useState('Dr. Leyla Əliyeva');
+  const [newCourseInstructor, setNewCourseInstructor] = useState('');
   const [newCoursePrice, setNewCoursePrice] = useState('₼ 450');
   const [newCourseCategory, setNewCourseCategory] = useState('psychology');
   const [newCourseDeadline, setNewCourseDeadline] = useState('');
@@ -51,6 +53,59 @@ export default function AdminCoursesTab() {
 
   // Delete Confirmation State
   const [courseToDelete, setCourseToDelete] = useState(null);
+
+  // Users & Coaches Options for Instructor Selection
+  const userOptions = useMemo(() => {
+    const list = [];
+    const seen = new Set();
+
+    // 1. Users from usersList (coaches first, then others)
+    const coaches = (usersList || []).filter(u => u.role === 'Kouç');
+    const others = (usersList || []).filter(u => u.role !== 'Kouç');
+
+    [...coaches, ...others].forEach(u => {
+      const name = (u.name || `${u.firstName || ''} ${u.lastName || ''}`).trim();
+      if (name && !seen.has(name)) {
+        seen.add(name);
+        list.push({
+          id: u.id || name,
+          name,
+          role: u.role || 'İstifadəçi',
+          email: u.email || ''
+        });
+      }
+    });
+
+    // 2. Coaches from coachesList
+    (coachesList || []).forEach(c => {
+      const name = (c.name || '').trim();
+      if (name && !seen.has(name)) {
+        seen.add(name);
+        list.push({
+          id: c.id || name,
+          name,
+          role: c.title || 'Kouç',
+          email: c.email || ''
+        });
+      }
+    });
+
+    // 3. Fallback: instructors from existing courses
+    (coursesList || []).forEach(c => {
+      const name = (c.instructor || '').trim();
+      if (name && !seen.has(name)) {
+        seen.add(name);
+        list.push({
+          id: `inst-${name}`,
+          name,
+          role: 'Kouç',
+          email: ''
+        });
+      }
+    });
+
+    return list;
+  }, [usersList, coachesList, coursesList]);
 
   // Helper: Count active applications for a given course
   const getCourseApplicationsCount = (course) => {
@@ -320,21 +375,7 @@ export default function AdminCoursesTab() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
                 {/* Centralized Category with quick modal trigger */}
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-                    <label className="admin-label" style={{ margin: 0 }}>Kateqoriya (Mərkəzləşdirilmiş)</label>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setCategoryModalTarget('edit');
-                        setCategoriesModalOpen(true);
-                      }}
-                      className="admin-btn-secondary"
-                      style={{ fontSize: '10px', padding: '2px 6px', height: 'auto', color: '#b45309' }}
-                      title="Yeni kateqoriya əlavə et və ya tərcümələri tənzimlə"
-                    >
-                      + Yarat / İdarə Et
-                    </button>
-                  </div>
+                  <label className="admin-label">Kateqoriya (Mərkəzləşdirilmiş)</label>
                   <select
                     value={editingCourse.category}
                     onChange={(e) => setEditingCourse({ ...editingCourse, category: e.target.value })}
@@ -349,12 +390,23 @@ export default function AdminCoursesTab() {
                 </div>
                 <div>
                   <label className="admin-label">Aparıcı Kouç</label>
-                  <input
-                    type="text"
-                    value={editingCourse.instructor}
+                  <select
+                    value={editingCourse.instructor || ''}
                     onChange={(e) => setEditingCourse({ ...editingCourse, instructor: e.target.value })}
-                    className="admin-input"
-                  />
+                    className="admin-select"
+                  >
+                    <option value="">-- İstifadəçi / Kouç Seçin --</option>
+                    {editingCourse.instructor && !userOptions.some(u => u.name === editingCourse.instructor) && (
+                      <option value={editingCourse.instructor}>
+                        {editingCourse.instructor} (Mövcud)
+                      </option>
+                    )}
+                    {userOptions.map(u => (
+                      <option key={u.id} value={u.name}>
+                        {u.name} {u.role ? `(${u.role})` : ''} {u.email ? `— ${u.email}` : ''}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 {/* Müddət / Son Tarix via DateTime picker */}
@@ -492,8 +544,6 @@ export default function AdminCoursesTab() {
                 fields={[
                   { key: 'title', label: 'Kurs Başlığı' },
                   { key: 'description', label: 'Təsvir', type: 'textarea', rows: 3 },
-                  { key: 'instructor', label: 'Aparıcı Kouç' },
-                  { key: 'duration', label: 'Müddət / Son Tarix' },
                   { key: 'badge', label: 'Nişan (Badge)' },
                   { key: 'status', label: 'Status' }
                 ]}
@@ -557,21 +607,7 @@ export default function AdminCoursesTab() {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-                <label className="admin-label" style={{ margin: 0 }}>Kateqoriya (Mərkəzləşdirilmiş)</label>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCategoryModalTarget('create');
-                    setCategoriesModalOpen(true);
-                  }}
-                  className="admin-btn-secondary"
-                  style={{ fontSize: '10px', padding: '2px 6px', height: 'auto', color: '#b45309' }}
-                  title="Yeni kateqoriya yarat"
-                >
-                  + Yarat / İdarə Et
-                </button>
-              </div>
+              <label className="admin-label">Kateqoriya (Mərkəzləşdirilmiş)</label>
               <select
                 value={newCourseCategory}
                 onChange={(e) => setNewCourseCategory(e.target.value)}
@@ -586,12 +622,18 @@ export default function AdminCoursesTab() {
             </div>
             <div>
               <label className="admin-label">Aparıcı Kouç</label>
-              <input
-                type="text"
+              <select
                 value={newCourseInstructor}
                 onChange={(e) => setNewCourseInstructor(e.target.value)}
-                className="admin-input"
-              />
+                className="admin-select"
+              >
+                <option value="">-- İstifadəçi / Kouç Seçin --</option>
+                {userOptions.map(u => (
+                  <option key={u.id} value={u.name}>
+                    {u.name} {u.role ? `(${u.role})` : ''} {u.email ? `— ${u.email}` : ''}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="admin-label">Son Qeydiyyat Tarixi & Saatı (Müddət)</label>
@@ -663,8 +705,6 @@ export default function AdminCoursesTab() {
             fields={[
               { key: 'title', label: 'Kurs Başlığı' },
               { key: 'description', label: 'Təsvir', type: 'textarea', rows: 3 },
-              { key: 'instructor', label: 'Aparıcı Kouç' },
-              { key: 'duration', label: 'Müddət / Son Tarix' },
               { key: 'badge', label: 'Nişan (Badge)' }
             ]}
             activeLang={newCourseTransLang}
@@ -695,8 +735,8 @@ export default function AdminCoursesTab() {
       </AdminPopupModal>
 
       {/* Filter & Search Toolbar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
-        <div style={{ position: 'relative', flex: 1, minWidth: '220px', maxWidth: '360px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+        <div style={{ position: 'relative', flex: '1 1 240px', minWidth: '220px', maxWidth: '380px' }}>
           <span className="material-symbols-outlined" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', fontSize: '16px', color: '#94a3b8' }}>search</span>
           <input
             type="text"
@@ -704,7 +744,7 @@ export default function AdminCoursesTab() {
             value={searchTerm}
             onChange={e => { setSearchTerm(e.target.value); setCurrentPage(1); }}
             className="admin-input"
-            style={{ paddingLeft: '34px' }}
+            style={{ paddingLeft: '34px', width: '100%' }}
           />
           {searchTerm && (
             <button
@@ -717,31 +757,29 @@ export default function AdminCoursesTab() {
           )}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          <select
-            value={categoryFilter}
-            onChange={e => { setCategoryFilter(e.target.value); setCurrentPage(1); }}
-            className="admin-select"
-            style={{ minWidth: '150px' }}
-          >
-            <option value="all">Bütün Kateqoriyalar</option>
-            {courseCategories.map(cat => (
-              <option key={cat.key} value={cat.key}>{cat.name}</option>
-            ))}
-          </select>
+        <select
+          value={categoryFilter}
+          onChange={e => { setCategoryFilter(e.target.value); setCurrentPage(1); }}
+          className="admin-select"
+          style={{ width: 'auto', minWidth: '170px', flexShrink: 0 }}
+        >
+          <option value="all">Bütün Kateqoriyalar</option>
+          {courseCategories.map(cat => (
+            <option key={cat.key} value={cat.key}>{cat.name}</option>
+          ))}
+        </select>
 
-          <select
-            value={statusFilter}
-            onChange={e => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-            className="admin-select"
-            style={{ minWidth: '150px' }}
-          >
-            <option value="all">Bütün Statuslar</option>
-            <option value="Qrup qəbulu aktivdir">Qrup qəbulu aktivdir</option>
-            <option value="Tezliklə">Tezliklə</option>
-            <option value="Tam Dolub">Tam Dolub</option>
-          </select>
-        </div>
+        <select
+          value={statusFilter}
+          onChange={e => { setStatusFilter(e.target.value); setCurrentPage(1); }}
+          className="admin-select"
+          style={{ width: 'auto', minWidth: '150px', flexShrink: 0 }}
+        >
+          <option value="all">Bütün Statuslar</option>
+          <option value="Qrup qəbulu aktivdir">Qrup qəbulu aktivdir</option>
+          <option value="Tezliklə">Tezliklə</option>
+          <option value="Tam Dolub">Tam Dolub</option>
+        </select>
       </div>
 
       {/* Courses List */}
