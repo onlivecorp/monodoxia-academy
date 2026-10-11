@@ -1798,6 +1798,10 @@ export function AppProvider({ children }) {
     showToast('İnkişaf sahəsi silindi', 'info');
   };
 
+  const updateAllAreas = (newList) => {
+    setAreasList(newList);
+  };
+
   // Coaches Operations
   const addCoach = (coach) => {
     const newCoach = {
@@ -1970,6 +1974,7 @@ export function AppProvider({ children }) {
       addArea,
       updateArea,
       deleteArea,
+      updateAllAreas,
       coachesList,
       addCoach,
       updateCoach,

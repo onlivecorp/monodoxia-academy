@@ -12,6 +12,11 @@ export default function AdminCmsTab() {
     updatePillar,
     deletePillar,
     updateAllPillars,
+    areasList = [],
+    addArea,
+    updateArea,
+    deleteArea,
+    updateAllAreas,
     testimonialsList = [],
     addTestimonial,
     deleteTestimonial,
@@ -32,7 +37,7 @@ export default function AdminCmsTab() {
     { id: 'navbar', label: 'Loqo & Naviqasiya' },
     { id: 'hero', label: 'Hero Bölməsi' },
     { id: 'about', label: 'Akademiyanın Məramı' },
-    { id: 'areas', label: 'Sahələr' },
+    { id: 'areas', label: 'Fundamental Sahələr' },
     { id: 'academy', label: 'Akademiya' },
     { id: 'club', label: 'Klub' },
     { id: 'coaches', label: 'Koçlar' },
@@ -94,6 +99,14 @@ export default function AdminCmsTab() {
     return (pillarsList && pillarsList.length > 0) ? [...pillarsList] : [];
   });
 
+  // Areas states & direct fields
+  const [cmsAreasList, setCmsAreasList] = useState(() => {
+    if (homeContent?.areas?.items && Array.isArray(homeContent.areas.items) && homeContent.areas.items.length > 0) {
+      return homeContent.areas.items;
+    }
+    return (areasList && areasList.length > 0) ? [...areasList] : [];
+  });
+
   // Delete Confirmation State
   const [itemToDelete, setItemToDelete] = useState(null); // { type: 'coach'|'pillar'|'testimonial'|'faq', item }
 
@@ -117,8 +130,14 @@ export default function AdminCmsTab() {
       } else if (pillarsList && pillarsList.length > 0) {
         setCmsPillars(pillarsList);
       }
+
+      if (homeContent.areas?.items && Array.isArray(homeContent.areas.items) && homeContent.areas.items.length > 0) {
+        setCmsAreasList(homeContent.areas.items);
+      } else if (areasList && areasList.length > 0) {
+        setCmsAreasList(areasList);
+      }
     }
-  }, [homeContent, pillarsList]);
+  }, [homeContent, pillarsList, areasList]);
 
   const updatePillarAt = (idx, updaterOrVal) => {
     setCmsPillars(prev => {
@@ -153,6 +172,41 @@ export default function AdminCmsTab() {
     showToast('Yeni dəyər kartı sahəsi əlavə edildi', 'success');
   };
 
+  const updateAreaAt = (idx, updaterOrVal) => {
+    setCmsAreasList(prev => {
+      const copy = [...prev];
+      const cur = copy[idx] || {};
+      const next = typeof updaterOrVal === 'function' ? updaterOrVal(cur) : updaterOrVal;
+      copy[idx] = next;
+      return copy;
+    });
+  };
+
+  const removeAreaAt = (idx) => {
+    setCmsAreasList(prev => prev.filter((_, i) => i !== idx));
+    showToast('Sahə çıxarıldı', 'info');
+  };
+
+  const addNewAreaCard = () => {
+    const num = cmsAreasList.length + 1;
+    const padNum = String(num).padStart(2, '0');
+    const newArea = {
+      id: 'area-' + Date.now(),
+      number: `${padNum} / SAHƏ`,
+      title: `Yeni Sahə ${num}`,
+      icon: 'explore',
+      desc: 'İnkişaf istiqaməti və tematik modul haqqında ətraflı məlumat.',
+      translations: {
+        az: { number: `${padNum} / SAHƏ`, title: `Yeni Sahə ${num}`, desc: 'İnkişaf istiqaməti və tematik modul haqqında ətraflı məlumat.' },
+        en: { number: `${padNum} / PILLAR`, title: `New Area ${num}`, desc: 'Detailed information about this personal development pillar.' },
+        tr: { number: `${padNum} / ALAN`, title: `Yeni Alan ${num}`, desc: 'Bu gelişim boyutu ve tematik modül hakkında detaylı bilgi.' },
+        ru: { number: `${padNum} / СФЕРА`, title: `Новая Сфера ${num}`, desc: 'Подробная информация о данном направлении личностного роста.' }
+      }
+    };
+    setCmsAreasList(prev => [...prev, newArea]);
+    showToast('Yeni inkişaf sahəsi əlavə edildi', 'success');
+  };
+
   const saveBlock = (blockKey, data) => {
     updateHomeBlock(blockKey, data);
     showToast('Məzmun yadda saxlandı!', 'success');
@@ -168,6 +222,18 @@ export default function AdminCmsTab() {
       updateAllPillars(cmsPillars);
     }
     showToast('Akademiyanın Məramı və bütün dəyər kartları yadda saxlandı!', 'success');
+  };
+
+  const saveAreasWithItems = () => {
+    const payload = {
+      ...cmsAreas,
+      items: cmsAreasList
+    };
+    saveBlock('areas', payload);
+    if (updateAllAreas) {
+      updateAllAreas(cmsAreasList);
+    }
+    showToast('Fundamental sahələr və bütün modullar yadda saxlandı!', 'success');
   };
 
   const confirmDeleteAction = () => {
@@ -866,15 +932,149 @@ export default function AdminCmsTab() {
         </div>
       )}
 
-      {/* AREAS */}
+      {/* FUNDAMENTAL SAHƏLƏR (AREAS) */}
       {cmsBlock === 'areas' && (
-        <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0' }}>Sahələr Bölməsi</h5>
-          <Field label="Üst Etiket" block={cmsAreas} setBlock={setCmsAreas} fieldKey="badge" />
-          <Field label="Başlıq" block={cmsAreas} setBlock={setCmsAreas} fieldKey="title" />
-          <Field label="Təsvir (desc)" block={cmsAreas} setBlock={setCmsAreas} fieldKey="desc" multiline />
-          <div>
-            <button onClick={() => saveBlock('areas', cmsAreas)} className="admin-btn-primary">Yadda Saxla</button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Bölmə Başlıq və Təsviri */}
+          <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0' }}>
+              <div>
+                <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Fundamental Sahələr – Başlıq və Giriş Mətni</h5>
+                <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0 0' }}>Ana səhifədəki 8 inkişaf istiqamətinin üst başlığı və təsviri</p>
+              </div>
+              <span style={{ fontSize: '11px', color: '#64748b', background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px' }}>Ana Səhifə</span>
+            </div>
+            <Field label="Üst Etiket (Badge)" block={cmsAreas} setBlock={setCmsAreas} fieldKey="badge" />
+            <Field label="Əsas Başlıq" block={cmsAreas} setBlock={setCmsAreas} fieldKey="title" />
+            <Field label="Giriş Təsviri (desc)" block={cmsAreas} setBlock={setCmsAreas} fieldKey="desc" multiline rows={3} />
+            <div>
+              <button onClick={saveAreasWithItems} className="admin-btn-primary">Yadda Saxla</button>
+            </div>
+          </div>
+
+          {/* SAHƏLƏR (AREAS GRID) – BİRBAŞA REDAKTƏ SAHƏLƏRİ */}
+          <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0', flexWrap: 'wrap', gap: '8px' }}>
+              <div>
+                <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                  Fundamental Sahələr – İnkişaf İstiqamətləri ({cmsAreasList.length} Sahə)
+                </h5>
+                <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0 0' }}>
+                  Ana səhifədə qrid şəklində göstərilən bütün inkişaf sahələrini birbaşa redaktə edin və ya yenilərini əlavə edin
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={addNewAreaCard}
+                className="admin-btn-secondary"
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#b45309' }}>add</span>
+                <span>Yeni Sahə Əlavə Et</span>
+              </button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
+              {cmsAreasList.map((a, idx) => (
+                <div
+                  key={a.id || idx}
+                  style={{
+                    padding: '14px',
+                    background: '#f8fafc',
+                    border: '1.5px solid #e2e8f0',
+                    borderRadius: '10px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '6px', borderBottom: '1px solid #e2e8f0' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        color: '#b45309',
+                        background: '#fef3c7',
+                        padding: '2px 8px',
+                        borderRadius: '4px'
+                      }}>
+                        Sahə #{idx + 1}
+                      </span>
+                      <span style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>
+                        {a.title || `Sahə ${idx + 1}`}
+                      </span>
+                    </div>
+                    {cmsAreasList.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeAreaAt(idx)}
+                        className="admin-btn-danger"
+                        style={{ padding: '2px 8px', fontSize: '11px' }}
+                        title="Bu sahəni sil"
+                      >
+                        Sil
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Nömrə / Kod Sahəsi (Məs: 01 / DƏRİNLİK) */}
+                  <Field
+                    label="Nömrə / Kod (Məs: 01 / DƏRİNLİK)"
+                    block={a}
+                    setBlock={updater => updateAreaAt(idx, updater)}
+                    fieldKey="number"
+                  />
+
+                  {/* İkon Sahəsi */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <label className="admin-label" style={{ margin: 0 }}>İkon (Material Symbols)</label>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '22px', color: '#b45309', background: '#ffffff', padding: '6px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
+                        {a.icon || 'explore'}
+                      </span>
+                      <input
+                        type="text"
+                        value={a.icon || ''}
+                        onChange={e => updateAreaAt(idx, prev => ({ ...prev, icon: e.target.value }))}
+                        className="admin-input"
+                        placeholder="Məs: psychology, trending_up, self_improvement, nest_eco_leaf, fingerprint..."
+                        style={{ flex: 1 }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Sahə Adı (Başlıq) */}
+                  <Field
+                    label="Sahə Adı (Başlıq)"
+                    block={a}
+                    setBlock={updater => updateAreaAt(idx, updater)}
+                    fieldKey="title"
+                  />
+
+                  {/* Sahə İzahı (Təsvir) */}
+                  <Field
+                    label="Sahə İzahı (Təsvir)"
+                    block={a}
+                    setBlock={updater => updateAreaAt(idx, updater)}
+                    fieldKey="desc"
+                    multiline
+                    rows={3}
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div style={{ paddingTop: '8px', display: 'flex', gap: '10px' }}>
+              <button
+                type="button"
+                onClick={saveAreasWithItems}
+                className="admin-btn-primary"
+                style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>save</span>
+                <span>Bütün Sahələri və Giriş Mətnini Yadda Saxla</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

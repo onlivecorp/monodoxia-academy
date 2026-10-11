@@ -7,6 +7,9 @@ export default function Areas() {
   const { t, currentLang, defaultLang } = useLanguage();
   const { homeContent, areasList } = useApp();
   const areas = homeContent?.areas || {};
+  const activeAreas = (areas?.items && Array.isArray(areas.items) && areas.items.length > 0)
+    ? areas.items
+    : (areasList && areasList.length > 0 ? areasList : []);
 
   return (
     <section className="py-space-2xl md:py-space-3xl bg-surface border-b border-outline-variant/40">
@@ -25,7 +28,7 @@ export default function Areas() {
 
         {/* DYNAMIC AREAS GRID */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {areasList.map((a) => (
+          {activeAreas.map((a) => (
             <div
               key={a.id}
               className="group bg-surface-container-lowest p-6 rounded border border-outline-variant/60 hover:border-secondary transition-all duration-300 gold-glow-hover flex flex-col justify-between"
