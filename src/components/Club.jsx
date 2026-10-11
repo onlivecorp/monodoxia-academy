@@ -17,11 +17,21 @@ export default function Club() {
     "Qapalı intellektual icma müzakirələri: Konfidensial təhlükəsiz platforma.",
     "Oflayn tədbirlərə və retreat-lərə VIP giriş: Qapalı illik düşərgələr."
   ];
-  const perks = club.perks && club.perks.length > 0 ? club.perks : defaultPerks;
+  const clubPerks = getLocalizedArray(club, 'perks', currentLang, defaultLang);
+  const perks = clubPerks && clubPerks.length > 0 ? clubPerks : (club.perks && club.perks.length > 0 ? club.perks : defaultPerks);
 
-  const tierName = premiumTier ? getLocalized(premiumTier, 'name', currentLang, defaultLang) : t('club_tier_title');
-  const tierPeriod = premiumTier ? getLocalized(premiumTier, 'period', currentLang, defaultLang) : '/ aylıq';
-  const tierFeatures = premiumTier ? getLocalizedArray(premiumTier, 'features', currentLang, defaultLang) : [];
+  const tierBadge = getLocalized(club, 'tierBadge', currentLang, defaultLang) || 'PREMIUM REZİDENT';
+  const tierName = getLocalized(club, 'tierTitle', currentLang, defaultLang) || (premiumTier ? getLocalized(premiumTier, 'name', currentLang, defaultLang) : t('club_tier_title'));
+  const tierSubtitle = getLocalized(club, 'tierSubtitle', currentLang, defaultLang) || t('club_tier_sub');
+  const tierPrice = (club.tierPrice !== undefined && club.tierPrice !== null && String(club.tierPrice).trim() !== '') ? club.tierPrice : (premiumTier ? premiumTier.price : '95');
+  const tierPeriod = getLocalized(club, 'tierPeriod', currentLang, defaultLang) || (premiumTier ? getLocalized(premiumTier, 'period', currentLang, defaultLang) : (t('club_tier_period') || '/ aylıq'));
+  const tierOffer = getLocalized(club, 'tierOffer', currentLang, defaultLang) || t('club_tier_offer');
+  
+  const clubFeatures = getLocalizedArray(club, 'tierFeatures', currentLang, defaultLang);
+  const tierFeatures = clubFeatures && clubFeatures.length > 0
+    ? clubFeatures
+    : (premiumTier ? getLocalizedArray(premiumTier, 'features', currentLang, defaultLang) : []);
+  const tierCtaText = getLocalized(club, 'tierCtaText', currentLang, defaultLang) || t('club_tier_cta');
 
   return (
     <section className="py-space-2xl md:py-space-3xl bg-primary-container text-on-primary relative overflow-hidden" id="club">
@@ -53,7 +63,7 @@ export default function Club() {
             </ul>
             <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
               <button
-                onClick={() => openApplication(premiumTier || { id: 'premium', title: 'Premium Rezidentlik', price: '₼ 95' }, 'club')}
+                onClick={() => openApplication(premiumTier || { id: 'premium', title: tierName, price: `₼ ${tierPrice}` }, 'club')}
                 className="bg-secondary-fixed text-on-secondary-fixed hover:bg-secondary-container px-8 py-3.5 rounded text-label-lg font-label-lg tracking-wider text-center transition-colors font-semibold flex items-center justify-center gap-2 shadow-md"
               >
                 <span>{userTier === 'Premium' || userTier === 'VIP' ? 'Rezident Statusunuz Aktivdir' : (userClubApp ? `Müraciət: ${userClubApp.status}` : (getLocalized(club, 'ctaBtnText', currentLang, defaultLang) || t('club_join_btn')))}</span>
@@ -70,22 +80,22 @@ export default function Club() {
           <div className="lg:col-span-5">
             <div className="bg-surface-bright text-on-surface p-8 rounded-lg border border-secondary/40 shadow-2xl relative">
               <div className="absolute -top-3 right-6 bg-secondary text-surface-bright px-3 py-1 rounded text-label-sm font-label-sm uppercase tracking-widest">
-                PREMIUM REZİDENT
+                {tierBadge}
               </div>
               <h3 className="font-headline-md text-headline-md font-serif text-primary">
                 {tierName}
               </h3>
               <p className="font-body-sm text-body-sm text-on-surface-variant mt-1 mb-6">
-                {t('club_tier_sub')}
+                {tierSubtitle}
               </p>
               <div className="py-4 border-y border-outline-variant/40 mb-6">
                 <span className="font-display-lg text-display-lg text-primary font-serif">
-                  ₼ {premiumTier ? premiumTier.price : '95'}
+                  ₼ {tierPrice}
                 </span>
                 <span className="font-body-md text-body-md text-on-surface-variant">
                   {' '}{tierPeriod}
                 </span>
-                <div className="text-xs text-secondary mt-1">{t('club_tier_offer')}</div>
+                <div className="text-xs text-secondary mt-1">{tierOffer}</div>
               </div>
               <div className="space-y-3 mb-8">
                 {tierFeatures.map((feat, idx) => (
@@ -96,10 +106,10 @@ export default function Club() {
                 ))}
               </div>
               <button
-                onClick={() => openApplication(premiumTier || { id: 'premium', title: 'Premium Rezidentlik', price: '₼ 95' }, 'club')}
+                onClick={() => openApplication(premiumTier || { id: 'premium', title: tierName, price: `₼ ${tierPrice}` }, 'club')}
                 className="block w-full py-3 text-center bg-primary-container text-on-primary hover:bg-[#112240] rounded text-label-md font-label-md uppercase tracking-wider transition-colors shadow-sm"
               >
-                {userTier === 'Premium' || userTier === 'VIP' ? 'Aktiv Rezident' : (userClubApp ? `Müraciət Statusu: ${userClubApp.status}` : t('club_tier_cta'))}
+                {userTier === 'Premium' || userTier === 'VIP' ? 'Aktiv Rezident' : (userClubApp ? `Müraciət Statusu: ${userClubApp.status}` : tierCtaText)}
               </button>
             </div>
           </div>

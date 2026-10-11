@@ -7,6 +7,8 @@ export default function AdminCmsTab() {
   const {
     homeContent = {},
     updateHomeBlock,
+    clubTiersList = [],
+    updateClubTier,
     pillarsList = [],
     addPillar,
     updatePillar,
@@ -59,13 +61,167 @@ export default function AdminCmsTab() {
   const [cmsLang, setCmsLang] = useState('az');
   const [cmsShowAllLangs, setCmsShowAllLangs] = useState(false);
 
+  const defaultClubData = {
+    badge: "QAPALI İCMA ÜZVLÜYÜ",
+    title: "Monodoxia Coaching Club — Həmfikirlərin Seçilmiş Məkanı",
+    desc: "Davamlı inkişaf fərdi bir hadisə deyil, doğru mühitin bəhrəsidir. Coaching Club — dərin suallar verən, səthilikdən uzaq, bir-birinin təkamülünə töhfə verən seçkin şəxslərin qapalı ekosistemidir.",
+    perks: [
+      "Həftəlik canlı mentorluq və mastermind sessiyaları: Təcrübəli mentorlarla birbaşa dialoq.",
+      "Özəl meditasiya və təcrübə arxivi: 100+ saatlıq audio və video bələdçilər.",
+      "Qapalı intellektual icma müzakirələri: Konfidensial təhlükəsiz platforma.",
+      "Oflayn tədbirlərə və retreat-lərə VIP giriş: Qapalı illik düşərgələr."
+    ],
+    ctaBtnText: "Kluba qoşul",
+    limitedText: "Məhdud sayda yer: Aylıq qəbul",
+    tierBadge: "PREMIUM REZİDENT",
+    tierTitle: "Premium Rezident",
+    tierSubtitle: "Aylıq və ya illik daxil olma paketi",
+    tierPrice: "95",
+    tierPeriod: "/ aylıq",
+    tierOffer: "İllik ödənişdə 2 ay hədiyyə",
+    tierFeatures: [
+      "Bütün canlı klub tədbirləri və masterklaslar",
+      "Telegram VIP məxfi müzakirə otağı",
+      "Kurslara 25% fərdi endirim",
+      "Aylıq 1 fərdi diaqnostik orientasiya",
+      "Tam 100+ saatlıq meditasiya və video arxivi"
+    ],
+    tierCtaText: "REZİDENT OL",
+    translations: {
+      az: {
+        badge: "QAPALI İCMA ÜZVLÜYÜ",
+        title: "Monodoxia Coaching Club — Həmfikirlərin Seçilmiş Məkanı",
+        desc: "Davamlı inkişaf fərdi bir hadisə deyil, doğru mühitin bəhrəsidir. Coaching Club — dərin suallar verən, səthilikdən uzaq, bir-birinin təkamülünə töhfə verən seçkin şəxslərin qapalı ekosistemidir.",
+        perks: [
+          "Həftəlik canlı mentorluq və mastermind sessiyaları: Təcrübəli mentorlarla birbaşa dialoq.",
+          "Özəl meditasiya və təcrübə arxivi: 100+ saatlıq audio və video bələdçilər.",
+          "Qapalı intellektual icma müzakirələri: Konfidensial təhlükəsiz platforma.",
+          "Oflayn tədbirlərə və retreat-lərə VIP giriş: Qapalı illik düşərgələr."
+        ],
+        ctaBtnText: "Kluba qoşul",
+        limitedText: "Məhdud sayda yer: Aylıq qəbul",
+        tierBadge: "PREMIUM REZİDENT",
+        tierTitle: "Premium Rezident",
+        tierSubtitle: "Aylıq və ya illik daxil olma paketi",
+        tierPrice: "95",
+        tierPeriod: "/ aylıq",
+        tierOffer: "İllik ödənişdə 2 ay hədiyyə",
+        tierFeatures: [
+          "Bütün canlı klub tədbirləri və masterklaslar",
+          "Telegram VIP məxfi müzakirə otağı",
+          "Kurslara 25% fərdi endirim",
+          "Aylıq 1 fərdi diaqnostik orientasiya",
+          "Tam 100+ saatlıq meditasiya və video arxivi"
+        ],
+        tierCtaText: "REZİDENT OL"
+      },
+      en: {
+        badge: "EXCLUSIVE RESIDENCY",
+        title: "Monodoxia Coaching Club — Sanctuary for Like Minds",
+        desc: "Sustainable development is the fruit of the right ecosystem. Coaching Club is an exclusive sanctuary for individuals who value intellectual depth and mutual evolution.",
+        perks: [
+          "Weekly live mentoring and mastermind sessions: Direct dialogue with experienced mentors.",
+          "Exclusive meditation and practice archive: 100+ hours of audio and video guides.",
+          "Private intellectual community discussions: Confidential secure platform.",
+          "VIP access to offline events and retreats: Exclusive annual camps."
+        ],
+        ctaBtnText: "Join the Club",
+        limitedText: "Limited availability: Monthly cohorts",
+        tierBadge: "PREMIUM RESIDENT",
+        tierTitle: "Premium Resident",
+        tierSubtitle: "Monthly or annual access plan",
+        tierPrice: "95",
+        tierPeriod: "/ monthly",
+        tierOffer: "2 months free with annual billing",
+        tierFeatures: [
+          "All live club events and masterclasses",
+          "Telegram VIP private discussion group",
+          "25% personal discount on courses",
+          "1 monthly individual diagnostic orientation",
+          "Full 100+ hours meditation and video archive"
+        ],
+        tierCtaText: "BECOME A RESIDENT"
+      },
+      tr: {
+        badge: "ÖZEL ÜYELİK",
+        title: "Monodoxia Coaching Club — Ortak Zihinlerin Buluşma Noktası",
+        desc: "Sürdürülebilir gelişim doğru çevrenin eseridir. Coaching Club, derin sorular soran ve birbirinin gelişimine katkı sağlayan seçkin bireylerin kapalı alanıdır.",
+        perks: [
+          "Haftalık canlı mentorluk ve mastermind oturumları: Deneyimli mentorlarla doğrudan diyalog.",
+          "Özel meditasyon ve pratik arşivi: 100+ saatlik sesli ve görüntülü rehberler.",
+          "Kapalı entelektüel topluluk tartışmaları: Gizli ve güvenli platform.",
+          "Çevrimdışı etkinliklere ve kamplara VIP giriş: Kapalı yıllık kamplar."
+        ],
+        ctaBtnText: "Kulübe Katıl",
+        limitedText: "Kontenjan sınırlı: Aylık kabul",
+        tierBadge: "PREMİUM REZİDANS",
+        tierTitle: "Premium Üye",
+        tierSubtitle: "Aylık veya yıllık erişim paketi",
+        tierPrice: "95",
+        tierPeriod: "/ aylık",
+        tierOffer: "Yıllık ödemede 2 ay hediye",
+        tierFeatures: [
+          "Tüm canlı kulüp etkinlikleri ve masterclasslar",
+          "Telegram VIP gizli tartışma odası",
+          "Kurslarda %25 kişisel indirim",
+          "Ayda 1 bireysel diagnostik oryantasyon",
+          "Tam 100+ saatlik meditasyon ve video arşivi"
+        ],
+        tierCtaText: "REZİDENT OL"
+      },
+      ru: {
+        badge: "ЗАКРЫТОЕ ЧЛЕНСТВО",
+        title: "Monodoxia Coaching Club — Пространство Единомышленников",
+        desc: "Устойчивое развитие — результат правильного окружения. Закрытый клуб для глубоких личностей, ориентированных на рост.",
+        perks: [
+          "Еженедельные живые сессии менторства и мастермайнды: Прямой диалог с опытными наставниками.",
+          "Эксклюзивный архив медитаций и практик: 100+ часов аудио- и видеоматериалов.",
+          "Закрытые интеллектуальные дискуссии сообщества: Конфиденциальная безопасная платформа.",
+          "VIP-доступ к офлайн-мероприятиям и ретритам: Закрытые ежегодные кемпы."
+        ],
+        ctaBtnText: "Вступить в клуб",
+        limitedText: "Ограниченное количество мест: Ежемесячный набор",
+        tierBadge: "ПРЕМИУМ РЕЗИДЕНТ",
+        tierTitle: "Премиум резидент",
+        tierSubtitle: "Ежемесячный или годовой план",
+        tierPrice: "95",
+        tierPeriod: "/ месяц",
+        tierOffer: "При годовой оплате — 2 месяца в подарок",
+        tierFeatures: [
+          "Все живые клубные мероприятия и мастер-классы",
+          "Закрытая VIP группа в Telegram",
+          "Персональная скидка 25% на курсы",
+          "1 индивидуальная диагностическая ориентация в месяц",
+          "Полный архив 100+ часов медитаций и видео"
+        ],
+        tierCtaText: "СТАТЬ РЕЗИДЕНТОМ"
+      }
+    }
+  };
+
+  const mergeClubWithDefaults = (src) => {
+    const raw = src || {};
+    return {
+      ...defaultClubData,
+      ...raw,
+      perks: (Array.isArray(raw.perks) && raw.perks.length > 0) ? raw.perks : defaultClubData.perks,
+      tierFeatures: (Array.isArray(raw.tierFeatures) && raw.tierFeatures.length > 0) ? raw.tierFeatures : defaultClubData.tierFeatures,
+      translations: {
+        az: { ...defaultClubData.translations.az, ...(raw.translations?.az || {}) },
+        en: { ...defaultClubData.translations.en, ...(raw.translations?.en || {}) },
+        tr: { ...defaultClubData.translations.tr, ...(raw.translations?.tr || {}) },
+        ru: { ...defaultClubData.translations.ru, ...(raw.translations?.ru || {}) },
+      }
+    };
+  };
+
   // Content block states
   const [cmsNavbar, setCmsNavbar] = useState(() => ({ ...(homeContent?.navbar || {}) }));
   const [cmsHero, setCmsHero] = useState(() => ({ ...(homeContent?.hero || {}) }));
   const [cmsAbout, setCmsAbout] = useState(() => ({ ...(homeContent?.about || {}) }));
   const [cmsAreas, setCmsAreas] = useState(() => ({ ...(homeContent?.areas || {}) }));
   const [cmsAcademy, setCmsAcademy] = useState(() => ({ ...(homeContent?.academy || {}) }));
-  const [cmsClub, setCmsClub] = useState(() => ({ ...(homeContent?.club || {}) }));
+  const [cmsClub, setCmsClub] = useState(() => mergeClubWithDefaults(homeContent?.club));
   const [cmsCoaches, setCmsCoaches] = useState(() => ({ ...(homeContent?.coaches || {}) }));
   const [cmsCommunity, setCmsCommunity] = useState(() => ({ ...(homeContent?.community || {}) }));
   const [cmsTestimonials, setCmsTestimonials] = useState(() => ({ ...(homeContent?.testimonials || {}) }));
@@ -117,7 +273,7 @@ export default function AdminCmsTab() {
       setCmsAbout({ ...(homeContent.about || {}) });
       setCmsAreas({ ...(homeContent.areas || {}) });
       setCmsAcademy({ ...(homeContent.academy || {}) });
-      setCmsClub({ ...(homeContent.club || {}) });
+      setCmsClub(mergeClubWithDefaults(homeContent.club));
       setCmsCoaches({ ...(homeContent.coaches || {}) });
       setCmsCommunity({ ...(homeContent.community || {}) });
       setCmsTestimonials({ ...(homeContent.testimonials || {}) });
@@ -1131,16 +1287,127 @@ export default function AdminCmsTab() {
 
       {/* CLUB */}
       {cmsBlock === 'club' && (
-        <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0' }}>Klub Bölməsi</h5>
-          <Field label="Üst Etiket" block={cmsClub} setBlock={setCmsClub} fieldKey="badge" />
-          <Field label="Başlıq" block={cmsClub} setBlock={setCmsClub} fieldKey="title" />
-          <Field label="Təsvir (desc)" block={cmsClub} setBlock={setCmsClub} fieldKey="desc" multiline />
-          <ImageField label="Klub Şəkli (opsional)" value={cmsClub.image} onChange={v => setCmsClub(p => ({ ...p, image: v }))} />
-          <Field label="Düymə Mətni" block={cmsClub} setBlock={setCmsClub} fieldKey="ctaBtnText" />
-          <Field label="Məhdudiyyət Xəbərdarlığı" block={cmsClub} setBlock={setCmsClub} fieldKey="limitedText" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {/* Left section: General info & perks */}
+          <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0' }}>
+              <div>
+                <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Klub — Əsas Məlumatlar və Üstünlüklər (Sol Hissə)</h5>
+                <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0' }}>Bölmənin başlığı, təsviri, sol sütundakı imtiyaz bəndləri və müraciət düyməsi</p>
+              </div>
+              <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: '#fef3c7', color: '#b45309' }}>Sol Blok</span>
+            </div>
+
+            <Field label="Üst Etiket (Badge)" block={cmsClub} setBlock={setCmsClub} fieldKey="badge" />
+            <Field label="Bölmə Başlığı (Title)" block={cmsClub} setBlock={setCmsClub} fieldKey="title" />
+            <Field label="Bölmə Təsviri (Desc)" block={cmsClub} setBlock={setCmsClub} fieldKey="desc" multiline rows={3} />
+            
+            <ImageField label="Klub Şəkli (opsional)" value={cmsClub.image} onChange={v => setCmsClub(p => ({ ...p, image: v }))} />
+
+            {/* Perks list */}
+            <Field
+              label="Klub İmtiyazları və Dəyərləri (Perks - Bəndlər)"
+              block={cmsClub}
+              setBlock={setCmsClub}
+              fieldKey="perks"
+              isArray={true}
+              multiline={true}
+              rows={5}
+              placeholder="Hər sətirdə bir imtiyaz qeyd edin..."
+              helpText="Sol sütunda 'verified' ikonu ilə göstərilən üstünlüklər. Hər sətirdə 1 bənd yazın."
+            />
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+              <Field label="Əsas Düymə Mətni (CTA)" block={cmsClub} setBlock={setCmsClub} fieldKey="ctaBtnText" placeholder="Məs: Kluba qoşul" />
+              <Field label="Məhdudiyyət Xəbərdarlığı" block={cmsClub} setBlock={setCmsClub} fieldKey="limitedText" placeholder="Məs: Məhdud sayda yer: Aylıq qəbul" />
+            </div>
+          </div>
+
+          {/* Right section: Membership Tier Card */}
+          <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0' }}>
+              <div>
+                <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Klub — Rezidentlik / Paket Kartı (Sağ Hissə)</h5>
+                <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0' }}>Sağ tərəfdəki ağ kart: etiket, paket adı, alt başlıq, qiymət, daxil olan xüsusiyyətlər və düymə</p>
+              </div>
+              <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: '#ecfdf5', color: '#047857' }}>Sağ Kart</span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+              <Field label="Kart Üst Etiketi (Badge)" block={cmsClub} setBlock={setCmsClub} fieldKey="tierBadge" placeholder="Məs: PREMIUM REZİDENT" />
+              <Field label="Paket Adı / Başlığı" block={cmsClub} setBlock={setCmsClub} fieldKey="tierTitle" placeholder="Məs: Premium Rezident" />
+            </div>
+
+            <Field label="Paket İzahı (Alt Başlıq)" block={cmsClub} setBlock={setCmsClub} fieldKey="tierSubtitle" placeholder="Məs: Aylıq və ya illik daxil olma paketi" />
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+              <Field label="Məbləğ / Qiymət (Rəqəm)" block={cmsClub} setBlock={setCmsClub} fieldKey="tierPrice" placeholder="Məs: 95" />
+              <Field label="Ödəniş Dövrü (Period)" block={cmsClub} setBlock={setCmsClub} fieldKey="tierPeriod" placeholder="Məs: / aylıq" />
+              <Field label="Xüsusi Təklif / Endirim Qeydi" block={cmsClub} setBlock={setCmsClub} fieldKey="tierOffer" placeholder="Məs: İllik ödənişdə 2 ay hədiyyə" />
+            </div>
+
+            {/* Tier features list */}
+            <Field
+              label="Paketə Daxil Olan Xüsusiyyətlər (Features - Bəndlər)"
+              block={cmsClub}
+              setBlock={setCmsClub}
+              fieldKey="tierFeatures"
+              isArray={true}
+              multiline={true}
+              rows={6}
+              placeholder="Hər sətirdə bir xüsusiyyət qeyd edin..."
+              helpText="Sağ kartda 'check_circle' ikonu ilə göstərilən maddələr. Hər sətirdə 1 maddə yazın."
+            />
+
+            <Field label="Kart Düymə Mətni (CTA)" block={cmsClub} setBlock={setCmsClub} fieldKey="tierCtaText" placeholder="Məs: REZİDENT OL" />
+          </div>
+
           <div>
-            <button onClick={() => saveBlock('club', cmsClub)} className="admin-btn-primary">Yadda Saxla</button>
+            <button
+              type="button"
+              onClick={() => {
+                saveBlock('club', cmsClub);
+                const premTier = clubTiersList.find(t => t.id === 'premium');
+                if (premTier && updateClubTier) {
+                  updateClubTier(premTier.id, {
+                    name: cmsClub.tierTitle || premTier.name,
+                    price: cmsClub.tierPrice || premTier.price,
+                    period: cmsClub.tierPeriod || premTier.period,
+                    features: (Array.isArray(cmsClub.tierFeatures) && cmsClub.tierFeatures.length > 0) ? cmsClub.tierFeatures : premTier.features,
+                    translations: {
+                      ...(premTier.translations || {}),
+                      az: {
+                        ...(premTier.translations?.az || {}),
+                        name: cmsClub.translations?.az?.tierTitle || cmsClub.tierTitle || premTier.name,
+                        period: cmsClub.translations?.az?.tierPeriod || cmsClub.tierPeriod || premTier.period,
+                        features: cmsClub.translations?.az?.tierFeatures || cmsClub.tierFeatures || premTier.features
+                      },
+                      en: {
+                        ...(premTier.translations?.en || {}),
+                        name: cmsClub.translations?.en?.tierTitle || premTier.translations?.en?.name || premTier.name,
+                        period: cmsClub.translations?.en?.tierPeriod || premTier.translations?.en?.period || premTier.period,
+                        features: cmsClub.translations?.en?.tierFeatures || premTier.translations?.en?.features || premTier.features
+                      },
+                      tr: {
+                        ...(premTier.translations?.tr || {}),
+                        name: cmsClub.translations?.tr?.tierTitle || premTier.translations?.tr?.name || premTier.name,
+                        period: cmsClub.translations?.tr?.tierPeriod || premTier.translations?.tr?.period || premTier.period,
+                        features: cmsClub.translations?.tr?.tierFeatures || premTier.translations?.tr?.features || premTier.features
+                      },
+                      ru: {
+                        ...(premTier.translations?.ru || {}),
+                        name: cmsClub.translations?.ru?.tierTitle || premTier.translations?.ru?.name || premTier.name,
+                        period: cmsClub.translations?.ru?.tierPeriod || premTier.translations?.ru?.period || premTier.period,
+                        features: cmsClub.translations?.ru?.tierFeatures || premTier.translations?.ru?.features || premTier.features
+                      }
+                    }
+                  });
+                }
+              }}
+              className="admin-btn-primary"
+            >
+              Klub Məzmununu Yadda Saxla
+            </button>
           </div>
         </div>
       )}
