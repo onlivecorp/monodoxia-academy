@@ -58,7 +58,6 @@ export default function AdminTranslationsTab() {
     ],
     users: [
       { key: 'name', label: 'Ad və Soyad', required: true },
-      { key: 'role', label: 'Rol & Səlahiyyət' },
       { key: 'tier', label: 'Abunəlik Paketi' },
       { key: 'notes', label: 'Admin Qeydləri', type: 'textarea' }
     ],
