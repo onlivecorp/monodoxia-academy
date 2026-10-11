@@ -254,7 +254,7 @@ export function AppProvider({ children }) {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        return parsed.filter(u => !['u1', 'u2', 'u3', 'u4', 'u5', 'u6'].includes(u.id));
+        return Array.isArray(parsed) ? parsed : INITIAL_USERS;
       } catch (e) {
         return INITIAL_USERS;
       }
@@ -325,8 +325,7 @@ export function AppProvider({ children }) {
     const saved = localStorage.getItem('monodoxia_coaches');
     if (saved) {
       try {
-        const parsed = JSON.parse(saved);
-        return parsed.filter(c => !['coach-leyla', 'coach-farid', 'coach-nargiz'].includes(c.id) && !['Dr. Leyla Əliyeva', 'Fərid Məmmədov', 'Nərgiz Qasımova'].includes(c.name));
+        return JSON.parse(saved);
       } catch (e) {
         return [];
       }
@@ -690,8 +689,14 @@ export function AppProvider({ children }) {
   const openPlayer = (courseId) => {
     const course = coursesList.find(c => c.id === courseId);
     if (!course) return;
+    const firstModule = course.modules && course.modules.length > 0 ? course.modules[0] : null;
+    const firstLesson = firstModule && firstModule.lessons && firstModule.lessons.length > 0 ? firstModule.lessons[0] : null;
+    if (!firstLesson) {
+      showToast('Bu kursun hələ dərsi əlavə edilməyib.', 'warning');
+      return;
+    }
     setActiveCourse(course);
-    setActiveLesson(course.modules[0].lessons[0]);
+    setActiveLesson(firstLesson);
     setPlayerModalOpen(true);
   };
 
@@ -987,7 +992,7 @@ export function AppProvider({ children }) {
 
   const cancelApplication = (appId) => {
     updateApplicationStatus(appId, 'Ləğv edildi', 'İstifadəçi tərəfindən ləğv edildi.');
-    showToast('Müraciətiniz ləğv edildi.', 'info');
+    // Note: updateApplicationStatus already calls showToast — no duplicate toast here
   };
 
   const deleteApplication = (appId, permanent = false) => {
@@ -1076,9 +1081,18 @@ export function AppProvider({ children }) {
     setCurrentUser(prev => {
       if (!prev) return prev;
       const updated = { ...prev, ...updates };
-      // Also update in usersList
-      setUsersList(uList => uList.map(u => u.id === updated.id ? { ...u, name: `${updated.firstName || ''} ${updated.lastName || ''}`.trim() || updated.name, email: updated.email } : u));
       return updated;
+    });
+    // Sync usersList in a separate synchronous setState call (safe — React batches these)
+    setUsersList(uList => {
+      // We need current user id — read it from the functional closure via currentUser ref
+      // currentUser is captured in closure; fine since we only need its .id
+      if (!currentUser) return uList;
+      const updatedName = `${updates.firstName || currentUser.firstName || ''} ${updates.lastName || currentUser.lastName || ''}`.trim();
+      return uList.map(u => u.id === currentUser.id
+        ? { ...u, name: updatedName || u.name, email: updates.email || u.email }
+        : u
+      );
     });
     showToast('Profil məlumatları yeniləndi', 'success');
   };

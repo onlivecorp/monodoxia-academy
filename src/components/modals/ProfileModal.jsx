@@ -23,7 +23,8 @@ export default function ProfileModal() {
     openPlayer
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState(activeProfileTab || 'applications');
+  const activeTab = activeProfileTab || 'applications';
+  const setActiveTab = setActiveProfileTab;
   const [editingProfile, setEditingProfile] = useState(false);
   const [profileForm, setProfileForm] = useState({
     firstName: currentUser?.firstName || '',
@@ -33,12 +34,6 @@ export default function ProfileModal() {
     city: currentUser?.city || 'Bakı'
   });
   const [expandedAppId, setExpandedAppId] = useState(null);
-
-  useEffect(() => {
-    if (activeProfileTab) {
-      setActiveTab(activeProfileTab);
-    }
-  }, [activeProfileTab]);
 
   useEffect(() => {
     if (currentUser) {

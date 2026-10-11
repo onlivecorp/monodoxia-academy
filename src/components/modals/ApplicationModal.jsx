@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { TARGET_TYPE_MAP, APPLICATION_STATUSES } from '../../data/applicationData';
 
@@ -35,11 +35,12 @@ export default function ApplicationModal() {
     : null;
 
   // Relevant dynamic fields
-  const relevantFields = activeApplicationTarget
-    ? formFieldsList
-        .filter(f => f.isActive && (f.targetType === 'all' || f.targetType === activeApplicationTarget.type))
-        .sort((a, b) => a.sortOrder - b.sortOrder)
-    : [];
+  const relevantFields = useMemo(() => {
+    if (!activeApplicationTarget) return [];
+    return formFieldsList
+      .filter(f => f.isActive && (f.targetType === 'all' || f.targetType === activeApplicationTarget.type))
+      .sort((a, b) => a.sortOrder - b.sortOrder);
+  }, [formFieldsList, activeApplicationTarget]);
 
   useEffect(() => {
     if (activeApplicationTarget && currentUser) {
@@ -57,7 +58,7 @@ export default function ApplicationModal() {
       });
       setFormResponses(initialResp);
     }
-  }, [activeApplicationTarget, currentUser]);
+  }, [activeApplicationTarget, currentUser, relevantFields]);
 
   if (!applicationModalOpen || !activeApplicationTarget) return null;
 

@@ -1,7 +1,369 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext, createContext } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../i18n/LanguageContext';
 import AdminConfirmModal from './AdminConfirmModal';
+
+
+const CmsFieldContext = createContext({
+  cmsLang: 'az',
+  cmsShowAllLangs: false,
+  langs: [],
+  showToast: () => {}
+});
+
+  // Reusable Field Component
+function Field({
+  label,
+  block,
+  setBlock,
+  fieldKey,
+  value,
+  onChange,
+  multiline,
+  rows = 3,
+  isArray = false,
+  placeholder,
+  helpText
+}) {
+  const { cmsLang, cmsShowAllLangs, langs, showToast } = useContext(CmsFieldContext);
+    const [localExpanded, setLocalExpanded] = useState(false);
+    const isExpanded = cmsShowAllLangs || localExpanded;
+    const isBlockMode = Boolean(block && fieldKey && setBlock);
+
+    const getLangVal = (langCode) => {
+      if (!isBlockMode) {
+        return langCode === 'az' ? (value || '') : '';
+      }
+      const trans = block.translations || {};
+      let val;
+      if (langCode === 'az') {
+        val = trans.az?.[fieldKey] !== undefined
+          ? trans.az[fieldKey]
+          : (block[fieldKey] !== undefined ? block[fieldKey] : '');
+      } else {
+        val = trans[langCode]?.[fieldKey] !== undefined ? trans[langCode][fieldKey] : '';
+      }
+      if (isArray) {
+        return Array.isArray(val) ? val.join('\n') : (val || '');
+      }
+      return val !== undefined && val !== null ? String(val) : '';
+    };
+
+    const handleLangChange = (langCode, rawVal) => {
+      if (!isBlockMode) {
+        if (onChange) onChange(rawVal);
+        return;
+      }
+      const finalVal = isArray
+        ? rawVal.split('\n')
+        : rawVal;
+
+      setBlock(prev => {
+        const prevTrans = prev?.translations || {};
+        if (langCode === 'az') {
+          return {
+            ...prev,
+            [fieldKey]: finalVal,
+            translations: {
+              ...prevTrans,
+              az: { ...(prevTrans.az || {}), [fieldKey]: finalVal }
+            }
+          };
+        }
+        return {
+          ...prev,
+          translations: {
+            ...prevTrans,
+            [langCode]: { ...(prevTrans[langCode] || {}), [fieldKey]: finalVal }
+          }
+        };
+      });
+    };
+
+    const copyFromAz = (targetLang) => {
+      const azVal = getLangVal('az');
+      if (azVal) {
+        handleLangChange(targetLang, azVal);
+        showToast(`AZ mətni ${targetLang.toUpperCase()} sahəsinə kopyalandı`, 'info');
+      }
+    };
+
+    const azValue = getLangVal('az');
+
+    return (
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '5px',
+        padding: isExpanded ? '10px 12px' : '0px',
+        background: isExpanded ? '#fafaf9' : 'transparent',
+        borderRadius: isExpanded ? '8px' : '0px',
+        border: isExpanded ? '1px solid #e2e8f0' : 'none',
+        transition: 'all 0.2s'
+      }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <label className="admin-label" style={{ margin: 0 }}>{label}</label>
+            {!isExpanded && (
+              <span style={{
+                fontSize: '10px',
+                fontWeight: 700,
+                padding: '1px 5px',
+                borderRadius: '4px',
+                background: cmsLang === 'az' ? '#f1f5f9' : '#fef3c7',
+                color: cmsLang === 'az' ? '#475569' : '#b45309',
+                textTransform: 'uppercase'
+              }}>
+                {cmsLang}
+              </span>
+            )}
+            {isArray && (
+              <span style={{ fontSize: '10px', color: '#94a3b8' }}>(hər sətirdə bir maddə)</span>
+            )}
+          </div>
+
+          {isBlockMode && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                {langs.map(l => {
+                  const v = getLangVal(l.code);
+                  const hasVal = v && String(v).trim() !== '';
+                  return (
+                    <span
+                      key={l.code}
+                      title={`${l.name} (${l.code.toUpperCase()}): ${hasVal ? 'Doldurulub' : 'Boşdur'}`}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '2px',
+                        fontSize: '10px',
+                        color: '#64748b'
+                      }}
+                    >
+                      <span style={{
+                        width: '6px',
+                        height: '6px',
+                        borderRadius: '50%',
+                        background: hasVal ? '#22c55e' : (l.code === 'az' ? '#f87171' : '#cbd5e1')
+                      }} />
+                      <span style={{ textTransform: 'uppercase', fontSize: '9px', fontWeight: 700 }}>{l.code}</span>
+                    </span>
+                  );
+                })}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setLocalExpanded(!localExpanded)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '3px',
+                  padding: '2px 7px',
+                  fontSize: '10px',
+                  fontWeight: 600,
+                  borderRadius: '4px',
+                  border: '1px solid #e2e8f0',
+                  background: localExpanded ? '#fffbeb' : '#ffffff',
+                  color: localExpanded ? '#b45309' : '#64748b',
+                  cursor: 'pointer'
+                }}
+                title="Bu sahə üçün bütün 4 dili göstər"
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '13px' }}>
+                  {localExpanded ? 'expand_less' : 'translate'}
+                </span>
+                <span>{localExpanded ? 'Yığcam' : '🌐 4 Dil'}</span>
+              </button>
+            </div>
+          )}
+        </div>
+
+        {helpText && <p style={{ fontSize: '11px', color: '#64748b', margin: 0 }}>{helpText}</p>}
+
+        {/* Inputs */}
+        {isExpanded ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '2px' }}>
+            {langs.map(l => {
+              const val = getLangVal(l.code);
+              const isAz = l.code === 'az';
+              return (
+                <div key={l.code} style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 600, color: '#334155', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span>{l.flag}</span>
+                      <span>{l.name}</span>
+                      <span style={{ fontSize: '10px', color: '#94a3b8' }}>({l.code.toUpperCase()}{isAz ? ' - Əsas' : ''})</span>
+                    </span>
+                    {!isAz && azValue && !val && (
+                      <button
+                        type="button"
+                        onClick={() => copyFromAz(l.code)}
+                        style={{
+                          padding: '1px 6px',
+                          fontSize: '10px',
+                          color: '#b45309',
+                          background: '#fffbeb',
+                          border: '1px solid #fef3c7',
+                          borderRadius: '4px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        🇦🇿 AZ-dən kopyala
+                      </button>
+                    )}
+                  </div>
+                  {multiline || isArray ? (
+                    <textarea
+                      rows={rows}
+                      value={val}
+                      onChange={e => handleLangChange(l.code, e.target.value)}
+                      className="admin-input"
+                      style={{ resize: 'vertical' }}
+                      placeholder={placeholder ? `${placeholder} (${l.code.toUpperCase()})` : `${label} (${l.name})...`}
+                    />
+                  ) : (
+                    <input
+                      type="text"
+                      value={val}
+                      onChange={e => handleLangChange(l.code, e.target.value)}
+                      className="admin-input"
+                      placeholder={placeholder ? `${placeholder} (${l.code.toUpperCase()})` : `${label} (${l.name})...`}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            {cmsLang !== 'az' && isBlockMode && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                justifyContent: 'space-between',
+                gap: '8px',
+                padding: '6px 10px',
+                background: '#f8fafc',
+                border: '1px dashed #cbd5e1',
+                borderRadius: '6px',
+                fontSize: '11px',
+                color: '#475569'
+              }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <span style={{ fontWeight: 600, color: '#0f172a' }}>🇦🇿 Orijinal (AZ): </span>
+                  <span style={{ fontStyle: 'italic', color: azValue ? '#334155' : '#94a3b8' }}>
+                    {azValue ? (azValue.length > 130 ? azValue.slice(0, 130) + '...' : azValue) : '(Hələ doldurulmayıb)'}
+                  </span>
+                </div>
+                {azValue && !getLangVal(cmsLang) && (
+                  <button
+                    type="button"
+                    onClick={() => copyFromAz(cmsLang)}
+                    style={{
+                      padding: '2px 8px',
+                      fontSize: '10px',
+                      fontWeight: 600,
+                      color: '#b45309',
+                      background: '#fffbeb',
+                      border: '1px solid #fef3c7',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    Kopyala
+                  </button>
+                )}
+              </div>
+            )}
+
+            {multiline || isArray ? (
+              <textarea
+                rows={rows}
+                value={getLangVal(cmsLang)}
+                onChange={e => handleLangChange(cmsLang, e.target.value)}
+                className="admin-input"
+                style={{ resize: 'vertical' }}
+                placeholder={placeholder || `${label} (${cmsLang.toUpperCase()})...`}
+              />
+            ) : (
+              <input
+                type="text"
+                value={getLangVal(cmsLang)}
+                onChange={e => handleLangChange(cmsLang, e.target.value)}
+                className="admin-input"
+                placeholder={placeholder || `${label} (${cmsLang.toUpperCase()})...`}
+              />
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // ImageField helper
+function ImageField({ label, value, onChange }) {
+  const { showToast } = useContext(CmsFieldContext);
+    const handleFileChange = (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('Şəkil ölçüsü 5MB-dan çox ola bilməz', 'error');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        onChange(event.target.result);
+        showToast('Şəkil uğurla yükləndi!', 'success');
+      };
+      reader.readAsDataURL(file);
+    };
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        <label className="admin-label">{label}</label>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <input
+              type="text"
+              placeholder="URL daxil edin və ya fayl seçin..."
+              value={value || ''}
+              onChange={e => onChange(e.target.value)}
+              className="admin-input"
+              style={{ flex: 1 }}
+            />
+            <label className="admin-btn-secondary" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#c5a059' }}>upload</span>
+              <span>Fayl Yüklə</span>
+              <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileChange} />
+            </label>
+          </div>
+          {value && (
+            <div className="admin-card" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 12px' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '6px', border: '1px solid #e2e8f0', overflow: 'hidden', background: '#f1f5f9', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <img src={value} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <span style={{ fontSize: '11px', fontWeight: 600, color: '#0f172a', display: 'block' }}>Cari şəkil önizləməsi</span>
+                <span style={{ fontSize: '10px', color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{value.startsWith('data:') ? 'Lokal yüklənmiş fayl (Base64)' : value}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => onChange('')}
+                className="admin-btn-danger"
+                style={{ padding: '4px 8px', fontSize: '11px' }}
+              >
+                Şəkli Sil
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
 
 export default function AdminCmsTab() {
   const {
@@ -434,358 +796,8 @@ export default function AdminCmsTab() {
     setItemToDelete(null);
   };
 
-  // Reusable Field Component
-  const Field = ({
-    label,
-    block,
-    setBlock,
-    fieldKey,
-    value,
-    onChange,
-    multiline,
-    rows = 3,
-    isArray = false,
-    placeholder,
-    helpText
-  }) => {
-    const [localExpanded, setLocalExpanded] = useState(false);
-    const isExpanded = cmsShowAllLangs || localExpanded;
-    const isBlockMode = Boolean(block && fieldKey && setBlock);
-
-    const getLangVal = (langCode) => {
-      if (!isBlockMode) {
-        return langCode === 'az' ? (value || '') : '';
-      }
-      const trans = block.translations || {};
-      let val;
-      if (langCode === 'az') {
-        val = trans.az?.[fieldKey] !== undefined
-          ? trans.az[fieldKey]
-          : (block[fieldKey] !== undefined ? block[fieldKey] : '');
-      } else {
-        val = trans[langCode]?.[fieldKey] !== undefined ? trans[langCode][fieldKey] : '';
-      }
-      if (isArray) {
-        return Array.isArray(val) ? val.join('\n') : (val || '');
-      }
-      return val !== undefined && val !== null ? String(val) : '';
-    };
-
-    const handleLangChange = (langCode, rawVal) => {
-      if (!isBlockMode) {
-        if (onChange) onChange(rawVal);
-        return;
-      }
-      const finalVal = isArray
-        ? rawVal.split('\n')
-        : rawVal;
-
-      setBlock(prev => {
-        const prevTrans = prev?.translations || {};
-        if (langCode === 'az') {
-          return {
-            ...prev,
-            [fieldKey]: finalVal,
-            translations: {
-              ...prevTrans,
-              az: { ...(prevTrans.az || {}), [fieldKey]: finalVal }
-            }
-          };
-        }
-        return {
-          ...prev,
-          translations: {
-            ...prevTrans,
-            [langCode]: { ...(prevTrans[langCode] || {}), [fieldKey]: finalVal }
-          }
-        };
-      });
-    };
-
-    const copyFromAz = (targetLang) => {
-      const azVal = getLangVal('az');
-      if (azVal) {
-        handleLangChange(targetLang, azVal);
-        showToast(`AZ mətni ${targetLang.toUpperCase()} sahəsinə kopyalandı`, 'info');
-      }
-    };
-
-    const azValue = getLangVal('az');
-
-    return (
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '5px',
-        padding: isExpanded ? '10px 12px' : '0px',
-        background: isExpanded ? '#fafaf9' : 'transparent',
-        borderRadius: isExpanded ? '8px' : '0px',
-        border: isExpanded ? '1px solid #e2e8f0' : 'none',
-        transition: 'all 0.2s'
-      }}>
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <label className="admin-label" style={{ margin: 0 }}>{label}</label>
-            {!isExpanded && (
-              <span style={{
-                fontSize: '10px',
-                fontWeight: 700,
-                padding: '1px 5px',
-                borderRadius: '4px',
-                background: cmsLang === 'az' ? '#f1f5f9' : '#fef3c7',
-                color: cmsLang === 'az' ? '#475569' : '#b45309',
-                textTransform: 'uppercase'
-              }}>
-                {cmsLang}
-              </span>
-            )}
-            {isArray && (
-              <span style={{ fontSize: '10px', color: '#94a3b8' }}>(hər sətirdə bir maddə)</span>
-            )}
-          </div>
-
-          {isBlockMode && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                {langs.map(l => {
-                  const v = getLangVal(l.code);
-                  const hasVal = v && String(v).trim() !== '';
-                  return (
-                    <span
-                      key={l.code}
-                      title={`${l.name} (${l.code.toUpperCase()}): ${hasVal ? 'Doldurulub' : 'Boşdur'}`}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '2px',
-                        fontSize: '10px',
-                        color: '#64748b'
-                      }}
-                    >
-                      <span style={{
-                        width: '6px',
-                        height: '6px',
-                        borderRadius: '50%',
-                        background: hasVal ? '#22c55e' : (l.code === 'az' ? '#f87171' : '#cbd5e1')
-                      }} />
-                      <span style={{ textTransform: 'uppercase', fontSize: '9px', fontWeight: 700 }}>{l.code}</span>
-                    </span>
-                  );
-                })}
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setLocalExpanded(!localExpanded)}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '3px',
-                  padding: '2px 7px',
-                  fontSize: '10px',
-                  fontWeight: 600,
-                  borderRadius: '4px',
-                  border: '1px solid #e2e8f0',
-                  background: localExpanded ? '#fffbeb' : '#ffffff',
-                  color: localExpanded ? '#b45309' : '#64748b',
-                  cursor: 'pointer'
-                }}
-                title="Bu sahə üçün bütün 4 dili göstər"
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: '13px' }}>
-                  {localExpanded ? 'expand_less' : 'translate'}
-                </span>
-                <span>{localExpanded ? 'Yığcam' : '🌐 4 Dil'}</span>
-              </button>
-            </div>
-          )}
-        </div>
-
-        {helpText && <p style={{ fontSize: '11px', color: '#64748b', margin: 0 }}>{helpText}</p>}
-
-        {/* Inputs */}
-        {isExpanded ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '2px' }}>
-            {langs.map(l => {
-              const val = getLangVal(l.code);
-              const isAz = l.code === 'az';
-              return (
-                <div key={l.code} style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: '11px', fontWeight: 600, color: '#334155', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span>{l.flag}</span>
-                      <span>{l.name}</span>
-                      <span style={{ fontSize: '10px', color: '#94a3b8' }}>({l.code.toUpperCase()}{isAz ? ' - Əsas' : ''})</span>
-                    </span>
-                    {!isAz && azValue && !val && (
-                      <button
-                        type="button"
-                        onClick={() => copyFromAz(l.code)}
-                        style={{
-                          padding: '1px 6px',
-                          fontSize: '10px',
-                          color: '#b45309',
-                          background: '#fffbeb',
-                          border: '1px solid #fef3c7',
-                          borderRadius: '4px',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        🇦🇿 AZ-dən kopyala
-                      </button>
-                    )}
-                  </div>
-                  {multiline || isArray ? (
-                    <textarea
-                      rows={rows}
-                      value={val}
-                      onChange={e => handleLangChange(l.code, e.target.value)}
-                      className="admin-input"
-                      style={{ resize: 'vertical' }}
-                      placeholder={placeholder ? `${placeholder} (${l.code.toUpperCase()})` : `${label} (${l.name})...`}
-                    />
-                  ) : (
-                    <input
-                      type="text"
-                      value={val}
-                      onChange={e => handleLangChange(l.code, e.target.value)}
-                      className="admin-input"
-                      placeholder={placeholder ? `${placeholder} (${l.code.toUpperCase()})` : `${label} (${l.name})...`}
-                    />
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            {cmsLang !== 'az' && isBlockMode && (
-              <div style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                justifyContent: 'space-between',
-                gap: '8px',
-                padding: '6px 10px',
-                background: '#f8fafc',
-                border: '1px dashed #cbd5e1',
-                borderRadius: '6px',
-                fontSize: '11px',
-                color: '#475569'
-              }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <span style={{ fontWeight: 600, color: '#0f172a' }}>🇦🇿 Orijinal (AZ): </span>
-                  <span style={{ fontStyle: 'italic', color: azValue ? '#334155' : '#94a3b8' }}>
-                    {azValue ? (azValue.length > 130 ? azValue.slice(0, 130) + '...' : azValue) : '(Hələ doldurulmayıb)'}
-                  </span>
-                </div>
-                {azValue && !getLangVal(cmsLang) && (
-                  <button
-                    type="button"
-                    onClick={() => copyFromAz(cmsLang)}
-                    style={{
-                      padding: '2px 8px',
-                      fontSize: '10px',
-                      fontWeight: 600,
-                      color: '#b45309',
-                      background: '#fffbeb',
-                      border: '1px solid #fef3c7',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    Kopyala
-                  </button>
-                )}
-              </div>
-            )}
-
-            {multiline || isArray ? (
-              <textarea
-                rows={rows}
-                value={getLangVal(cmsLang)}
-                onChange={e => handleLangChange(cmsLang, e.target.value)}
-                className="admin-input"
-                style={{ resize: 'vertical' }}
-                placeholder={placeholder || `${label} (${cmsLang.toUpperCase()})...`}
-              />
-            ) : (
-              <input
-                type="text"
-                value={getLangVal(cmsLang)}
-                onChange={e => handleLangChange(cmsLang, e.target.value)}
-                className="admin-input"
-                placeholder={placeholder || `${label} (${cmsLang.toUpperCase()})...`}
-              />
-            )}
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  // ImageField helper
-  const ImageField = ({ label, value, onChange }) => {
-    const handleFileChange = (e) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
-      if (file.size > 5 * 1024 * 1024) {
-        showToast('Şəkil ölçüsü 5MB-dan çox ola bilməz', 'error');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        onChange(event.target.result);
-        showToast('Şəkil uğurla yükləndi!', 'success');
-      };
-      reader.readAsDataURL(file);
-    };
-
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        <label className="admin-label">{label}</label>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <input
-              type="text"
-              placeholder="URL daxil edin və ya fayl seçin..."
-              value={value || ''}
-              onChange={e => onChange(e.target.value)}
-              className="admin-input"
-              style={{ flex: 1 }}
-            />
-            <label className="admin-btn-secondary" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#c5a059' }}>upload</span>
-              <span>Fayl Yüklə</span>
-              <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileChange} />
-            </label>
-          </div>
-          {value && (
-            <div className="admin-card" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 12px' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '6px', border: '1px solid #e2e8f0', overflow: 'hidden', background: '#f1f5f9', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <img src={value} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <span style={{ fontSize: '11px', fontWeight: 600, color: '#0f172a', display: 'block' }}>Cari şəkil önizləməsi</span>
-                <span style={{ fontSize: '10px', color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{value.startsWith('data:') ? 'Lokal yüklənmiş fayl (Base64)' : value}</span>
-              </div>
-              <button
-                type="button"
-                onClick={() => onChange('')}
-                className="admin-btn-danger"
-                style={{ padding: '4px 8px', fontSize: '11px' }}
-              >
-                Şəkli Sil
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
-
   return (
+    <CmsFieldContext.Provider value={{ cmsLang, cmsShowAllLangs, langs, showToast }}>
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* Delete Confirmation Modal */}
       <AdminConfirmModal
@@ -2056,5 +2068,6 @@ export default function AdminCmsTab() {
         onCancel={() => setItemToDelete(null)}
       />
     </div>
+    </CmsFieldContext.Provider>
   );
 }
