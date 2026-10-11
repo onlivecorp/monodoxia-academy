@@ -1870,7 +1870,13 @@ export function AppProvider({ children }) {
     const newFaq = {
       id: 'faq-' + Date.now(),
       question: faq.question,
-      answer: faq.answer
+      answer: faq.answer,
+      translations: faq.translations || {
+        az: { question: faq.question, answer: faq.answer },
+        en: { question: '', answer: '' },
+        tr: { question: '', answer: '' },
+        ru: { question: '', answer: '' }
+      }
     };
     setFaqsList(prev => [...prev, newFaq]);
     showToast('Yeni sual əlavə edildi', 'success');

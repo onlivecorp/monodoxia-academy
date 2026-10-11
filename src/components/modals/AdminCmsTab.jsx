@@ -25,6 +25,7 @@ export default function AdminCmsTab() {
     deleteTestimonial,
     faqsList = [],
     addFaq,
+    updateFaq,
     deleteFaq,
     coachesList = [],
     addCoach,
@@ -254,9 +255,19 @@ export default function AdminCmsTab() {
   const [newTestimonial, setNewTestimonial] = useState(emptyTestimonial);
   const [editingTestimonial, setEditingTestimonial] = useState(null);
 
-  // FAQ add states
-  const [newFaqQuestion, setNewFaqQuestion] = useState('');
-  const [newFaqAnswer, setNewFaqAnswer] = useState('');
+  // FAQ add & edit states
+  const emptyFaq = {
+    question: '',
+    answer: '',
+    translations: {
+      az: { question: '', answer: '' },
+      en: { question: '', answer: '' },
+      tr: { question: '', answer: '' },
+      ru: { question: '', answer: '' }
+    }
+  };
+  const [newFaq, setNewFaq] = useState(emptyFaq);
+  const [editingFaq, setEditingFaq] = useState(null);
 
   // Pillar states & direct fields
   const [cmsPillars, setCmsPillars] = useState(() => {
@@ -1816,39 +1827,168 @@ export default function AdminCmsTab() {
             <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0' }}>Mövcud Suallar ({faqsList.length})</h5>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {faqsList.map(item => (
-                <div key={item.id} style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '10px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', gap: '10px' }}>
-                  <div style={{ minWidth: 0, flex: 1 }}>
-                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>{item.question}</div>
-                    <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px', lineHeight: 1.4 }}>{item.answer}</div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setItemToDelete({ type: 'faq', item })}
-                    className="admin-btn-danger"
-                    style={{ padding: '4px 8px', fontSize: '11px' }}
-                  >
-                    Sil
-                  </button>
+                <div key={item.id} style={{ padding: '12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                  {editingFaq && editingFaq.id === item.id ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #e2e8f0', paddingBottom: '6px' }}>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#b45309' }}>Sualı Redaktə Et</span>
+                        <button type="button" onClick={() => setEditingFaq(null)} className="admin-btn-secondary" style={{ padding: '2px 8px', fontSize: '11px' }}>Ləğv et</button>
+                      </div>
+                      <Field label="Sual *" block={editingFaq} setBlock={setEditingFaq} fieldKey="question" />
+                      <Field label="Cavab *" block={editingFaq} setBlock={setEditingFaq} fieldKey="answer" multiline />
+                      <div style={{ display: 'flex', gap: '8px', paddingTop: '4px' }}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const qVal = editingFaq.question || editingFaq.translations?.az?.question || '';
+                            const aVal = editingFaq.answer || editingFaq.translations?.az?.answer || '';
+                            if (!qVal.trim() || !aVal.trim()) {
+                              showToast('Zəhmət olmasa sual və cavab sahələrini doldurun', 'warning');
+                              return;
+                            }
+                            const updatedItem = {
+                              ...editingFaq,
+                              question: qVal.trim(),
+                              answer: aVal.trim(),
+                              translations: {
+                                ...(editingFaq.translations || {}),
+                                az: {
+                                  ...(editingFaq.translations?.az || {}),
+                                  question: qVal.trim(),
+                                  answer: aVal.trim()
+                                }
+                              }
+                            };
+                            updateFaq(item.id, updatedItem);
+                            setEditingFaq(null);
+                            showToast('Sual məlumatları və tərcümələri yeniləndi!', 'success');
+                          }}
+                          className="admin-btn-primary"
+                        >
+                          Saxla
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditingFaq(null)}
+                          className="admin-btn-secondary"
+                        >
+                          Bağla
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>{item.question}</span>
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', marginLeft: '4px' }}>
+                            {langs.map(l => {
+                              const hasTrans = l.code === 'az' ? Boolean(item.question) : Boolean(item.translations?.[l.code]?.question);
+                              return (
+                                <span
+                                  key={l.code}
+                                  title={`${l.name} (${l.code.toUpperCase()}): ${hasTrans ? 'Tərcümə mövcuddur' : 'Tərcümə edilməyib'}`}
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    padding: '1px 5px',
+                                    borderRadius: '3px',
+                                    fontSize: '9px',
+                                    fontWeight: 700,
+                                    background: hasTrans ? '#dcfce7' : '#f1f5f9',
+                                    color: hasTrans ? '#15803d' : '#94a3b8'
+                                  }}
+                                >
+                                  {l.code.toUpperCase()}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </div>
+                        <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px', lineHeight: 1.4 }}>
+                          {item.answer}
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingFaq({
+                              ...item,
+                              translations: {
+                                az: {
+                                  question: item.translations?.az?.question || item.question || '',
+                                  answer: item.translations?.az?.answer || item.answer || ''
+                                },
+                                en: {
+                                  question: item.translations?.en?.question || '',
+                                  answer: item.translations?.en?.answer || ''
+                                },
+                                tr: {
+                                  question: item.translations?.tr?.question || '',
+                                  answer: item.translations?.tr?.answer || ''
+                                },
+                                ru: {
+                                  question: item.translations?.ru?.question || '',
+                                  answer: item.translations?.ru?.answer || ''
+                                },
+                                ...(item.translations || {})
+                              }
+                            });
+                          }}
+                          className="admin-btn-edit"
+                          style={{ padding: '4px 8px', fontSize: '11px' }}
+                        >
+                          Redaktə Et
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setItemToDelete({ type: 'faq', item })}
+                          className="admin-btn-danger"
+                          style={{ padding: '4px 8px', fontSize: '11px' }}
+                        >
+                          Sil
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
 
             <div style={{ paddingTop: '14px', borderTop: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <h5 style={{ fontSize: '12px', fontWeight: 700, color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>Yeni Sual Əlavə Et</h5>
-              <Field label="Sual *" value={newFaqQuestion} onChange={setNewFaqQuestion} />
-              <Field label="Cavab *" value={newFaqAnswer} onChange={setNewFaqAnswer} multiline />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <h5 style={{ fontSize: '12px', fontWeight: 700, color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>Yeni Sual Əlavə Et</h5>
+                <span style={{ fontSize: '11px', color: '#64748b' }}>🌐 4 Dil düyməsi ilə digər dilləri daxil edə bilərsiniz</span>
+              </div>
+              <Field label="Sual *" block={newFaq} setBlock={setNewFaq} fieldKey="question" />
+              <Field label="Cavab *" block={newFaq} setBlock={setNewFaq} fieldKey="answer" multiline />
               <div>
                 <button
                   type="button"
                   onClick={() => {
-                    if (!newFaqQuestion.trim() || !newFaqAnswer.trim()) {
+                    const qVal = newFaq.question || newFaq.translations?.az?.question || '';
+                    const aVal = newFaq.answer || newFaq.translations?.az?.answer || '';
+                    if (!qVal.trim() || !aVal.trim()) {
                       showToast('Zəhmət olmasa sual və cavab sahələrini doldurun', 'warning');
                       return;
                     }
-                    addFaq({ question: newFaqQuestion.trim(), answer: newFaqAnswer.trim() });
-                    setNewFaqQuestion('');
-                    setNewFaqAnswer('');
-                    showToast('Sual əlavə edildi!', 'success');
+                    addFaq({
+                      question: qVal.trim(),
+                      answer: aVal.trim(),
+                      translations: {
+                        az: {
+                          question: qVal.trim(),
+                          answer: aVal.trim(),
+                          ...(newFaq.translations?.az || {})
+                        },
+                        en: newFaq.translations?.en || {},
+                        tr: newFaq.translations?.tr || {},
+                        ru: newFaq.translations?.ru || {}
+                      }
+                    });
+                    setNewFaq(emptyFaq);
+                    showToast('Yeni sual və tərcümələri əlavə edildi!', 'success');
                   }}
                   className="admin-btn-primary"
                 >
