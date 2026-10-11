@@ -1846,7 +1846,10 @@ export function AppProvider({ children }) {
       id: 't-' + Date.now(),
       quote: testimonial.quote,
       author: testimonial.author,
-      role: testimonial.role || 'Məzun'
+      role: testimonial.role || 'Məzun',
+      translations: testimonial.translations || {
+        az: { quote: testimonial.quote, author: testimonial.author, role: testimonial.role || 'Məzun' }
+      }
     };
     setTestimonialsList(prev => [...prev, newT]);
     showToast(`Yeni rəy əlavə edildi: ${newT.author}`, 'success');

@@ -91,7 +91,8 @@ export default function AdminTranslationsTab() {
       { key: 'bio', label: 'Haqqında (Bio)', type: 'textarea' }
     ],
     testimonials: [
-      { key: 'quote', label: 'Rəy Mətni', type: 'textarea', required: true },
+      { key: 'quote', label: 'Rəy Mətni (Sitat)', type: 'textarea', required: true },
+      { key: 'author', label: 'Müəllif (Ad Soyad)' },
       { key: 'role', label: 'Müəllifin Peşəsi / Rolu' }
     ],
     faqs: [

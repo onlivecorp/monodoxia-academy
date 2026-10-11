@@ -21,6 +21,7 @@ export default function AdminCmsTab() {
     updateAllAreas,
     testimonialsList = [],
     addTestimonial,
+    updateTestimonial,
     deleteTestimonial,
     faqsList = [],
     addFaq,
@@ -238,10 +239,20 @@ export default function AdminCmsTab() {
   const [newCoachImage, setNewCoachImage] = useState('');
   const [newCoachSpecialties, setNewCoachSpecialties] = useState('');
 
-  // Testimonials add states
-  const [newTestimonialQuote, setNewTestimonialQuote] = useState('');
-  const [newTestimonialAuthor, setNewTestimonialAuthor] = useState('');
-  const [newTestimonialRole, setNewTestimonialRole] = useState('');
+  // Testimonials add & edit states
+  const emptyTestimonial = {
+    quote: '',
+    author: '',
+    role: '',
+    translations: {
+      az: { quote: '', author: '', role: '' },
+      en: { quote: '', author: '', role: '' },
+      tr: { quote: '', author: '', role: '' },
+      ru: { quote: '', author: '', role: '' }
+    }
+  };
+  const [newTestimonial, setNewTestimonial] = useState(emptyTestimonial);
+  const [editingTestimonial, setEditingTestimonial] = useState(null);
 
   // FAQ add states
   const [newFaqQuestion, setNewFaqQuestion] = useState('');
@@ -1601,43 +1612,183 @@ export default function AdminCmsTab() {
 
           <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0' }}>Mövcud Rəylər ({testimonialsList.length})</h5>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {testimonialsList.map(item => (
-                <div key={item.id} style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '10px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', gap: '10px' }}>
-                  <div style={{ minWidth: 0, flex: 1 }}>
-                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>{item.author} <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 'normal' }}>({item.role})</span></div>
-                    <div style={{ fontSize: '11px', color: '#475569', marginTop: '2px', lineHeight: 1.4 }}>"{item.quote}"</div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setItemToDelete({ type: 'testimonial', item })}
-                    className="admin-btn-danger"
-                    style={{ padding: '4px 8px', fontSize: '11px' }}
-                  >
-                    Sil
-                  </button>
+                <div key={item.id} style={{ padding: '12px', background: '#f8fafc', border: editingTestimonial?.id === item.id ? '1px solid #c5a059' : '1px solid #e2e8f0', borderRadius: '8px' }}>
+                  {editingTestimonial?.id === item.id ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #e2e8f0', paddingBottom: '6px' }}>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#b45309' }}>Rəyi Redaktə Et: {item.author}</span>
+                        <button type="button" onClick={() => setEditingTestimonial(null)} className="admin-btn-secondary" style={{ padding: '2px 8px', fontSize: '11px' }}>Ləğv et</button>
+                      </div>
+                      <Field label="Sitat (quote) *" block={editingTestimonial} setBlock={setEditingTestimonial} fieldKey="quote" multiline />
+                      <Field label="Ad Soyad (author) *" block={editingTestimonial} setBlock={setEditingTestimonial} fieldKey="author" />
+                      <Field label="Vəzifə / Tələbə statusu (role)" block={editingTestimonial} setBlock={setEditingTestimonial} fieldKey="role" />
+                      <div style={{ display: 'flex', gap: '8px', paddingTop: '4px' }}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const quoteVal = editingTestimonial.quote || editingTestimonial.translations?.az?.quote || '';
+                            const authorVal = editingTestimonial.author || editingTestimonial.translations?.az?.author || '';
+                            if (!quoteVal.trim() || !authorVal.trim()) {
+                              showToast('Zəhmət olmasa sitat və müəllif sahələrini doldurun', 'warning');
+                              return;
+                            }
+                            const roleVal = editingTestimonial.role || editingTestimonial.translations?.az?.role || 'Tələbə';
+                            const updatedItem = {
+                              ...editingTestimonial,
+                              quote: quoteVal.trim(),
+                              author: authorVal.trim(),
+                              role: roleVal.trim(),
+                              translations: {
+                                ...(editingTestimonial.translations || {}),
+                                az: {
+                                  ...(editingTestimonial.translations?.az || {}),
+                                  quote: quoteVal.trim(),
+                                  author: authorVal.trim(),
+                                  role: roleVal.trim()
+                                }
+                              }
+                            };
+                            updateTestimonial(item.id, updatedItem);
+                            setEditingTestimonial(null);
+                            showToast('Rəy məlumatları və tərcümələri yeniləndi!', 'success');
+                          }}
+                          className="admin-btn-primary"
+                        >
+                          Saxla
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditingTestimonial(null)}
+                          className="admin-btn-secondary"
+                        >
+                          Bağla
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>{item.author}</span>
+                          <span style={{ fontSize: '11px', color: '#64748b' }}>({item.role})</span>
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', marginLeft: '4px' }}>
+                            {langs.map(l => {
+                              const hasTrans = l.code === 'az' ? Boolean(item.quote) : Boolean(item.translations?.[l.code]?.quote);
+                              return (
+                                <span
+                                  key={l.code}
+                                  title={`${l.name} (${l.code.toUpperCase()}): ${hasTrans ? 'Tərcümə mövcuddur' : 'Tərcümə edilməyib'}`}
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    padding: '1px 5px',
+                                    borderRadius: '3px',
+                                    fontSize: '9px',
+                                    fontWeight: 700,
+                                    background: hasTrans ? '#dcfce7' : '#f1f5f9',
+                                    color: hasTrans ? '#15803d' : '#94a3b8'
+                                  }}
+                                >
+                                  {l.code.toUpperCase()}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </div>
+                        <div style={{ fontSize: '11px', color: '#475569', marginTop: '4px', lineHeight: 1.4 }}>
+                          "{item.quote}"
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingTestimonial({
+                              ...item,
+                              translations: {
+                                az: {
+                                  quote: item.translations?.az?.quote || item.quote || '',
+                                  author: item.translations?.az?.author || item.author || '',
+                                  role: item.translations?.az?.role || item.role || ''
+                                },
+                                en: {
+                                  quote: item.translations?.en?.quote || '',
+                                  author: item.translations?.en?.author || '',
+                                  role: item.translations?.en?.role || ''
+                                },
+                                tr: {
+                                  quote: item.translations?.tr?.quote || '',
+                                  author: item.translations?.tr?.author || '',
+                                  role: item.translations?.tr?.role || ''
+                                },
+                                ru: {
+                                  quote: item.translations?.ru?.quote || '',
+                                  author: item.translations?.ru?.author || '',
+                                  role: item.translations?.ru?.role || ''
+                                },
+                                ...(item.translations || {})
+                              }
+                            });
+                          }}
+                          className="admin-btn-edit"
+                          style={{ padding: '4px 8px', fontSize: '11px' }}
+                        >
+                          Redaktə Et
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setItemToDelete({ type: 'testimonial', item })}
+                          className="admin-btn-danger"
+                          style={{ padding: '4px 8px', fontSize: '11px' }}
+                        >
+                          Sil
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
 
             <div style={{ paddingTop: '14px', borderTop: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <h5 style={{ fontSize: '12px', fontWeight: 700, color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>Yeni Rəy Əlavə Et</h5>
-              <Field label="Sitat (quote) *" value={newTestimonialQuote} onChange={setNewTestimonialQuote} multiline />
-              <Field label="Ad Soyad (author) *" value={newTestimonialAuthor} onChange={setNewTestimonialAuthor} />
-              <Field label="Vəzifə / Tələbə statusu (role)" value={newTestimonialRole} onChange={setNewTestimonialRole} />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <h5 style={{ fontSize: '12px', fontWeight: 700, color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>Yeni Rəy Əlavə Et</h5>
+                <span style={{ fontSize: '11px', color: '#64748b' }}>🌐 4 Dil düyməsi ilə digər dilləri daxil edə bilərsiniz</span>
+              </div>
+              <Field label="Sitat (quote) *" block={newTestimonial} setBlock={setNewTestimonial} fieldKey="quote" multiline />
+              <Field label="Ad Soyad (author) *" block={newTestimonial} setBlock={setNewTestimonial} fieldKey="author" />
+              <Field label="Vəzifə / Tələbə statusu (role)" block={newTestimonial} setBlock={setNewTestimonial} fieldKey="role" />
               <div>
                 <button
                   type="button"
                   onClick={() => {
-                    if (!newTestimonialQuote.trim() || !newTestimonialAuthor.trim()) {
+                    const quoteVal = newTestimonial.quote || newTestimonial.translations?.az?.quote || '';
+                    const authorVal = newTestimonial.author || newTestimonial.translations?.az?.author || '';
+                    if (!quoteVal.trim() || !authorVal.trim()) {
                       showToast('Zəhmət olmasa sitat və müəllif sahələrini doldurun', 'warning');
                       return;
                     }
-                    addTestimonial({ quote: newTestimonialQuote.trim(), author: newTestimonialAuthor.trim(), role: newTestimonialRole.trim() || 'Tələbə' });
-                    setNewTestimonialQuote('');
-                    setNewTestimonialAuthor('');
-                    setNewTestimonialRole('');
-                    showToast('Rəy əlavə edildi!', 'success');
+                    const roleVal = newTestimonial.role || newTestimonial.translations?.az?.role || 'Tələbə';
+                    addTestimonial({
+                      quote: quoteVal.trim(),
+                      author: authorVal.trim(),
+                      role: roleVal.trim(),
+                      translations: {
+                        az: {
+                          quote: quoteVal.trim(),
+                          author: authorVal.trim(),
+                          role: roleVal.trim(),
+                          ...(newTestimonial.translations?.az || {})
+                        },
+                        en: newTestimonial.translations?.en || {},
+                        tr: newTestimonial.translations?.tr || {},
+                        ru: newTestimonial.translations?.ru || {}
+                      }
+                    });
+                    setNewTestimonial(emptyTestimonial);
+                    showToast('Yeni rəy və tərcümələri əlavə edildi!', 'success');
                   }}
                   className="admin-btn-primary"
                 >

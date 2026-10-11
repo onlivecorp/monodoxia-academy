@@ -30,7 +30,9 @@ export default function Testimonials() {
                 </p>
               </div>
               <div className="pt-4 border-t border-outline-variant/30">
-                <div className="font-label-md text-label-md text-primary font-semibold">{item.author}</div>
+                <div className="font-label-md text-label-md text-primary font-semibold">
+                  {getLocalized(item, 'author', currentLang, defaultLang) || item.author}
+                </div>
                 <div className="font-label-sm text-label-sm text-on-surface-variant">
                   {getLocalized(item, 'role', currentLang, defaultLang)}
                 </div>
