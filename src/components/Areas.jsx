@@ -47,8 +47,15 @@ export default function Areas() {
                   {getLocalized(a, 'desc', currentLang, defaultLang)}
                 </p>
               </div>
-              <a className="inline-flex items-center text-secondary font-label-md text-label-md hover:underline gap-1" href="#akademiya">
-                <span>{t('area_explore')}</span>
+              <a
+                className="inline-flex items-center text-secondary font-label-md text-label-md hover:underline gap-1"
+                href={a.link || areas.link || areas.exploreLink || '#akademiya'}
+              >
+                <span>
+                  {getLocalized(a, 'btnText', currentLang, defaultLang) ||
+                   getLocalized(areas, 'btnText', currentLang, defaultLang) ||
+                   t('area_explore')}
+                </span>
                 <span className="material-symbols-outlined text-[16px]">arrow_right_alt</span>
               </a>
             </div>

@@ -196,11 +196,13 @@ export default function AdminCmsTab() {
       title: `Yeni Sahə ${num}`,
       icon: 'explore',
       desc: 'İnkişaf istiqaməti və tematik modul haqqında ətraflı məlumat.',
+      btnText: 'Kəşf et',
+      link: '#akademiya',
       translations: {
-        az: { number: `${padNum} / SAHƏ`, title: `Yeni Sahə ${num}`, desc: 'İnkişaf istiqaməti və tematik modul haqqında ətraflı məlumat.' },
-        en: { number: `${padNum} / PILLAR`, title: `New Area ${num}`, desc: 'Detailed information about this personal development pillar.' },
-        tr: { number: `${padNum} / ALAN`, title: `Yeni Alan ${num}`, desc: 'Bu gelişim boyutu ve tematik modül hakkında detaylı bilgi.' },
-        ru: { number: `${padNum} / СФЕРА`, title: `Новая Сфера ${num}`, desc: 'Подробная информация о данном направлении личностного роста.' }
+        az: { number: `${padNum} / SAHƏ`, title: `Yeni Sahə ${num}`, desc: 'İnkişaf istiqaməti və tematik modul haqqında ətraflı məlumat.', btnText: 'Kəşf et' },
+        en: { number: `${padNum} / PILLAR`, title: `New Area ${num}`, desc: 'Detailed information about this personal development pillar.', btnText: 'Explore' },
+        tr: { number: `${padNum} / ALAN`, title: `Yeni Alan ${num}`, desc: 'Bu gelişim boyutu ve tematik modül hakkında detaylı bilgi.', btnText: 'Keşfet' },
+        ru: { number: `${padNum} / СФЕРА`, title: `Новая Сфера ${num}`, desc: 'Подробная информация о данном направлении личностного роста.', btnText: 'Исследовать' }
       }
     };
     setCmsAreasList(prev => [...prev, newArea]);
@@ -947,6 +949,19 @@ export default function AdminCmsTab() {
             <Field label="Üst Etiket (Badge)" block={cmsAreas} setBlock={setCmsAreas} fieldKey="badge" />
             <Field label="Əsas Başlıq" block={cmsAreas} setBlock={setCmsAreas} fieldKey="title" />
             <Field label="Giriş Təsviri (desc)" block={cmsAreas} setBlock={setCmsAreas} fieldKey="desc" multiline rows={3} />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+              <Field label="Ümumi Düymə Mətni" block={cmsAreas} setBlock={setCmsAreas} fieldKey="btnText" placeholder="Məs: Kəşf et" />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label className="admin-label" style={{ margin: 0 }}>Ümumi Keçid Linki</label>
+                <input
+                  type="text"
+                  value={cmsAreas.link || ''}
+                  onChange={e => setCmsAreas(p => ({ ...p, link: e.target.value }))}
+                  className="admin-input"
+                  placeholder="Məs: #akademiya və ya /courses"
+                />
+              </div>
+            </div>
             <div>
               <button onClick={saveAreasWithItems} className="admin-btn-primary">Yadda Saxla</button>
             </div>
@@ -1060,6 +1075,27 @@ export default function AdminCmsTab() {
                     multiline
                     rows={3}
                   />
+
+                  {/* Düymə Mətni və Linki */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px' }}>
+                    <Field
+                      label="Düymə Mətni (fərdi)"
+                      block={a}
+                      setBlock={updater => updateAreaAt(idx, updater)}
+                      fieldKey="btnText"
+                      placeholder="Məs: Kəşf et (boşdursa ümumi)"
+                    />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                      <label className="admin-label" style={{ margin: 0 }}>Keçid Linki (fərdi)</label>
+                      <input
+                        type="text"
+                        value={a.link || ''}
+                        onChange={e => updateAreaAt(idx, prev => ({ ...prev, link: e.target.value }))}
+                        className="admin-input"
+                        placeholder="Məs: #akademiya, /courses"
+                      />
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
