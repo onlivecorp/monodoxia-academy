@@ -7,6 +7,9 @@ export default function About() {
   const { t, currentLang, defaultLang } = useLanguage();
   const { homeContent, pillarsList } = useApp();
   const about = homeContent?.about || {};
+  const activePillars = (about?.pillars && Array.isArray(about.pillars) && about.pillars.length > 0)
+    ? about.pillars
+    : (pillarsList || []);
 
   return (
     <section className="py-space-2xl md:py-space-3xl bg-surface-container-low border-b border-outline-variant/40" id="haqqimizda">
@@ -48,7 +51,7 @@ export default function About() {
             </p>
             {/* PILLARS DYNAMIC LIST */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4">
-              {pillarsList.map((p) => (
+              {activePillars.map((p) => (
                 <div key={p.id} className="p-5 rounded bg-surface-container-lowest border border-outline-variant/40 hover:border-secondary/50 transition-colors">
                   <div className="w-8 h-8 rounded bg-secondary/10 text-secondary flex items-center justify-center mb-3">
                     <span className="material-symbols-outlined text-[20px]">{p.icon || 'psychology'}</span>

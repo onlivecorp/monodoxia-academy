@@ -1771,6 +1771,10 @@ export function AppProvider({ children }) {
     showToast('Sütun silindi', 'info');
   };
 
+  const updateAllPillars = (newList) => {
+    setPillarsList(newList);
+  };
+
   // Areas Operations
   const addArea = (area) => {
     const newArea = {
@@ -1961,6 +1965,7 @@ export function AppProvider({ children }) {
       addPillar,
       updatePillar,
       deletePillar,
+      updateAllPillars,
       areasList,
       addArea,
       updateArea,

@@ -11,6 +11,7 @@ export default function AdminCmsTab() {
     addPillar,
     updatePillar,
     deletePillar,
+    updateAllPillars,
     testimonialsList = [],
     addTestimonial,
     deleteTestimonial,
@@ -85,11 +86,13 @@ export default function AdminCmsTab() {
   const [newFaqQuestion, setNewFaqQuestion] = useState('');
   const [newFaqAnswer, setNewFaqAnswer] = useState('');
 
-  // Pillar add/edit states
-  const [editingPillar, setEditingPillar] = useState(null);
-  const [newPillarIcon, setNewPillarIcon] = useState('psychology');
-  const [newPillarTitle, setNewPillarTitle] = useState('');
-  const [newPillarDesc, setNewPillarDesc] = useState('');
+  // Pillar states & direct fields
+  const [cmsPillars, setCmsPillars] = useState(() => {
+    if (homeContent?.about?.pillars && Array.isArray(homeContent.about.pillars) && homeContent.about.pillars.length > 0) {
+      return homeContent.about.pillars;
+    }
+    return (pillarsList && pillarsList.length > 0) ? [...pillarsList] : [];
+  });
 
   // Delete Confirmation State
   const [itemToDelete, setItemToDelete] = useState(null); // { type: 'coach'|'pillar'|'testimonial'|'faq', item }
@@ -108,12 +111,63 @@ export default function AdminCmsTab() {
       setCmsFaq({ ...(homeContent.faq || {}) });
       setCmsNewsletter({ ...(homeContent.newsletter || {}) });
       setCmsFooter({ ...(homeContent.footer || {}) });
+
+      if (homeContent.about?.pillars && Array.isArray(homeContent.about.pillars) && homeContent.about.pillars.length > 0) {
+        setCmsPillars(homeContent.about.pillars);
+      } else if (pillarsList && pillarsList.length > 0) {
+        setCmsPillars(pillarsList);
+      }
     }
-  }, [homeContent]);
+  }, [homeContent, pillarsList]);
+
+  const updatePillarAt = (idx, updaterOrVal) => {
+    setCmsPillars(prev => {
+      const copy = [...prev];
+      const cur = copy[idx] || {};
+      const next = typeof updaterOrVal === 'function' ? updaterOrVal(cur) : updaterOrVal;
+      copy[idx] = next;
+      return copy;
+    });
+  };
+
+  const removePillarAt = (idx) => {
+    setCmsPillars(prev => prev.filter((_, i) => i !== idx));
+    showToast('Kart siyahıdan silindi', 'info');
+  };
+
+  const addNewPillarCard = () => {
+    const newIdx = cmsPillars.length + 1;
+    const newP = {
+      id: 'pillar-' + Date.now(),
+      icon: 'psychology',
+      title: `Yeni İstiqamət ${newIdx}`,
+      desc: 'İstiqamət və dəyər haqqında qısa izah.',
+      translations: {
+        az: { title: `Yeni İstiqamət ${newIdx}`, desc: 'İstiqamət və dəyər haqqında qısa izah.' },
+        en: { title: `New Core Pillar ${newIdx}`, desc: 'Short description about this value pillar.' },
+        tr: { title: `Yeni İstikamet ${newIdx}`, desc: 'Bu değer sütunu hakkında kısa açıklama.' },
+        ru: { title: `Новое направление ${newIdx}`, desc: 'Краткое описание данного направления.' }
+      }
+    };
+    setCmsPillars(prev => [...prev, newP]);
+    showToast('Yeni dəyər kartı sahəsi əlavə edildi', 'success');
+  };
 
   const saveBlock = (blockKey, data) => {
     updateHomeBlock(blockKey, data);
     showToast('Məzmun yadda saxlandı!', 'success');
+  };
+
+  const saveAboutWithPillars = () => {
+    const payload = {
+      ...cmsAbout,
+      pillars: cmsPillars
+    };
+    saveBlock('about', payload);
+    if (updateAllPillars) {
+      updateAllPillars(cmsPillars);
+    }
+    showToast('Akademiyanın Məramı və bütün dəyər kartları yadda saxlandı!', 'success');
   };
 
   const confirmDeleteAction = () => {
@@ -667,9 +721,13 @@ export default function AdminCmsTab() {
       {/* AKADEMİYANIN MƏRAMI (ABOUT) */}
       {cmsBlock === 'about' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Əsas Mətn və Şəkil */}
           <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0' }}>
-              <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Akademiyanın Məramı – Əsas Mətn və Şəkil</h5>
+              <div>
+                <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Akademiyanın Məramı – Əsas Mətn və Şəkil</h5>
+                <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0 0' }}>Ana səhifənin sol tərəfindəki şəkil və mərkəzi başlıq mətnləri</p>
+              </div>
               <span style={{ fontSize: '11px', color: '#64748b', background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px' }}>Ana Səhifə</span>
             </div>
             <Field label="Üst Etiket (Badge)" block={cmsAbout} setBlock={setCmsAbout} fieldKey="badge" />
@@ -685,137 +743,124 @@ export default function AdminCmsTab() {
               <Field label="Şəkil Sağ Etiketi" block={cmsAbout} setBlock={setCmsAbout} fieldKey="imageBadgeRight" />
             </div>
             <div>
-              <button onClick={() => saveBlock('about', cmsAbout)} className="admin-btn-primary">Yadda Saxla</button>
+              <button onClick={saveAboutWithPillars} className="admin-btn-primary">Yadda Saxla</button>
             </div>
           </div>
 
-          {/* PILLARS / MƏRAM DƏYƏR KARTLARI */}
-          <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0' }}>
+          {/* DƏYƏR KARTLARI (PİLLARS) – BİRBAŞA REDAKTƏ SAHƏLƏRİ */}
+          <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0', flexWrap: 'wrap', gap: '8px' }}>
               <div>
-                <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Akademiyanın Məramı – Dəyər Kartları ({pillarsList.length})</h5>
-                <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0 0' }}>Ana səhifədə "Akademiyanın Məramı" hissəsində sağ tərəfdə göstərilən dəyər kartları</p>
+                <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                  Akademiyanın Məramı – Dəyər Kartları ({cmsPillars.length} Kart)
+                </h5>
+                <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0 0' }}>
+                  Ana səhifədə şəklin sağında görünən 4 əsas dəyər kartının məlumatları (birbaşa redaktə edilə bilən sahələr)
+                </p>
               </div>
+              <button
+                type="button"
+                onClick={addNewPillarCard}
+                className="admin-btn-secondary"
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#b45309' }}>add</span>
+                <span>Yeni Kart Əlavə Et</span>
+              </button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {pillarsList.map(p => (
-                <div key={p.id} style={{ padding: '12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
-                  {editingPillar?.id === p.id ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #e2e8f0', paddingBottom: '6px' }}>
-                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#b45309' }}>Kartı Redaktə Et</span>
-                        <button onClick={() => setEditingPillar(null)} className="admin-btn-secondary" style={{ padding: '2px 8px', fontSize: '11px' }}>Ləğv et</button>
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <label className="admin-label">İkon (Material Symbols simvolu)</label>
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                          <span className="material-symbols-outlined" style={{ fontSize: '24px', color: '#b45309', background: '#fef3c7', padding: '6px', borderRadius: '6px' }}>
-                            {editingPillar.icon || 'psychology'}
-                          </span>
-                          <input
-                            type="text"
-                            value={editingPillar.icon || ''}
-                            onChange={e => setEditingPillar(prev => ({ ...prev, icon: e.target.value }))}
-                            className="admin-input"
-                            placeholder="Məs: psychology, supervisor_account, spa, shield..."
-                          />
-                        </div>
-                      </div>
-                      <Field label="Kartın Başlığı" block={editingPillar} setBlock={setEditingPillar} fieldKey="title" />
-                      <Field label="Kartın İzahı" block={editingPillar} setBlock={setEditingPillar} fieldKey="desc" multiline rows={2} />
-                      <div style={{ display: 'flex', gap: '8px', paddingTop: '4px' }}>
-                        <button
-                          onClick={() => {
-                            updatePillar(p.id, editingPillar);
-                            setEditingPillar(null);
-                            showToast('Məram kartı yeniləndi!', 'success');
-                          }}
-                          className="admin-btn-primary"
-                        >
-                          Saxla
-                        </button>
-                        <button
-                          onClick={() => setEditingPillar(null)}
-                          className="admin-btn-secondary"
-                        >
-                          Bağla
-                        </button>
-                      </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
+              {cmsPillars.map((p, idx) => (
+                <div
+                  key={p.id || idx}
+                  style={{
+                    padding: '14px',
+                    background: '#f8fafc',
+                    border: '1.5px solid #e2e8f0',
+                    borderRadius: '10px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '6px', borderBottom: '1px solid #e2e8f0' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        color: '#b45309',
+                        background: '#fef3c7',
+                        padding: '2px 8px',
+                        borderRadius: '4px'
+                      }}>
+                        Kart #{idx + 1}
+                      </span>
+                      <span style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>
+                        {p.title || `Kart ${idx + 1}`}
+                      </span>
                     </div>
-                  ) : (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
-                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', minWidth: 0, flex: 1 }}>
-                        <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#fef3c7', color: '#b45309', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                          <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>{p.icon || 'psychology'}</span>
-                        </div>
-                        <div style={{ minWidth: 0 }}>
-                          <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>{p.title}</div>
-                          <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px', lineHeight: 1.4 }}>{p.desc}</div>
-                        </div>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                        <button
-                          onClick={() => setEditingPillar({ ...p })}
-                          className="admin-btn-edit"
-                        >
-                          Redaktə Et
-                        </button>
-                        <button
-                          onClick={() => setItemToDelete({ type: 'pillar', item: p })}
-                          className="admin-btn-danger"
-                        >
-                          Sil
-                        </button>
-                      </div>
+                    {cmsPillars.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removePillarAt(idx)}
+                        className="admin-btn-danger"
+                        style={{ padding: '2px 8px', fontSize: '11px' }}
+                        title="Bu kartı sil"
+                      >
+                        Sil
+                      </button>
+                    )}
+                  </div>
+
+                  {/* İkon Sahəsi */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <label className="admin-label" style={{ margin: 0 }}>İkon (Material Symbols)</label>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '22px', color: '#b45309', background: '#ffffff', padding: '6px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
+                        {p.icon || 'psychology'}
+                      </span>
+                      <input
+                        type="text"
+                        value={p.icon || ''}
+                        onChange={e => updatePillarAt(idx, prev => ({ ...prev, icon: e.target.value }))}
+                        className="admin-input"
+                        placeholder="Məs: psychology, supervisor_account, spa, shield..."
+                        style={{ flex: 1 }}
+                      />
                     </div>
-                  )}
+                  </div>
+
+                  {/* Başlıq Sahəsi */}
+                  <Field
+                    label="Kart Başlığı"
+                    block={p}
+                    setBlock={updater => updatePillarAt(idx, updater)}
+                    fieldKey="title"
+                  />
+
+                  {/* İzah Sahəsi */}
+                  <Field
+                    label="Kart İzahı (Mətn)"
+                    block={p}
+                    setBlock={updater => updatePillarAt(idx, updater)}
+                    fieldKey="desc"
+                    multiline
+                    rows={3}
+                  />
                 </div>
               ))}
             </div>
 
-            {/* Add New Pillar */}
-            <div style={{ paddingTop: '16px', borderTop: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <h5 style={{ fontSize: '12px', fontWeight: 700, color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>Yeni Dəyər Kartı Əlavə Et</h5>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <label className="admin-label">İkon</label>
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: '24px', color: '#b45309', background: '#fef3c7', padding: '6px', borderRadius: '6px' }}>
-                    {newPillarIcon || 'psychology'}
-                  </span>
-                  <input
-                    type="text"
-                    value={newPillarIcon}
-                    onChange={e => setNewPillarIcon(e.target.value)}
-                    className="admin-input"
-                    placeholder="Məs: psychology, supervisor_account, spa, shield..."
-                  />
-                </div>
-              </div>
-              <Field label="Başlıq *" value={newPillarTitle} onChange={setNewPillarTitle} />
-              <Field label="İzah *" value={newPillarDesc} onChange={setNewPillarDesc} multiline rows={2} />
-              <div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!newPillarTitle.trim() || !newPillarDesc.trim()) {
-                      showToast('Zəhmət olmasa başlıq və izah sahələrini doldurun', 'warning');
-                      return;
-                    }
-                    addPillar({
-                      icon: newPillarIcon.trim() || 'psychology',
-                      title: newPillarTitle.trim(),
-                      desc: newPillarDesc.trim()
-                    });
-                    setNewPillarTitle('');
-                    setNewPillarDesc('');
-                    setNewPillarIcon('psychology');
-                  }}
-                  className="admin-btn-primary"
-                >
-                  Kart Əlavə Et
-                </button>
-              </div>
+            <div style={{ paddingTop: '8px', display: 'flex', gap: '10px' }}>
+              <button
+                type="button"
+                onClick={saveAboutWithPillars}
+                className="admin-btn-primary"
+                style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>save</span>
+                <span>Bütün Bölməni və Kartları Yadda Saxla</span>
+              </button>
             </div>
           </div>
         </div>
