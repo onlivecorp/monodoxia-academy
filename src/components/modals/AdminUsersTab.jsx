@@ -237,7 +237,6 @@ export default function AdminUsersTab() {
               item={editingUser}
               fields={[
                 { key: 'name', label: 'Ad və Soyad' },
-                { key: 'tier', label: 'Abunəlik Paketi' },
                 { key: 'notes', label: 'Admin Qeydləri', type: 'textarea' }
               ]}
               activeLang={userTransLang}
@@ -318,12 +317,10 @@ export default function AdminUsersTab() {
           <AdminInlineTranslator
             item={{
               name: newUserName,
-              tier: newUserTier,
               translations: newUserTranslations
             }}
             fields={[
-              { key: 'name', label: 'Ad və Soyad' },
-              { key: 'tier', label: 'Abunəlik Paketi' }
+              { key: 'name', label: 'Ad və Soyad' }
             ]}
             activeLang={newUserTransLang}
             setActiveLang={setNewUserTransLang}

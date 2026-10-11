@@ -208,7 +208,14 @@ export default function AdminCoursesTab() {
 
     const mergedTranslations = {
       ...newCourseTranslations,
-      az: { ...(newCourseTranslations.az || {}), duration: autoTrans.az?.duration || durationText },
+      az: {
+        ...(newCourseTranslations.az || {}),
+        title: newCourseTitle.trim(),
+        description: newCourseDesc || 'Praktiki dərslər, keyslər və beynəlxalq standartlara uyğun tədris planı.',
+        badge: newCourseBadge,
+        status: 'Qrup qəbulu aktivdir',
+        duration: autoTrans.az?.duration || durationText
+      },
       en: { ...(newCourseTranslations.en || {}), duration: autoTrans.en?.duration || newCourseTranslations.en?.duration },
       tr: { ...(newCourseTranslations.tr || {}), duration: autoTrans.tr?.duration || newCourseTranslations.tr?.duration },
       ru: { ...(newCourseTranslations.ru || {}), duration: autoTrans.ru?.duration || newCourseTranslations.ru?.duration }
@@ -225,6 +232,7 @@ export default function AdminCoursesTab() {
       initialParticipants: 0,
       occupancy: 0,
       badge: newCourseBadge,
+      status: 'Qrup qəbulu aktivdir',
       description: newCourseDesc || 'Praktiki dərslər, keyslər və beynəlxalq standartlara uyğun tədris planı.',
       translations: mergedTranslations
     });
@@ -256,7 +264,17 @@ export default function AdminCoursesTab() {
       badge: editingCourse.badge,
       status: editingCourse.status,
       description: editingCourse.description,
-      translations: editingCourse.translations || {}
+      translations: {
+        ...(editingCourse.translations || {}),
+        az: {
+          ...(editingCourse.translations?.az || {}),
+          title: editingCourse.title,
+          description: editingCourse.description,
+          badge: editingCourse.badge,
+          status: editingCourse.status,
+          duration: editingCourse.duration
+        }
+      }
     });
     setEditingCourse(null);
   };

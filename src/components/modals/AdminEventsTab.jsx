@@ -211,7 +211,15 @@ export default function AdminEventsTab() {
       registered: 0,
       typeBadge: newEventTypeBadge,
       desc: newEventDesc || 'İnteraktiv masterklas və praktiki sessiya.',
-      translations: newEventTranslations
+      translations: {
+        ...(newEventTranslations || {}),
+        az: {
+          ...(newEventTranslations?.az || {}),
+          title: newEventTitle.trim(),
+          desc: newEventDesc || 'İnteraktiv masterklas və praktiki sessiya.',
+          typeBadge: newEventTypeBadge
+        }
+      }
     });
     setNewEventTitle('');
     setNewEventRawDate('');
@@ -234,7 +242,15 @@ export default function AdminEventsTab() {
       registered: editingEvent.registered !== undefined ? Number(editingEvent.registered) : 0,
       typeBadge: editingEvent.typeBadge,
       desc: editingEvent.desc,
-      translations: editingEvent.translations || {}
+      translations: {
+        ...(editingEvent.translations || {}),
+        az: {
+          ...(editingEvent.translations?.az || {}),
+          title: editingEvent.title,
+          desc: editingEvent.desc,
+          typeBadge: editingEvent.typeBadge
+        }
+      }
     });
     setEditingEvent(null);
     setEditEventRawDate('');

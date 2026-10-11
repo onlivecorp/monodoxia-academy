@@ -58,7 +58,6 @@ export default function AdminTranslationsTab() {
     ],
     users: [
       { key: 'name', label: 'Ad və Soyad', required: true },
-      { key: 'tier', label: 'Abunəlik Paketi' },
       { key: 'notes', label: 'Admin Qeydləri', type: 'textarea' }
     ],
     courses: [
@@ -159,17 +158,18 @@ export default function AdminTranslationsTab() {
 
   const handleCopyFromDefault = () => {
     if (!selectedItem) return;
-    const copied = copyFromDefaultLanguage(selectedItem, fields.map(f => f.key), transActiveLang, defaultLang);
-    if (transEntity === 'roles') updateRole(selectedItem.id, { translations: copied });
-    else if (transEntity === 'users') updateUser(selectedItem.id, { translations: copied });
-    else if (transEntity === 'courses') updateCourse(selectedItem.id, { translations: copied });
-    else if (transEntity === 'club') updateClubTier(selectedItem.id, { translations: copied });
-    else if (transEntity === 'events') updateEvent(selectedItem.id, { translations: copied });
-    else if (transEntity === 'coaches') updateCoach(selectedItem.id, { translations: copied });
-    else if (transEntity === 'testimonials') updateTestimonial(selectedItem.id, { translations: copied });
-    else if (transEntity === 'faqs') updateFaq(selectedItem.id, { translations: copied });
-    else if (transEntity === 'areas') updateArea(selectedItem.id, { translations: copied });
-    else if (transEntity === 'community') updateTopic(selectedItem.id, { translations: copied });
+    const copiedItem = copyFromDefaultLanguage(selectedItem, transActiveLang, defaultLang, fields.map(f => f.key));
+    const copiedTranslations = copiedItem.translations;
+    if (transEntity === 'roles') updateRole(selectedItem.id, { translations: copiedTranslations });
+    else if (transEntity === 'users') updateUser(selectedItem.id, { translations: copiedTranslations });
+    else if (transEntity === 'courses') updateCourse(selectedItem.id, { translations: copiedTranslations });
+    else if (transEntity === 'club') updateClubTier(selectedItem.id, { translations: copiedTranslations });
+    else if (transEntity === 'events') updateEvent(selectedItem.id, { translations: copiedTranslations });
+    else if (transEntity === 'coaches') updateCoach(selectedItem.id, { translations: copiedTranslations });
+    else if (transEntity === 'testimonials') updateTestimonial(selectedItem.id, { translations: copiedTranslations });
+    else if (transEntity === 'faqs') updateFaq(selectedItem.id, { translations: copiedTranslations });
+    else if (transEntity === 'areas') updateArea(selectedItem.id, { translations: copiedTranslations });
+    else if (transEntity === 'community') updateTopic(selectedItem.id, { translations: copiedTranslations });
     showToast(`AZ mətnləri ${transActiveLang.toUpperCase()} dilinə nüsxələndi!`, 'success');
   };
 

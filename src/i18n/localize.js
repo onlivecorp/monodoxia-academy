@@ -14,36 +14,54 @@ import { DEFAULT_LANGUAGE } from './languages';
 export function getLocalized(item, field, currentLang = 'az', defaultLang = DEFAULT_LANGUAGE, safeFallback = '') {
   if (!item || !field) return safeFallback;
 
-  // 1. Nested translation object for current language
+  // 1. When viewing in default language, base property is the primary authoring field
+  if (currentLang === defaultLang) {
+    if (item[field] !== undefined && item[field] !== null) {
+      if (typeof item[field] === 'string' && item[field].trim() !== '') return item[field];
+      if (typeof item[field] === 'number') return String(item[field]);
+    }
+    if (item.translations && item.translations[defaultLang] && item.translations[defaultLang][field] !== undefined) {
+      const val = item.translations[defaultLang][field];
+      if (typeof val === 'string' && val.trim() !== '') return val;
+      if (typeof val === 'number') return String(val);
+    }
+    const defaultDirectKey = `${field}_${defaultLang}`;
+    if (item[defaultDirectKey] !== undefined && typeof item[defaultDirectKey] === 'string' && item[defaultDirectKey].trim() !== '') {
+      return item[defaultDirectKey];
+    }
+    return safeFallback;
+  }
+
+  // 2. Nested translation object for non-default current language
   if (item.translations && item.translations[currentLang] && item.translations[currentLang][field] !== undefined) {
     const val = item.translations[currentLang][field];
     if (typeof val === 'string' && val.trim() !== '') return val;
     if (typeof val === 'number') return String(val);
   }
 
-  // 2. Direct property like title_en, desc_ru
+  // 3. Direct property like title_en, desc_ru
   const directKey = `${field}_${currentLang}`;
   if (item[directKey] !== undefined && typeof item[directKey] === 'string' && item[directKey].trim() !== '') {
     return item[directKey];
   }
 
-  // 3. Nested translation object for default language
-  if (currentLang !== defaultLang && item.translations && item.translations[defaultLang] && item.translations[defaultLang][field] !== undefined) {
+  // 4. Fallback to base property
+  if (item[field] !== undefined && item[field] !== null) {
+    if (typeof item[field] === 'string' && item[field].trim() !== '') return item[field];
+    if (typeof item[field] === 'number') return String(item[field]);
+  }
+
+  // 5. Fallback to default language translation object
+  if (item.translations && item.translations[defaultLang] && item.translations[defaultLang][field] !== undefined) {
     const val = item.translations[defaultLang][field];
     if (typeof val === 'string' && val.trim() !== '') return val;
     if (typeof val === 'number') return String(val);
   }
 
-  // 4. Direct property for default language (e.g. title_az)
+  // 6. Direct property for default language (e.g. title_az)
   const defaultDirectKey = `${field}_${defaultLang}`;
-  if (currentLang !== defaultLang && item[defaultDirectKey] !== undefined && typeof item[defaultDirectKey] === 'string' && item[defaultDirectKey].trim() !== '') {
+  if (item[defaultDirectKey] !== undefined && typeof item[defaultDirectKey] === 'string' && item[defaultDirectKey].trim() !== '') {
     return item[defaultDirectKey];
-  }
-
-  // 5. Base property (e.g. item.title, item.description)
-  if (item[field] !== undefined && item[field] !== null) {
-    if (typeof item[field] === 'string' && item[field].trim() !== '') return item[field];
-    if (typeof item[field] === 'number') return String(item[field]);
   }
 
   return safeFallback;
@@ -55,26 +73,42 @@ export function getLocalized(item, field, currentLang = 'az', defaultLang = DEFA
 export function getLocalizedArray(item, field, currentLang = 'az', defaultLang = DEFAULT_LANGUAGE) {
   if (!item || !field) return [];
 
-  // 1. Nested translations
+  // When viewing in default language, base array is primary
+  if (currentLang === defaultLang) {
+    if (Array.isArray(item[field]) && item[field].length > 0) {
+      return item[field];
+    }
+    if (typeof item[field] === 'string' && item[field].trim() !== '') {
+      return item[field].split('\n').map(s => s.trim()).filter(Boolean);
+    }
+    if (item.translations && item.translations[defaultLang] && item.translations[defaultLang][field] !== undefined) {
+      const val = item.translations[defaultLang][field];
+      if (Array.isArray(val) && val.length > 0) return val;
+      if (typeof val === 'string' && val.trim() !== '') return val.split('\n').map(s => s.trim()).filter(Boolean);
+    }
+    return [];
+  }
+
+  // 1. Nested translations for non-default language
   if (item.translations && item.translations[currentLang] && item.translations[currentLang][field] !== undefined) {
     const val = item.translations[currentLang][field];
     if (Array.isArray(val) && val.length > 0) return val;
     if (typeof val === 'string' && val.trim() !== '') return val.split('\n').map(s => s.trim()).filter(Boolean);
   }
 
-  // 2. Fallback to default language translations
-  if (currentLang !== defaultLang && item.translations && item.translations[defaultLang] && item.translations[defaultLang][field] !== undefined) {
-    const val = item.translations[defaultLang][field];
-    if (Array.isArray(val) && val.length > 0) return val;
-    if (typeof val === 'string' && val.trim() !== '') return val.split('\n').map(s => s.trim()).filter(Boolean);
-  }
-
-  // 3. Base array property
-  if (Array.isArray(item[field])) {
+  // 2. Base array property fallback
+  if (Array.isArray(item[field]) && item[field].length > 0) {
     return item[field];
   }
   if (typeof item[field] === 'string' && item[field].trim() !== '') {
     return item[field].split('\n').map(s => s.trim()).filter(Boolean);
+  }
+
+  // 3. Fallback to default language translations
+  if (item.translations && item.translations[defaultLang] && item.translations[defaultLang][field] !== undefined) {
+    const val = item.translations[defaultLang][field];
+    if (Array.isArray(val) && val.length > 0) return val;
+    if (typeof val === 'string' && val.trim() !== '') return val.split('\n').map(s => s.trim()).filter(Boolean);
   }
 
   return [];

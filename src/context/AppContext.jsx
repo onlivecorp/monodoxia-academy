@@ -1345,7 +1345,32 @@ export function AppProvider({ children }) {
   };
 
   const updateCourse = (id, updates) => {
-    setCoursesList(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
+    setCoursesList(prev => prev.map(c => {
+      if (c.id !== id) return c;
+      const updated = { ...c, ...updates };
+
+      const azTrans = { ...(updated.translations?.az || {}) };
+      if (updates.title !== undefined) azTrans.title = updates.title;
+      if (updates.description !== undefined) azTrans.description = updates.description;
+      if (updates.badge !== undefined) azTrans.badge = updates.badge;
+      if (updates.status !== undefined) azTrans.status = updates.status;
+      if (updates.duration !== undefined) azTrans.duration = updates.duration;
+
+      if (updates.translations?.az) {
+        if (updates.translations.az.title !== undefined) updated.title = updates.translations.az.title;
+        if (updates.translations.az.description !== undefined) updated.description = updates.translations.az.description;
+        if (updates.translations.az.badge !== undefined) updated.badge = updates.translations.az.badge;
+        if (updates.translations.az.status !== undefined) updated.status = updates.translations.az.status;
+        if (updates.translations.az.duration !== undefined) updated.duration = updates.translations.az.duration;
+      }
+
+      updated.translations = {
+        ...(updated.translations || {}),
+        az: azTrans
+      };
+
+      return updated;
+    }));
     showToast('Kurs parametrləri yeniləndi', 'success');
   };
 
@@ -1360,12 +1385,22 @@ export function AppProvider({ children }) {
       description: newCourse.description,
       instructor: newCourse.instructor,
       instructorRole: 'Sertifikatlı Kouç',
-      status: 'Qrup qəbulu aktivdir',
+      status: newCourse.status || 'Qrup qəbulu aktivdir',
       occupancy: 0,
       price: newCourse.price,
       featured: false,
-      translations: newCourse.translations || {},
-      modules: [
+      translations: {
+        ...(newCourse.translations || {}),
+        az: {
+          ...(newCourse.translations?.az || {}),
+          title: newCourse.title,
+          description: newCourse.description,
+          badge: newCourse.badge || 'YENİ KURS',
+          status: newCourse.status || 'Qrup qəbulu aktivdir',
+          duration: newCourse.duration || '8 Həftə'
+        }
+      },
+      modules: newCourse.modules || [
         {
           id: 'm1',
           title: 'Modul 1: Giriş və Əsaslar',
@@ -1392,6 +1427,22 @@ export function AppProvider({ children }) {
           updated.features = updated.features.split('\n').map(s => s.trim()).filter(Boolean);
         }
 
+        const azTrans = { ...(updated.translations?.az || {}) };
+        if (updates.name !== undefined) azTrans.name = updates.name;
+        if (updates.period !== undefined) azTrans.period = updates.period;
+        if (updates.features !== undefined) azTrans.features = updated.features;
+
+        if (updates.translations?.az) {
+          if (updates.translations.az.name !== undefined) updated.name = updates.translations.az.name;
+          if (updates.translations.az.period !== undefined) updated.period = updates.translations.az.period;
+          if (updates.translations.az.features !== undefined) updated.features = updates.translations.az.features;
+        }
+
+        updated.translations = {
+          ...(updated.translations || {}),
+          az: azTrans
+        };
+
         try {
           fetch('/api.php?action=save_club_tier', {
             method: 'POST',
@@ -1414,7 +1465,17 @@ export function AppProvider({ children }) {
       price: newTier.price,
       period: newTier.period || '/ aylıq',
       popular: Boolean(newTier.popular),
-      translations: newTier.translations || {},
+      translations: {
+        ...(newTier.translations || {}),
+        az: {
+          ...(newTier.translations?.az || {}),
+          name: newTier.name,
+          period: newTier.period || '/ aylıq',
+          features: Array.isArray(newTier.features)
+            ? newTier.features
+            : (newTier.features || '').split('\n').map(s => s.trim()).filter(Boolean)
+        }
+      },
       features: Array.isArray(newTier.features)
         ? newTier.features
         : (newTier.features || '').split('\n').map(s => s.trim()).filter(Boolean),
@@ -1456,7 +1517,15 @@ export function AppProvider({ children }) {
       speaker: newEvent.speaker,
       capacity: Number(newEvent.capacity) || 100,
       registered: 0,
-      translations: newEvent.translations || {},
+      translations: {
+        ...(newEvent.translations || {}),
+        az: {
+          ...(newEvent.translations?.az || {}),
+          title: newEvent.title,
+          desc: newEvent.desc,
+          typeBadge: newEvent.typeBadge || 'VEBİNAR'
+        }
+      },
       isOnline: newEvent.isOnline ?? true
     };
     setEventsList(prev => [ev, ...prev]);
@@ -1464,7 +1533,30 @@ export function AppProvider({ children }) {
   };
 
   const updateEvent = (id, updates) => {
-    setEventsList(prev => prev.map(e => e.id === id ? { ...e, ...updates } : e));
+    setEventsList(prev => prev.map(e => {
+      if (e.id !== id) return e;
+      const updated = { ...e, ...updates };
+
+      const azTrans = { ...(updated.translations?.az || {}) };
+      if (updates.title !== undefined) azTrans.title = updates.title;
+      if (updates.desc !== undefined) azTrans.desc = updates.desc;
+      if (updates.typeBadge !== undefined) azTrans.typeBadge = updates.typeBadge;
+      if (updates.datetime !== undefined) azTrans.datetime = updates.datetime;
+
+      if (updates.translations?.az) {
+        if (updates.translations.az.title !== undefined) updated.title = updates.translations.az.title;
+        if (updates.translations.az.desc !== undefined) updated.desc = updates.translations.az.desc;
+        if (updates.translations.az.typeBadge !== undefined) updated.typeBadge = updates.translations.az.typeBadge;
+        if (updates.translations.az.datetime !== undefined) updated.datetime = updates.translations.az.datetime;
+      }
+
+      updated.translations = {
+        ...(updated.translations || {}),
+        az: azTrans
+      };
+
+      return updated;
+    }));
     showToast('Tədbir məlumatları yeniləndi', 'success');
   };
 
