@@ -1752,15 +1752,18 @@ export function AppProvider({ children }) {
       id: 'pillar-' + Date.now(),
       icon: pillar.icon || 'psychology',
       title: pillar.title,
-      desc: pillar.desc
+      desc: pillar.desc,
+      translations: pillar.translations || {
+        az: { title: pillar.title, desc: pillar.desc }
+      }
     };
     setPillarsList(prev => [...prev, newPillar]);
-    showToast(`Yeni sütun əlavə edildi: ${newPillar.title}`, 'success');
+    showToast(`Yeni dəyər kartı əlavə edildi: ${newPillar.title}`, 'success');
   };
 
   const updatePillar = (id, updates) => {
     setPillarsList(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
-    showToast('Sütun məlumatı yeniləndi', 'success');
+    showToast('Məram kartı yeniləndi', 'success');
   };
 
   const deletePillar = (id) => {

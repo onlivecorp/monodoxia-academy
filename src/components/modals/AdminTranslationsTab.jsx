@@ -27,6 +27,8 @@ export default function AdminTranslationsTab() {
     updateTopic,
     rolesList = [],
     updateRole,
+    pillarsList = [],
+    updatePillar,
     showToast
   } = useApp();
 
@@ -44,6 +46,7 @@ export default function AdminTranslationsTab() {
     { id: 'courses', label: 'Kurslar & LMS', count: coursesList.length },
     { id: 'events', label: 'Tədbirlər & Vebinarlar', count: eventsList.length },
     { id: 'coaches', label: 'Mentorlar & Kouçlar', count: coachesList.length },
+    { id: 'pillars', label: 'Akademiyanın Məramı (Kartlar)', count: pillarsList.length },
     { id: 'testimonials', label: 'Rəylər (Testimonials)', count: testimonialsList.length },
     { id: 'faqs', label: 'FAQ Sualları', count: faqsList.length },
     { id: 'areas', label: 'İnkişaf Sahələri (8)', count: areasList.length },
@@ -100,6 +103,10 @@ export default function AdminTranslationsTab() {
       { key: 'title', label: 'Sahə Adı', required: true },
       { key: 'desc', label: 'İzah / Təsvir', type: 'textarea' }
     ],
+    pillars: [
+      { key: 'title', label: 'Kart Başlığı', required: true },
+      { key: 'desc', label: 'İzah / Təsvir', type: 'textarea', required: true }
+    ],
     community: [
       { key: 'badge', label: 'Mövzu Kateqoriyası' },
       { key: 'title', label: 'Başlıq', required: true },
@@ -116,6 +123,7 @@ export default function AdminTranslationsTab() {
   else if (transEntity === 'club') currentItems = clubTiersList;
   else if (transEntity === 'events') currentItems = eventsList;
   else if (transEntity === 'coaches') currentItems = coachesList;
+  else if (transEntity === 'pillars') currentItems = pillarsList;
   else if (transEntity === 'testimonials') currentItems = testimonialsList;
   else if (transEntity === 'faqs') currentItems = faqsList;
   else if (transEntity === 'areas') currentItems = areasList;
@@ -150,6 +158,7 @@ export default function AdminTranslationsTab() {
     else if (transEntity === 'club') updateClubTier(selectedItem.id, { translations: updatedTranslations });
     else if (transEntity === 'events') updateEvent(selectedItem.id, { translations: updatedTranslations });
     else if (transEntity === 'coaches') updateCoach(selectedItem.id, { translations: updatedTranslations });
+    else if (transEntity === 'pillars') updatePillar(selectedItem.id, { translations: updatedTranslations });
     else if (transEntity === 'testimonials') updateTestimonial(selectedItem.id, { translations: updatedTranslations });
     else if (transEntity === 'faqs') updateFaq(selectedItem.id, { translations: updatedTranslations });
     else if (transEntity === 'areas') updateArea(selectedItem.id, { translations: updatedTranslations });
@@ -166,6 +175,7 @@ export default function AdminTranslationsTab() {
     else if (transEntity === 'club') updateClubTier(selectedItem.id, { translations: copiedTranslations });
     else if (transEntity === 'events') updateEvent(selectedItem.id, { translations: copiedTranslations });
     else if (transEntity === 'coaches') updateCoach(selectedItem.id, { translations: copiedTranslations });
+    else if (transEntity === 'pillars') updatePillar(selectedItem.id, { translations: copiedTranslations });
     else if (transEntity === 'testimonials') updateTestimonial(selectedItem.id, { translations: copiedTranslations });
     else if (transEntity === 'faqs') updateFaq(selectedItem.id, { translations: copiedTranslations });
     else if (transEntity === 'areas') updateArea(selectedItem.id, { translations: copiedTranslations });
