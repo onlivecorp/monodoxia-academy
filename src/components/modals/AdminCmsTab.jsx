@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, createContext } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../i18n/LanguageContext';
 import AdminConfirmModal from './AdminConfirmModal';
-import { getHeroMediaStyles, parseVideoUrl } from '../../utils/heroMediaHelper';
+import { getHeroMediaStyles, getAboutMediaStyles, parseVideoUrl } from '../../utils/heroMediaHelper';
 
 
 const CmsFieldContext = createContext({
@@ -1729,33 +1729,760 @@ export default function AdminCmsTab() {
       })()}
 
       {/* AKADEMİYANIN MƏRAMI (ABOUT) */}
-      {cmsBlock === 'about' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {/* Əsas Mətn və Şəkil */}
-          <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0' }}>
-              <div>
-                <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Akademiyanın Məramı – Əsas Mətn və Şəkil</h5>
-                <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0 0' }}>Ana səhifənin sol tərəfindəki şəkil və mərkəzi başlıq mətnləri</p>
+      {cmsBlock === 'about' && (() => {
+        const aboutStyles = getAboutMediaStyles(cmsAbout);
+        const aboutVideo = parseVideoUrl(cmsAbout.videoUrl);
+        const isVideoMode = cmsAbout.mediaType === 'video';
+
+        const framePresets = [
+          { id: 'rounded', label: 'Modern Yuvarlaq', icon: 'rounded_corner', desc: '16px zərif künclər (Klassik)' },
+          { id: 'arch', label: 'Klassik Tağ (Arch)', icon: 'architecture', desc: 'Monodoxia imza tağvarisi (140px tağ)' },
+          { id: 'rectangle', label: 'Düzbucaqlı (Kəskin)', icon: 'crop_square', desc: '0px kəskin künclər' },
+          { id: 'pill', label: 'Kapsul / Oval', icon: 'capsule', desc: 'Tam dairəvi kapsul (9999px)' },
+          { id: 'circle', label: 'Tam Dairəvi', icon: 'circle', desc: '1:1 nisbətində tam dairə' },
+          { id: 'none', label: 'Framesiz (Çərçivəsiz)', icon: 'layers_clear', desc: 'Altlıqsız təmiz media' }
+        ];
+
+        const strokeWidthOptions = [
+          { val: 0, label: '0px (Yoxdur)' },
+          { val: 1, label: '1px (İncə)' },
+          { val: 2, label: '2px (Orta)' },
+          { val: 3, label: '3px' },
+          { val: 4, label: '4px (Qalın)' },
+          { val: 6, label: '6px' },
+          { val: 8, label: '8px (Ekstra)' }
+        ];
+
+        const strokeColorOptions = [
+          { val: 'rgba(197, 160, 89, 0.4)', label: 'Zərif Şəffaf Qızılı' },
+          { val: '#c5a059', label: 'Monodoxia Qızılı' },
+          { val: '#e2e8f0', label: 'Neytral Boz' },
+          { val: '#112240', label: 'Tünd Göy' },
+          { val: '#ffffff', label: 'Ağ' },
+          { val: 'transparent', label: 'Şəffaf' }
+        ];
+
+        const radiusOptions = [
+          { id: 'none', label: '0px (Kəskin)' },
+          { id: 'sm', label: '8px (Kiçik)' },
+          { id: 'md', label: '16px (Orta)' },
+          { id: 'lg', label: '24px (Böyük)' },
+          { id: 'xl', label: '36px (Geniş)' },
+          { id: 'full', label: '9999px (Kapsul)' },
+          { id: 'arch', label: 'Tağvari (140px)' },
+          { id: 'custom', label: 'Xüsusi (Slider)' }
+        ];
+
+        const widthOptions = [
+          { id: 'sm', label: 'Kompakt (380px)' },
+          { id: 'md', label: 'Standart (460px)' },
+          { id: 'lg', label: 'Geniş (540px)' },
+          { id: 'xl', label: 'Böyük (620px)' },
+          { id: 'full', label: '100% (Tam En)' },
+          { id: 'custom', label: 'Xüsusi En (px)' }
+        ];
+
+        const aspectOptions = [
+          { id: '4/3', label: '4:3 (Standart Məram)' },
+          { id: '16/9', label: '16:9 (Geniş Ekran / Video)' },
+          { id: '1/1', label: '1:1 (Kvadrat)' },
+          { id: '4/5', label: '4:5 (Portret)' },
+          { id: '3/4', label: '3:4 (Klassik Portret)' },
+          { id: 'auto', label: 'Auto (Orijinal Nisbət)' }
+        ];
+
+        const handleAboutVideoUpload = (e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          if (file.size > 50 * 1024 * 1024) {
+            showToast('Video fayl ölçüsü 50MB-dan çox ola bilməz', 'error');
+            return;
+          }
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            setCmsAbout(p => ({ ...p, videoUrl: event.target.result, mediaType: 'video' }));
+            showToast('Video faylı uğurla yükləndi!', 'success');
+          };
+          reader.readAsDataURL(file);
+        };
+
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+            {/* ƏSAS MƏTNLƏR */}
+            <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0' }}>
+                <div>
+                  <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Akademiyanın Məramı – Əsas Mətnlər</h5>
+                  <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0 0' }}>Bölmənin üst etiketi, əsas fəlsəfə başlığı və ətraflı izahat mətni</p>
+                </div>
+                <span className="admin-count-badge">Məram Bölməsi</span>
               </div>
-              <span style={{ fontSize: '11px', color: '#64748b', background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px' }}>Ana Səhifə</span>
+              <Field label="Üst Etiket (Badge)" block={cmsAbout} setBlock={setCmsAbout} fieldKey="badge" />
+              <Field label="Əsas Başlıq" block={cmsAbout} setBlock={setCmsAbout} fieldKey="title" />
+              <Field label="Mətn (desc)" block={cmsAbout} setBlock={setCmsAbout} fieldKey="desc" multiline rows={4} />
             </div>
-            <Field label="Üst Etiket (Badge)" block={cmsAbout} setBlock={setCmsAbout} fieldKey="badge" />
-            <Field label="Əsas Başlıq" block={cmsAbout} setBlock={setCmsAbout} fieldKey="title" />
-            <Field label="Mətn (desc)" block={cmsAbout} setBlock={setCmsAbout} fieldKey="desc" multiline rows={4} />
-            <ImageField
-              label="Haqqımızda / Məram Şəkli"
-              value={cmsAbout.image}
-              onChange={v => setCmsAbout(p => ({ ...p, image: v }))}
-            />
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
-              <Field label="Şəkil Sol Etiketi" block={cmsAbout} setBlock={setCmsAbout} fieldKey="imageBadgeLeft" />
-              <Field label="Şəkil Sağ Etiketi" block={cmsAbout} setBlock={setCmsAbout} fieldKey="imageBadgeRight" />
+
+            {/* AKADEMİYANIN MƏRAMI SOL MEDIA (ŞƏKİL / VİDEO, FRAME, STROKE, RADIUS, ÖLÇÜ) */}
+            <div className="admin-card-elevated" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '10px', borderBottom: '1.5px solid #e2e8f0', flexWrap: 'wrap', gap: '8px' }}>
+                <div>
+                  <h5 style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span className="material-symbols-outlined" style={{ color: '#c5a059' }}>photo_library</span>
+                    Akademiyanın Məramı – Sol Media (Şəkil / Video) İdarəetməsi
+                  </h5>
+                  <p style={{ fontSize: '12px', color: '#64748b', margin: '3px 0 0' }}>
+                    Sol tərəfdəki vizual blokun media formatı, çərçivə stili, stroke qalınlığı, framesiz rejim, künc radiusu və ölçülərini tənzimləyin
+                  </p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 700, padding: '3px 8px', borderRadius: '4px', background: isVideoMode ? '#eff6ff' : '#fef3c7', color: isVideoMode ? '#1d4ed8' : '#92400e', border: isVideoMode ? '1px solid #bfdbfe' : '1px solid #fde68a' }}>
+                    {isVideoMode ? '🎥 Video Rejimi' : '🖼️ Şəkil Rejimi'}
+                  </span>
+                  {aboutStyles.isFrameless && (
+                    <span style={{ fontSize: '11px', fontWeight: 700, padding: '3px 8px', borderRadius: '4px', background: '#f1f5f9', color: '#334155', border: '1px solid #cbd5e1' }}>
+                      ✨ Framesiz
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* 1. MEDIA NÖVÜ SEÇİMİ */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <label className="admin-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#c5a059' }}>perm_media</span>
+                  Media Növü (Şəkil və ya Video)
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setCmsAbout(p => ({ ...p, mediaType: 'image' }))}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      padding: '10px 14px',
+                      borderRadius: '8px',
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      border: !isVideoMode ? '2px solid #c5a059' : '1px solid #cbd5e1',
+                      background: !isVideoMode ? '#fffdf7' : '#ffffff',
+                      color: !isVideoMode ? '#92400e' : '#475569',
+                      boxShadow: !isVideoMode ? '0 2px 6px rgba(197,160,89,0.18)' : 'none',
+                      transition: 'all 0.15s'
+                    }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>image</span>
+                    <span>Şəkil (Image)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCmsAbout(p => ({ ...p, mediaType: 'video' }))}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      padding: '10px 14px',
+                      borderRadius: '8px',
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      border: isVideoMode ? '2px solid #2563eb' : '1px solid #cbd5e1',
+                      background: isVideoMode ? '#eff6ff' : '#ffffff',
+                      color: isVideoMode ? '#1e40af' : '#475569',
+                      boxShadow: isVideoMode ? '0 2px 6px rgba(37,99,235,0.18)' : 'none',
+                      transition: 'all 0.15s'
+                    }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>videocam</span>
+                    <span>Video (YouTube / MP4 / Vimeo)</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* 2. MEDIA MƏNBƏYİ: ŞƏKİL VƏ YA VİDEO */}
+              {!isVideoMode ? (
+                /* ŞƏKİL SAHƏSİ */
+                <div style={{ background: '#fdfbf7', padding: '14px', borderRadius: '8px', border: '1px solid #f1ece1', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <ImageField
+                    label="Məram Sol Əsas Şəkil URL və ya Fayl"
+                    value={cmsAbout.image}
+                    onChange={v => setCmsAbout(p => ({ ...p, image: v }))}
+                  />
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <button
+                      type="button"
+                      onClick={() => setCmsAbout(p => ({
+                        ...p,
+                        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCfJ9v48nWJzTbw80sDrDtTVhJ3mvXbVUbCeHjTMi_Y-NUPyOTMrFxaSuOPQsSmEsuH1iFUesyI1GA23YGlZQlqzMJLdnrhTp12XLt8NPffBd1uWx8YenygyqGA2zja0D9d-rKVoNVykmJRjh03f9EEtW4IghPWZy_-gBbdmrV1VbwrBwzlJWS1Ixvco8e0IdrYq8AHbaR5Pdystz7aBbXr4cWkfac3BRp_ESWqbNA0K6eg7X2YuuMP"
+                      }))}
+                      className="admin-btn-secondary"
+                      style={{ fontSize: '11px', padding: '4px 10px' }}
+                    >
+                      Klassik Monodoxia Məram Şəkli (Defolt)
+                    </button>
+                    <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '11px', color: '#64748b' }}>Şəkil Doldurma:</span>
+                      <select
+                        value={cmsAbout.objectFit || 'cover'}
+                        onChange={e => setCmsAbout(p => ({ ...p, objectFit: e.target.value }))}
+                        className="admin-input"
+                        style={{ padding: '3px 8px', fontSize: '11px', width: 'auto' }}
+                      >
+                        <option value="cover">Tam Örtük (Cover)</option>
+                        <option value="contain">Sığışdır (Contain)</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* VİDEO SAHƏSİ */
+                <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div>
+                    <label className="admin-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span>Video URL və ya Video Fayl Yüklə</span>
+                      <span style={{ fontSize: '10px', color: '#64748b' }}>YouTube, Vimeo və ya birbaşa .mp4/.webm</span>
+                    </label>
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                      <input
+                        type="text"
+                        placeholder="https://www.youtube.com/watch?v=... və ya video.mp4"
+                        value={cmsAbout.videoUrl || ''}
+                        onChange={e => setCmsAbout(p => ({ ...p, videoUrl: e.target.value, mediaType: 'video' }))}
+                        className="admin-input"
+                        style={{ flex: 1 }}
+                      />
+                      <label className="admin-btn-secondary" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#2563eb' }}>video_file</span>
+                        <span>Fayl Yüklə</span>
+                        <input type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime" style={{ display: 'none' }} onChange={handleAboutVideoUpload} />
+                      </label>
+                      {cmsAbout.videoUrl && (
+                        <button
+                          type="button"
+                          onClick={() => setCmsAbout(p => ({ ...p, videoUrl: '' }))}
+                          className="admin-btn-danger"
+                          style={{ padding: '6px 10px', fontSize: '11px' }}
+                        >
+                          Sil
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* TEZ NÜMUNƏ DÜYMƏLƏRİ */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 600 }}>Sürətli sınaq üçün:</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCmsAbout(p => ({ ...p, videoUrl: 'https://www.youtube.com/watch?v=inpok4MKVLM', mediaType: 'video' }));
+                        showToast('YouTube video linki təyin edildi', 'info');
+                      }}
+                      className="admin-btn-secondary"
+                      style={{ fontSize: '11px', padding: '3px 8px' }}
+                    >
+                      ▶️ YouTube Fərqindəlik Videosu
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCmsAbout(p => ({ ...p, videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-waves-in-the-water-1164-large.mp4', mediaType: 'video' }));
+                        showToast('Sakitləşdirici MP4 video təyin edildi', 'info');
+                      }}
+                      className="admin-btn-secondary"
+                      style={{ fontSize: '11px', padding: '3px 8px' }}
+                    >
+                      🌊 Sakitləşdirici Təbiət (MP4)
+                    </button>
+                  </div>
+
+                  {/* VİDEO POSTER ŞƏKLİ */}
+                  <div style={{ borderTop: '1px dashed #cbd5e1', paddingTop: '10px' }}>
+                    <ImageField
+                      label="Video Örtük Şəkli (Poster / Thumbnail - opsional)"
+                      value={cmsAbout.videoPoster || ''}
+                      onChange={v => setCmsAbout(p => ({ ...p, videoPoster: v }))}
+                    />
+                  </div>
+
+                  {/* VİDEO PARAMETRLƏRİ */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px', paddingTop: '6px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 600, color: '#334155', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={cmsAbout.videoAutoplay !== false}
+                        onChange={e => setCmsAbout(p => ({ ...p, videoAutoplay: e.target.checked }))}
+                      />
+                      <span>Avtomatik Oxut (Autoplay)</span>
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 600, color: '#334155', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={cmsAbout.videoMuted !== false}
+                        onChange={e => setCmsAbout(p => ({ ...p, videoMuted: e.target.checked }))}
+                      />
+                      <span>Səssiz (Muted)</span>
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 600, color: '#334155', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={cmsAbout.videoLoop !== false}
+                        onChange={e => setCmsAbout(p => ({ ...p, videoLoop: e.target.checked }))}
+                      />
+                      <span>Təkrarla (Loop)</span>
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 600, color: '#334155', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={cmsAbout.videoControls === true}
+                        onChange={e => setCmsAbout(p => ({ ...p, videoControls: e.target.checked }))}
+                      />
+                      <span>Pleyer Düymələri (Controls)</span>
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              {/* 3. FRAME STİLİ VƏ FRAMESİZ REJİMİ */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', paddingTop: '4px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                  <label className="admin-label" style={{ display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#c5a059' }}>filter_frames</span>
+                    Frame Stili (Çərçivə Forması)
+                  </label>
+                  {/* FRAMESİZ TOGGLE SWITCH */}
+                  <label style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '6px 12px',
+                    borderRadius: '6px',
+                    background: aboutStyles.isFrameless ? '#fef3c7' : '#f1f5f9',
+                    border: aboutStyles.isFrameless ? '1.5px solid #d4af37' : '1px solid #cbd5e1',
+                    cursor: 'pointer',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    color: aboutStyles.isFrameless ? '#92400e' : '#475569'
+                  }}>
+                    <input
+                      type="checkbox"
+                      checked={aboutStyles.isFrameless}
+                      onChange={e => {
+                        const val = e.target.checked;
+                        setCmsAbout(p => ({
+                          ...p,
+                          isFrameless: val,
+                          frameStyle: val ? 'none' : (p.frameStyle === 'none' ? 'rounded' : (p.frameStyle || 'rounded'))
+                        }));
+                      }}
+                      style={{ cursor: 'pointer' }}
+                    />
+                    <span>Framesiz Rejim (Çərçivə lövhəsiz)</span>
+                  </label>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '8px' }}>
+                  {framePresets.map(fp => {
+                    const isSelected = (!aboutStyles.isFrameless && (cmsAbout.frameStyle || 'rounded') === fp.id) || (aboutStyles.isFrameless && fp.id === 'none');
+                    return (
+                      <button
+                        key={fp.id}
+                        type="button"
+                        onClick={() => {
+                          if (fp.id === 'none') {
+                            setCmsAbout(p => ({ ...p, isFrameless: true, frameStyle: 'none' }));
+                          } else {
+                            setCmsAbout(p => ({
+                              ...p,
+                              isFrameless: false,
+                              frameStyle: fp.id,
+                              borderRadius: fp.id === 'arch' ? 'arch' : (fp.id === 'rectangle' ? 'none' : (fp.id === 'pill' ? 'full' : (fp.id === 'circle' ? 'full' : (fp.id === 'rounded' ? 'md' : (p.borderRadius || 'md')))))
+                            }));
+                          }
+                        }}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'flex-start',
+                          padding: '10px 12px',
+                          borderRadius: '8px',
+                          textAlign: 'left',
+                          cursor: 'pointer',
+                          border: isSelected ? '2px solid #c5a059' : '1px solid #e2e8f0',
+                          background: isSelected ? '#fffdf7' : '#ffffff',
+                          color: isSelected ? '#0f172a' : '#475569',
+                          boxShadow: isSelected ? '0 2px 6px rgba(197,160,89,0.15)' : 'none',
+                          transition: 'all 0.15s'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, fontSize: '12px', color: isSelected ? '#92400e' : '#1e293b' }}>
+                          <span className="material-symbols-outlined" style={{ fontSize: '16px', color: isSelected ? '#c5a059' : '#64748b' }}>{fp.icon}</span>
+                          <span>{fp.label}</span>
+                        </div>
+                        <span style={{ fontSize: '10px', color: '#64748b', marginTop: '3px' }}>{fp.desc}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 4. STROKE ÖLÇÜSÜ (QALINLIĞI) VƏ RƏNGİ */}
+              <div style={{ background: '#fafaf9', padding: '12px 14px', borderRadius: '8px', border: '1px solid #e7e5e4', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                  <label className="admin-label" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#c5a059' }}>border_style</span>
+                    Stroke Ölçüsü (Qalınlığı): <strong>{cmsAbout.strokeWidth !== undefined ? cmsAbout.strokeWidth : 1}px</strong>
+                  </label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    {strokeWidthOptions.map(sw => (
+                      <button
+                        key={sw.val}
+                        type="button"
+                        onClick={() => setCmsAbout(p => ({ ...p, strokeWidth: sw.val }))}
+                        style={{
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          border: (cmsAbout.strokeWidth !== undefined ? cmsAbout.strokeWidth : 1) === sw.val ? '1.5px solid #c5a059' : '1px solid #cbd5e1',
+                          background: (cmsAbout.strokeWidth !== undefined ? cmsAbout.strokeWidth : 1) === sw.val ? '#fffbeb' : '#ffffff',
+                          color: (cmsAbout.strokeWidth !== undefined ? cmsAbout.strokeWidth : 1) === sw.val ? '#92400e' : '#475569'
+                        }}
+                      >
+                        {sw.val}px
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* STROKE RƏNGİ */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 600, color: '#475569' }}>Stroke Rəngi:</span>
+                  {strokeColorOptions.map(sc => (
+                    <button
+                      key={sc.val}
+                      type="button"
+                      onClick={() => setCmsAbout(p => ({ ...p, strokeColor: sc.val }))}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        border: (cmsAbout.strokeColor || 'rgba(197, 160, 89, 0.4)') === sc.val ? '1.5px solid #0f172a' : '1px solid #cbd5e1',
+                        background: '#ffffff',
+                        color: '#334155'
+                      }}
+                    >
+                      <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: sc.val === 'transparent' ? '#ffffff' : sc.val, border: '1px solid #94a3b8', display: 'inline-block' }} />
+                      <span>{sc.label}</span>
+                    </button>
+                  ))}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto' }}>
+                    <span style={{ fontSize: '11px', color: '#64748b' }}>Özəl Rəng:</span>
+                    <input
+                      type="color"
+                      value={cmsAbout.strokeColor?.startsWith('#') ? cmsAbout.strokeColor : '#c5a059'}
+                      onChange={e => setCmsAbout(p => ({ ...p, strokeColor: e.target.value }))}
+                      style={{ width: '28px', height: '28px', padding: 0, border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 5. BORDER RADIUS VƏ ÖLÇÜLƏR (EN & NİSBƏT) */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
+                {/* BORDER RADIUS */}
+                <div style={{ background: '#ffffff', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label className="admin-label" style={{ margin: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#c5a059' }}>rounded_corner</span>
+                      Border Radius (Künc Yuvarlaqlığı)
+                    </span>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#92400e' }}>
+                      {cmsAbout.borderRadius === 'custom' ? `${cmsAbout.customBorderRadius || 16}px` : (cmsAbout.borderRadius || 'md')}
+                    </span>
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(90px, 1fr))', gap: '6px' }}>
+                    {radiusOptions.map(ro => {
+                      const isSel = (cmsAbout.borderRadius || 'md') === ro.id;
+                      return (
+                        <button
+                          key={ro.id}
+                          type="button"
+                          onClick={() => setCmsAbout(p => ({ ...p, borderRadius: ro.id }))}
+                          style={{
+                            padding: '5px 8px',
+                            borderRadius: '4px',
+                            fontSize: '11px',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            border: isSel ? '1.5px solid #c5a059' : '1px solid #cbd5e1',
+                            background: isSel ? '#fffbeb' : '#ffffff',
+                            color: isSel ? '#92400e' : '#475569'
+                          }}
+                        >
+                          {ro.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {cmsAbout.borderRadius === 'custom' && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+                      <input
+                        type="range"
+                        min="0"
+                        max="200"
+                        value={cmsAbout.customBorderRadius !== undefined ? cmsAbout.customBorderRadius : 16}
+                        onChange={e => setCmsAbout(p => ({ ...p, customBorderRadius: Number(e.target.value) }))}
+                        style={{ flex: 1, cursor: 'pointer' }}
+                      />
+                      <span style={{ fontSize: '12px', fontWeight: 700, minWidth: '45px', textAlign: 'right' }}>
+                        {cmsAbout.customBorderRadius !== undefined ? cmsAbout.customBorderRadius : 16}px
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* ŞƏKİL / MEDIA ÖLÇÜSÜ (EN & NİSBƏT) */}
+                <div style={{ background: '#ffffff', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label className="admin-label" style={{ margin: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#c5a059' }}>aspect_ratio</span>
+                      Şəkil / Media Ölçüsü (En & Nisbət)
+                    </span>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#92400e' }}>
+                      {cmsAbout.mediaWidth || 'full'} · {cmsAbout.aspectRatio || '4/3'}
+                    </span>
+                  </label>
+
+                  {/* EN SEÇİMLƏRİ */}
+                  <div>
+                    <span style={{ fontSize: '10px', color: '#64748b', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Maksimal En:</span>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))', gap: '4px' }}>
+                      {widthOptions.map(wo => {
+                        const isSel = (cmsAbout.mediaWidth || 'full') === wo.id;
+                        return (
+                          <button
+                            key={wo.id}
+                            type="button"
+                            onClick={() => setCmsAbout(p => ({ ...p, mediaWidth: wo.id }))}
+                            style={{
+                              padding: '4px 6px',
+                              borderRadius: '4px',
+                              fontSize: '10px',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                              border: isSel ? '1.5px solid #c5a059' : '1px solid #cbd5e1',
+                              background: isSel ? '#fffbeb' : '#ffffff',
+                              color: isSel ? '#92400e' : '#475569'
+                            }}
+                          >
+                            {wo.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {cmsAbout.mediaWidth === 'custom' && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px' }}>
+                        <input
+                          type="range"
+                          min="260"
+                          max="700"
+                          value={cmsAbout.customMediaWidth || 460}
+                          onChange={e => setCmsAbout(p => ({ ...p, customMediaWidth: Number(e.target.value) }))}
+                          style={{ flex: 1, cursor: 'pointer' }}
+                        />
+                        <span style={{ fontSize: '11px', fontWeight: 700, minWidth: '45px', textAlign: 'right' }}>
+                          {cmsAbout.customMediaWidth || 460}px
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* NİSBƏT SEÇİMLƏRİ */}
+                  <div>
+                    <span style={{ fontSize: '10px', color: '#64748b', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Nisbət (Aspect Ratio):</span>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(70px, 1fr))', gap: '4px' }}>
+                      {aspectOptions.map(ao => {
+                        const isSel = (cmsAbout.aspectRatio || '4/3') === ao.id;
+                        return (
+                          <button
+                            key={ao.id}
+                            type="button"
+                            onClick={() => setCmsAbout(p => ({ ...p, aspectRatio: ao.id }))}
+                            style={{
+                              padding: '4px 6px',
+                              borderRadius: '4px',
+                              fontSize: '10px',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                              border: isSel ? '1.5px solid #c5a059' : '1px solid #cbd5e1',
+                              background: isSel ? '#fffbeb' : '#ffffff',
+                              color: isSel ? '#92400e' : '#475569'
+                            }}
+                          >
+                            {ao.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 6. ŞƏKİL ALT ETİKETLƏRİ (BADGES) */}
+              <div style={{ background: '#fdfcf7', padding: '12px', borderRadius: '8px', border: '1px solid #f1ece1', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: 700, color: '#334155', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={cmsAbout.showBadges !== false}
+                      onChange={e => setCmsAbout(p => ({ ...p, showBadges: e.target.checked }))}
+                    />
+                    <span>Şəkil / Video Altındakı Məlumat Etiketlərini Göstər</span>
+                  </label>
+                  <span style={{ fontSize: '11px', color: '#64748b' }}>Sol & Sağ Etiket Mətnləri</span>
+                </div>
+
+                {cmsAbout.showBadges !== false && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+                    <Field label="Şəkil Sol Etiketi" block={cmsAbout} setBlock={setCmsAbout} fieldKey="imageBadgeLeft" />
+                    <Field label="Şəkil Sağ Etiketi" block={cmsAbout} setBlock={setCmsAbout} fieldKey="imageBadgeRight" />
+                  </div>
+                )}
+              </div>
+
+              {/* 7. CANLI İNTERAKTİV ÖNİZLƏMƏ (LIVE PREVIEW) */}
+              <div style={{
+                background: '#ffffff',
+                border: '1.5px solid #e2e8f0',
+                borderRadius: '10px',
+                padding: '16px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#c5a059' }}>visibility</span>
+                    Canlı Önizləmə (Real-time Preview)
+                  </span>
+                  <span style={{ fontSize: '11px', color: '#64748b' }}>
+                    Seçilmiş stil: <strong>{aboutStyles.frameStyle}</strong> · Stroke: <strong>{aboutStyles.strokeWidth}px</strong> · Nisbət: <strong>{aboutStyles.aspectRatio}</strong>
+                  </span>
+                </div>
+
+                <div style={{
+                  background: '#f8fafc',
+                  border: '1px dashed #cbd5e1',
+                  borderRadius: '8px',
+                  padding: '24px 16px',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{ width: '100%', maxWidth: aboutStyles.maxWidth, margin: '0 auto' }}>
+                    <div
+                      style={{
+                        position: 'relative',
+                        borderRadius: aboutStyles.outerRadius,
+                        border: aboutStyles.strokeWidth > 0 ? `${aboutStyles.strokeWidth}px solid ${aboutStyles.strokeColor}` : 'none',
+                        background: aboutStyles.isFrameless ? 'transparent' : '#ffffff',
+                        padding: aboutStyles.isFrameless ? '0px' : '10px',
+                        boxShadow: aboutStyles.isFrameless ? 'none' : '0 4px 14px rgba(0,0,0,0.06)',
+                        overflow: 'hidden',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      <div
+                        style={{
+                          borderRadius: aboutStyles.innerRadius,
+                          aspectRatio: aboutStyles.aspectRatio === 'auto' ? undefined : aboutStyles.aspectRatio,
+                          overflow: 'hidden',
+                          background: '#0f172a',
+                          position: 'relative',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          minHeight: '220px'
+                        }}
+                      >
+                        {isVideoMode && cmsAbout.videoUrl ? (
+                          aboutVideo.type === 'youtube' || aboutVideo.type === 'vimeo' ? (
+                            <iframe
+                              src={aboutVideo.embedUrl}
+                              title="About Preview"
+                              style={{ width: '100%', height: '100%', border: 0 }}
+                            />
+                          ) : (
+                            <video
+                              src={aboutVideo.rawUrl || cmsAbout.videoUrl}
+                              poster={cmsAbout.videoPoster || cmsAbout.image}
+                              autoPlay={cmsAbout.videoAutoplay !== false}
+                              loop={cmsAbout.videoLoop !== false}
+                              muted={cmsAbout.videoMuted !== false}
+                              controls={cmsAbout.videoControls === true}
+                              playsInline
+                              style={{ width: '100%', height: '100%', objectFit: aboutStyles.objectFit }}
+                            />
+                          )
+                        ) : (
+                          <img
+                            src={
+                              cmsAbout.image ||
+                              "https://lh3.googleusercontent.com/aida-public/AB6AXuCfJ9v48nWJzTbw80sDrDtTVhJ3mvXbVUbCeHjTMi_Y-NUPyOTMrFxaSuOPQsSmEsuH1iFUesyI1GA23YGlZQlqzMJLdnrhTp12XLt8NPffBd1uWx8YenygyqGA2zja0D9d-rKVoNVykmJRjh03f9EEtW4IghPWZy_-gBbdmrV1VbwrBwzlJWS1Ixvco8e0IdrYq8AHbaR5Pdystz7aBbXr4cWkfac3BRp_ESWqbNA0K6eg7X2YuuMP"
+                            }
+                            alt="Məram Önizləmə"
+                            style={{ width: '100%', height: '100%', objectFit: aboutStyles.objectFit }}
+                          />
+                        )}
+                      </div>
+
+                      {/* BADGES PREVIEW */}
+                      {cmsAbout.showBadges !== false && (cmsAbout.imageBadgeLeft || cmsAbout.imageBadgeRight) && (
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: aboutStyles.isFrameless ? '10px 4px 4px' : '12px 6px 4px',
+                          fontSize: '11px',
+                          fontWeight: 700
+                        }}>
+                          <span style={{ color: '#c5a059', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                            {cmsAbout.imageBadgeLeft || 'Gündəlik Fərqindəlik'}
+                          </span>
+                          <span style={{ color: '#94a3b8' }}>
+                            {cmsAbout.imageBadgeRight || '01 / SÜKUT'}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* YADDA SAXLA DÜYMƏSİ */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '4px' }}>
+                <button
+                  type="button"
+                  onClick={saveAboutWithPillars}
+                  className="admin-btn-primary"
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 24px', fontSize: '13px' }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>save</span>
+                  <span>Akademiyanın Məramını Yadda Saxla</span>
+                </button>
+              </div>
             </div>
-            <div>
-              <button onClick={saveAboutWithPillars} className="admin-btn-primary">Yadda Saxla</button>
-            </div>
-          </div>
 
           {/* DƏYƏR KARTLARI (PİLLARS) – BİRBAŞA REDAKTƏ SAHƏLƏRİ */}
           <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -1874,7 +2601,8 @@ export default function AdminCmsTab() {
             </div>
           </div>
         </div>
-      )}
+      );
+    })()}
 
       {/* FUNDAMENTAL SAHƏLƏR (AREAS) */}
       {cmsBlock === 'areas' && (

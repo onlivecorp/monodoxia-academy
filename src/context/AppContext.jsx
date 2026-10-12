@@ -1100,6 +1100,13 @@ export function AppProvider({ children }) {
   // Admin Operations (CRUD)
   const updateUser = (id, updates) => {
     setUsersList(prev => prev.map(u => u.id === id ? { ...u, ...updates } : u));
+    if (currentUser?.id === id) {
+      setCurrentUser(prev => {
+        const next = { ...prev, ...updates };
+        localStorage.setItem('monodoxia_user', JSON.stringify(next));
+        return next;
+      });
+    }
     showToast('İstifadəçi məlumatı yeniləndi', 'success');
     const target = usersList.find(u => u.id === id);
     if (target) {

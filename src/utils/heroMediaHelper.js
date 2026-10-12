@@ -125,3 +125,93 @@ export function getHeroMediaStyles(hero = {}) {
     mediaType
   };
 }
+
+/**
+ * Compute style objects and classes for About Left Media
+ */
+export function getAboutMediaStyles(about = {}) {
+  const isFrameless = about.isFrameless === true || about.frameStyle === 'none';
+  const frameStyle = about.frameStyle || 'rounded';
+
+  // Radius calculation
+  let outerRadius = '16px';
+  let innerRadius = '10px';
+
+  const radiusMode = about.borderRadius || (
+    frameStyle === 'arch' ? 'arch' :
+    frameStyle === 'rectangle' ? 'none' :
+    frameStyle === 'pill' ? 'full' :
+    frameStyle === 'circle' ? 'circle' :
+    (frameStyle === 'rounded' ? 'md' : 'md')
+  );
+
+  if (radiusMode === 'none' || frameStyle === 'rectangle') {
+    outerRadius = '0px';
+    innerRadius = '0px';
+  } else if (radiusMode === 'sm') {
+    outerRadius = '8px';
+    innerRadius = isFrameless ? '8px' : '4px';
+  } else if (radiusMode === 'md' || frameStyle === 'rounded') {
+    outerRadius = '16px';
+    innerRadius = isFrameless ? '16px' : '10px';
+  } else if (radiusMode === 'lg') {
+    outerRadius = '24px';
+    innerRadius = isFrameless ? '24px' : '18px';
+  } else if (radiusMode === 'xl') {
+    outerRadius = '36px';
+    innerRadius = isFrameless ? '36px' : '28px';
+  } else if (radiusMode === 'full' || frameStyle === 'pill') {
+    outerRadius = '9999px';
+    innerRadius = '9999px';
+  } else if (frameStyle === 'circle') {
+    outerRadius = '50%';
+    innerRadius = '50%';
+  } else if (radiusMode === 'custom') {
+    const customPx = about.customBorderRadius !== undefined ? Number(about.customBorderRadius) : 16;
+    outerRadius = `${customPx}px`;
+    innerRadius = isFrameless ? `${customPx}px` : `${Math.max(0, customPx - 4)}px`;
+  } else if (radiusMode === 'arch' || frameStyle === 'arch') {
+    outerRadius = '140px 140px 14px 14px';
+    innerRadius = isFrameless ? '140px 140px 14px 14px' : '132px 132px 10px 10px';
+  }
+
+  // Stroke / Border Thickness
+  const strokeWidth = about.strokeWidth !== undefined ? Number(about.strokeWidth) : 1;
+  const strokeColor = about.strokeColor || 'rgba(197, 160, 89, 0.4)';
+
+  // Max Width
+  let maxWidth = '100%';
+  if (about.mediaWidth === 'sm') maxWidth = '380px';
+  else if (about.mediaWidth === 'md') maxWidth = '460px';
+  else if (about.mediaWidth === 'lg') maxWidth = '540px';
+  else if (about.mediaWidth === 'xl') maxWidth = '620px';
+  else if (about.mediaWidth === 'full') maxWidth = '100%';
+  else if (about.mediaWidth === 'custom') {
+    maxWidth = about.customMediaWidth ? `${about.customMediaWidth}px` : '100%';
+  }
+
+  // Aspect ratio (default 4/3 for About)
+  let aspectRatio = '4/3';
+  if (about.aspectRatio === '1/1' || frameStyle === 'circle') aspectRatio = '1/1';
+  else if (about.aspectRatio === '16/9') aspectRatio = '16/9';
+  else if (about.aspectRatio === '4/5') aspectRatio = '4/5';
+  else if (about.aspectRatio === '3/4') aspectRatio = '3/4';
+  else if (about.aspectRatio === 'auto') aspectRatio = 'auto';
+  else if (about.aspectRatio) aspectRatio = about.aspectRatio;
+
+  const objectFit = about.objectFit || 'cover';
+  const mediaType = about.mediaType || 'image';
+
+  return {
+    isFrameless,
+    frameStyle,
+    outerRadius,
+    innerRadius,
+    strokeWidth,
+    strokeColor,
+    maxWidth,
+    aspectRatio,
+    objectFit,
+    mediaType
+  };
+}

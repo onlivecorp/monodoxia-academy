@@ -44,11 +44,7 @@ export default function Coaches() {
                           alt={c.name}
                         />
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-primary-container to-surface-container-high flex flex-col items-center justify-center text-secondary p-4 text-center">
-                          <span className="material-symbols-outlined text-[56px] mb-2 opacity-80">psychology</span>
-                          <span className="font-serif text-base font-bold text-surface-bright">{c.name}</span>
-                          <span className="text-[11px] text-secondary-fixed mt-1">{coachTitle}</span>
-                        </div>
+                        <div className="w-full h-full bg-gradient-to-br from-primary-container to-surface-container-high" />
                       )}
                     </div>
                     <div className="p-6">

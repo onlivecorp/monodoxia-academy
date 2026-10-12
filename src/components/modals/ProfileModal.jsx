@@ -20,74 +20,157 @@ export default function ProfileModal() {
     updateCurrentUser,
     activeProfileTab,
     setActiveProfileTab,
-    openPlayer
+    openPlayer,
+    showToast
   } = useApp();
 
-  const activeTab = activeProfileTab || 'applications';
+  const activeTab = activeProfileTab || 'profile';
   const setActiveTab = setActiveProfileTab;
   const [editingProfile, setEditingProfile] = useState(false);
   const [profileForm, setProfileForm] = useState({
-    firstName: currentUser?.firstName || '',
-    lastName: currentUser?.lastName || '',
-    phone: currentUser?.phone || '',
-    country: currentUser?.country || 'Azərbaycan',
-    city: currentUser?.city || 'Bakı'
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    avatar: '',
+    country: 'Azərbaycan',
+    city: 'Bakı',
+    bio: '',
+    linkedin: '',
+    instagram: ''
   });
+
+  // Password state
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [passwordStatus, setPasswordStatus] = useState(null);
   const [expandedAppId, setExpandedAppId] = useState(null);
 
   useEffect(() => {
     if (currentUser) {
       setProfileForm({
-        firstName: currentUser.firstName || '',
-        lastName: currentUser.lastName || '',
+        firstName: currentUser.firstName || currentUser.name?.split(' ')[0] || '',
+        lastName: currentUser.lastName || currentUser.name?.split(' ').slice(1).join(' ') || '',
+        email: currentUser.email || '',
         phone: currentUser.phone || '',
+        avatar: currentUser.avatar || currentUser.image || '',
         country: currentUser.country || 'Azərbaycan',
-        city: currentUser.city || 'Bakı'
+        city: currentUser.city || 'Bakı',
+        bio: currentUser.bio || '',
+        linkedin: currentUser.linkedin || '',
+        instagram: currentUser.instagram || ''
       });
     }
   }, [currentUser]);
 
   if (!profileModalOpen || !currentUser) return null;
 
-  // Filter applications for current user (non-archived)
-  const myApplications = applicationsList.filter(a => a.userId === currentUser.id && !a.archived);
-  const myNotifications = userNotifications.filter(n => n.userId === currentUser.id);
+  const myApplications = (applicationsList || []).filter(a => a.userId === currentUser.id && !a.archived);
+  const myNotifications = (userNotifications || []).filter(n => n.userId === currentUser.id);
   const unreadCount = myNotifications.filter(n => !n.isRead).length;
+
+  const handleAvatarFile = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('Şəkil ölçüsü 5MB-dan çox ola bilməz', 'error');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target.result;
+      setProfileForm(p => ({ ...p, avatar: dataUrl }));
+      updateCurrentUser({ avatar: dataUrl, image: dataUrl });
+      showToast('Profil şəkli yeniləndi!', 'success');
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleSaveProfile = (e) => {
     e.preventDefault();
+    const fullName = `${profileForm.firstName.trim()} ${profileForm.lastName.trim()}`.trim();
     updateCurrentUser({
       firstName: profileForm.firstName.trim(),
       lastName: profileForm.lastName.trim(),
+      name: fullName || currentUser.name,
+      email: profileForm.email.trim(),
       phone: profileForm.phone.trim(),
+      avatar: profileForm.avatar,
+      image: profileForm.avatar,
       country: profileForm.country.trim(),
-      city: profileForm.city.trim()
+      city: profileForm.city.trim(),
+      bio: profileForm.bio.trim(),
+      linkedin: profileForm.linkedin.trim(),
+      instagram: profileForm.instagram.trim()
     });
     setEditingProfile(false);
+    showToast('Profil məlumatları uğurla saxlanıldı!', 'success');
+  };
+
+  const handlePasswordChange = (e) => {
+    e.preventDefault();
+    if (!passwordForm.newPassword || passwordForm.newPassword.length < 6) {
+      setPasswordStatus({ type: 'error', text: 'Yeni şifrə ən azı 6 simvoldan ibarət olmalıdır!' });
+      return;
+    }
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordStatus({ type: 'error', text: 'Təkrar şifrə uyğun gəlmir!' });
+      return;
+    }
+    updateCurrentUser({ password: passwordForm.newPassword });
+    setPasswordStatus({ type: 'success', text: 'Şifrəniz uğurla yeniləndi!' });
+    setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    showToast('Şifrə uğurla dəyişdirildi', 'success');
   };
 
   return (
     <div className="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-      <div className="bg-surface-bright rounded-xl border border-outline-variant shadow-2xl max-w-2xl w-full my-auto overflow-hidden animate-fadeIn relative flex flex-col max-h-[90vh]">
+      <div className="bg-surface-bright rounded-2xl border border-outline-variant shadow-2xl max-w-3xl w-full my-auto overflow-hidden animate-fadeIn relative flex flex-col max-h-[92vh]">
         {/* Header with User Summary & Tabs */}
         <div className="p-5 sm:p-6 border-b border-outline-variant/40 bg-surface-container/20 shrink-0">
           <div className="flex items-start justify-between">
-            <div className="flex items-center gap-3.5">
-              <div className="w-14 h-14 rounded-full bg-secondary/10 border-2 border-secondary text-secondary flex items-center justify-center font-bold text-xl uppercase shrink-0 shadow-inner">
-                {currentUser.firstName ? currentUser.firstName[0] : 'U'}
+            <div className="flex items-center gap-4">
+              {/* AVATAR WITH QUICK UPLOAD */}
+              <div className="relative group shrink-0">
+                <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-secondary bg-surface-container flex items-center justify-center shadow-md">
+                  {profileForm.avatar || currentUser.avatar || currentUser.image ? (
+                    <img
+                      src={profileForm.avatar || currentUser.avatar || currentUser.image}
+                      alt={currentUser.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-secondary/15 text-secondary flex items-center justify-center font-bold text-2xl uppercase">
+                      {currentUser.firstName ? currentUser.firstName[0] : (currentUser.name ? currentUser.name[0] : 'U')}
+                    </div>
+                  )}
+                </div>
+                <label className="absolute inset-0 rounded-full bg-black/50 text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                  <span className="material-symbols-outlined text-[18px]">photo_camera</span>
+                  <span className="text-[8px] font-bold">Dəyiş</span>
+                  <input type="file" accept="image/*" onChange={handleAvatarFile} className="hidden" />
+                </label>
               </div>
+
               <div>
-                <h3 className="font-headline-sm text-base sm:text-lg font-serif text-primary leading-tight">
-                  {currentUser.firstName} {currentUser.lastName}
-                </h3>
-                <span className="text-xs text-outline block">{currentUser.email}</span>
-                <div className="mt-1 flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="font-headline-sm text-lg sm:text-xl font-serif text-primary leading-tight">
+                    {currentUser.firstName || currentUser.name} {currentUser.lastName || ''}
+                  </h3>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-secondary/15 text-secondary border border-secondary/20">
+                    {userTier || currentUser.tier || 'Free'} Rezident
+                  </span>
                   <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-surface-container text-primary">
                     {currentUser.role || 'Tələbə'}
                   </span>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-secondary/15 text-secondary border border-secondary/20">
-                    {userTier} Rezident
-                  </span>
+                </div>
+                <span className="text-xs text-outline block mt-0.5">{currentUser.email}</span>
+                <div className="mt-1 flex items-center gap-3 text-[11px] text-on-surface-variant">
+                  <span>ID: #{currentUser.id}</span>
+                  {currentUser.joinedDate && <span>• Qeydiyyat: {currentUser.joinedDate}</span>}
                   {currentUser.role === 'Admin' && (
                     <button
                       onClick={() => { setProfileModalOpen(false); setAdminModalOpen(true); }}
@@ -104,12 +187,36 @@ export default function ProfileModal() {
               onClick={() => setProfileModalOpen(false)}
               className="text-outline hover:text-primary transition-colors p-1 rounded-full hover:bg-surface-container"
             >
-              <span className="material-symbols-outlined text-[20px]">close</span>
+              <span className="material-symbols-outlined text-[22px]">close</span>
             </button>
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex items-center gap-2 mt-5 border-b border-outline-variant/40 -mb-5 overflow-x-auto pb-0 text-xs">
+          <div className="flex items-center gap-1 sm:gap-2 mt-5 border-b border-outline-variant/40 -mb-5 overflow-x-auto pb-0 text-xs scrollbar-none">
+            <button
+              onClick={() => setActiveTab('profile')}
+              className={`pb-3 px-3 font-semibold transition-colors border-b-2 flex items-center gap-1.5 whitespace-nowrap ${
+                activeTab === 'profile'
+                  ? 'border-secondary text-secondary'
+                  : 'border-transparent text-on-surface-variant hover:text-primary'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[17px]">account_circle</span>
+              <span>Profil Məlumatlarım</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('security')}
+              className={`pb-3 px-3 font-semibold transition-colors border-b-2 flex items-center gap-1.5 whitespace-nowrap ${
+                activeTab === 'security'
+                  ? 'border-secondary text-secondary'
+                  : 'border-transparent text-on-surface-variant hover:text-primary'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[17px]">lock_reset</span>
+              <span>Təhlükəsizlik & Şifrə</span>
+            </button>
+
             <button
               onClick={() => setActiveTab('applications')}
               className={`pb-3 px-3 font-semibold transition-colors border-b-2 flex items-center gap-1.5 whitespace-nowrap ${
@@ -119,7 +226,7 @@ export default function ProfileModal() {
               }`}
             >
               <span className="material-symbols-outlined text-[17px]">assignment</span>
-              <span>Müraciətlərim & Qeydiyyatlarım</span>
+              <span>Müraciətlər & Qeydiyyat</span>
               <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-surface-container text-primary">
                 {myApplications.length}
               </span>
@@ -146,18 +253,6 @@ export default function ProfileModal() {
             </button>
 
             <button
-              onClick={() => setActiveTab('profile')}
-              className={`pb-3 px-3 font-semibold transition-colors border-b-2 flex items-center gap-1.5 whitespace-nowrap ${
-                activeTab === 'profile'
-                  ? 'border-secondary text-secondary'
-                  : 'border-transparent text-on-surface-variant hover:text-primary'
-              }`}
-            >
-              <span className="material-symbols-outlined text-[17px]">person</span>
-              <span>Profil Məlumatlarım</span>
-            </button>
-
-            <button
               onClick={() => setActiveTab('learning')}
               className={`pb-3 px-3 font-semibold transition-colors border-b-2 flex items-center gap-1.5 whitespace-nowrap ${
                 activeTab === 'learning'
@@ -166,30 +261,369 @@ export default function ProfileModal() {
               }`}
             >
               <span className="material-symbols-outlined text-[17px]">workspace_premium</span>
-              <span>Sertifikatlar & Tədris</span>
+              <span>Tədris & Kouçinq</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('membership')}
+              className={`pb-3 px-3 font-semibold transition-colors border-b-2 flex items-center gap-1.5 whitespace-nowrap ${
+                activeTab === 'membership'
+                  ? 'border-secondary text-secondary'
+                  : 'border-transparent text-on-surface-variant hover:text-primary'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[17px]">card_membership</span>
+              <span>Rezidentlik (Paket)</span>
             </button>
           </div>
         </div>
 
         {/* Tab Contents */}
         <div className="p-5 sm:p-6 overflow-y-auto flex-1 text-sm">
-          {/* TAB 1: APPLICATIONS & REGISTRATIONS */}
-          {activeTab === 'applications' && (
-            <div className="space-y-4">
+          {/* TAB 1: PROFILE INFO & EDIT */}
+          {activeTab === 'profile' && (
+            <div className="space-y-5">
               <div className="flex items-center justify-between">
                 <div>
                   <h4 className="text-xs font-bold uppercase tracking-wider text-primary">
-                    Bütün Müraciət və Qeydiyyat Tarixçəsi
+                    Şəxsi Profil Məlumatları
                   </h4>
                   <p className="text-[11px] text-on-surface-variant">
-                    Kurslar, klublar, tədbirlər və icma üçün göndərdiyiniz müraciətlərin aktual vəziyyəti
+                    Hesab rekvizitlərinizi və ictimai profilinizi tənzimləyin
                   </p>
+                </div>
+                {!editingProfile ? (
+                  <button
+                    onClick={() => setEditingProfile(true)}
+                    className="px-3 py-1.5 rounded border border-secondary text-secondary hover:bg-secondary/10 text-xs font-semibold flex items-center gap-1 transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[15px]">edit</span>
+                    <span>Profili Redaktə Et</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setEditingProfile(false)}
+                    className="px-3 py-1.5 rounded text-xs text-outline hover:text-primary"
+                  >
+                    Ləğv Et
+                  </button>
+                )}
+              </div>
+
+              {/* AVATAR SELECTOR / UPLOAD IN VIEW & EDIT */}
+              <div className="p-4 rounded-xl bg-surface-container/20 border border-outline-variant/40 flex flex-col sm:flex-row items-center gap-4">
+                <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-secondary bg-surface-container flex items-center justify-center shrink-0">
+                  {profileForm.avatar ? (
+                    <img src={profileForm.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="font-bold text-2xl text-secondary">
+                      {profileForm.firstName ? profileForm.firstName[0] : 'U'}
+                    </span>
+                  )}
+                </div>
+                <div className="flex-1 text-center sm:text-left space-y-1">
+                  <div className="font-semibold text-primary text-xs">Profil Şəkli / Avatar</div>
+                  <p className="text-[11px] text-outline">
+                    JPG, PNG və ya WebM formatında maksimum 5MB fayl yükləyə bilərsiniz.
+                  </p>
+                  <div className="flex items-center gap-2 pt-1 justify-center sm:justify-start">
+                    <label className="cursor-pointer px-3 py-1 rounded bg-secondary/10 hover:bg-secondary/20 text-secondary border border-secondary/30 text-xs font-semibold flex items-center gap-1 transition-colors">
+                      <span className="material-symbols-outlined text-[15px]">upload</span>
+                      <span>Yeni Şəkil Yüklə</span>
+                      <input type="file" accept="image/*" onChange={handleAvatarFile} className="hidden" />
+                    </label>
+                    {profileForm.avatar && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setProfileForm(p => ({ ...p, avatar: '' }));
+                          updateCurrentUser({ avatar: '', image: '' });
+                        }}
+                        className="text-rose-600 hover:text-rose-800 text-xs font-semibold px-2 py-1"
+                      >
+                        Şəkli Sil
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
 
+              {editingProfile ? (
+                <form onSubmit={handleSaveProfile} className="space-y-4 p-4 rounded-xl bg-surface-container/15 border border-outline-variant/40">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <div>
+                      <label className="block text-xs font-semibold text-primary mb-1">Ad *</label>
+                      <input
+                        type="text"
+                        value={profileForm.firstName}
+                        onChange={(e) => setProfileForm(prev => ({ ...prev, firstName: e.target.value }))}
+                        className="w-full px-3 py-2 rounded-lg border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-primary mb-1">Soyad</label>
+                      <input
+                        type="text"
+                        value={profileForm.lastName}
+                        onChange={(e) => setProfileForm(prev => ({ ...prev, lastName: e.target.value }))}
+                        className="w-full px-3 py-2 rounded-lg border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-primary mb-1">E-poçt Ünvanı *</label>
+                      <input
+                        type="email"
+                        value={profileForm.email}
+                        onChange={(e) => setProfileForm(prev => ({ ...prev, email: e.target.value }))}
+                        className="w-full px-3 py-2 rounded-lg border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-primary mb-1">Telefon / WhatsApp</label>
+                      <input
+                        type="text"
+                        value={profileForm.phone}
+                        onChange={(e) => setProfileForm(prev => ({ ...prev, phone: e.target.value }))}
+                        placeholder="+994 50 123 45 67"
+                        className="w-full px-3 py-2 rounded-lg border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-primary mb-1">Ölkə</label>
+                      <input
+                        type="text"
+                        value={profileForm.country}
+                        onChange={(e) => setProfileForm(prev => ({ ...prev, country: e.target.value }))}
+                        className="w-full px-3 py-2 rounded-lg border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-primary mb-1">Şəhər</label>
+                      <input
+                        type="text"
+                        value={profileForm.city}
+                        onChange={(e) => setProfileForm(prev => ({ ...prev, city: e.target.value }))}
+                        className="w-full px-3 py-2 rounded-lg border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-primary mb-1">Haqqında / Bio</label>
+                    <textarea
+                      rows={3}
+                      value={profileForm.bio}
+                      onChange={(e) => setProfileForm(prev => ({ ...prev, bio: e.target.value }))}
+                      placeholder="Özünüz haqqında qısa məlumat, peşə və maraq sahələriniz..."
+                      className="w-full px-3 py-2 rounded-lg border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <div>
+                      <label className="block text-xs font-semibold text-primary mb-1">LinkedIn Profili</label>
+                      <input
+                        type="text"
+                        placeholder="https://linkedin.com/in/..."
+                        value={profileForm.linkedin}
+                        onChange={(e) => setProfileForm(prev => ({ ...prev, linkedin: e.target.value }))}
+                        className="w-full px-3 py-2 rounded-lg border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-primary mb-1">Instagram Profili</label>
+                      <input
+                        type="text"
+                        placeholder="https://instagram.com/..."
+                        value={profileForm.instagram}
+                        onChange={(e) => setProfileForm(prev => ({ ...prev, instagram: e.target.value }))}
+                        className="w-full px-3 py-2 rounded-lg border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-3 border-t border-outline-variant/30">
+                    <button
+                      type="button"
+                      onClick={() => setEditingProfile(false)}
+                      className="px-4 py-2 rounded-lg text-xs text-outline hover:text-primary"
+                    >
+                      İmtina
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-5 py-2 rounded-lg bg-primary text-surface-bright hover:bg-[#112240] text-xs font-semibold shadow-sm flex items-center gap-1.5"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">save</span>
+                      <span>Yadda Saxla</span>
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div className="p-3.5 rounded-xl border border-outline-variant/30 bg-surface-bright">
+                      <span className="text-[10px] uppercase text-outline block">Tam Ad</span>
+                      <strong className="text-primary text-sm font-serif">
+                        {currentUser.firstName} {currentUser.lastName}
+                      </strong>
+                    </div>
+                    <div className="p-3.5 rounded-xl border border-outline-variant/30 bg-surface-bright">
+                      <span className="text-[10px] uppercase text-outline block">E-poçt</span>
+                      <strong className="text-primary">{currentUser.email}</strong>
+                    </div>
+                    <div className="p-3.5 rounded-xl border border-outline-variant/30 bg-surface-bright">
+                      <span className="text-[10px] uppercase text-outline block">Telefon / WhatsApp</span>
+                      <strong className="text-primary">{currentUser.phone || '+994 (qeyd edilməyib)'}</strong>
+                    </div>
+                    <div className="p-3.5 rounded-xl border border-outline-variant/30 bg-surface-bright">
+                      <span className="text-[10px] uppercase text-outline block">Məkan</span>
+                      <strong className="text-primary">{currentUser.city || 'Bakı'}, {currentUser.country || 'Azərbaycan'}</strong>
+                    </div>
+                  </div>
+
+                  {currentUser.bio && (
+                    <div className="p-3.5 rounded-xl border border-outline-variant/30 bg-surface-bright text-xs">
+                      <span className="text-[10px] uppercase text-outline block mb-1">Haqqında / Bio</span>
+                      <p className="text-primary leading-relaxed">{currentUser.bio}</p>
+                    </div>
+                  )}
+
+                  {(currentUser.linkedin || currentUser.instagram) && (
+                    <div className="p-3.5 rounded-xl border border-outline-variant/30 bg-surface-bright text-xs flex items-center gap-4">
+                      <span className="text-[10px] uppercase text-outline">Sosial Profillər:</span>
+                      {currentUser.linkedin && (
+                        <a href={currentUser.linkedin} target="_blank" rel="noreferrer" className="text-secondary hover:underline flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[15px]">link</span>
+                          <span>LinkedIn</span>
+                        </a>
+                      )}
+                      {currentUser.instagram && (
+                        <a href={currentUser.instagram} target="_blank" rel="noreferrer" className="text-secondary hover:underline flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[15px]">photo_camera</span>
+                          <span>Instagram</span>
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="pt-3 border-t border-outline-variant/30 flex justify-between items-center text-xs">
+                <span className="text-outline">Platforma İstifadəçi ID: #{currentUser.id}</span>
+                <button
+                  onClick={() => {
+                    setProfileModalOpen(false);
+                    setOnboardingOpen(true);
+                  }}
+                  className="text-secondary hover:underline flex items-center gap-1 font-medium"
+                >
+                  <span className="material-symbols-outlined text-[15px]">tune</span>
+                  Fərdi İnkişaf Xəritəsini Yenilə
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 2: SECURITY & PASSWORD */}
+          {activeTab === 'security' && (
+            <div className="space-y-5">
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-primary">
+                  Hesab Təhlükəsizliyi və Şifrə Yeniləmə
+                </h4>
+                <p className="text-[11px] text-on-surface-variant">
+                  Hesabınızın təhlükəsizliyini təmin etmək üçün mütəmadi olaraq şifrənizi yeniləyin
+                </p>
+              </div>
+
+              {passwordStatus && (
+                <div className={`p-3 rounded-lg text-xs flex items-center gap-2 ${
+                  passwordStatus.type === 'success' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'
+                }`}>
+                  <span className="material-symbols-outlined text-[18px]">
+                    {passwordStatus.type === 'success' ? 'check_circle' : 'error'}
+                  </span>
+                  <span>{passwordStatus.text}</span>
+                </div>
+              )}
+
+              <form onSubmit={handlePasswordChange} className="space-y-3.5 p-4 rounded-xl bg-surface-container/20 border border-outline-variant/40 max-w-lg">
+                <div>
+                  <label className="block text-xs font-semibold text-primary mb-1">Cari Şifrə (Köhnə)</label>
+                  <input
+                    type="password"
+                    placeholder="••••••••"
+                    value={passwordForm.currentPassword}
+                    onChange={e => setPasswordForm(p => ({ ...p, currentPassword: e.target.value }))}
+                    className="w-full px-3 py-2 rounded-lg border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-primary mb-1">Yeni Şifrə (Minimum 6 simvol) *</label>
+                  <input
+                    type="password"
+                    placeholder="••••••••"
+                    required
+                    value={passwordForm.newPassword}
+                    onChange={e => setPasswordForm(p => ({ ...p, newPassword: e.target.value }))}
+                    className="w-full px-3 py-2 rounded-lg border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-primary mb-1">Yeni Şifrə Təkrarı *</label>
+                  <input
+                    type="password"
+                    placeholder="••••••••"
+                    required
+                    value={passwordForm.confirmPassword}
+                    onChange={e => setPasswordForm(p => ({ ...p, confirmPassword: e.target.value }))}
+                    className="w-full px-3 py-2 rounded-lg border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
+                  />
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    className="px-5 py-2 rounded-lg bg-primary text-surface-bright hover:bg-[#112240] text-xs font-semibold flex items-center gap-1.5"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">lock_reset</span>
+                    <span>Şifrəni Yenilə</span>
+                  </button>
+                </div>
+              </form>
+
+              <div className="p-4 rounded-xl border border-outline-variant/30 bg-surface-bright text-xs space-y-2">
+                <div className="flex items-center gap-2 text-emerald-600 font-bold">
+                  <span className="material-symbols-outlined text-[18px]">verified_user</span>
+                  <span>Hesab Təhlükəsizlik Statusu: Aktiv</span>
+                </div>
+                <p className="text-on-surface-variant text-[11px] leading-relaxed">
+                  Hesabınız 256-bit SSL şifrələməsi və qorunan sessiya protokolu ilə təmin olunmuşdur. Şübhəli daxilolma cəhdləri qeydə alındıqda dərhal e-poçt bildirişi alacaqsınız.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: APPLICATIONS & REGISTRATIONS */}
+          {activeTab === 'applications' && (
+            <div className="space-y-4">
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-primary">
+                  Bütün Müraciət və Qeydiyyat Tarixçəsi
+                </h4>
+                <p className="text-[11px] text-on-surface-variant">
+                  Kurslar, klublar, tədbirlər və icma üçün göndərdiyiniz müraciətlərin aktual vəziyyəti
+                </p>
+              </div>
+
               {myApplications.length === 0 ? (
-                <div className="text-center py-10 border border-dashed border-outline-variant/60 rounded-xl">
-                  <span className="material-symbols-outlined text-[40px] text-outline mb-2">inbox</span>
+                <div className="text-center py-12 border border-dashed border-outline-variant/60 rounded-xl">
+                  <span className="material-symbols-outlined text-[44px] text-outline mb-2">inbox</span>
                   <p className="text-xs text-on-surface-variant">Hələ heç bir müraciətiniz yoxdur.</p>
                   <p className="text-[11px] text-outline mt-1">
                     Kurs və ya tədbir seçərək qeydiyyatdan keçə bilərsiniz.
@@ -212,12 +646,12 @@ export default function ProfileModal() {
                     return (
                       <div
                         key={app.id}
-                        className="rounded-lg border border-outline-variant/50 bg-surface-bright p-4 transition-all hover:border-secondary/40 shadow-sm"
+                        className="rounded-xl border border-outline-variant/50 bg-surface-bright p-4 transition-all hover:border-secondary/40 shadow-sm"
                       >
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-outline-variant/20">
-                          <div className="flex items-center gap-2">
-                            <span className={`p-1.5 rounded-md bg-surface-container ${typeObj.color} flex items-center justify-center`}>
-                              <span className="material-symbols-outlined text-[18px]">{typeObj.icon}</span>
+                          <div className="flex items-center gap-2.5">
+                            <span className={`p-2 rounded-lg bg-surface-container ${typeObj.color} flex items-center justify-center`}>
+                              <span className="material-symbols-outlined text-[20px]">{typeObj.icon}</span>
                             </span>
                             <div>
                               <div className="flex items-center gap-2">
@@ -235,13 +669,12 @@ export default function ProfileModal() {
                           </div>
 
                           <div className="flex items-center gap-2 self-start sm:self-center">
-                            <span className={`px-2.5 py-1 rounded text-xs font-bold border ${statusObj.badgeClass}`}>
+                            <span className={`px-2.5 py-1 rounded-md text-xs font-bold border ${statusObj.badgeClass}`}>
                               {app.status}
                             </span>
                           </div>
                         </div>
 
-                        {/* Status detail grid */}
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3 text-xs text-on-surface-variant">
                           <div>
                             <span className="text-[10px] uppercase text-outline block">Məbləğ</span>
@@ -265,9 +698,8 @@ export default function ProfileModal() {
                           </div>
                         </div>
 
-                        {/* Admin note banner */}
                         {app.adminNote && (
-                          <div className="mt-3 p-2.5 rounded bg-secondary/5 border border-secondary/20 text-xs">
+                          <div className="mt-3 p-2.5 rounded-lg bg-secondary/5 border border-secondary/20 text-xs">
                             <span className="font-bold text-secondary flex items-center gap-1 mb-0.5">
                               <span className="material-symbols-outlined text-[14px]">admin_panel_settings</span>
                               Administrator Qeydi:
@@ -276,7 +708,6 @@ export default function ProfileModal() {
                           </div>
                         )}
 
-                        {/* Expandable answers & Actions */}
                         <div className="mt-3 pt-2.5 border-t border-outline-variant/20 flex items-center justify-between text-xs">
                           <button
                             onClick={() => setExpandedAppId(isExpanded ? null : app.id)}
@@ -317,7 +748,6 @@ export default function ProfileModal() {
                           </div>
                         </div>
 
-                        {/* Expanded details */}
                         {isExpanded && (
                           <div className="mt-3 p-3 rounded-lg bg-surface-container/30 border border-outline-variant/30 text-xs space-y-2 animate-fadeIn">
                             <span className="font-bold text-primary block border-b border-outline-variant/20 pb-1">
@@ -345,7 +775,7 @@ export default function ProfileModal() {
             </div>
           )}
 
-          {/* TAB 2: NOTIFICATIONS */}
+          {/* TAB 4: NOTIFICATIONS */}
           {activeTab === 'notifications' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -369,8 +799,8 @@ export default function ProfileModal() {
               </div>
 
               {myNotifications.length === 0 ? (
-                <div className="text-center py-10 border border-dashed border-outline-variant/60 rounded-xl">
-                  <span className="material-symbols-outlined text-[40px] text-outline mb-2">notifications_off</span>
+                <div className="text-center py-12 border border-dashed border-outline-variant/60 rounded-xl">
+                  <span className="material-symbols-outlined text-[44px] text-outline mb-2">notifications_off</span>
                   <p className="text-xs text-on-surface-variant">Hələ heç bir bildirişiniz yoxdur.</p>
                 </div>
               ) : (
@@ -382,7 +812,7 @@ export default function ProfileModal() {
                     return (
                       <div
                         key={notif.id}
-                        className={`p-3.5 rounded-lg border text-xs flex items-start gap-3 transition-colors ${
+                        className={`p-3.5 rounded-xl border text-xs flex items-start gap-3 transition-colors ${
                           notif.isRead
                             ? 'bg-surface-bright border-outline-variant/30 text-on-surface-variant'
                             : 'bg-secondary/5 border-secondary/30 text-primary font-medium shadow-sm'
@@ -408,156 +838,33 @@ export default function ProfileModal() {
             </div>
           )}
 
-          {/* TAB 3: PROFILE INFO */}
-          {activeTab === 'profile' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-primary">
-                    Şəxsi Profil Məlumatları
-                  </h4>
-                  <p className="text-[11px] text-on-surface-variant">
-                    Müraciətlər zamanı avtomatik tətbiq olunan şəxsi rekvizitlər
-                  </p>
-                </div>
-                {!editingProfile && (
-                  <button
-                    onClick={() => setEditingProfile(true)}
-                    className="px-3 py-1.5 rounded border border-secondary text-secondary hover:bg-secondary/10 text-xs font-semibold flex items-center gap-1 transition-colors"
-                  >
-                    <span className="material-symbols-outlined text-[15px]">edit</span>
-                    Redaktə Et
-                  </button>
-                )}
-              </div>
-
-              {editingProfile ? (
-                <form onSubmit={handleSaveProfile} className="space-y-3 p-4 rounded-lg bg-surface-container/20 border border-outline-variant/40">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-semibold text-primary mb-1">Ad</label>
-                      <input
-                        type="text"
-                        value={profileForm.firstName}
-                        onChange={(e) => setProfileForm(prev => ({ ...prev, firstName: e.target.value }))}
-                        className="w-full px-3 py-2 rounded border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-primary mb-1">Soyad</label>
-                      <input
-                        type="text"
-                        value={profileForm.lastName}
-                        onChange={(e) => setProfileForm(prev => ({ ...prev, lastName: e.target.value }))}
-                        className="w-full px-3 py-2 rounded border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-primary mb-1">Telefon / WhatsApp</label>
-                      <input
-                        type="text"
-                        value={profileForm.phone}
-                        onChange={(e) => setProfileForm(prev => ({ ...prev, phone: e.target.value }))}
-                        placeholder="+994 50 123 45 67"
-                        className="w-full px-3 py-2 rounded border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-primary mb-1">Şəhər</label>
-                      <input
-                        type="text"
-                        value={profileForm.city}
-                        onChange={(e) => setProfileForm(prev => ({ ...prev, city: e.target.value }))}
-                        className="w-full px-3 py-2 rounded border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex justify-end gap-2 pt-2 border-t border-outline-variant/30">
-                    <button
-                      type="button"
-                      onClick={() => setEditingProfile(false)}
-                      className="px-3 py-1.5 rounded text-xs text-outline hover:text-primary"
-                    >
-                      İmtina
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-4 py-1.5 rounded bg-primary text-surface-bright hover:bg-[#112240] text-xs font-semibold"
-                    >
-                      Yadda Saxla
-                    </button>
-                  </div>
-                </form>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                  <div className="p-3 rounded-lg border border-outline-variant/30 bg-surface-bright">
-                    <span className="text-[10px] uppercase text-outline block">Tam Ad</span>
-                    <strong className="text-primary text-sm font-serif">
-                      {currentUser.firstName} {currentUser.lastName}
-                    </strong>
-                  </div>
-                  <div className="p-3 rounded-lg border border-outline-variant/30 bg-surface-bright">
-                    <span className="text-[10px] uppercase text-outline block">E-poçt</span>
-                    <strong className="text-primary">{currentUser.email}</strong>
-                  </div>
-                  <div className="p-3 rounded-lg border border-outline-variant/30 bg-surface-bright">
-                    <span className="text-[10px] uppercase text-outline block">Telefon</span>
-                    <strong className="text-primary">{currentUser.phone || '+994 (qeyd edilməyib)'}</strong>
-                  </div>
-                  <div className="p-3 rounded-lg border border-outline-variant/30 bg-surface-bright">
-                    <span className="text-[10px] uppercase text-outline block">Məkan</span>
-                    <strong className="text-primary">{currentUser.city || 'Bakı'}, {currentUser.country || 'Azərbaycan'}</strong>
-                  </div>
-                </div>
-              )}
-
-              <div className="pt-3 border-t border-outline-variant/30 flex justify-between items-center text-xs">
-                <span className="text-outline">Platforma ID: #{currentUser.id}</span>
-                <button
-                  onClick={() => {
-                    setProfileModalOpen(false);
-                    setOnboardingOpen(true);
-                  }}
-                  className="text-secondary hover:underline flex items-center gap-1 font-medium"
-                >
-                  <span className="material-symbols-outlined text-[15px]">tune</span>
-                  Fərdi İnkişaf Xəritəsini Yenilə
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 4: CERTIFICATES & LEARNING */}
+          {/* TAB 5: LEARNING & COACHING */}
           {activeTab === 'learning' && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-primary">
-                    Tədris & Sertifikasiya
-                  </h4>
-                  <p className="text-[11px] text-on-surface-variant">
-                    Tamamlanmış kurslar və rezerv edilmiş kouçinq sessiyaları
-                  </p>
-                </div>
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-primary">
+                  Tədris, Sertifikatlar & Kouçinq
+                </h4>
+                <p className="text-[11px] text-on-surface-variant">
+                  Tamamlanmış kurslar və rezerv edilmiş kouçinq sessiyaları
+                </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                <div className="p-4 rounded-lg border border-outline-variant/40 bg-surface-bright flex items-center justify-between">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
+                <div className="p-4 rounded-xl border border-outline-variant/40 bg-surface-bright flex items-center justify-between shadow-sm">
                   <div>
                     <span className="text-[11px] text-on-surface-variant block">Qazanılmış Sertifikatlar</span>
-                    <strong className="text-lg font-serif text-primary">{certificates.length}</strong>
+                    <strong className="text-2xl font-serif text-primary">{certificates.length}</strong>
                   </div>
-                  <span className="material-symbols-outlined text-secondary text-[32px]">workspace_premium</span>
+                  <span className="material-symbols-outlined text-secondary text-[36px]">workspace_premium</span>
                 </div>
 
-                <div className="p-4 rounded-lg border border-outline-variant/40 bg-surface-bright flex items-center justify-between">
+                <div className="p-4 rounded-xl border border-outline-variant/40 bg-surface-bright flex items-center justify-between shadow-sm">
                   <div>
                     <span className="text-[11px] text-on-surface-variant block">Rezerv Olunmuş Sessiyalar</span>
-                    <strong className="text-lg font-serif text-primary">{bookings.length}</strong>
+                    <strong className="text-2xl font-serif text-primary">{bookings.length}</strong>
                   </div>
-                  <span className="material-symbols-outlined text-primary text-[32px]">event_available</span>
+                  <span className="material-symbols-outlined text-primary text-[36px]">event_available</span>
                 </div>
               </div>
 
@@ -566,12 +873,12 @@ export default function ProfileModal() {
                   <h5 className="text-xs font-bold text-primary uppercase mb-2">Kouçinq Rezervasiyaları:</h5>
                   <div className="space-y-2">
                     {bookings.map(b => (
-                      <div key={b.id} className="p-3 rounded border border-outline-variant/40 text-xs flex justify-between items-center bg-surface-bright">
+                      <div key={b.id} className="p-3.5 rounded-xl border border-outline-variant/40 text-xs flex justify-between items-center bg-surface-bright">
                         <div>
                           <strong className="text-primary block">{b.coachName}</strong>
                           <span className="text-[11px] text-outline">{b.date} • {b.time}</span>
                         </div>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800">
+                        <span className="px-2.5 py-1 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800">
                           Təsdiqləndi
                         </span>
                       </div>
@@ -579,6 +886,46 @@ export default function ProfileModal() {
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* TAB 6: MEMBERSHIP / TIER */}
+          {activeTab === 'membership' && (
+            <div className="space-y-4">
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-primary">
+                  Rezidentlik Səviyyəsi və Üzvlük
+                </h4>
+                <p className="text-[11px] text-on-surface-variant">
+                  Monodoxia Academy cəmiyyətindəki cari statusunuz və əlavə imkanlar
+                </p>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-gradient-to-br from-secondary/15 via-surface-container to-secondary/5 border border-secondary/30 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <span className="text-[10px] uppercase font-bold tracking-widest text-secondary block">Cari Status</span>
+                  <h3 className="font-serif text-2xl font-bold text-primary mt-0.5">
+                    {userTier || currentUser.tier || 'Free'} Rezident
+                  </h3>
+                  <p className="text-xs text-on-surface-variant mt-1 max-w-md">
+                    {userTier === 'VIP' ? 'Bütün qapalı klub tədbirlərinə, mentor sessiyalarına və VIP arxivinə tam limitsiz giriş.' :
+                     userTier === 'Premium' ? 'Genişləndirilmiş tədris modulları və aylıq kouçinq sessiyalarında endirimlər.' :
+                     userTier === 'Basic' ? 'Əsas dərslərə və ictimai icma müzakirələrinə sərbəst çıxış.' :
+                     'Başlanğıc giriş səviyyəsi. Klub və təlimlərə qoşularaq dərəcənizi yüksəldə bilərsiniz.'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProfileModalOpen(false);
+                    const el = document.getElementById('club');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="px-5 py-2.5 rounded-lg bg-secondary text-on-secondary font-bold text-xs uppercase tracking-wider hover:bg-secondary/90 transition-colors shadow shrink-0 self-start sm:self-center"
+                >
+                  Paketi Yüksəlt
+                </button>
+              </div>
             </div>
           )}
         </div>

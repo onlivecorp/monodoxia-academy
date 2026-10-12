@@ -162,7 +162,15 @@ export default function Header() {
                 className="w-9 h-9 rounded-full bg-secondary/10 border border-secondary text-secondary flex items-center justify-center font-bold text-xs uppercase hover:bg-secondary hover:text-surface-bright transition-colors"
                 title="Hesabım və Müraciətlərim"
               >
-                {currentUser.firstName ? currentUser.firstName[0] : 'U'}
+                {currentUser.avatar || currentUser.image ? (
+                  <img
+                    src={currentUser.avatar || currentUser.image}
+                    alt={currentUser.name || 'User'}
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                ) : (
+                  currentUser.firstName ? currentUser.firstName[0] : (currentUser.name ? currentUser.name[0] : 'U')
+                )}
               </button>
               <button
                 onClick={logout}
