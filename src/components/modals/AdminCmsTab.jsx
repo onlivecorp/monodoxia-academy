@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext, createContext } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../i18n/LanguageContext';
 import AdminConfirmModal from './AdminConfirmModal';
+import { getHeroMediaStyles, parseVideoUrl } from '../../utils/heroMediaHelper';
 
 
 const CmsFieldContext = createContext({
@@ -943,38 +944,789 @@ export default function AdminCmsTab() {
       )}
 
       {/* HERO */}
-      {cmsBlock === 'hero' && (
-        <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0' }}>Hero Bölməsi</h5>
-          <Field label="Üst Etiket" block={cmsHero} setBlock={setCmsHero} fieldKey="badge" />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
-            <Field label="Başlıq Sətir 1" block={cmsHero} setBlock={setCmsHero} fieldKey="title1" />
-            <Field label="Başlıq Sətir 2 (İtalik)" block={cmsHero} setBlock={setCmsHero} fieldKey="title2" />
-            <Field label="Başlıq Sətir 3" block={cmsHero} setBlock={setCmsHero} fieldKey="title3" />
+      {cmsBlock === 'hero' && (() => {
+        const heroStyles = getHeroMediaStyles(cmsHero);
+        const heroVideo = parseVideoUrl(cmsHero.videoUrl);
+        const isVideoMode = cmsHero.mediaType === 'video';
+
+        const framePresets = [
+          { id: 'arch', label: 'Klassik Tağ (Arch)', icon: 'architecture', desc: 'Monodoxia imza tağvarisi (160px tağ)' },
+          { id: 'rounded', label: 'Modern Yuvarlaq', icon: 'rounded_corner', desc: '24px zərif künclər' },
+          { id: 'rectangle', label: 'Düzbucaqlı (Kəskin)', icon: 'crop_square', desc: '0px kəskin künclər' },
+          { id: 'pill', label: 'Kapsul / Oval', icon: 'capsule', desc: 'Tam dairəvi kapsul (9999px)' },
+          { id: 'circle', label: 'Tam Dairəvi', icon: 'circle', desc: '1:1 nisbətində tam dairə' },
+          { id: 'none', label: 'Framesiz (Çərçivəsiz)', icon: 'layers_clear', desc: 'Altlıqsız təmiz media' }
+        ];
+
+        const strokeWidthOptions = [
+          { val: 0, label: '0px (Yoxdur)' },
+          { val: 1, label: '1px (İncə)' },
+          { val: 2, label: '2px (Orta)' },
+          { val: 3, label: '3px' },
+          { val: 4, label: '4px (Qalın)' },
+          { val: 6, label: '6px' },
+          { val: 8, label: '8px (Ekstra)' }
+        ];
+
+        const strokeColorOptions = [
+          { val: '#c5a059', label: 'Monodoxia Qızılı' },
+          { val: 'rgba(197, 160, 89, 0.4)', label: 'Zərif Şəffaf Qızılı' },
+          { val: '#e2e8f0', label: 'Neytral Boz' },
+          { val: '#112240', label: 'Tünd Göy' },
+          { val: '#ffffff', label: 'Ağ' },
+          { val: 'transparent', label: 'Şəffaf' }
+        ];
+
+        const radiusOptions = [
+          { id: 'arch', label: 'Tağvari (160px tağ)' },
+          { id: 'none', label: '0px (Kəskin)' },
+          { id: 'sm', label: '8px (Kiçik)' },
+          { id: 'md', label: '16px (Orta)' },
+          { id: 'lg', label: '24px (Böyük)' },
+          { id: 'xl', label: '36px (Geniş)' },
+          { id: 'full', label: '9999px (Kapsul)' },
+          { id: 'custom', label: 'Xüsusi (Slider)' }
+        ];
+
+        const widthOptions = [
+          { id: 'sm', label: 'Kompakt (384px)' },
+          { id: 'md', label: 'Standart (448px)' },
+          { id: 'lg', label: 'Geniş (512px)' },
+          { id: 'xl', label: 'Böyük (576px)' },
+          { id: 'full', label: '100% (Tam En)' },
+          { id: 'custom', label: 'Xüsusi En (px)' }
+        ];
+
+        const aspectOptions = [
+          { id: '4/5', label: '4:5 (Standart Portret)' },
+          { id: '1/1', label: '1:1 (Kvadrat)' },
+          { id: '16/9', label: '16:9 (Geniş Ekran / Video)' },
+          { id: '3/4', label: '3:4 (Klassik Portret)' },
+          { id: 'auto', label: 'Auto (Orijinal Nisbət)' }
+        ];
+
+        const handleHeroVideoUpload = (e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          if (file.size > 50 * 1024 * 1024) {
+            showToast('Video fayl ölçüsü 50MB-dan çox ola bilməz', 'error');
+            return;
+          }
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            setCmsHero(p => ({ ...p, videoUrl: event.target.result, mediaType: 'video' }));
+            showToast('Video faylı uğurla yükləndi!', 'success');
+          };
+          reader.readAsDataURL(file);
+        };
+
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+            {/* HERO MƏTNLƏRİ VƏ DÜYMƏLƏR */}
+            <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0' }}>
+                <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Hero Əsas Mətnlər və Çağırışlar</h5>
+                <span className="admin-count-badge">Səhifə Başlığı</span>
+              </div>
+              <Field label="Üst Etiket (Badge)" block={cmsHero} setBlock={setCmsHero} fieldKey="badge" />
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+                <Field label="Başlıq Sətir 1" block={cmsHero} setBlock={setCmsHero} fieldKey="title1" />
+                <Field label="Başlıq Sətir 2 (İtalik)" block={cmsHero} setBlock={setCmsHero} fieldKey="title2" />
+                <Field label="Başlıq Sətir 3" block={cmsHero} setBlock={setCmsHero} fieldKey="title3" />
+              </div>
+              <Field label="Təsvir (desc)" block={cmsHero} setBlock={setCmsHero} fieldKey="desc" multiline />
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+                <Field label="Əsas Düymə Mətni" block={cmsHero} setBlock={setCmsHero} fieldKey="btnPrimaryText" />
+                <Field label="Əsas Düymə Linki" block={cmsHero} setBlock={setCmsHero} fieldKey="btnPrimaryLink" />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+                <Field label="İkinci Düymə Mətni" block={cmsHero} setBlock={setCmsHero} fieldKey="btnSecondaryText" />
+                <Field label="İkinci Düymə Linki" block={cmsHero} setBlock={setCmsHero} fieldKey="btnSecondaryLink" />
+              </div>
+            </div>
+
+            {/* HERO SAĞ MEDIA (ŞƏKİL / VİDEO, FRAME, STROKE, RADIUS, ÖLÇÜ) */}
+            <div className="admin-card-elevated" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '10px', borderBottom: '1.5px solid #e2e8f0', flexWrap: 'wrap', gap: '8px' }}>
+                <div>
+                  <h5 style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span className="material-symbols-outlined" style={{ color: '#c5a059' }}>photo_library</span>
+                    Hero Sağ Əsas Media (Şəkil / Video) İdarəetməsi
+                  </h5>
+                  <p style={{ fontSize: '12px', color: '#64748b', margin: '3px 0 0' }}>
+                    Sağ tərəfdəki vizual blokun media formatı, çərçivə stili, stroke ölçüsü, radiusu və ölçülərini tənzimləyin
+                  </p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 700, padding: '3px 8px', borderRadius: '4px', background: isVideoMode ? '#eff6ff' : '#fef3c7', color: isVideoMode ? '#1d4ed8' : '#92400e', border: isVideoMode ? '1px solid #bfdbfe' : '1px solid #fde68a' }}>
+                    {isVideoMode ? '🎥 Video Rejimi' : '🖼️ Şəkil Rejimi'}
+                  </span>
+                  {heroStyles.isFrameless && (
+                    <span style={{ fontSize: '11px', fontWeight: 700, padding: '3px 8px', borderRadius: '4px', background: '#f1f5f9', color: '#334155', border: '1px solid #cbd5e1' }}>
+                      ✨ Framesiz
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* 1. MEDIA NÖVÜ SEÇİMİ */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <label className="admin-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#c5a059' }}>perm_media</span>
+                  Media Növü (Şəkil və ya Video)
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setCmsHero(p => ({ ...p, mediaType: 'image' }))}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      padding: '10px 14px',
+                      borderRadius: '8px',
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      border: !isVideoMode ? '2px solid #c5a059' : '1px solid #cbd5e1',
+                      background: !isVideoMode ? '#fffdf7' : '#ffffff',
+                      color: !isVideoMode ? '#92400e' : '#475569',
+                      boxShadow: !isVideoMode ? '0 2px 6px rgba(197,160,89,0.18)' : 'none',
+                      transition: 'all 0.15s'
+                    }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>image</span>
+                    <span>Şəkil (Image)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCmsHero(p => ({ ...p, mediaType: 'video' }))}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      padding: '10px 14px',
+                      borderRadius: '8px',
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      border: isVideoMode ? '2px solid #2563eb' : '1px solid #cbd5e1',
+                      background: isVideoMode ? '#eff6ff' : '#ffffff',
+                      color: isVideoMode ? '#1e40af' : '#475569',
+                      boxShadow: isVideoMode ? '0 2px 6px rgba(37,99,235,0.18)' : 'none',
+                      transition: 'all 0.15s'
+                    }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>videocam</span>
+                    <span>Video (YouTube / MP4 / Vimeo)</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* MEDIA MƏNBƏYİ: ŞƏKİL VƏ YA VİDEO */}
+              {!isVideoMode ? (
+                /* ŞƏKİL SAHƏSİ */
+                <div style={{ background: '#fdfbf7', padding: '14px', borderRadius: '8px', border: '1px solid #f1ece1' }}>
+                  <ImageField
+                    label="Hero Sağ Əsas Şəkil URL və ya Fayl"
+                    value={cmsHero.image}
+                    onChange={v => setCmsHero(p => ({ ...p, image: v }))}
+                  />
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      onClick={() => setCmsHero(p => ({ ...p, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBu6A42fLsKyb7QEyw763LYrM2DhMvrcMod35fdqpYFnlKrGTcsg11v2ljzwkebadfB8h3tfo-a23eJ2C1IgUxOWL0A7cON3aCvZ3irV6bqO5eStKS9edI_Qda-YAOeRR0EMqS_cCqNkoDRtBJgrns8bUxgLQjRFG1ZVUGF2Ob9e9CG4dgb2myU2AJgY2j8uSiSRSDuMt6yq1zuCRYVZhvt2-Eiq7WHllVLEpzNMbm6AuMR7CS-ijR7" }))}
+                      className="admin-btn-secondary"
+                      style={{ fontSize: '11px', padding: '4px 10px' }}
+                    >
+                      Klassik Monodoxia Şəkli (Defolt)
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* VİDEO SAHƏSİ */
+                <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div>
+                    <label className="admin-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span>Video URL və ya Video Fayl Yüklə</span>
+                      <span style={{ fontSize: '10px', color: '#64748b' }}>YouTube, Vimeo və ya birbaşa .mp4/.webm</span>
+                    </label>
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                      <input
+                        type="text"
+                        placeholder="https://www.youtube.com/watch?v=... və ya video.mp4"
+                        value={cmsHero.videoUrl || ''}
+                        onChange={e => setCmsHero(p => ({ ...p, videoUrl: e.target.value, mediaType: 'video' }))}
+                        className="admin-input"
+                        style={{ flex: 1 }}
+                      />
+                      <label className="admin-btn-secondary" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#2563eb' }}>video_file</span>
+                        <span>Fayl Yüklə</span>
+                        <input type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime" style={{ display: 'none' }} onChange={handleHeroVideoUpload} />
+                      </label>
+                      {cmsHero.videoUrl && (
+                        <button
+                          type="button"
+                          onClick={() => setCmsHero(p => ({ ...p, videoUrl: '' }))}
+                          className="admin-btn-danger"
+                          style={{ padding: '6px 10px', fontSize: '11px' }}
+                        >
+                          Sil
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* TEZ NÜMUNƏ DÜYMƏLƏRİ */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 600 }}>Sürətli sınaq üçün:</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCmsHero(p => ({ ...p, videoUrl: 'https://www.youtube.com/watch?v=inpok4MKVLM', mediaType: 'video' }));
+                        showToast('YouTube video linki seçildi', 'info');
+                      }}
+                      className="admin-btn-secondary"
+                      style={{ fontSize: '11px', padding: '3px 8px' }}
+                    >
+                      ▶️ YouTube Dərs Videosu
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCmsHero(p => ({ ...p, videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-waves-in-the-water-1164-large.mp4', mediaType: 'video' }));
+                        showToast('Sakitləşdirici MP4 video seçildi', 'info');
+                      }}
+                      className="admin-btn-secondary"
+                      style={{ fontSize: '11px', padding: '3px 8px' }}
+                    >
+                      🌊 Sakitləşdirici Dalğalar (MP4)
+                    </button>
+                  </div>
+
+                  {/* VİDEO POSTER ŞƏKLİ */}
+                  <div style={{ borderTop: '1px dashed #cbd5e1', paddingTop: '10px' }}>
+                    <ImageField
+                      label="Video Örtük Şəkli (Poster / Thumbnail - opsional)"
+                      value={cmsHero.videoPoster || ''}
+                      onChange={v => setCmsHero(p => ({ ...p, videoPoster: v }))}
+                    />
+                  </div>
+
+                  {/* VİDEO PARAMETRLƏRİ */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px', paddingTop: '6px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 600, color: '#334155', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={cmsHero.videoAutoplay !== false}
+                        onChange={e => setCmsHero(p => ({ ...p, videoAutoplay: e.target.checked }))}
+                      />
+                      <span>Avtomatik Oxut (Autoplay)</span>
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 600, color: '#334155', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={cmsHero.videoMuted !== false}
+                        onChange={e => setCmsHero(p => ({ ...p, videoMuted: e.target.checked }))}
+                      />
+                      <span>Səssiz (Muted)</span>
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 600, color: '#334155', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={cmsHero.videoLoop !== false}
+                        onChange={e => setCmsHero(p => ({ ...p, videoLoop: e.target.checked }))}
+                      />
+                      <span>Təkrarla (Loop)</span>
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 600, color: '#334155', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={cmsHero.videoControls === true}
+                        onChange={e => setCmsHero(p => ({ ...p, videoControls: e.target.checked }))}
+                      />
+                      <span>Pleyer Düymələri (Controls)</span>
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              {/* 2. FRAME STİLİ VƏ FRAMESİZ REJİMİ */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', paddingTop: '4px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                  <label className="admin-label" style={{ display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#c5a059' }}>filter_frames</span>
+                    Frame Stili (Çərçivə Forması)
+                  </label>
+                  {/* FRAMESİZ TOGGLE SWITCH */}
+                  <label style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '6px 12px',
+                    borderRadius: '6px',
+                    background: heroStyles.isFrameless ? '#fef3c7' : '#f1f5f9',
+                    border: heroStyles.isFrameless ? '1.5px solid #d4af37' : '1px solid #cbd5e1',
+                    cursor: 'pointer',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    color: heroStyles.isFrameless ? '#92400e' : '#475569'
+                  }}>
+                    <input
+                      type="checkbox"
+                      checked={heroStyles.isFrameless}
+                      onChange={e => {
+                        const val = e.target.checked;
+                        setCmsHero(p => ({
+                          ...p,
+                          isFrameless: val,
+                          frameStyle: val ? 'none' : (p.frameStyle === 'none' ? 'arch' : (p.frameStyle || 'arch'))
+                        }));
+                      }}
+                      style={{ cursor: 'pointer' }}
+                    />
+                    <span>Framesiz Rejim (Çərçivə lövhəsiz)</span>
+                  </label>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '8px' }}>
+                  {framePresets.map(fp => {
+                    const isSelected = (!heroStyles.isFrameless && (cmsHero.frameStyle || 'arch') === fp.id) || (heroStyles.isFrameless && fp.id === 'none');
+                    return (
+                      <button
+                        key={fp.id}
+                        type="button"
+                        onClick={() => {
+                          if (fp.id === 'none') {
+                            setCmsHero(p => ({ ...p, isFrameless: true, frameStyle: 'none' }));
+                          } else {
+                            setCmsHero(p => ({
+                              ...p,
+                              isFrameless: false,
+                              frameStyle: fp.id,
+                              borderRadius: fp.id === 'arch' ? 'arch' : (fp.id === 'rectangle' ? 'none' : (fp.id === 'pill' ? 'full' : (fp.id === 'circle' ? 'full' : (p.borderRadius || 'arch'))))
+                            }));
+                          }
+                        }}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'flex-start',
+                          padding: '10px 12px',
+                          borderRadius: '8px',
+                          textAlign: 'left',
+                          cursor: 'pointer',
+                          border: isSelected ? '2px solid #c5a059' : '1px solid #e2e8f0',
+                          background: isSelected ? '#fffdf7' : '#ffffff',
+                          color: isSelected ? '#0f172a' : '#475569',
+                          boxShadow: isSelected ? '0 2px 6px rgba(197,160,89,0.15)' : 'none',
+                          transition: 'all 0.15s'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, fontSize: '12px', color: isSelected ? '#92400e' : '#1e293b' }}>
+                          <span className="material-symbols-outlined" style={{ fontSize: '16px', color: isSelected ? '#c5a059' : '#64748b' }}>{fp.icon}</span>
+                          <span>{fp.label}</span>
+                        </div>
+                        <span style={{ fontSize: '10px', color: '#64748b', marginTop: '3px' }}>{fp.desc}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 3. STROKE ÖLÇÜSÜ (QALINLIĞI) VƏ RƏNGİ */}
+              <div style={{ background: '#fafaf9', padding: '12px 14px', borderRadius: '8px', border: '1px solid #e7e5e4', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                  <label className="admin-label" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#c5a059' }}>border_style</span>
+                    Stroke Ölçüsü (Qalınlığı): <strong>{cmsHero.strokeWidth !== undefined ? cmsHero.strokeWidth : 1}px</strong>
+                  </label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    {strokeWidthOptions.map(sw => (
+                      <button
+                        key={sw.val}
+                        type="button"
+                        onClick={() => setCmsHero(p => ({ ...p, strokeWidth: sw.val }))}
+                        style={{
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          border: (cmsHero.strokeWidth !== undefined ? cmsHero.strokeWidth : 1) === sw.val ? '1.5px solid #c5a059' : '1px solid #cbd5e1',
+                          background: (cmsHero.strokeWidth !== undefined ? cmsHero.strokeWidth : 1) === sw.val ? '#fffbeb' : '#ffffff',
+                          color: (cmsHero.strokeWidth !== undefined ? cmsHero.strokeWidth : 1) === sw.val ? '#92400e' : '#475569'
+                        }}
+                      >
+                        {sw.val}px
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* STROKE RƏNGİ */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 600, color: '#475569' }}>Stroke Rəngi:</span>
+                  {strokeColorOptions.map(sc => (
+                    <button
+                      key={sc.val}
+                      type="button"
+                      onClick={() => setCmsHero(p => ({ ...p, strokeColor: sc.val }))}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        border: (cmsHero.strokeColor || 'rgba(197, 160, 89, 0.4)') === sc.val ? '1.5px solid #0f172a' : '1px solid #cbd5e1',
+                        background: '#ffffff',
+                        color: '#334155'
+                      }}
+                    >
+                      <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: sc.val === 'transparent' ? '#ffffff' : sc.val, border: '1px solid #94a3b8', display: 'inline-block' }} />
+                      <span>{sc.label}</span>
+                    </button>
+                  ))}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto' }}>
+                    <span style={{ fontSize: '11px', color: '#64748b' }}>Özəl Rəng:</span>
+                    <input
+                      type="color"
+                      value={cmsHero.strokeColor?.startsWith('#') ? cmsHero.strokeColor : '#c5a059'}
+                      onChange={e => setCmsHero(p => ({ ...p, strokeColor: e.target.value }))}
+                      style={{ width: '28px', height: '28px', padding: 0, border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 4. BORDER RADIUS VƏ ÖLÇÜLƏR (EN & NİSBƏT) */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
+                {/* BORDER RADIUS */}
+                <div style={{ background: '#ffffff', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label className="admin-label" style={{ margin: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#c5a059' }}>rounded_corner</span>
+                      Border Radius (Künc Yuvarlaqlığı)
+                    </span>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#92400e' }}>
+                      {cmsHero.borderRadius === 'custom' ? `${cmsHero.customBorderRadius || 24}px` : (cmsHero.borderRadius || 'arch')}
+                    </span>
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(90px, 1fr))', gap: '6px' }}>
+                    {radiusOptions.map(ro => {
+                      const isSel = (cmsHero.borderRadius || 'arch') === ro.id;
+                      return (
+                        <button
+                          key={ro.id}
+                          type="button"
+                          onClick={() => setCmsHero(p => ({ ...p, borderRadius: ro.id }))}
+                          style={{
+                            padding: '5px 8px',
+                            borderRadius: '4px',
+                            fontSize: '11px',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            border: isSel ? '1.5px solid #c5a059' : '1px solid #cbd5e1',
+                            background: isSel ? '#fffbeb' : '#ffffff',
+                            color: isSel ? '#92400e' : '#475569'
+                          }}
+                        >
+                          {ro.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {cmsHero.borderRadius === 'custom' && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+                      <input
+                        type="range"
+                        min="0"
+                        max="200"
+                        value={cmsHero.customBorderRadius !== undefined ? cmsHero.customBorderRadius : 24}
+                        onChange={e => setCmsHero(p => ({ ...p, customBorderRadius: Number(e.target.value) }))}
+                        style={{ flex: 1, cursor: 'pointer' }}
+                      />
+                      <span style={{ fontSize: '12px', fontWeight: 700, minWidth: '45px', textAlign: 'right' }}>
+                        {cmsHero.customBorderRadius !== undefined ? cmsHero.customBorderRadius : 24}px
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* ŞƏKİL / MEDIA ÖLÇÜSÜ */}
+                <div style={{ background: '#ffffff', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label className="admin-label" style={{ margin: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#c5a059' }}>aspect_ratio</span>
+                      Şəkil / Media Ölçüsü (En & Nisbət)
+                    </span>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#92400e' }}>
+                      {cmsHero.mediaWidth || 'md'} · {cmsHero.aspectRatio || '4/5'}
+                    </span>
+                  </label>
+
+                  {/* EN SEÇİMLƏRİ */}
+                  <div>
+                    <span style={{ fontSize: '10px', color: '#64748b', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Maksimal En:</span>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))', gap: '4px' }}>
+                      {widthOptions.map(wo => {
+                        const isSel = (cmsHero.mediaWidth || 'md') === wo.id;
+                        return (
+                          <button
+                            key={wo.id}
+                            type="button"
+                            onClick={() => setCmsHero(p => ({ ...p, mediaWidth: wo.id }))}
+                            style={{
+                              padding: '4px 6px',
+                              borderRadius: '4px',
+                              fontSize: '10px',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                              border: isSel ? '1.5px solid #c5a059' : '1px solid #cbd5e1',
+                              background: isSel ? '#fffbeb' : '#ffffff',
+                              color: isSel ? '#92400e' : '#475569'
+                            }}
+                          >
+                            {wo.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {cmsHero.mediaWidth === 'custom' && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px' }}>
+                        <input
+                          type="range"
+                          min="260"
+                          max="700"
+                          value={cmsHero.customMediaWidth || 448}
+                          onChange={e => setCmsHero(p => ({ ...p, customMediaWidth: Number(e.target.value) }))}
+                          style={{ flex: 1, cursor: 'pointer' }}
+                        />
+                        <span style={{ fontSize: '11px', fontWeight: 700, minWidth: '45px', textAlign: 'right' }}>
+                          {cmsHero.customMediaWidth || 448}px
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* NİSBƏT SEÇİMLƏRİ */}
+                  <div>
+                    <span style={{ fontSize: '10px', color: '#64748b', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Nisbət (Aspect Ratio):</span>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(70px, 1fr))', gap: '4px' }}>
+                      {aspectOptions.map(ao => {
+                        const isSel = (cmsHero.aspectRatio || '4/5') === ao.id;
+                        return (
+                          <button
+                            key={ao.id}
+                            type="button"
+                            onClick={() => setCmsHero(p => ({ ...p, aspectRatio: ao.id }))}
+                            style={{
+                              padding: '4px 6px',
+                              borderRadius: '4px',
+                              fontSize: '10px',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                              border: isSel ? '1.5px solid #c5a059' : '1px solid #cbd5e1',
+                              background: isSel ? '#fffbeb' : '#ffffff',
+                              color: isSel ? '#92400e' : '#475569'
+                            }}
+                          >
+                            {ao.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 5. ŞƏKİL ÜZƏRİNDƏKİ SİTAT (QUOTE) VƏ ARXA PARILTI */}
+              <div style={{ background: '#fdfcf7', padding: '12px', borderRadius: '8px', border: '1px solid #f1ece1', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: 700, color: '#334155', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={cmsHero.showQuote !== false}
+                      onChange={e => setCmsHero(p => ({ ...p, showQuote: e.target.checked }))}
+                    />
+                    <span>Şəkil / Video Üzərində Sitat Qutusunu Göstər</span>
+                  </label>
+
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: 700, color: '#334155', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={cmsHero.showGlow !== false}
+                      onChange={e => setCmsHero(p => ({ ...p, showGlow: e.target.checked }))}
+                    />
+                    <span>Arxa Fon Parıltısını (Glow) Aktiv Et</span>
+                  </label>
+                </div>
+
+                {cmsHero.showQuote !== false && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+                    <Field label="Şəkil Üzərində Sitat" block={cmsHero} setBlock={setCmsHero} fieldKey="quote" />
+                    <Field label="Sitat Alt Yazısı" block={cmsHero} setBlock={setCmsHero} fieldKey="quoteSub" />
+                  </div>
+                )}
+              </div>
+
+              {/* 6. CANLI İNTERAKTİV ÖNİZLƏMƏ (LIVE PREVIEW) */}
+              <div style={{
+                background: '#ffffff',
+                border: '1.5px solid #e2e8f0',
+                borderRadius: '10px',
+                padding: '16px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#c5a059' }}>visibility</span>
+                    Canlı Önizləmə (Real-time Preview)
+                  </span>
+                  <span style={{ fontSize: '11px', color: '#64748b' }}>
+                    Seçilmiş stil: <strong>{heroStyles.frameStyle}</strong> · Stroke: <strong>{heroStyles.strokeWidth}px</strong> · Nisbət: <strong>{heroStyles.aspectRatio}</strong>
+                  </span>
+                </div>
+
+                <div style={{
+                  background: '#f8fafc',
+                  border: '1px dashed #cbd5e1',
+                  borderRadius: '8px',
+                  padding: '24px 16px',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  minHeight: '260px',
+                  overflow: 'hidden',
+                  position: 'relative'
+                }}>
+                  {/* PREVIEW WRAPPER */}
+                  <div style={{
+                    position: 'relative',
+                    width: '100%',
+                    maxWidth: heroStyles.maxWidth === '100%' ? '360px' : `min(340px, ${heroStyles.maxWidth})`
+                  }}>
+                    {/* HALO GLOW */}
+                    {cmsHero.showGlow !== false && (
+                      <div style={{
+                        position: 'absolute',
+                        inset: '-10px',
+                        background: 'rgba(197, 160, 89, 0.15)',
+                        borderRadius: '9999px',
+                        filter: 'blur(20px)',
+                        pointerEvents: 'none'
+                      }} />
+                    )}
+
+                    {/* OUTER CONTAINER */}
+                    <div
+                      style={{
+                        position: 'relative',
+                        boxShadow: '0 14px 28px rgba(0,0,0,0.12)',
+                        overflow: 'hidden',
+                        borderRadius: heroStyles.outerRadius,
+                        border: heroStyles.strokeWidth > 0 ? `${heroStyles.strokeWidth}px solid ${heroStyles.strokeColor}` : 'none',
+                        background: heroStyles.isFrameless ? 'transparent' : '#ffffff',
+                        padding: heroStyles.isFrameless ? '0px' : '8px'
+                      }}
+                    >
+                      {/* INNER MEDIA CONTAINER */}
+                      <div
+                        style={{
+                          borderRadius: heroStyles.innerRadius,
+                          overflow: 'hidden',
+                          width: '100%',
+                          aspectRatio: heroStyles.aspectRatio === 'auto' ? undefined : heroStyles.aspectRatio,
+                          background: '#e2e8f0',
+                          position: 'relative'
+                        }}
+                      >
+                        {isVideoMode && cmsHero.videoUrl ? (
+                          heroVideo.type === 'youtube' || heroVideo.type === 'vimeo' ? (
+                            <iframe
+                              src={heroVideo.embedUrl}
+                              title="Preview Video"
+                              style={{ width: '100%', height: '100%', border: 'none' }}
+                            />
+                          ) : (
+                            <video
+                              src={heroVideo.rawUrl || cmsHero.videoUrl}
+                              poster={cmsHero.videoPoster || cmsHero.image}
+                              autoPlay={cmsHero.videoAutoplay !== false}
+                              loop={cmsHero.videoLoop !== false}
+                              muted={cmsHero.videoMuted !== false}
+                              controls={cmsHero.videoControls === true}
+                              playsInline
+                              style={{ width: '100%', height: '100%', objectFit: heroStyles.objectFit }}
+                            />
+                          )
+                        ) : (
+                          <img
+                            src={
+                              cmsHero.image ||
+                              "https://lh3.googleusercontent.com/aida-public/AB6AXuBu6A42fLsKyb7QEyw763LYrM2DhMvrcMod35fdqpYFnlKrGTcsg11v2ljzwkebadfB8h3tfo-a23eJ2C1IgUxOWL0A7cON3aCvZ3irV6bqO5eStKS9edI_Qda-YAOeRR0EMqS_cCqNkoDRtBJgrns8bUxgLQjRFG1ZVUGF2Ob9e9CG4dgb2myU2AJgY2j8uSiSRSDuMt6yq1zuCRYVZhvt2-Eiq7WHllVLEpzNMbm6AuMR7CS-ijR7"
+                            }
+                            alt="Hero Preview"
+                            style={{ width: '100%', height: '100%', objectFit: heroStyles.objectFit }}
+                          />
+                        )}
+                      </div>
+
+                      {/* QUOTE OVERLAY PREVIEW */}
+                      {cmsHero.showQuote !== false && (
+                        <div style={{
+                          position: 'absolute',
+                          bottom: '12px',
+                          left: '12px',
+                          right: '12px',
+                          background: 'rgba(255, 255, 255, 0.95)',
+                          backdropFilter: 'blur(6px)',
+                          padding: '8px 10px',
+                          borderRadius: '6px',
+                          border: '1px solid rgba(197, 160, 89, 0.4)',
+                          textAlign: 'center',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                        }}>
+                          <div style={{ fontStyle: 'italic', fontSize: '11px', color: '#c5a059', fontWeight: 600 }}>
+                            "{cmsHero.quote || 'Daxili səssizlikdə bütün cavablar aşkarlanır.'}"
+                          </div>
+                          <div style={{ fontSize: '8px', letterSpacing: '1px', textTransform: 'uppercase', color: '#64748b', marginTop: '2px' }}>
+                            {cmsHero.quoteSub || 'Monodoxia Fəlsəfəsi'}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* YADDA SAXLA DÜYMƏSİ */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '8px', borderTop: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: '12px', color: '#64748b' }}>
+                  Dəyişikliklər həm veb saytda canlı görünəcək, həm də yadda saxlanılacaq.
+                </span>
+                <button
+                  type="button"
+                  onClick={() => saveBlock('hero', cmsHero)}
+                  className="admin-btn-primary"
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 24px', fontSize: '13px' }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>save</span>
+                  <span>Hero Tənzimləmələrini Yadda Saxla</span>
+                </button>
+              </div>
+            </div>
           </div>
-          <Field label="Təsvir (desc)" block={cmsHero} setBlock={setCmsHero} fieldKey="desc" multiline />
-          <ImageField
-            label="Hero Sağ Əsas Şəkil"
-            value={cmsHero.image}
-            onChange={v => setCmsHero(p => ({ ...p, image: v }))}
-          />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
-            <Field label="Şəkil Üzərində Sitat" block={cmsHero} setBlock={setCmsHero} fieldKey="quote" />
-            <Field label="Sitat Alt Yazısı" block={cmsHero} setBlock={setCmsHero} fieldKey="quoteSub" />
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
-            <Field label="Əsas Düymə Mətni" block={cmsHero} setBlock={setCmsHero} fieldKey="btnPrimaryText" />
-            <Field label="Əsas Düymə Linki" block={cmsHero} setBlock={setCmsHero} fieldKey="btnPrimaryLink" />
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
-            <Field label="İkinci Düymə Mətni" block={cmsHero} setBlock={setCmsHero} fieldKey="btnSecondaryText" />
-            <Field label="İkinci Düymə Linki" block={cmsHero} setBlock={setCmsHero} fieldKey="btnSecondaryLink" />
-          </div>
-          <div>
-            <button onClick={() => saveBlock('hero', cmsHero)} className="admin-btn-primary">Yadda Saxla</button>
-          </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* AKADEMİYANIN MƏRAMI (ABOUT) */}
       {cmsBlock === 'about' && (
