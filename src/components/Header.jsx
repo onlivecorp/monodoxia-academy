@@ -15,7 +15,9 @@ export default function Header() {
     userNotifications,
     setActiveProfileTab,
     homeContent,
-    canAccessAdmin
+    canAccessAdmin,
+    currentPage,
+    navigateTo
   } = useApp();
 
   const logoUrl = homeContent?.navbar?.logoUrl;
@@ -23,12 +25,12 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
-    { href: '#akademiya', label: t('nav_academy'), active: true },
-    { href: '#koucinq', label: t('nav_coaching') },
-    { href: '#club', label: t('nav_club') },
-    { href: '#tedbirler', label: t('nav_events') },
-    { href: '#icma', label: t('nav_community') },
-    { href: '#haqqimizda', label: t('nav_about') },
+    { id: 'akademiya', href: '#akademiya', label: t('nav_academy') },
+    { id: 'koucinq', href: '#koucinq', label: t('nav_coaching') },
+    { id: 'club', href: '#club', label: t('nav_club') },
+    { id: 'tedbirler', href: '#tedbirler', label: t('nav_events') },
+    { id: 'icma', href: '#icma', label: t('nav_community') },
+    { id: 'haqqimizda', href: '#haqqimizda', label: t('nav_about') },
   ];
 
   return (
@@ -36,7 +38,14 @@ export default function Header() {
       <div className="max-w-7xl mx-auto h-20 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
         
         {/* BRAND LOGO */}
-        <a href="#" className="flex items-center gap-3 group shrink-0">
+        <a
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            navigateTo('home');
+          }}
+          className="flex items-center gap-3 group shrink-0 cursor-pointer"
+        >
           {logoUrl ? (
             <img src={logoUrl} alt="Logo" className="h-10 w-auto object-contain" />
           ) : (
@@ -62,19 +71,26 @@ export default function Header() {
 
         {/* CENTER DESKTOP NAVIGATION LINKS */}
         <nav className="hidden lg:flex items-center space-x-6 xl:space-x-8">
-          {navLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className={`whitespace-nowrap font-label-md text-sm transition-all duration-200 py-1 ${
-                link.active
-                  ? 'text-primary font-semibold border-b-2 border-secondary'
-                  : 'text-on-surface-variant hover:text-secondary'
-              }`}
-            >
-              {link.label}
-            </a>
-          ))}
+          {navLinks.map((link) => {
+            const isActive = currentPage === link.id;
+            return (
+              <a
+                key={link.id}
+                href={link.href}
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigateTo(link.id);
+                }}
+                className={`whitespace-nowrap font-label-md text-sm transition-all duration-200 py-1 cursor-pointer ${
+                  isActive
+                    ? 'text-primary font-bold border-b-2 border-secondary'
+                    : 'text-on-surface-variant hover:text-secondary'
+                }`}
+              >
+                {link.label}
+              </a>
+            );
+          })}
         </nav>
 
         {/* RIGHT ACTION CONTROLS */}
@@ -214,17 +230,29 @@ export default function Header() {
       {/* MOBILE DRAWER */}
       {mobileMenuOpen && (
         <div className="lg:hidden bg-surface-container-lowest border-b border-outline-variant px-4 py-4 space-y-3 shadow-lg">
-          <nav className="flex flex-col space-y-2">
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className="px-3 py-2 rounded text-sm font-medium text-on-surface hover:bg-surface-container hover:text-secondary"
-              >
-                {link.label}
-              </a>
-            ))}
+          <nav className="flex flex-col space-y-1.5">
+            {navLinks.map((link) => {
+              const isActive = currentPage === link.id;
+              return (
+                <a
+                  key={link.id}
+                  href={link.href}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigateTo(link.id);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`px-3 py-2 rounded text-sm font-medium transition-colors cursor-pointer flex items-center justify-between ${
+                    isActive
+                      ? 'bg-secondary/15 text-secondary font-bold'
+                      : 'text-on-surface hover:bg-surface-container hover:text-secondary'
+                  }`}
+                >
+                  <span>{link.label}</span>
+                  {isActive && <span className="w-1.5 h-1.5 rounded-full bg-secondary" />}
+                </a>
+              );
+            })}
           </nav>
           {(currentUser?.role === 'Admin' || canAccessAdmin?.(currentUser)) && (
             <div className="pt-2 border-t border-outline-variant flex items-center justify-between">

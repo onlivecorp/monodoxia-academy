@@ -402,13 +402,14 @@ export default function AdminCmsTab() {
 
   const cmsBlocks = [
     { id: 'navbar', label: 'Loqo & Naviqasiya' },
-    { id: 'hero', label: 'Hero Bölməsi' },
-    { id: 'about', label: 'Akademiyanın Məramı' },
-    { id: 'areas', label: 'Fundamental Sahələr' },
-    { id: 'academy', label: 'Akademiya' },
-    { id: 'club', label: 'Klub' },
-    { id: 'coaches', label: 'Koçlar' },
-    { id: 'community', label: 'İcma' },
+    { id: 'hero', label: 'Ana Səhifə — Hero Bölməsi' },
+    { id: 'academy', label: '📄 Akademiya Səhifəsi' },
+    { id: 'coaches', label: '📄 Kouçinq Səhifəsi & Mentorlar' },
+    { id: 'club', label: '📄 Coaching Club Səhifəsi' },
+    { id: 'events', label: '📄 Tədbirlər Səhifəsi' },
+    { id: 'community', label: '📄 İcma Səhifəsi' },
+    { id: 'about', label: '📄 Haqqımızda (Məram & Sol Media)' },
+    { id: 'areas', label: '📄 Haqqımızda (8 Sahə Modulları)' },
     { id: 'testimonials', label: 'Rəylər' },
     { id: 'faq', label: 'Tez-tez soruşulan suallar' },
     { id: 'newsletter', label: 'Bülletenə abunəlik' },
@@ -588,6 +589,7 @@ export default function AdminCmsTab() {
   const [cmsAcademy, setCmsAcademy] = useState(() => ({ ...(homeContent?.academy || {}) }));
   const [cmsClub, setCmsClub] = useState(() => mergeClubWithDefaults(homeContent?.club));
   const [cmsCoaches, setCmsCoaches] = useState(() => ({ ...(homeContent?.coaches || {}) }));
+  const [cmsEvents, setCmsEvents] = useState(() => ({ ...(homeContent?.events || {}) }));
   const [cmsCommunity, setCmsCommunity] = useState(() => ({ ...(homeContent?.community || {}) }));
   const [cmsTestimonials, setCmsTestimonials] = useState(() => ({ ...(homeContent?.testimonials || {}) }));
   const [cmsFaq, setCmsFaq] = useState(() => ({ ...(homeContent?.faq || {}) }));
@@ -660,6 +662,7 @@ export default function AdminCmsTab() {
       setCmsAcademy({ ...(homeContent.academy || {}) });
       setCmsClub(mergeClubWithDefaults(homeContent.club));
       setCmsCoaches({ ...(homeContent.coaches || {}) });
+      setCmsEvents({ ...(homeContent.events || {}) });
       setCmsCommunity({ ...(homeContent.community || {}) });
       setCmsTestimonials({ ...(homeContent.testimonials || {}) });
       setCmsFaq({ ...(homeContent.faq || {}) });
@@ -3074,6 +3077,30 @@ export default function AdminCmsTab() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* EVENTS / TƏDBİRLƏR SƏHİFƏSİ */}
+      {cmsBlock === 'events' && (
+        <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0' }}>
+            <div>
+              <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Tədbirlər Səhifəsi — Məzmun və Təqvim</h5>
+              <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0' }}>Tədbirlər səhifəsinin başlığı, üst etiketi və təqvim düyməsi mətni</p>
+            </div>
+            <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: '#fef3c7', color: '#b45309' }}>📄 Tədbirlər Səhifəsi</span>
+          </div>
+
+          <Field label="Üst Etiket (Badge)" block={cmsEvents} setBlock={setCmsEvents} fieldKey="badge" placeholder="Məs: Canlı Təqvim" />
+          <Field label="Səhifə Başlığı (Title)" block={cmsEvents} setBlock={setCmsEvents} fieldKey="title" placeholder="Məs: Yaxınlaşan Tədbirlər və Masterklaslar" />
+          <Field label="Təsvir (Desc)" block={cmsEvents} setBlock={setCmsEvents} fieldKey="desc" multiline rows={3} placeholder="Məs: Canlı interaktiv vebinarlar..." />
+          <Field label="Təqvim Düyməsi Mətni" block={cmsEvents} setBlock={setCmsEvents} fieldKey="calendarBtnText" placeholder="Məs: Bütün Təqvim" />
+
+          <div style={{ paddingTop: '4px' }}>
+            <button onClick={() => saveBlock('events', cmsEvents)} className="admin-btn-primary">
+              Tədbirlər Məzmununu Yadda Saxla
+            </button>
           </div>
         </div>
       )}

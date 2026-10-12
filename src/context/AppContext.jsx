@@ -395,6 +395,38 @@ export function AppProvider({ children }) {
   const [applicationModalOpen, setApplicationModalOpen] = useState(false);
   const [activeApplicationTarget, setActiveApplicationTarget] = useState(null);
 
+  // Page Routing (Separate pages for each section)
+  const validPages = ['home', 'akademiya', 'koucinq', 'club', 'tedbirler', 'icma', 'haqqimizda'];
+  const getPageFromHash = () => {
+    const raw = (window.location.hash || '').replace('#', '').trim().toLowerCase();
+    return validPages.includes(raw) ? raw : 'home';
+  };
+
+  const [currentPage, setCurrentPage] = useState(getPageFromHash);
+
+  useEffect(() => {
+    const handleHash = () => {
+      const page = getPageFromHash();
+      setCurrentPage(page);
+    };
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
+
+  const navigateTo = (page) => {
+    const target = validPages.includes(page) ? page : 'home';
+    if (target === 'home') {
+      if (window.location.hash) {
+        history.pushState(null, '', window.location.pathname + window.location.search);
+      }
+      setCurrentPage('home');
+    } else {
+      window.location.hash = target;
+      setCurrentPage(target);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   // Toasts
   const [toasts, setToasts] = useState([]);
 
@@ -2016,7 +2048,11 @@ export function AppProvider({ children }) {
       faqsList,
       addFaq,
       updateFaq,
-      deleteFaq
+      deleteFaq,
+      // Page Routing
+      currentPage,
+      setCurrentPage,
+      navigateTo
     }}>
       {children}
     </AppContext.Provider>

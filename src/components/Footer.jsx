@@ -5,7 +5,7 @@ import { useApp } from '../context/AppContext';
 
 export default function Footer() {
   const { currentLang, defaultLang, changeLang, supportedLangs, t } = useLanguage();
-  const { homeContent, platformSettings } = useApp();
+  const { homeContent, platformSettings, navigateTo } = useApp();
   const footer = homeContent?.footer || {};
   const contactEmail = platformSettings?.contactEmail || footer.email || 'contact@monodoxia.academy';
   const contactPhone = platformSettings?.contactPhone || footer.phone || '+994 (12) 490 88 00';
@@ -16,7 +16,14 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10">
           {/* BRAND */}
           <div className="lg:col-span-5 space-y-4">
-            <a className="inline-block" href="#">
+            <a
+              className="inline-block cursor-pointer"
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                navigateTo('home');
+              }}
+            >
               <img
                 alt="Monodoxia Academy"
                 className="h-10 md:h-12 w-auto object-contain brightness-0 invert"
@@ -37,11 +44,60 @@ export default function Footer() {
           <div className="lg:col-span-3 space-y-3">
             <div className="font-label-sm text-label-sm text-secondary-fixed tracking-widest uppercase">NAVİQASİYA</div>
             <ul className="space-y-2 font-body-md text-body-md">
-              <li><a className="hover:text-on-primary transition-colors text-secondary-fixed font-medium" href="#akademiya">{t('nav_academy')}</a></li>
-              <li><a className="text-on-primary-container hover:text-on-primary transition-colors" href="#koucinq">{t('nav_coaching')}</a></li>
-              <li><a className="text-on-primary-container hover:text-on-primary transition-colors" href="#club">{t('nav_club')}</a></li>
-              <li><a className="text-on-primary-container hover:text-on-primary transition-colors" href="#tedbirler">{t('nav_events')}</a></li>
-              <li><a className="text-on-primary-container hover:text-on-primary transition-colors" href="#icma">{t('nav_community')}</a></li>
+              <li>
+                <a
+                  className="hover:text-on-primary transition-colors text-secondary-fixed font-medium cursor-pointer"
+                  href="#akademiya"
+                  onClick={(e) => { e.preventDefault(); navigateTo('akademiya'); }}
+                >
+                  {t('nav_academy')}
+                </a>
+              </li>
+              <li>
+                <a
+                  className="text-on-primary-container hover:text-on-primary transition-colors cursor-pointer"
+                  href="#koucinq"
+                  onClick={(e) => { e.preventDefault(); navigateTo('koucinq'); }}
+                >
+                  {t('nav_coaching')}
+                </a>
+              </li>
+              <li>
+                <a
+                  className="text-on-primary-container hover:text-on-primary transition-colors cursor-pointer"
+                  href="#club"
+                  onClick={(e) => { e.preventDefault(); navigateTo('club'); }}
+                >
+                  {t('nav_club')}
+                </a>
+              </li>
+              <li>
+                <a
+                  className="text-on-primary-container hover:text-on-primary transition-colors cursor-pointer"
+                  href="#tedbirler"
+                  onClick={(e) => { e.preventDefault(); navigateTo('tedbirler'); }}
+                >
+                  {t('nav_events')}
+                </a>
+              </li>
+              <li>
+                <a
+                  className="text-on-primary-container hover:text-on-primary transition-colors cursor-pointer"
+                  href="#icma"
+                  onClick={(e) => { e.preventDefault(); navigateTo('icma'); }}
+                >
+                  {t('nav_community')}
+                </a>
+              </li>
+              <li>
+                <a
+                  className="text-on-primary-container hover:text-on-primary transition-colors cursor-pointer"
+                  href="#haqqimizda"
+                  onClick={(e) => { e.preventDefault(); navigateTo('haqqimizda'); }}
+                >
+                  {t('nav_about')}
+                </a>
+              </li>
             </ul>
           </div>
 

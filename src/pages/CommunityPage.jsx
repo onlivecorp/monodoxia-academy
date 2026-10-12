@@ -1,0 +1,279 @@
+import React, { useState } from 'react';
+import { useLanguage } from '../i18n/LanguageContext';
+import { getLocalized } from '../i18n/localize';
+import { useApp } from '../context/AppContext';
+import PageHero from '../components/PageHero';
+
+export default function CommunityPage() {
+  const { t, currentLang, defaultLang } = useLanguage();
+  const {
+    topicsList,
+    homeContent,
+    setNewTopicModalOpen,
+    currentUser,
+    setAuthModalOpen,
+    categoriesList,
+    getCategoryLabel
+  } = useApp();
+
+  const community = homeContent?.community || {};
+  const [filterTag, setFilterTag] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Extract tags from topics
+  const allTags = Array.from(
+    new Set(
+      topicsList.flatMap(t => {
+        if (Array.isArray(t.tags)) return t.tags;
+        if (typeof t.tag === 'string') return [t.tag];
+        return [];
+      }).filter(Boolean)
+    )
+  );
+
+  const filteredTopics = topicsList.filter(t => {
+    const matchesTag = filterTag === 'all' ||
+      (Array.isArray(t.tags) && t.tags.includes(filterTag)) ||
+      t.tag === filterTag;
+
+    const title = getLocalized(t, 'title', currentLang, defaultLang) || t.title || '';
+    const desc = getLocalized(t, 'desc', currentLang, defaultLang) || t.desc || '';
+    const author = t.author || '';
+
+    const matchesSearch = !searchQuery.trim() ||
+      title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      desc.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      author.toLowerCase().includes(searchQuery.toLowerCase());
+
+    return matchesTag && matchesSearch;
+  });
+
+  const handleCreateTopic = () => {
+    if (!currentUser) {
+      setAuthModalOpen(true);
+    } else {
+      setNewTopicModalOpen(true);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <PageHero
+        badge={getLocalized(community, 'badge', currentLang, defaultLang) || 'İntellektual Şəbəkə'}
+        title={getLocalized(community, 'title', currentLang, defaultLang) || 'Düşüncə və Təcrübə Mübadiləsi'}
+        description={getLocalized(community, 'desc', currentLang, defaultLang) || 'Akademiyamızın tələbələri və klub rezidentləri üçün gündəlik fəlsəfi dialoq, dərin suallar və daxili kəşflər sahəsi.'}
+        breadcrumbs={[{ label: 'İcma' }]}
+        adminCmsBlock="community"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-4 mt-6 pt-6 border-t border-outline-variant/40">
+          <div className="flex flex-wrap items-center gap-4 text-xs text-on-surface-variant">
+            <div className="flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-secondary text-[18px]">verified_user</span>
+              <span>Konfidensiallıq və Qarşılıqlı Hörmət</span>
+            </div>
+            <div className="w-1 h-1 rounded-full bg-outline-variant" />
+            <div className="flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-secondary text-[18px]">psychology</span>
+              <span>Moderasiya Olunan Dərin Dialoq</span>
+            </div>
+          </div>
+
+          <button
+            onClick={handleCreateTopic}
+            className="px-4 py-2 rounded-lg bg-secondary text-on-secondary font-bold text-xs hover:bg-secondary/90 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+          >
+            <span className="material-symbols-outlined text-[16px]">add_circle</span>
+            <span>{getLocalized(community, 'newTopicBtnText', currentLang, defaultLang) || 'Yeni Mövzu Başlat'}</span>
+          </button>
+        </div>
+      </PageHero>
+
+      {/* Main Section */}
+      <section className="py-12 sm:py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            {/* Left Column: Topics Feed (2 Cols) */}
+            <div className="lg:col-span-2 space-y-6">
+              
+              {/* Search & Tag Filter Bar */}
+              <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-xl p-4 space-y-4">
+                <div className="relative">
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">search</span>
+                  <input
+                    type="text"
+                    placeholder="Mövzu və ya müəllif axtar..."
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2 text-xs rounded bg-surface border border-outline-variant focus:border-secondary focus:outline-none transition-colors"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-outline hover:text-primary text-xs"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+
+                {allTags.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                    <button
+                      onClick={() => setFilterTag('all')}
+                      className={`px-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                        filterTag === 'all'
+                          ? 'bg-secondary text-on-secondary'
+                          : 'bg-surface-container text-on-surface-variant hover:text-primary'
+                      }`}
+                    >
+                      Bütün Mövzular ({topicsList.length})
+                    </button>
+                    {allTags.map(tag => (
+                      <button
+                        key={tag}
+                        onClick={() => setFilterTag(tag)}
+                        className={`px-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                          filterTag === tag
+                            ? 'bg-secondary text-on-secondary'
+                            : 'bg-surface-container text-on-surface-variant hover:text-primary'
+                        }`}
+                      >
+                        #{tag}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Topics List */}
+              {filteredTopics.length === 0 ? (
+                <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-xl p-10 text-center">
+                  <span className="material-symbols-outlined text-4xl text-outline mb-2">forum</span>
+                  <h4 className="font-bold text-sm text-primary mb-1">Heç bir mövzu tapılmadı</h4>
+                  <p className="text-xs text-on-surface-variant mb-4">İlk mövzunu başlatmaq üçün aşağıdakı düyməyə klikləyin.</p>
+                  <button
+                    onClick={handleCreateTopic}
+                    className="px-4 py-2 rounded bg-secondary text-on-secondary text-xs font-semibold"
+                  >
+                    Yeni Mövzu Başlat
+                  </button>
+                </div>
+              ) : (
+                filteredTopics.map((topic) => {
+                  const title = getLocalized(topic, 'title', currentLang, defaultLang) || topic.title;
+                  const desc = getLocalized(topic, 'desc', currentLang, defaultLang) || topic.desc;
+
+                  return (
+                    <div
+                      key={topic.id}
+                      className="bg-surface-container-lowest border border-outline-variant/60 rounded-xl p-6 hover:border-secondary transition-all duration-200 shadow-sm hover:shadow-md"
+                    >
+                      {/* Topic Header */}
+                      <div className="flex items-center justify-between gap-3 mb-3">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-full bg-secondary/10 text-secondary flex items-center justify-center font-bold text-xs shrink-0">
+                            {topic.author?.charAt(0) || 'U'}
+                          </div>
+                          <div>
+                            <span className="font-bold text-xs text-primary block leading-tight">{topic.author}</span>
+                            <span className="text-[10px] text-outline block">{topic.date || 'Son zamanlar'}</span>
+                          </div>
+                        </div>
+
+                        {topic.tag && (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-secondary/10 text-secondary uppercase tracking-wider">
+                            #{topic.tag}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Title & Desc */}
+                      <h3 className="font-serif text-base sm:text-lg font-bold text-primary mb-2 hover:text-secondary transition-colors cursor-pointer">
+                        {title}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-on-surface-variant leading-relaxed mb-4">
+                        {desc}
+                      </p>
+
+                      {/* Footer Actions */}
+                      <div className="flex items-center justify-between pt-3 border-t border-outline-variant/30 text-xs text-on-surface-variant">
+                        <div className="flex items-center gap-4">
+                          <span className="flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[15px] text-secondary">forum</span>
+                            <span>{topic.commentsCount || 0} şərh</span>
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[15px] text-outline">visibility</span>
+                            <span>{topic.views || 120} baxış</span>
+                          </span>
+                        </div>
+
+                        <button
+                          onClick={handleCreateTopic}
+                          className="text-secondary hover:underline text-xs font-semibold flex items-center gap-1 cursor-pointer"
+                        >
+                          <span>Cavab yaz</span>
+                          <span className="material-symbols-outlined text-[14px]">reply</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Right Column: Community Guidelines & Moderator Info */}
+            <div className="space-y-6">
+              
+              {/* Community Rules Card */}
+              <div className="bg-surface-container-low border border-outline-variant/60 rounded-2xl p-6">
+                <div className="flex items-center gap-2 mb-4 text-primary">
+                  <span className="material-symbols-outlined text-secondary text-xl">shield</span>
+                  <h4 className="font-serif text-base font-bold">İcma Etikası və Qaydaları</h4>
+                </div>
+                <div className="space-y-3 text-xs text-on-surface-variant leading-relaxed">
+                  <div className="flex items-start gap-2">
+                    <span className="material-symbols-outlined text-secondary text-[16px] shrink-0 mt-0.5">check_circle</span>
+                    <span><strong>Məxfilik prinsipi:</strong> Müzakirə olunan şəxsi təcrübələr və etiraflar icmadan kənara çıxarılmır.</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="material-symbols-outlined text-secondary text-[16px] shrink-0 mt-0.5">check_circle</span>
+                    <span><strong>Konstruktiv yanaşma:</strong> Qınaq və mühakimə yoxdur; hər fikir təkamül nöqteyi-nəzərindən dinlənilir.</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="material-symbols-outlined text-secondary text-[16px] shrink-0 mt-0.5">check_circle</span>
+                    <span><strong>Səthilikdən uzaq:</strong> Siyasi, polemik və ya kommersiya xarakterli paylaşımlar qadağandır.</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Weekly Discussion Theme */}
+              <div className="bg-secondary/10 border border-secondary/30 rounded-2xl p-6">
+                <span className="text-[10px] font-bold text-secondary uppercase tracking-widest block mb-1">
+                  Həftənin Fəlsəfi Mövzusu
+                </span>
+                <h4 className="font-serif text-lg font-bold text-primary mb-2">
+                  "Daxili təzyiq qarşısında şüurlu müşahidəçi qalmaq necə mümkündür?"
+                </h4>
+                <p className="text-xs text-on-surface-variant leading-relaxed mb-4">
+                  Bu həftə mentorlarımızın fasilitasiyası ilə emosional reaktivliyi idarə etməyin nevrobioloji yollarını müzakirə edirik.
+                </p>
+                <button
+                  onClick={handleCreateTopic}
+                  className="w-full py-2 px-3 rounded-lg bg-secondary text-on-secondary font-bold text-xs hover:bg-secondary/90 transition-all text-center cursor-pointer shadow-sm"
+                >
+                  Müzakirəyə Qoşul
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+    </div>
+  );
+}

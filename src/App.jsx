@@ -4,17 +4,6 @@ import { AppProvider, useApp } from './context/AppContext';
 
 import SafetyBanner from './components/SafetyBanner';
 import Header from './components/Header';
-import Hero from './components/Hero';
-import About from './components/About';
-import Areas from './components/Areas';
-import Academy from './components/Academy';
-import Club from './components/Club';
-import Coaches from './components/Coaches';
-import Community from './components/Community';
-import Events from './components/Events';
-import Testimonials from './components/Testimonials';
-import FAQ from './components/FAQ';
-import Newsletter from './components/Newsletter';
 import Footer from './components/Footer';
 import ToastContainer from './components/ToastContainer';
 import MaintenanceScreen from './components/MaintenanceScreen';
@@ -29,8 +18,16 @@ import NewTopicModal from './components/modals/NewTopicModal';
 import ProfileModal from './components/modals/ProfileModal';
 import ApplicationModal from './components/modals/ApplicationModal';
 
+import HomePage from './pages/HomePage';
+import AcademyPage from './pages/AcademyPage';
+import CoachingPage from './pages/CoachingPage';
+import ClubPage from './pages/ClubPage';
+import EventsPage from './pages/EventsPage';
+import CommunityPage from './pages/CommunityPage';
+import AboutPage from './pages/AboutPage';
+
 function AppContent() {
-  const { platformSettings, currentUser, setAuthModalOpen, canAccessAdmin, adminModalOpen } = useApp();
+  const { platformSettings, currentUser, setAuthModalOpen, canAccessAdmin, adminModalOpen, currentPage } = useApp();
   const isAdminUser = currentUser?.role === 'Admin' || Boolean(canAccessAdmin?.(currentUser));
   const isMaintenance = Boolean(platformSettings?.maintenanceMode) && !isAdminUser;
 
@@ -43,6 +40,26 @@ function AppContent() {
       </div>
     );
   }
+
+  const renderCurrentPage = () => {
+    switch (currentPage) {
+      case 'akademiya':
+        return <AcademyPage />;
+      case 'koucinq':
+        return <CoachingPage />;
+      case 'club':
+        return <ClubPage />;
+      case 'tedbirler':
+        return <EventsPage />;
+      case 'icma':
+        return <CommunityPage />;
+      case 'haqqimizda':
+        return <AboutPage />;
+      case 'home':
+      default:
+        return <HomePage />;
+    }
+  };
 
   return (
     <div className="bg-background text-on-surface antialiased selection:bg-secondary-fixed selection:text-on-secondary-fixed min-h-screen flex flex-col justify-between">
@@ -58,18 +75,8 @@ function AppContent() {
 
       <SafetyBanner />
       <Header />
-      <main>
-        <Hero />
-        <About />
-        <Areas />
-        <Academy />
-        <Club />
-        <Coaches />
-        <Community />
-        <Events />
-        <Testimonials />
-        <FAQ />
-        <Newsletter />
+      <main className="flex-1">
+        {renderCurrentPage()}
       </main>
       <Footer />
 
