@@ -9,8 +9,13 @@ export default function PageHero({
   adminCmsBlock,
   children
 }) {
-  const { navigateTo, currentUser, canAccessAdmin, setAdminModalOpen } = useApp();
+  const { navigateTo, currentUser, canAccessAdmin, setAdminModalOpen, setAdminModalTab } = useApp();
   const isAdminUser = currentUser?.role === 'Admin' || Boolean(canAccessAdmin?.(currentUser));
+
+  const handleAdminEdit = () => {
+    if (setAdminModalTab) setAdminModalTab('pages');
+    setAdminModalOpen(true);
+  };
 
   return (
     <div className="relative overflow-hidden bg-gradient-to-b from-surface-container-low via-surface to-background border-b border-outline-variant/60 pt-8 pb-12 sm:pt-12 sm:pb-16">
@@ -48,9 +53,9 @@ export default function PageHero({
           {/* Admin shortcut if logged in */}
           {isAdminUser && (
             <button
-              onClick={() => setAdminModalOpen(true)}
+              onClick={handleAdminEdit}
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-secondary/10 text-secondary border border-secondary/30 hover:bg-secondary/20 transition-all cursor-pointer"
-              title="Bu bölməni admin paneldə redaktə et"
+              title="Bu səhifəni Səhifələr İdarəetməsi ekranında redaktə et"
             >
               <span className="material-symbols-outlined text-[14px]">edit_note</span>
               <span>Admin: Bu Səhifəni Redaktə Et</span>

@@ -388,6 +388,7 @@ export function AppProvider({ children }) {
   const [activeCoach, setActiveCoach] = useState(null);
   const [newTopicModalOpen, setNewTopicModalOpen] = useState(false);
   const [adminModalOpen, setAdminModalOpen] = useState(false);
+  const [adminModalTab, setAdminModalTab] = useState('overview');
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [activeProfileTab, setActiveProfileTab] = useState('applications');
 
@@ -1981,6 +1982,7 @@ export function AppProvider({ children }) {
       likeTopic, addTopic, deleteTopic, pinTopic,
       registerEvent, joinClubTier,
       adminModalOpen, setAdminModalOpen,
+      adminModalTab, setAdminModalTab,
       profileModalOpen, setProfileModalOpen,
       activeProfileTab, setActiveProfileTab,
       applicationModalOpen, setApplicationModalOpen,

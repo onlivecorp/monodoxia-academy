@@ -16,6 +16,7 @@ import AdminStaticTranslationsTab from './AdminStaticTranslationsTab';
 import AdminTranslationsTab from './AdminTranslationsTab';
 import AdminMaintenanceTab from './AdminMaintenanceTab';
 import AdminCmsTab from './AdminCmsTab';
+import AdminPagesTab from './AdminPagesTab';
 import AdminDatabaseTab from './AdminDatabaseTab';
 import AdminSettingsTab from './AdminSettingsTab';
 
@@ -27,13 +28,21 @@ export default function AdminModal() {
     platformSettings,
     applicationsList = [],
     hasPermission,
-    canAccessAdmin
+    canAccessAdmin,
+    adminModalTab,
+    setAdminModalTab
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState(adminModalTab || 'overview');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [quickCreateOpen, setQuickCreateOpen] = useState(false);
   const [initialCreateTarget, setInitialCreateTarget] = useState(null);
+
+  useEffect(() => {
+    if (adminModalOpen && adminModalTab) {
+      setActiveTab(adminModalTab);
+    }
+  }, [adminModalOpen, adminModalTab]);
 
   const handleQuickCreate = (targetTab) => {
     setQuickCreateOpen(false);
@@ -91,8 +100,9 @@ export default function AdminModal() {
       {
         group: 'Sistem & Rejimlər',
         items: [
+          { id: 'pages', icon: 'auto_stories', label: 'Səhifələr İdarəetməsi', perm: 'content.view' },
+          { id: 'content', icon: 'edit_document', label: 'Məzmun (CMS Blokları)', perm: 'content.view' },
           { id: 'maintenance', icon: 'construction', label: 'Texniki Qulluq Ekranı', perm: 'maintenance.view', highlight: Boolean(platformSettings?.maintenanceMode) },
-          { id: 'content', icon: 'edit_document', label: 'Məzmun (CMS)', perm: 'content.view' },
           { id: 'database', icon: 'database', label: 'SQL Bazası', perm: 'database.view' },
           { id: 'settings', icon: 'settings', label: 'Ümumi Parametrlər', perm: 'settings.view' }
         ]
@@ -523,6 +533,10 @@ export default function AdminModal() {
 
             {activeTab === 'translations' && (
               <AdminTranslationsTab />
+            )}
+
+            {activeTab === 'pages' && (
+              <AdminPagesTab />
             )}
 
             {activeTab === 'content' && (
