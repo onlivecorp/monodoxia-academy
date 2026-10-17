@@ -12,6 +12,7 @@ export default function ClubPage() {
     joinClubTier,
     currentUser,
     userTier,
+    applicationsList,
     openApplication
   } = useApp();
 
@@ -89,6 +90,9 @@ export default function ClubPage() {
                 : rawPrice;
               const periodText = billingCycle === 'annual' && rawPrice > 0 ? '/ illik' : (tier.period || '/ aylıq');
               const tierName = getLocalized(tier, 'name', currentLang, defaultLang) || tier.name || tier.id || 'Klub Rezidentliyi';
+              const userTierApp = currentUser && Array.isArray(applicationsList)
+                ? applicationsList.find(a => a.userId === currentUser.id && a.targetId === tier.id && !a.archived)
+                : null;
 
               return (
                 <div
@@ -153,9 +157,17 @@ export default function ClubPage() {
                         <span className="material-symbols-outlined text-[16px]">verified</span>
                         <span>Cari Rezidentliyiniz</span>
                       </button>
+                    ) : userTierApp && userTierApp.status !== 'Ləğv edildi' && userTierApp.status !== 'Rədd edildi' ? (
+                      <button
+                        onClick={() => openApplication(tier, 'club')}
+                        className="w-full py-2.5 px-4 rounded-lg bg-amber-100 text-amber-800 text-xs font-bold border border-amber-300 flex items-center justify-center gap-1.5 hover:bg-amber-200 transition-colors cursor-pointer"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">pending</span>
+                        <span>Müraciət: {userTierApp.status}</span>
+                      </button>
                     ) : (
                       <button
-                        onClick={() => joinClubTier(tier)}
+                        onClick={() => openApplication(tier, 'club')}
                         className={`w-full py-2.5 px-4 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                           isPopular
                             ? 'bg-secondary text-on-secondary hover:bg-secondary/90 shadow-sm'

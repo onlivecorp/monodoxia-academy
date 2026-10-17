@@ -1252,12 +1252,9 @@ export function AppProvider({ children }) {
     }));
   };
 
-  // Club Tier upgrade
+  // Club Tier upgrade - routes to application workflow for admin approval
   const joinClubTier = (tier) => {
-    const tierId = typeof tier === 'object' && tier !== null ? (tier.id || tier.name || 'Free') : String(tier || 'Free');
-    const tierName = typeof tier === 'object' && tier !== null ? (tier.name || tier.id || 'Free') : tierId;
-    setUserTier(tierId);
-    showToast(`Təbriklər! Siz artıq Monodoxia Coaching Club "${tierName}" üzvüsünüz.`, 'success');
+    openApplication(tier, 'club');
   };
 
   // ========================================================
@@ -1405,7 +1402,24 @@ export function AppProvider({ children }) {
         } else if (updatedApp.targetType === 'course') {
           setCoursesList(prev => prev.map(c => c.id === updatedApp.targetId ? { ...c, occupancy: Math.min(100, (c.occupancy || 0) + 2) } : c));
         } else if (updatedApp.targetType === 'club') {
-          setUserTier(updatedApp.targetTitle.includes('VIP') ? 'VIP' : (updatedApp.targetTitle.includes('Premium') ? 'Premium' : 'Basic'));
+          let approvedTier = 'Basic';
+          const title = updatedApp.targetTitle || '';
+          if (title.toLowerCase().includes('vip')) {
+            approvedTier = 'VIP';
+          } else if (title.toLowerCase().includes('premium')) {
+            approvedTier = 'Premium';
+          } else if (title.toLowerCase().includes('basic')) {
+            approvedTier = 'Basic';
+          } else if (updatedApp.targetId) {
+            approvedTier = updatedApp.targetId.replace('tier-', '').toUpperCase();
+          }
+          setUserTier(approvedTier);
+          localStorage.setItem('monodoxia_tier', approvedTier);
+
+          // If the approved application belongs to current user, update currentUser.tier
+          if (currentUser && currentUser.id === updatedApp.userId) {
+            updateCurrentUser({ tier: approvedTier });
+          }
         }
       }
 

@@ -1134,6 +1134,44 @@ if ($action === 'update_application_status' && $_SERVER['REQUEST_METHOD'] === 'P
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
 
+    // Fetch application details for notification & membership upgrade
+    try {
+        $appStmt = $pdo->prepare("SELECT * FROM mdx_applications WHERE id = ? LIMIT 1");
+        $appStmt->execute([$id]);
+        $app = $appStmt->fetch();
+
+        if ($app) {
+            $notifType = ($new_status === 'Təsdiqləndi' || $new_status === 'Tamamlandı') ? 'success' : (in_array($new_status, ['Rədd edildi', 'Ləğv edildi']) ? 'error' : 'warning');
+            $notifMsg = "Sizin \"{$app['target_title']}\" müraciətinizin statusu yeniləndi: {$new_status}." . ($admin_note ? " Qeyd: {$admin_note}" : "");
+
+            $notifStmt = $pdo->prepare("
+                INSERT INTO mdx_notifications (id, user_id, title, message, type, is_read, created_at)
+                VALUES (?, ?, ?, ?, ?, 0, NOW())
+            ");
+            $notifStmt->execute([
+                'NOTIF-' . uniqid(),
+                $app['user_id'],
+                "Müraciət Statusu: {$new_status}",
+                $notifMsg,
+                $notifType
+            ]);
+
+            // If club membership approved, elevate user tier in database
+            if ($new_status === 'Təsdiqləndi' && $app['target_type'] === 'club') {
+                $tier = 'Basic';
+                if (stripos($app['target_title'], 'VIP') !== false) {
+                    $tier = 'VIP';
+                } elseif (stripos($app['target_title'], 'Premium') !== false) {
+                    $tier = 'Premium';
+                } elseif (!empty($app['target_id'])) {
+                    $tier = ucfirst(str_replace('tier-', '', $app['target_id']));
+                }
+                $userUpdate = $pdo->prepare("UPDATE mdx_users SET tier = ? WHERE id = ?");
+                $userUpdate->execute([$tier, $app['user_id']]);
+            }
+        }
+    } catch (Exception $e) {}
+
     echo json_encode(['status' => 'success', 'message' => 'Müraciət statusu yeniləndi', 'id' => $id, 'status' => $new_status], JSON_UNESCAPED_UNICODE);
     exit();
 }
