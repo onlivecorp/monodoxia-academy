@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { LanguageProvider } from './i18n/LanguageContext';
 import { AppProvider, useApp } from './context/AppContext';
 
@@ -9,22 +9,22 @@ import ToastContainer from './components/ToastContainer';
 import MaintenanceScreen from './components/MaintenanceScreen';
 
 import AuthModal from './components/modals/AuthModal';
-import OnboardingModal from './components/modals/OnboardingModal';
-import PlayerModal from './components/modals/PlayerModal';
-import CertificateModal from './components/modals/CertificateModal';
-import BookingModal from './components/modals/BookingModal';
-import AdminModal from './components/modals/AdminModal';
-import NewTopicModal from './components/modals/NewTopicModal';
-import ProfileModal from './components/modals/ProfileModal';
-import ApplicationModal from './components/modals/ApplicationModal';
+const OnboardingModal = lazy(() => import('./components/modals/OnboardingModal'));
+const PlayerModal = lazy(() => import('./components/modals/PlayerModal'));
+const CertificateModal = lazy(() => import('./components/modals/CertificateModal'));
+const BookingModal = lazy(() => import('./components/modals/BookingModal'));
+const AdminModal = lazy(() => import('./components/modals/AdminModal'));
+const NewTopicModal = lazy(() => import('./components/modals/NewTopicModal'));
+const ProfileModal = lazy(() => import('./components/modals/ProfileModal'));
+const ApplicationModal = lazy(() => import('./components/modals/ApplicationModal'));
 
 import HomePage from './pages/HomePage';
-import AcademyPage from './pages/AcademyPage';
-import CoachingPage from './pages/CoachingPage';
-import ClubPage from './pages/ClubPage';
-import EventsPage from './pages/EventsPage';
-import CommunityPage from './pages/CommunityPage';
-import AboutPage from './pages/AboutPage';
+const AcademyPage = lazy(() => import('./pages/AcademyPage'));
+const CoachingPage = lazy(() => import('./pages/CoachingPage'));
+const ClubPage = lazy(() => import('./pages/ClubPage'));
+const EventsPage = lazy(() => import('./pages/EventsPage'));
+const CommunityPage = lazy(() => import('./pages/CommunityPage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
 
 function AppContent() {
   const { platformSettings, currentUser, setAuthModalOpen, canAccessAdmin, adminModalOpen, currentPage } = useApp();
@@ -76,20 +76,28 @@ function AppContent() {
       <SafetyBanner />
       <Header />
       <main className="flex-1">
-        {renderCurrentPage()}
+        <Suspense fallback={
+          <div className="min-h-[40vh] flex items-center justify-center text-secondary">
+            <div className="w-8 h-8 border-2 border-secondary border-t-transparent rounded-full animate-spin" />
+          </div>
+        }>
+          {renderCurrentPage()}
+        </Suspense>
       </main>
       <Footer />
 
       {/* Modals */}
       <AuthModal />
-      <OnboardingModal />
-      <PlayerModal />
-      <CertificateModal />
-      <BookingModal />
-      <AdminModal />
-      <NewTopicModal />
-      <ProfileModal />
-      <ApplicationModal />
+      <Suspense fallback={null}>
+        <OnboardingModal />
+        <PlayerModal />
+        <CertificateModal />
+        <BookingModal />
+        <AdminModal />
+        <NewTopicModal />
+        <ProfileModal />
+        <ApplicationModal />
+      </Suspense>
     </div>
   );
 }

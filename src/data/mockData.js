@@ -283,7 +283,116 @@ export const COURSES = [
   }
 ];
 
-export const COACHES = [];
+export const COACHES = [
+  {
+    id: "coach-leyla",
+    name: "Dr. Leyla Əliyeva",
+    title: "PhD Psixologiya | ICF PCC",
+    experience: "14+ il",
+    bio: "Koqnitiv fərqindəlik və şüuraltı travmalar üzrə baş ekspert. Harvard və Bakı Dövlət Universitetinin tədqiqat layihələrinin məzunu.",
+    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCn9ZjfxW-PL-o_xZ9Me83EiOB9x_aaIbuIEYtOce00950-vB-hL99E3BUxNBeJriyWWNWGGDlnTJRCJGRwkjlEPSCAIQYPacFkDcUc0Gx7SG3u_LdP-yJ9ZvAxESWMhqm8PQ0_Jjk2lpNGCZW3k-pFcnjQ873cYwWNg72N95sYxMH-w5fpXfjJZfJo1LZC2K5AStfFo8Xfl-GQ968CVb_yfDTaqIDcMiTxISBiZMVtj4d_vRd_K_L3",
+    specialties: ["Travma terapiyası", "Şüuraltı inanc dəyişimi", "Mindfulness"],
+    availableSlots: ["Sabah 11:00", "Sabah 15:30", "Cümə 18:00"],
+    translations: {
+      az: {
+        title: "PhD Psixologiya | ICF PCC",
+        experience: "14+ il",
+        bio: "Koqnitiv fərqindəlik və şüuraltı travmalar üzrə baş ekspert. Harvard və Bakı Dövlət Universitetinin tədqiqat layihələrinin məzunu.",
+        specialties: ["Travma terapiyası", "Şüuraltı inanc dəyişimi", "Mindfulness"]
+      },
+      en: {
+        title: "PhD Psychology | ICF PCC",
+        experience: "14+ yrs",
+        bio: "Lead expert in cognitive awareness and subconscious trauma. Graduate of research projects at Harvard and Baku State University.",
+        specialties: ["Trauma Therapy", "Subconscious Beliefs", "Mindfulness"]
+      },
+      tr: {
+        title: "PhD Psikoloji | ICF PCC",
+        experience: "14+ yıl",
+        bio: "Bilişsel farkındalık ve bilinçaltı travmalar konusunda baş uzman. Harvard ve Bakü Devlet Üniversitesi araştırma projeleri mezunu.",
+        specialties: ["Travma Terapisi", "Bilinçaltı İnanç Dönüşümü", "Mindfulness"]
+      },
+      ru: {
+        title: "PhD Психология | ICF PCC",
+        experience: "14+ лет",
+        bio: "Ведущий эксперт по когнитивной осознанности и подсознательным травмам. Выпускник исследовательских программ Гарварда и БГУ.",
+        specialties: ["Терапия травм", "Трансформация убеждений", "Майндфулнесс"]
+      }
+    }
+  },
+  {
+    id: "coach-farid",
+    name: "Fərid Məmmədov",
+    title: "ICF MCC Kouç | EQ Master",
+    experience: "11+ il",
+    bio: "Top menecerlər və sahibkarlar üçün ekzekyutiv kouçinq, böhran idarəçiliyi və emosional liderlik üzrə baş məsləhətçi.",
+    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBdkVIgrGvOaJjxAlQWP_tOgF6MLIc1W_hVcrzQBsdy3Nmj3_bg1aNTtm-J7ngXIQHCb_HUk8Wgmb1fcNip_lsrL-Gmar-UetvxkeR45_vSt4q1wmYr827ItSKFD3KvdecV_H8wq93ilFYULT8I6h79AaRYC4hHvZXNqnITSxTBQyhdlEbyKM6jmxqnqbhzDwzEMCBH3hkOs9Ek7d1JxL4eWrgGao9MIfgwjA76wbSTi5zJlsf9FF_w",
+    specialties: ["EQ Liderlik", "Karyera sıçrayışı", "Stres menecmenti"],
+    availableSlots: ["Bazar ertəsi 14:00", "Çərşənbə 16:30", "Şənbə 12:00"],
+    translations: {
+      az: {
+        title: "ICF MCC Kouç | EQ Master",
+        experience: "11+ il",
+        bio: "Top menecerlər və sahibkarlar üçün ekzekyutiv kouçinq, böhran idarəçiliyi və emosional liderlik üzrə baş məsləhətçi.",
+        specialties: ["EQ Liderlik", "Karyera sıçrayışı", "Stres menecmenti"]
+      },
+      en: {
+        title: "ICF MCC Coach | EQ Master",
+        experience: "11+ yrs",
+        bio: "Senior consultant for executive coaching, crisis management, and emotional leadership for executives and entrepreneurs.",
+        specialties: ["EQ Leadership", "Career Breakthrough", "Stress Management"]
+      },
+      tr: {
+        title: "ICF MCC Koç | EQ Master",
+        experience: "11+ yıl",
+        bio: "Üst düzey yöneticiler ve girişimciler için yönetici koçluğu, kriz yönetimi ve duygusal liderlik baş danışmanı.",
+        specialties: ["EQ Liderlik", "Kariyer Sıçraması", "Stres Yönetimi"]
+      },
+      ru: {
+        title: "ICF MCC Коуч | EQ Master",
+        experience: "11+ лет",
+        bio: "Ведущий консультант по исполнительному коучингу, кризис-менеджменту и эмоциональному лидерству для топ-менеджеров.",
+        specialties: ["EQ Лидерство", "Карьерный прорыв", "Стресс-менеджмент"]
+      }
+    }
+  },
+  {
+    id: "coach-nargiz",
+    name: "Nərgiz Qasımova",
+    title: "Münasibət Kouçu | Somatik Təlimçi",
+    experience: "9+ il",
+    bio: "Cütlüklər və fərdlər üçün münasibət dinamikası, psixosomatika və affektiv tənzimləmə üzrə mütəxəssis.",
+    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuApho0mk-jt09_EKWhr9Kr-rV4ni1mNVZ9NMTTJnSr7Io_rS9AF4YMxdvwdvNBSQ5niLnit1PKeNozwDdDlqiBGbJTz1MOiuOo8yyY1b3AbDK33_Lc-ZOXlb5WzmwRuSsfZWSPYV7fmbNuRtSts2hYeTZFmwlHsu99rLvjRaczoStwMfhP4xbjxoLfdcfKKedG3I9Wsc86Mw84ULdwPbgpzWaz6dnC5ZnLFz2n5VuHMa6K1rX1itB96",
+    specialties: ["Münasibətlər", "Bədən-zihin harmoniyası", "Özünü bağışlama"],
+    availableSlots: ["Sabah 17:00", "Cümə axşamı 19:00", "Şənbə 15:00"],
+    translations: {
+      az: {
+        title: "Münasibət Kouçu | Somatik Təlimçi",
+        experience: "9+ il",
+        bio: "Cütlüklər və fərdlər üçün münasibət dinamikası, psixosomatika və affektiv tənzimləmə üzrə mütəxəssis.",
+        specialties: ["Münasibətlər", "Bədən-zihin harmoniyası", "Özünü bağışlama"]
+      },
+      en: {
+        title: "Relationship Coach | Somatic Practitioner",
+        experience: "9+ yrs",
+        bio: "Specialist in relationship dynamics, psychosomatics, and affective regulation for couples and individuals.",
+        specialties: ["Relationships", "Mind-Body Harmony", "Self-Forgiveness"]
+      },
+      tr: {
+        title: "İlişki Koçu | Somatik Eğitmen",
+        experience: "9+ yıl",
+        bio: "Çiftler ve bireyler için ilişki dinamikleri, psikosomatik ve afektif düzenleme uzmanı.",
+        specialties: ["İlişkiler", "Beden-Zihin Dengesi", "Kendini Bağışlama"]
+      },
+      ru: {
+        title: "Коуч по отношениям | Соматический практик",
+        experience: "9+ лет",
+        bio: "Специалист по динамике отношений, психосоматике и аффективной регуляции для пар и индивидуальных клиентов.",
+        specialties: ["Отношения", "Гармония разума и тела", "Прощение себя"]
+      }
+    }
+  }
+];
 
 export const COMMUNITY_TOPICS = [
   {

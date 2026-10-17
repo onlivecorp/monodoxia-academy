@@ -17,9 +17,25 @@ export default function EventsPage() {
   const events = homeContent?.events || {};
   const [filterType, setFilterType] = useState('all');
 
+  const normalizeStr = (str) => {
+    return (str || '')
+      .toLocaleLowerCase('az-AZ')
+      .replace(/i̇/g, 'i')
+      .replace(/ı/g, 'i')
+      .replace(/ə/g, 'e')
+      .replace(/ö/g, 'o')
+      .replace(/ü/g, 'u')
+      .replace(/ş/g, 's')
+      .replace(/ç/g, 'c')
+      .replace(/ğ/g, 'g')
+      .trim();
+  };
+
   const filteredEvents = eventsList.filter(e => {
     if (filterType === 'all') return true;
-    return e.typeBadge?.toLowerCase() === filterType.toLowerCase();
+    const badge = normalizeStr(e.typeBadge);
+    const filter = normalizeStr(filterType);
+    return badge.includes(filter) || filter.includes(badge);
   });
 
   return (

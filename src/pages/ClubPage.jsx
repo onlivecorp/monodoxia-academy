@@ -80,8 +80,8 @@ export default function ClubPage() {
           {/* All Membership Tiers Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
             {clubTiersList.map((tier) => {
-              const tierName = getLocalized(tier, 'name', currentLang, defaultLang) || tier.name;
-              const isCurrentTier = userTier?.toLowerCase() === tier.id?.toLowerCase();
+              const currentTierStr = typeof userTier === 'string' ? userTier : (userTier?.id || userTier?.name || '');
+              const isCurrentTier = currentTierStr.toLowerCase() === (tier.id || '').toLowerCase();
               const isPopular = tier.id === 'premium';
               const rawPrice = Number(tier.price) || 0;
               const displayPrice = billingCycle === 'annual' && rawPrice > 0

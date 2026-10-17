@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { getLocalized } from '../i18n/localize';
+import { getLocalized, getLocalizedArray } from '../i18n/localize';
 import { useApp } from '../context/AppContext';
 import PageHero from '../components/PageHero';
 
@@ -9,7 +9,7 @@ export default function CoachingPage() {
   const {
     coachesList,
     homeContent,
-    openBookingModal,
+    openBooking,
     testimonialsList
   } = useApp();
 
@@ -98,9 +98,13 @@ export default function CoachingPage() {
           {/* Coaches Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
             {filteredCoaches.map((c) => {
-              const specialtiesList = Array.isArray(c.specialties)
-                ? c.specialties
-                : (c.specialties || '').split(',').map(s => s.trim()).filter(Boolean);
+              const coachTitle = getLocalized(c, 'title', currentLang, defaultLang) || c.title;
+              const coachBio = getLocalized(c, 'bio', currentLang, defaultLang) || c.bio;
+              const coachExp = getLocalized(c, 'experience', currentLang, defaultLang) || c.experience;
+              const rawSpecialties = getLocalizedArray(c, 'specialties', currentLang, defaultLang);
+              const specialtiesList = rawSpecialties.length > 0
+                ? rawSpecialties
+                : (Array.isArray(c.specialties) ? c.specialties : (c.specialties || '').split(',').map(s => s.trim()).filter(Boolean));
 
               return (
                 <div
@@ -126,16 +130,16 @@ export default function CoachingPage() {
                       </div>
                       <div className="min-w-0">
                         <h3 className="font-serif text-lg font-bold text-primary truncate">{c.name}</h3>
-                        <p className="text-xs text-secondary font-semibold uppercase tracking-wider">{c.title}</p>
-                        {c.experience && (
-                          <span className="text-[11px] text-outline">{c.experience} təcrübə</span>
+                        <p className="text-xs text-secondary font-semibold uppercase tracking-wider">{coachTitle}</p>
+                        {coachExp && (
+                          <span className="text-[11px] text-outline">{coachExp} təcrübə</span>
                         )}
                       </div>
                     </div>
 
                     {/* Bio */}
                     <p className="text-xs sm:text-sm text-on-surface-variant leading-relaxed mb-6">
-                      {c.bio}
+                      {coachBio}
                     </p>
 
                     {/* Specialties Chips */}
@@ -156,7 +160,7 @@ export default function CoachingPage() {
                   {/* Booking CTA */}
                   <div className="pt-4 border-t border-outline-variant/40 flex items-center gap-3">
                     <button
-                      onClick={() => openBookingModal(c)}
+                      onClick={() => openBooking(c.id)}
                       className="w-full py-2.5 px-4 rounded bg-primary text-on-primary text-xs font-semibold hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
                     >
                       <span className="material-symbols-outlined text-[16px]">calendar_today</span>

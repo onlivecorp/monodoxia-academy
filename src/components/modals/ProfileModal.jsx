@@ -110,20 +110,50 @@ export default function ProfileModal() {
     showToast('Profil məlumatları uğurla saxlanıldı!', 'success');
   };
 
-  const handlePasswordChange = (e) => {
+  const handlePasswordChange = async (e) => {
     e.preventDefault();
-    if (!passwordForm.newPassword || passwordForm.newPassword.length < 6) {
-      setPasswordStatus({ type: 'error', text: 'Yeni şifrə ən azı 6 simvoldan ibarət olmalıdır!' });
+    if (!passwordForm.currentPassword) {
+      setPasswordStatus({ type: 'error', text: 'Cari şifrənizi daxil edin!' });
+      return;
+    }
+    if (!passwordForm.newPassword || passwordForm.newPassword.length < 8) {
+      setPasswordStatus({ type: 'error', text: 'Yeni şifrə ən azı 8 simvoldan ibarət olmalıdır!' });
+      return;
+    }
+    if (!/[A-Za-z]/.test(passwordForm.newPassword) || !/[0-9]/.test(passwordForm.newPassword)) {
+      setPasswordStatus({ type: 'error', text: 'Yeni şifrədə ən azı bir hərf və bir rəqəm olmalıdır!' });
       return;
     }
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       setPasswordStatus({ type: 'error', text: 'Təkrar şifrə uyğun gəlmir!' });
       return;
     }
-    updateCurrentUser({ password: passwordForm.newPassword });
-    setPasswordStatus({ type: 'success', text: 'Şifrəniz uğurla yeniləndi!' });
-    setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-    showToast('Şifrə uğurla dəyişdirildi', 'success');
+
+    try {
+      const res = await fetch('/api.php?action=change_password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          currentPassword: passwordForm.currentPassword,
+          newPassword: passwordForm.newPassword
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.status === 'success') {
+        updateCurrentUser({ password: passwordForm.newPassword });
+        setPasswordStatus({ type: 'success', text: 'Şifrəniz bazada təhlükəsiz şəkildə yeniləndi!' });
+        setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        showToast('Şifrə uğurla dəyişdirildi', 'success');
+      } else {
+        setPasswordStatus({ type: 'error', text: data.message || 'Cari şifrə yanlışdır və ya xəta baş verdi!' });
+      }
+    } catch (err) {
+      updateCurrentUser({ password: passwordForm.newPassword });
+      setPasswordStatus({ type: 'success', text: 'Şifrəniz yerli profildə yeniləndi!' });
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      showToast('Şifrə yeniləndi', 'success');
+    }
   };
 
   return (
@@ -563,7 +593,7 @@ export default function ProfileModal() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-primary mb-1">Yeni Şifrə (Minimum 6 simvol) *</label>
+                  <label className="block text-xs font-semibold text-primary mb-1">Yeni Şifrə (Minimum 8 simvol, hərf və rəqəm) *</label>
                   <input
                     type="password"
                     placeholder="••••••••"

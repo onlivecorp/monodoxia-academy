@@ -241,7 +241,20 @@ export function AppProvider({ children }) {
   });
 
   const [userTier, setUserTier] = useState(() => {
-    return localStorage.getItem('monodoxia_tier') || 'Free';
+    const saved = localStorage.getItem('monodoxia_tier');
+    if (!saved) return 'Free';
+    if (saved.startsWith('{') || saved.startsWith('"')) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (typeof parsed === 'object' && parsed !== null) {
+          return parsed.id || parsed.name || 'Free';
+        }
+        return String(parsed);
+      } catch (e) {
+        return 'Free';
+      }
+    }
+    return saved;
   });
 
   const [safetyAck, setSafetyAck] = useState(() => {
@@ -325,12 +338,13 @@ export function AppProvider({ children }) {
     const saved = localStorage.getItem('monodoxia_coaches');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       } catch (e) {
-        return [];
+        // fallback
       }
     }
-    return [];
+    return COACHES;
   });
 
   const [testimonialsList, setTestimonialsList] = useState(() => {
@@ -431,12 +445,48 @@ export function AppProvider({ children }) {
   // Toasts
   const [toasts, setToasts] = useState([]);
 
+  // CSRF Protection Token
+  const [csrfToken, setCsrfToken] = useState(() => {
+    return sessionStorage.getItem('monodoxia_csrf') || '';
+  });
+
+  // Centralized Authenticated API Call Helper
+  const apiCall = async (action, data = null, method = 'POST') => {
+    const token = csrfToken || sessionStorage.getItem('monodoxia_csrf') || '';
+    const options = {
+      method,
+      headers: {
+        ...(data ? { 'Content-Type': 'application/json' } : {}),
+        ...(token ? { 'X-CSRF-Token': token } : {})
+      },
+      credentials: 'include'
+    };
+    if (data && method !== 'GET') {
+      options.body = JSON.stringify(data);
+    }
+    try {
+      const res = await fetch(`/api.php?action=${action}`, options);
+      const resData = await res.json().catch(() => null);
+      if (resData?.csrf_token) {
+        setCsrfToken(resData.csrf_token);
+        sessionStorage.setItem('monodoxia_csrf', resData.csrf_token);
+      }
+      return resData;
+    } catch (e) {
+      return null;
+    }
+  };
+
   // Live MySQL Hydration on App Mount
   useEffect(() => {
-    fetch('/api.php?action=get_all')
+    fetch('/api.php?action=get_all', { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data?.status === 'success') {
+          if (data.csrf_token) {
+            setCsrfToken(data.csrf_token);
+            sessionStorage.setItem('monodoxia_csrf', data.csrf_token);
+          }
           if (data.users && data.users.length > 0) {
             const mappedUsers = data.users.map(u => ({
               id: u.id,
@@ -467,6 +517,139 @@ export function AppProvider({ children }) {
               }
               return prev;
             });
+          }
+          if (data.courses && data.courses.length > 0) {
+            setCoursesList(data.courses.map(c => ({
+              id: c.id,
+              category: c.category,
+              badge: c.badge,
+              badgeClass: c.badge_class || 'bg-secondary/10 text-secondary',
+              duration: c.duration,
+              title: c.title,
+              description: c.description,
+              instructor: c.instructor,
+              instructorRole: c.instructor_role,
+              status: c.status,
+              occupancy: Number(c.occupancy) || 0,
+              price: c.price,
+              featured: Boolean(Number(c.featured)),
+              isOnline: c.is_online !== undefined ? Boolean(Number(c.is_online)) : true,
+              translations: typeof c.translations_json === 'string' ? JSON.parse(c.translations_json || '{}') : (c.translations_json || {}),
+              modules: typeof c.modules_json === 'string' ? JSON.parse(c.modules_json || '[]') : (c.modules_json || []),
+              tags: typeof c.tags_json === 'string' ? JSON.parse(c.tags_json || '[]') : (c.tags_json || [])
+            })));
+          }
+          if (data.events && data.events.length > 0) {
+            setEventsList(data.events.map(e => ({
+              id: e.id,
+              title: e.title,
+              datetime: e.datetime_label,
+              typeBadge: e.type_badge,
+              badgeClass: e.badge_class || 'bg-secondary/10 text-secondary',
+              speaker: e.speaker,
+              speakerRole: e.speaker_role || 'Spiker',
+              capacity: Number(e.capacity) || 100,
+              registered: Number(e.registered) || 0,
+              desc: e.description,
+              isOnline: e.is_online !== undefined ? Boolean(Number(e.is_online)) : true,
+              translations: typeof e.translations_json === 'string' ? JSON.parse(e.translations_json || '{}') : (e.translations_json || {})
+            })));
+          }
+          if (data.community && data.community.length > 0) {
+            setCommunityTopics(data.community.map(p => ({
+              id: p.id,
+              badge: p.badge,
+              badgeClass: p.badge_class || 'text-secondary font-semibold',
+              title: p.title,
+              snippet: p.snippet || p.content,
+              content: p.content || p.snippet,
+              author: p.author,
+              authorRole: p.author_role || 'Rezident',
+              time: p.time_ago || 'İndicə',
+              likes: Number(p.likes) || 0,
+              repliesCount: Number(p.replies) || 0,
+              pinned: Boolean(Number(p.pinned)),
+              translations: typeof p.translations_json === 'string' ? JSON.parse(p.translations_json || '{}') : (p.translations_json || {})
+            })));
+          }
+          if (data.club_tiers && data.club_tiers.length > 0) {
+            setClubTiersList(data.club_tiers.map(t => ({
+              id: t.id,
+              name: t.name,
+              price: t.price,
+              period: t.period,
+              popular: Boolean(Number(t.popular)),
+              active: t.active !== undefined ? Boolean(Number(t.active)) : true,
+              features: typeof t.features_json === 'string' ? JSON.parse(t.features_json || '[]') : (t.features_json || []),
+              translations: typeof t.translations === 'string' ? JSON.parse(t.translations || '{}') : (t.translations || {})
+            })));
+          }
+          if (data.categories && data.categories.length > 0) {
+            setCategoriesList(data.categories.map(cat => ({
+              id: cat.id,
+              key: cat.slug || cat.id,
+              type: cat.target_type || 'course',
+              name: cat.name,
+              icon: cat.icon || 'category',
+              translations: typeof cat.translations_json === 'string' ? JSON.parse(cat.translations_json || '{}') : (cat.translations_json || {})
+            })));
+          }
+          if (data.coaches && data.coaches.length > 0) {
+            setCoachesList(data.coaches.map(c => ({
+              id: c.id,
+              name: c.name,
+              title: c.title,
+              bio: c.bio,
+              rating: Number(c.rating) || 5.0,
+              reviewsCount: Number(c.reviews_count) || 0,
+              hourlyRate: c.hourly_rate || '100 ₼ / saat',
+              sessionDuration: c.session_duration || '60 dəqiqə',
+              image: c.avatar_url || '',
+              isActive: Boolean(Number(c.is_active ?? 1)),
+              specialties: typeof c.specialties_json === 'string' ? JSON.parse(c.specialties_json || '[]') : (c.specialties_json || []),
+              languages: typeof c.languages_json === 'string' ? JSON.parse(c.languages_json || '[]') : (c.languages_json || []),
+              availableSlots: typeof c.available_slots_json === 'string' ? JSON.parse(c.available_slots_json || '[]') : (c.available_slots_json || []),
+              translations: typeof c.translations_json === 'string' ? JSON.parse(c.translations_json || '{}') : (c.translations_json || {})
+            })));
+          }
+          if (data.cms_blocks && data.cms_blocks.length > 0) {
+            const blockMap = {};
+            data.cms_blocks.forEach(b => {
+              try {
+                blockMap[b.block_key] = typeof b.content_json === 'string' ? JSON.parse(b.content_json) : b.content_json;
+              } catch (e) {}
+            });
+            setHomeContent(prev => ({ ...prev, ...blockMap }));
+          }
+          if (data.student_progress && data.student_progress.length > 0) {
+            const progMap = {};
+            data.student_progress.forEach(p => {
+              progMap[p.course_id] = {
+                completedLessons: typeof p.completed_lessons_json === 'string' ? JSON.parse(p.completed_lessons_json || '[]') : (p.completed_lessons_json || []),
+                percent: Number(p.percent) || 0
+              };
+            });
+            setProgress(prev => ({ ...prev, ...progMap }));
+          }
+          if (data.student_certificates && data.student_certificates.length > 0) {
+            setCertificates(data.student_certificates.map(c => ({
+              id: c.id,
+              courseTitle: c.course_title,
+              studentName: c.student_name,
+              instructor: c.instructor,
+              date: c.issue_date
+            })));
+          }
+          if (data.bookings && data.bookings.length > 0) {
+            setBookings(data.bookings.map(b => ({
+              id: b.id,
+              coachId: b.coach_id,
+              coachName: b.coach_name,
+              slot: b.slot,
+              format: b.format,
+              notes: b.notes,
+              date: b.created_at ? b.created_at.split(' ')[0] : ''
+            })));
           }
           if (data.applications && data.applications.length > 0) {
             setApplicationsList(data.applications.map(a => ({
@@ -638,76 +821,172 @@ export function AppProvider({ children }) {
   };
 
   // Auth Operations
-  const login = (email, password) => {
+  const login = async (email, password) => {
     const normalizedEmail = (email || '').trim().toLowerCase();
-    const existing = usersList.find(u => (u.email || '').toLowerCase() === normalizedEmail);
-    const names = existing?.name ? existing.name.split(' ') : [email.split('@')[0], ''];
-    const user = {
-      id: existing?.id || ('usr_' + Date.now()),
-      firstName: names[0] || email.split('@')[0],
-      lastName: names.slice(1).join(' ') || '',
-      email: email,
-      role: existing?.role || (normalizedEmail.includes('admin') ? 'Admin' : (normalizedEmail.includes('coach') ? 'Kouç' : 'Tələbə')),
-      tier: existing?.tier || 'Free',
-      country: 'Azərbaycan',
-      city: 'Bakı'
-    };
-    setCurrentUser(user);
-    setAuthModalOpen(false);
-    showToast(`Daxil oldunuz: ${user.firstName} (${user.role})`, 'success');
+    try {
+      const token = csrfToken || sessionStorage.getItem('monodoxia_csrf') || '';
+      const res = await fetch('/api.php?action=login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'X-CSRF-Token': token } : {})
+        },
+        credentials: 'include',
+        body: JSON.stringify({ email: normalizedEmail, password })
+      });
+      const data = await res.json();
+      if (res.ok && data.status === 'success' && data.user) {
+        if (data.csrf_token) {
+          setCsrfToken(data.csrf_token);
+          sessionStorage.setItem('monodoxia_csrf', data.csrf_token);
+        }
+        const names = data.user.name ? data.user.name.split(' ') : [normalizedEmail.split('@')[0], ''];
+        const user = {
+          id: data.user.id,
+          firstName: names[0] || normalizedEmail.split('@')[0],
+          lastName: names.slice(1).join(' ') || '',
+          name: data.user.name || normalizedEmail.split('@')[0],
+          email: data.user.email,
+          role: data.user.role || 'Tələbə',
+          tier: data.user.tier || 'Free',
+          status: data.user.status || 'Aktiv',
+          joinedDate: data.user.joined_date || new Date().toISOString().split('T')[0],
+          country: 'Azərbaycan',
+          city: 'Bakı'
+        };
+        setCurrentUser(user);
+        setUserTier(user.tier);
+        setAuthModalOpen(false);
+        showToast(`Daxil oldunuz: ${user.firstName} (${user.role})`, 'success');
+        return { success: true, user };
+      } else {
+        const errorMsg = data.message || 'Email və ya şifrə yanlışdır.';
+        showToast(errorMsg, 'error');
+        return { success: false, message: errorMsg };
+      }
+    } catch (err) {
+      // Offline fallback: Check existing registered user from DB/cache ONLY
+      // NO email.includes('admin') bypass!
+      const existing = usersList.find(u => (u.email || '').toLowerCase() === normalizedEmail);
+      if (existing) {
+        const names = existing.name ? existing.name.split(' ') : [email.split('@')[0], ''];
+        const user = {
+          id: existing.id,
+          firstName: names[0] || email.split('@')[0],
+          lastName: names.slice(1).join(' ') || '',
+          name: existing.name || email.split('@')[0],
+          email: existing.email,
+          role: existing.role || 'Tələbə',
+          tier: existing.tier || 'Free',
+          country: 'Azərbaycan',
+          city: 'Bakı'
+        };
+        setCurrentUser(user);
+        setUserTier(user.tier);
+        setAuthModalOpen(false);
+        showToast(`Daxil oldunuz: ${user.firstName} (${user.role})`, 'success');
+        return { success: true, user };
+      }
+      showToast('Giriş xətası: Serverlə əlaqə qurula bilmədi.', 'error');
+      return { success: false, message: err.message };
+    }
   };
 
-  const register = (data) => {
-    const user = {
-      id: 'usr_' + Date.now(),
-      firstName: data.firstName,
-      lastName: data.lastName,
-      email: data.email,
-      birthDate: data.birthDate,
-      country: data.country || 'Azərbaycan',
-      city: data.city || 'Bakı',
-      role: 'Tələbə',
-      joinedAt: new Date().toISOString(),
-      focusAreas: []
-    };
-    setCurrentUser(user);
-    const newEntry = {
-      id: user.id,
-      name: `${user.firstName} ${user.lastName}`.trim(),
-      email: user.email,
-      role: 'Tələbə',
-      tier: 'Free',
-      status: 'Aktiv',
-      joinedDate: new Date().toISOString().split('T')[0]
-    };
-    setUsersList(prev => [newEntry, ...prev]);
-
-    // Save directly to MySQL database
+  const register = async (data) => {
+    const rawName = `${data.firstName || ''} ${data.lastName || ''}`.trim();
+    const token = csrfToken || sessionStorage.getItem('monodoxia_csrf') || '';
     try {
-      fetch('/api.php?action=register_user', {
+      const res = await fetch('/api.php?action=register_user', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'X-CSRF-Token': token } : {})
+        },
+        credentials: 'include',
         body: JSON.stringify({
+          firstName: data.firstName,
+          lastName: data.lastName,
+          name: rawName,
+          email: data.email,
+          password: data.password,
+          role: 'Tələbə',
+          tier: 'Free',
+          status: 'Aktiv'
+        })
+      });
+      const resData = await res.json();
+      if (res.ok && resData.status === 'success' && resData.user) {
+        if (resData.csrf_token) {
+          setCsrfToken(resData.csrf_token);
+          sessionStorage.setItem('monodoxia_csrf', resData.csrf_token);
+        }
+        const user = {
+          id: resData.user.id,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          name: rawName || resData.user.name,
+          email: resData.user.email,
+          birthDate: data.birthDate,
+          country: data.country || 'Azərbaycan',
+          city: data.city || 'Bakı',
+          role: 'Tələbə',
+          tier: 'Free',
+          joinedAt: new Date().toISOString(),
+          focusAreas: []
+        };
+        setCurrentUser(user);
+        setUsersList(prev => [{
           id: user.id,
-          name: newEntry.name,
+          name: user.name,
           email: user.email,
-          password: data.password || null,
           role: 'Tələbə',
           tier: 'Free',
           status: 'Aktiv',
-          joined_date: newEntry.joinedDate
-        })
-      }).catch(err => console.warn('MySQL user sync error:', err));
-    } catch (e) {}
-
-    setAuthModalOpen(false);
-    showToast(`Xoş gəldiniz, ${user.firstName}! Hesabınız yaradıldı.`, 'success');
-    setTimeout(() => {
-      setOnboardingOpen(true);
-    }, 400);
+          joinedDate: new Date().toISOString().split('T')[0]
+        }, ...prev]);
+        setAuthModalOpen(false);
+        showToast(`Xoş gəldiniz, ${user.firstName}! Hesabınız yaradıldı.`, 'success');
+        setTimeout(() => setOnboardingOpen(true), 400);
+        return;
+      } else {
+        showToast(resData.message || 'Qeydiyyat zamanı xəta baş verdi.', 'error');
+        return;
+      }
+    } catch (e) {
+      const user = {
+        id: 'usr_' + Date.now(),
+        firstName: data.firstName,
+        lastName: data.lastName,
+        name: rawName,
+        email: data.email,
+        birthDate: data.birthDate,
+        country: data.country || 'Azərbaycan',
+        city: data.city || 'Bakı',
+        role: 'Tələbə',
+        tier: 'Free',
+        joinedAt: new Date().toISOString(),
+        focusAreas: []
+      };
+      setCurrentUser(user);
+      setUsersList(prev => [{
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: 'Tələbə',
+        tier: 'Free',
+        status: 'Aktiv',
+        joinedDate: new Date().toISOString().split('T')[0]
+      }, ...prev]);
+      setAuthModalOpen(false);
+      showToast(`Xoş gəldiniz, ${user.firstName}! Hesabınız yaradıldı.`, 'success');
+      setTimeout(() => setOnboardingOpen(true), 400);
+    }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await fetch('/api.php?action=logout', { credentials: 'include' });
+    } catch (e) {}
     setCurrentUser(null);
     showToast('Hesabdan çıxış edildi', 'info');
   };
@@ -746,10 +1025,18 @@ export function AppProvider({ children }) {
 
       const course = coursesList.find(c => c.id === courseId);
       let total = 0;
-      course.modules.forEach(m => total += m.lessons.length);
-      const percent = Math.min(100, Math.round((list.length / total) * 100));
+      if (course?.modules) {
+        course.modules.forEach(m => total += (m.lessons?.length || 0));
+      }
+      const percent = total > 0 ? Math.min(100, Math.round((list.length / total) * 100)) : 0;
 
-      if (percent === 100 && courseProg.percent < 100) {
+      apiCall('save_student_progress', {
+        courseId,
+        completedLessons: list,
+        percent
+      });
+
+      if (percent === 100 && courseProg.percent < 100 && course) {
         const cert = {
           id: 'MDX-' + Math.floor(100000 + Math.random() * 900000),
           courseTitle: course.title,
@@ -760,6 +1047,7 @@ export function AppProvider({ children }) {
         setCertificates(cPrev => [...cPrev, cert]);
         setActiveCertificate(cert);
         setCertificateModalOpen(true);
+        apiCall('save_certificate', cert);
         showToast('Təbriklər! Kursu tamamladınız və sertifikat qazandınız.', 'success');
       }
 
@@ -771,8 +1059,9 @@ export function AppProvider({ children }) {
   };
 
   // Booking
-  const openBooking = (coachId) => {
-    const coach = coachesList.find(c => c.id === coachId);
+  const openBooking = (coachOrId) => {
+    const coachId = typeof coachOrId === 'object' && coachOrId?.id ? coachOrId.id : coachOrId;
+    const coach = coachesList.find(c => c.id === coachId) || (typeof coachOrId === 'object' && coachOrId?.name ? coachOrId : null);
     if (!coach) return;
     setActiveCoach(coach);
     setBookingModalOpen(true);
@@ -786,6 +1075,7 @@ export function AppProvider({ children }) {
     };
     setBookings(prev => [...prev, newBooking]);
     setBookingModalOpen(false);
+    apiCall('save_booking', newBooking);
     showToast(`Sessiya uğurla təyin edildi: ${bookingData.coachName}`, 'success');
   };
 
@@ -795,6 +1085,7 @@ export function AppProvider({ children }) {
       if (t.id === topicId) return { ...t, likes: t.likes + 1 };
       return t;
     }));
+    apiCall('like_community_post', { id: topicId });
     showToast('Bəyənmə qeydə alındı', 'info');
   };
 
@@ -806,6 +1097,7 @@ export function AppProvider({ children }) {
       time: "İndicə",
       title,
       snippet: content,
+      content,
       author: author || (currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : "Rezident"),
       likes: 1,
       repliesCount: 0,
@@ -813,11 +1105,13 @@ export function AppProvider({ children }) {
     };
     setCommunityTopics(prev => [newT, ...prev]);
     setNewTopicModalOpen(false);
+    apiCall('save_community_post', newT);
     showToast('Mövzu uğurla dərc edildi.', 'success');
   };
 
   const deleteTopic = (topicId) => {
     setCommunityTopics(prev => prev.filter(t => t.id !== topicId));
+    apiCall('delete_community_post', { id: topicId });
     showToast('Mövzu uğurla silindi', 'info');
   };
 
@@ -848,8 +1142,10 @@ export function AppProvider({ children }) {
 
   // Club Tier upgrade
   const joinClubTier = (tier) => {
-    setUserTier(tier);
-    showToast(`Təbriklər! Siz artıq Monodoxia Coaching Club "${tier}" üzvüsünüz.`, 'success');
+    const tierId = typeof tier === 'object' && tier !== null ? (tier.id || tier.name || 'Free') : String(tier || 'Free');
+    const tierName = typeof tier === 'object' && tier !== null ? (tier.name || tier.id || 'Free') : tierId;
+    setUserTier(tierId);
+    showToast(`Təbriklər! Siz artıq Monodoxia Coaching Club "${tierName}" üzvüsünüz.`, 'success');
   };
 
   // ========================================================
@@ -1399,6 +1695,7 @@ export function AppProvider({ children }) {
   };
 
   const updateCourse = (id, updates) => {
+    let mergedCourse = null;
     setCoursesList(prev => prev.map(c => {
       if (c.id !== id) return c;
       const updated = { ...c, ...updates };
@@ -1423,8 +1720,12 @@ export function AppProvider({ children }) {
         az: azTrans
       };
 
+      mergedCourse = updated;
       return updated;
     }));
+    if (mergedCourse) {
+      apiCall('save_course', mergedCourse);
+    }
     showToast('Kurs parametrləri yeniləndi', 'success');
   };
 
@@ -1465,11 +1766,13 @@ export function AppProvider({ children }) {
       ]
     };
     setCoursesList(prev => [...prev, course]);
+    apiCall('save_course', course);
     showToast(`Yeni kurs əlavə edildi: ${course.title}`, 'success');
   };
 
   const deleteCourse = (id) => {
     setCoursesList(prev => prev.filter(c => c.id !== id));
+    apiCall('delete_course', { id });
     showToast('Kurs silindi', 'info');
   };
 
@@ -1583,10 +1886,12 @@ export function AppProvider({ children }) {
       isOnline: newEvent.isOnline ?? true
     };
     setEventsList(prev => [ev, ...prev]);
+    apiCall('save_event', ev);
     showToast(`Tədbir yaradıldı: ${ev.title}`, 'success');
   };
 
   const updateEvent = (id, updates) => {
+    let mergedEvent = null;
     setEventsList(prev => prev.map(e => {
       if (e.id !== id) return e;
       const updated = { ...e, ...updates };
@@ -1609,13 +1914,18 @@ export function AppProvider({ children }) {
         az: azTrans
       };
 
+      mergedEvent = updated;
       return updated;
     }));
+    if (mergedEvent) {
+      apiCall('save_event', mergedEvent);
+    }
     showToast('Tədbir məlumatları yeniləndi', 'success');
   };
 
   const deleteEvent = (id) => {
     setEventsList(prev => prev.filter(e => e.id !== id));
+    apiCall('delete_event', { id });
     showToast('Tədbir silindi', 'info');
   };
 
@@ -1636,7 +1946,9 @@ export function AppProvider({ children }) {
     const newCat = {
       id: 'cat-' + Date.now(),
       key,
+      slug: key,
       type: categoryData.type || 'course',
+      target_type: categoryData.type || 'course',
       icon: categoryData.icon || 'category',
       name: categoryData.name || 'Yeni Kateqoriya',
       translations: {
@@ -1647,17 +1959,29 @@ export function AppProvider({ children }) {
       }
     };
     setCategoriesList(prev => [...prev, newCat]);
+    apiCall('save_category', newCat);
     showToast(`Kateqoriya əlavə edildi: ${newCat.name}`, 'success');
     return newCat;
   };
 
   const updateCategory = (id, updates) => {
-    setCategoriesList(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
+    let mergedCat = null;
+    setCategoriesList(prev => prev.map(c => {
+      if (c.id === id) {
+        mergedCat = { ...c, ...updates };
+        return mergedCat;
+      }
+      return c;
+    }));
+    if (mergedCat) {
+      apiCall('save_category', mergedCat);
+    }
     showToast('Kateqoriya yeniləndi', 'success');
   };
 
   const deleteCategory = (id) => {
     setCategoriesList(prev => prev.filter(c => c.id !== id));
+    apiCall('delete_category', { id });
     showToast('Kateqoriya silindi', 'info');
   };
 
@@ -1780,13 +2104,20 @@ export function AppProvider({ children }) {
 
   // Home Content CMS Block Editor
   const updateHomeBlock = (blockKey, blockData) => {
-    setHomeContent(prev => ({
-      ...prev,
-      [blockKey]: {
+    let mergedBlock = null;
+    setHomeContent(prev => {
+      mergedBlock = {
         ...prev[blockKey],
         ...blockData
-      }
-    }));
+      };
+      return {
+        ...prev,
+        [blockKey]: mergedBlock
+      };
+    });
+    if (mergedBlock) {
+      apiCall('save_cms_block', { block_key: blockKey, content: mergedBlock });
+    }
     showToast(`"${blockKey.toUpperCase()}" bloku uğurla yeniləndi!`, 'success');
   };
 
@@ -1796,6 +2127,7 @@ export function AppProvider({ children }) {
         ...prev,
         [blockKey]: INITIAL_HOME_CONTENT[blockKey]
       }));
+      apiCall('save_cms_block', { block_key: blockKey, content: INITIAL_HOME_CONTENT[blockKey] });
       showToast(`"${blockKey.toUpperCase()}" bloku ilkin vəziyyətinə qaytarıldı`, 'info');
     }
   };
@@ -1864,7 +2196,7 @@ export function AppProvider({ children }) {
       name: coach.name,
       title: coach.title || 'Sertifikatlı Kouç & Ekspert',
       experience: coach.experience || '5+ il təcrübə',
-      bio: coach.bio || '',
+      bio: coach.bio || coach.experience || '',
       image: coach.image || '',
       specialties: Array.isArray(coach.specialties) ? coach.specialties : (coach.specialties ? coach.specialties.split(',').map(s => s.trim()).filter(Boolean) : ['Fərdi İnkişaf']),
       availableSlots: coach.availableSlots || ['Sabah 15:00', 'Cümə 18:00']
@@ -1873,25 +2205,54 @@ export function AppProvider({ children }) {
     if (coach.userId) {
       setUsersList(prev => prev.map(u => u.id === coach.userId ? { ...u, role: 'Kouç' } : u));
     }
+    apiCall('save_coach', newCoach);
     showToast(`Ekspert heyətinə təyin edildi: ${newCoach.name}`, 'success');
   };
 
   const updateCoach = (id, updates) => {
+    let mergedCoach = null;
     setCoachesList(prev => prev.map(c => {
       if (c.id === id) {
         const spec = typeof updates.specialties === 'string'
           ? updates.specialties.split(',').map(s => s.trim()).filter(Boolean)
           : updates.specialties;
-        return { ...c, ...updates, ...(spec ? { specialties: spec } : {}) };
+        mergedCoach = { ...c, ...updates, ...(spec ? { specialties: spec } : {}) };
+        return mergedCoach;
       }
       return c;
     }));
+    if (mergedCoach) {
+      apiCall('save_coach', mergedCoach);
+    }
     showToast('Kouç profili yeniləndi', 'success');
   };
 
   const deleteCoach = (id) => {
     setCoachesList(prev => prev.filter(c => c.id !== id));
+    apiCall('delete_coach', { id });
     showToast('Kouç silindi', 'info');
+  };
+
+  const syncAllLocalDataToDatabase = async () => {
+    showToast('Bütün lokal məlumatlar MySQL bazasına sinxronlaşdırılır...', 'info');
+    const payload = {
+      courses: coursesList,
+      events: eventsList,
+      community: communityTopics,
+      coaches: coachesList,
+      club_tiers: clubTiersList,
+      categories: categoriesList,
+      cms_blocks: homeContent
+    };
+    const res = await apiCall('sync_all_local_data', payload);
+    if (res?.status === 'success') {
+      showToast('Bütün məlumatlar Hostinger SQL bazasına uğurla yazıldı!', 'success');
+      return { success: true, synced: res.synced };
+    } else {
+      const msg = res?.message || 'Sinxronizasiya xətası baş verdi.';
+      showToast(msg, 'error');
+      return { success: false, error: msg };
+    }
   };
 
   // Testimonials Operations
@@ -1955,6 +2316,7 @@ export function AppProvider({ children }) {
       userTier,
       safetyAck,
       communityTopics,
+      topicsList: communityTopics,
       eventsList,
       usersList,
       coursesList,
@@ -1977,7 +2339,7 @@ export function AppProvider({ children }) {
       certificateModalOpen, setCertificateModalOpen,
       activeCertificate,
       bookingModalOpen, setBookingModalOpen,
-      activeCoach, openBooking, confirmBooking,
+      activeCoach, openBooking, openBookingModal: openBooking, confirmBooking,
       newTopicModalOpen, setNewTopicModalOpen,
       likeTopic, addTopic, deleteTopic, pinTopic,
       registerEvent, joinClubTier,
@@ -2025,6 +2387,8 @@ export function AppProvider({ children }) {
       updateSqlConfig,
       testSqlConnection,
       migrateDatabaseTables,
+      syncAllLocalDataToDatabase,
+      apiCall,
       // CMS & Home Blocks
       homeContent,
       updateHomeBlock,

@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* Monodoxia Academy Design System - Based on DESIGN.md (Serene Intellectual Editorial) */
 :root {
   /* Colors */

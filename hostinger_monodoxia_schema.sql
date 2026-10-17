@@ -346,12 +346,97 @@ INSERT INTO `mdx_roles` (`id`, `name`, `code`, `description`, `is_system`, `is_a
 ('role-admin', 'Super Admin', 'Admin', 'Bütün sistem modullarına və təhlükəsizlik tənzimləmələrinə tam məhdudiyyətsiz giriş hüququ.', 1, 1, '#b45309', 'bg-amber-100 text-amber-800 border-amber-300', '["*"]'),
 ('role-moderator', 'Moderator', 'Moderator', 'Müraciətlərə, qeydiyyatlara, istifadəçilərə və icma müzakirələrinə operativ nəzarət və moderasiya hüququ.', 1, 1, '#2563eb', 'bg-blue-100 text-blue-800 border-blue-300', '["dashboard.view","applications.view","applications.approve","applications.reject","applications.export","registrations.view","registrations.export","users.view","users.edit","community.view","community.create","community.edit","community.delete","events.view"]'),
 ('role-coach', 'Kouç & Ekspert', 'Kouç', 'Kurslar, dərslər, tədbirlər və icma sessiyalarını idarə etmək üçün tədris heyəti hüququ.', 1, 1, '#059669', 'bg-emerald-100 text-emerald-800 border-emerald-300', '["dashboard.view","courses.view","courses.create","courses.edit","courses.publish","events.view","events.create","events.edit","community.view","community.create","categories.view"]'),
-('role-editor', 'Məzmun Redaktoru', 'Məzmun Redaktoru', 'CMS məzmunları, tərcümələr, kateqoriyalar və bloq/forum idarəetmə hüququ.', 0, 1, '#7c3aed', 'bg-purple-100 text-purple-800 border-purple-300', '["dashboard.view","content.view","content.edit","translations.view","translations.edit","categories.view","categories.create","categories.edit","community.view","community.edit"]'),
-('role-student', 'Tələbə (İstifadəçi)', 'Tələbə', 'Platformanın standart tələbə və üzv hesabı. Yalnız öz dərslərinə və ictimai imkanlara giriş.', 1, 1, '#64748b', 'bg-slate-100 text-slate-800 border-slate-300', '[]');
+('role-editor', 'Məzmun Redaktoru', 'Məzmun Redaktoru', 'CMS məzmunları, tərcümələr, kateqoriyalar və bloq/forum idarəetmə hüququ.', 0, 1, '#7c3aed', 'bg-purple-100 text-purple-800 border-purple-300', '["dashboard.view","content.view","content.edit","translations.view","translations.edit","categories.view","categories.create","categories.edit","community.view","community.edit"]');
+
+-- --------------------------------------------------------
+-- Cədvəl: mdx_coaches (Kouçlar və Ekspertlər)
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `mdx_coaches`;
+CREATE TABLE `mdx_coaches` (
+  `id` varchar(50) NOT NULL,
+  `name` varchar(150) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `bio` text NOT NULL,
+  `rating` decimal(3,2) NOT NULL DEFAULT 5.0,
+  `reviews_count` int(11) NOT NULL DEFAULT 0,
+  `hourly_rate` varchar(50) NOT NULL,
+  `session_duration` varchar(50) NOT NULL DEFAULT '60 dəqiqə',
+  `specialties_json` text DEFAULT NULL,
+  `languages_json` text DEFAULT NULL,
+  `available_slots_json` longtext DEFAULT NULL,
+  `translations_json` longtext DEFAULT NULL,
+  `avatar_url` varchar(255) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+-- Cədvəl: mdx_cms_blocks (CMS Məzmun Blokları)
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `mdx_cms_blocks`;
+CREATE TABLE `mdx_cms_blocks` (
+  `block_key` varchar(100) NOT NULL,
+  `content_json` longtext NOT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`block_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+-- Cədvəl: mdx_student_progress (Tələbə Dərs Tərəqqisi)
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `mdx_student_progress`;
+CREATE TABLE `mdx_student_progress` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` varchar(50) NOT NULL,
+  `course_id` varchar(50) NOT NULL,
+  `completed_lessons_json` text NOT NULL,
+  `percent` int(11) NOT NULL DEFAULT 0,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_user_course` (`user_id`, `course_id`),
+  KEY `idx_progress_user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+-- Cədvəl: mdx_student_certificates (Tələbə Sertifikatları)
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `mdx_student_certificates`;
+CREATE TABLE `mdx_student_certificates` (
+  `id` varchar(50) NOT NULL,
+  `user_id` varchar(50) NOT NULL,
+  `course_id` varchar(50) DEFAULT NULL,
+  `course_title` varchar(255) NOT NULL,
+  `student_name` varchar(150) NOT NULL,
+  `instructor` varchar(150) DEFAULT NULL,
+  `issue_date` varchar(50) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `idx_cert_user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+-- Cədvəl: mdx_bookings (Fərdi Kouçinq Rezervasiyaları)
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `mdx_bookings`;
+CREATE TABLE `mdx_bookings` (
+  `id` varchar(50) NOT NULL,
+  `user_id` varchar(50) NOT NULL,
+  `coach_id` varchar(50) NOT NULL,
+  `coach_name` varchar(150) NOT NULL,
+  `slot` varchar(100) NOT NULL,
+  `format` varchar(50) NOT NULL DEFAULT 'Online (Google Meet)',
+  `notes` text DEFAULT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'Təsdiqləndi',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `idx_booking_user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
 

@@ -7,6 +7,7 @@ export default function AdminDatabaseTab() {
     updateSqlConfig,
     testSqlConnection,
     migrateDatabaseTables,
+    syncAllLocalDataToDatabase,
     usersList = [],
     coursesList = [],
     applicationsList = [],
@@ -36,6 +37,7 @@ export default function AdminDatabaseTab() {
   const [showPassword, setShowPassword] = useState(false);
   const [isMigrating, setIsMigrating] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
     if (sqlConfig) {
@@ -53,6 +55,14 @@ export default function AdminDatabaseTab() {
     setIsMigrating(true);
     await migrateDatabaseTables();
     setIsMigrating(false);
+  };
+
+  const handleSyncAll = async () => {
+    if (typeof syncAllLocalDataToDatabase === 'function') {
+      setIsSyncing(true);
+      await syncAllLocalDataToDatabase();
+      setIsSyncing(false);
+    }
   };
 
   const handleExportBackup = () => {
@@ -128,11 +138,21 @@ export default function AdminDatabaseTab() {
             type="button"
             disabled={isMigrating}
             onClick={handleMigrate}
-            className="admin-btn-primary"
+            className="admin-btn-secondary"
             style={{ display: 'flex', alignItems: 'center', gap: '6px', opacity: isMigrating ? 0.7 : 1 }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>database</span>
             <span>{isMigrating ? 'Miqrasiya edilir...' : 'Cədvəlləri Miqrasiya Et'}</span>
+          </button>
+          <button
+            type="button"
+            disabled={isSyncing}
+            onClick={handleSyncAll}
+            className="admin-btn-primary"
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', opacity: isSyncing ? 0.7 : 1 }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>cloud_upload</span>
+            <span>{isSyncing ? 'Sinxronlaşdırılır...' : 'Lokal Məlumatları SQL-ə Sinxronlaşdır'}</span>
           </button>
         </div>
       </div>

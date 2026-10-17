@@ -18,7 +18,9 @@ dist-ssr/
 .env.test.local
 .env.production.local
 
-# Database Configuration Templates
+# Database Configuration Secrets
+db_config.php
+public/db_config.php
 !db_config.example.php
 !public/db_config.example.php
 

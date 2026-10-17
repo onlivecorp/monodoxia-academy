@@ -4,8 +4,56 @@
  * Verilənlər bazası ilə vebsayt arasında məlumat körpüsü
  */
 
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+// 1. Təhlükəsiz Sessiya Konfiqurasiyası
+if (session_status() === PHP_SESSION_NONE) {
+    ini_set('session.cookie_httponly', '1');
+    ini_set('session.use_only_cookies', '1');
+    $isHttps = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') 
+        || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+    if ($isHttps) {
+        ini_set('session.cookie_secure', '1');
+    }
+    session_set_cookie_params([
+        'lifetime' => 86400 * 7,
+        'path' => '/',
+        'secure' => $isHttps,
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
+    session_start();
+}
+
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+// 2. CORS və İcazəli Origin Konfiqurasiyası (Credentials dəstəyi ilə)
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+$allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:3000'
+];
+
+$isAllowedOrigin = false;
+if ($origin) {
+    $parsed = parse_url($origin);
+    $host = $parsed['host'] ?? '';
+    if (in_array($origin, $allowedOrigins, true) ||
+        preg_match('/(^|\.)monodoxia\.academy$/i', $host) ||
+        (isset($_SERVER['HTTP_HOST']) && $host === parse_url('http://' . $_SERVER['HTTP_HOST'], PHP_URL_HOST))) {
+        $isAllowedOrigin = true;
+    }
+}
+
+if ($isAllowedOrigin) {
+    header("Access-Control-Allow-Origin: {$origin}");
+    header('Access-Control-Allow-Credentials: true');
+} else {
+    header('Access-Control-Allow-Origin: *');
+}
+header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-CSRF-Token, X-Migration-Key');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Content-Type: application/json; charset=utf-8');
 
@@ -14,14 +62,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// Xarici konfiqurasiya faylı varsa yüklə (db_config.php)
+// 3. Konfiqurasiya və .env Yüklənməsi
 if (file_exists(__DIR__ . '/db_config.php')) {
     require_once __DIR__ . '/db_config.php';
 }
 
-// Support .env file loading if present
-if (file_exists(__DIR__ . '/.env')) {
-    $envLines = @file(__DIR__ . '/.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+$envPath = file_exists(__DIR__ . '/.env') ? (__DIR__ . '/.env') : (file_exists(dirname(__DIR__) . '/.env') ? (dirname(__DIR__) . '/.env') : null);
+if ($envPath) {
+    $envLines = @file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     if ($envLines) {
         foreach ($envLines as $line) {
             $line = trim($line);
@@ -40,26 +88,27 @@ if (file_exists(__DIR__ . '/.env')) {
     }
 }
 
-// Hostinger Baza Parametrləri (Environment və ya birbaşa təyin edilmiş dəyərlər)
 $db_host = getenv('DB_HOST') ?: ($db_host ?? 'localhost');
 $db_name = getenv('DB_NAME') ?: ($db_name ?? 'u310078278_monodoxia');
 $db_user = getenv('DB_USER') ?: ($db_user ?? 'u310078278_monodoxia');
-$db_pass = getenv('DB_PASS') ?: ($db_pass ?? 'BURAYA_SQL_SIFRENIZI_YAZIN'); // Hostinger-də təyin etdiyiniz şifrə
+$db_pass = getenv('DB_PASS') ?: ($db_pass ?? '');
 
 $action = $_GET['action'] ?? 'status';
 
-// Əgər şifrə hələ dəyişdirilməyibsə və status yoxlanılırsa, izahlı cavab qaytar
-if ($db_pass === 'BURAYA_SQL_SIFRENIZI_YAZIN') {
+if (empty($db_pass)) {
     if ($action === 'status') {
         echo json_encode([
             'status' => 'config_required',
-            'message' => 'Hostinger SQL şifrəsi hələ təyin edilməyib. api.php faylında və ya db_config.php faylında $db_pass dəyərini daxil edin.',
+            'message' => 'Hostinger SQL şifrəsi təyin edilməyib. Zəhmət olmasa .env faylında DB_PASS parametrini daxil edin.',
             'database' => $db_name,
             'host' => $db_host,
             'user' => $db_user
         ], JSON_UNESCAPED_UNICODE);
         exit();
     }
+    http_response_code(500);
+    echo json_encode(['status' => 'error', 'message' => 'Verilənlər bazası konfiqurasiyası natamamdır (DB_PASS yoxdur).'], JSON_UNESCAPED_UNICODE);
+    exit();
 }
 
 try {
@@ -70,12 +119,79 @@ try {
     ]);
 } catch (PDOException $e) {
     http_response_code(500);
+    error_log("Database connection error: " . $e->getMessage());
     echo json_encode([
         'status' => 'error',
-        'message' => 'Verilənlər bazasına qoşulmaq mümkün olmadı: ' . $e->getMessage(),
+        'message' => 'Verilənlər bazasına qoşulmaq mümkün olmadı. Zəhmət olmasa konfiqurasiyanı yoxlayın.',
         'database' => $db_name,
         'host' => $db_host
     ], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+// ========================================================
+// TƏHLÜKƏSİZLİK VƏ RBAC KÖMƏKÇİ FUNKSİYALARI
+// ========================================================
+function verifyCsrfToken() {
+    $headers = getallheaders();
+    $tokenFromHeader = $headers['X-CSRF-Token'] ?? ($headers['x-csrf-token'] ?? null);
+    $rawInput = file_get_contents('php://input');
+    $jsonInput = json_decode($rawInput, true);
+    $tokenFromBody = $jsonInput['csrf_token'] ?? ($_POST['csrf_token'] ?? null);
+
+    $token = $tokenFromHeader ?: $tokenFromBody;
+    if ($token && hash_equals($_SESSION['csrf_token'] ?? '', $token)) {
+        return true;
+    }
+
+    $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+    if ($origin && (strpos($origin, 'localhost') !== false || strpos($origin, '127.0.0.1') !== false || strpos($origin, 'monodoxia.academy') !== false)) {
+        return true;
+    }
+
+    http_response_code(403);
+    echo json_encode(['status' => 'error', 'message' => 'CSRF yoxlanışı uğursuz oldu (403 Forbidden)'], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+function getSessionUser($pdo) {
+    if (empty($_SESSION['user_id'])) {
+        return null;
+    }
+    $stmt = $pdo->prepare("SELECT id, name, email, role, tier, status, joined_date FROM mdx_users WHERE id = ? LIMIT 1");
+    $stmt->execute([$_SESSION['user_id']]);
+    return $stmt->fetch() ?: null;
+}
+
+function requireAuthUser($pdo) {
+    $user = getSessionUser($pdo);
+    if (!$user) {
+        http_response_code(401);
+        echo json_encode(['status' => 'unauthorized', 'message' => 'Giriş tələb olunur (401 Unauthorized)'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+    return $user;
+}
+
+function requireAdminUser($pdo) {
+    $user = requireAuthUser($pdo);
+    if ($user['role'] === 'Admin') {
+        return $user;
+    }
+    try {
+        $stmt = $pdo->prepare("SELECT permissions FROM mdx_roles WHERE code = ? OR name = ? LIMIT 1");
+        $stmt->execute([$user['role'], $user['role']]);
+        $roleData = $stmt->fetch();
+        if ($roleData && !empty($roleData['permissions'])) {
+            $perms = json_decode($roleData['permissions'], true);
+            if (is_array($perms) && (in_array('*', $perms) || in_array('all', $perms) || in_array('admin.access', $perms))) {
+                return $user;
+            }
+        }
+    } catch (Exception $e) {}
+
+    http_response_code(403);
+    echo json_encode(['status' => 'forbidden', 'message' => 'Admin hüququ tələb olunur (403 Forbidden)'], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
@@ -118,7 +234,7 @@ if ($action === 'get_all') {
         }
     };
 
-    $users = $safeQuery("SELECT * FROM mdx_users");
+    $users = $safeQuery("SELECT id, name, email, role, tier, status, joined_date FROM mdx_users");
     $courses = $safeQuery("SELECT * FROM mdx_courses");
     $tiers = $safeQuery("SELECT * FROM mdx_club_tiers");
     $events = $safeQuery("SELECT * FROM mdx_events");
@@ -131,10 +247,32 @@ if ($action === 'get_all') {
     $notifications = $safeQuery("SELECT * FROM mdx_notifications ORDER BY created_at DESC LIMIT 50");
     $categories = $safeQuery("SELECT * FROM mdx_categories ORDER BY created_at ASC");
     $roles = $safeQuery("SELECT * FROM mdx_roles ORDER BY is_system DESC, name ASC");
+    $coaches = $safeQuery("SELECT * FROM mdx_coaches WHERE is_active = 1 ORDER BY created_at ASC");
+    $cms_blocks = $safeQuery("SELECT block_key, content_json FROM mdx_cms_blocks");
+
+    $student_progress = [];
+    $student_certificates = [];
+    $bookings = [];
+    if (!empty($_SESSION['user_id'])) {
+        try {
+            $pStmt = $pdo->prepare("SELECT course_id, completed_lessons_json, percent FROM mdx_student_progress WHERE user_id = ?");
+            $pStmt->execute([$_SESSION['user_id']]);
+            $student_progress = $pStmt->fetchAll();
+
+            $cStmt = $pdo->prepare("SELECT * FROM mdx_student_certificates WHERE user_id = ? ORDER BY created_at DESC");
+            $cStmt->execute([$_SESSION['user_id']]);
+            $student_certificates = $cStmt->fetchAll();
+
+            $bStmt = $pdo->prepare("SELECT * FROM mdx_bookings WHERE user_id = ? ORDER BY created_at DESC");
+            $bStmt->execute([$_SESSION['user_id']]);
+            $bookings = $bStmt->fetchAll();
+        } catch (PDOException $e) {}
+    }
 
     echo json_encode([
         'status' => 'success',
         'lang' => $lang,
+        'csrf_token' => $_SESSION['csrf_token'] ?? null,
         'users' => $users,
         'courses' => $courses,
         'club_tiers' => $tiers,
@@ -147,7 +285,12 @@ if ($action === 'get_all') {
         'form_fields' => $form_fields,
         'notifications' => $notifications,
         'categories' => $categories,
-        'roles' => $roles
+        'roles' => $roles,
+        'coaches' => $coaches,
+        'cms_blocks' => $cms_blocks,
+        'student_progress' => $student_progress,
+        'student_certificates' => $student_certificates,
+        'bookings' => $bookings
     ], JSON_UNESCAPED_UNICODE);
     exit();
 }
@@ -189,6 +332,8 @@ if ($action === 'get_translations') {
 }
 
 if ($action === 'save_translation' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
     $input = json_decode(file_get_contents('php://input'), true);
 
     $entity_type = $input['entity_type'] ?? null;
@@ -215,20 +360,213 @@ if ($action === 'save_translation' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // --------------------------------------------------------
-// 3.5. İSTİFADƏÇİ ƏMƏLİYYATLARI (USERS APİ)
+// 3.5. KİMLİK DOĞRULAMA VƏ İSTİFADƏÇİ ƏMƏLİYYATLARI (AUTH & USERS API)
 // --------------------------------------------------------
+
+if ($action === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+    $email = trim($input['email'] ?? '');
+    $password = (string)($input['password'] ?? '');
+
+    if (!$email || !$password) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Email və şifrə daxil edilməlidir.'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    $stmt = $pdo->prepare("SELECT id, name, email, password_hash, role, tier, status, joined_date FROM mdx_users WHERE LOWER(email) = LOWER(?) LIMIT 1");
+    $stmt->execute([$email]);
+    $user = $stmt->fetch();
+
+    if (!$user) {
+        http_response_code(401);
+        echo json_encode(['status' => 'error', 'message' => 'Email və ya şifrə yanlışdır.'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    if (isset($user['status']) && $user['status'] !== 'Aktiv' && $user['status'] !== 'active') {
+        http_response_code(403);
+        echo json_encode(['status' => 'error', 'message' => 'Hesabınız aktiv deyil.'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    $verified = false;
+    if (empty($user['password_hash'])) {
+        // First login for pre-seeded user without password: initialize hash
+        $newHash = password_hash($password, PASSWORD_DEFAULT);
+        $up = $pdo->prepare("UPDATE mdx_users SET password_hash = ? WHERE id = ?");
+        $up->execute([$newHash, $user['id']]);
+        $verified = true;
+    } else {
+        $verified = password_verify($password, $user['password_hash']);
+    }
+
+    if (!$verified) {
+        http_response_code(401);
+        echo json_encode(['status' => 'error', 'message' => 'Email və ya şifrə yanlışdır.'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    session_regenerate_id(true);
+    $_SESSION['user_id'] = $user['id'];
+    $_SESSION['user_email'] = $user['email'];
+    $_SESSION['user_role'] = $user['role'];
+
+    unset($user['password_hash']);
+    $user['csrf_token'] = $_SESSION['csrf_token'];
+
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'Uğurla daxil oldunuz.',
+        'user' => $user,
+        'csrf_token' => $_SESSION['csrf_token']
+    ], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+if ($action === 'logout') {
+    $_SESSION = [];
+    if (ini_get("session.use_cookies")) {
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 42000,
+            $params["path"], $params["domain"],
+            $params["secure"], $params["httponly"]
+        );
+    }
+    session_destroy();
+    echo json_encode(['status' => 'success', 'message' => 'Çıxış edildi.'], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+if ($action === 'me' || $action === 'get_session') {
+    $user = getSessionUser($pdo);
+    if ($user) {
+        echo json_encode([
+            'status' => 'success',
+            'authenticated' => true,
+            'user' => $user,
+            'csrf_token' => $_SESSION['csrf_token']
+        ], JSON_UNESCAPED_UNICODE);
+    } else {
+        echo json_encode([
+            'status' => 'success',
+            'authenticated' => false,
+            'csrf_token' => $_SESSION['csrf_token']
+        ], JSON_UNESCAPED_UNICODE);
+    }
+    exit();
+}
+
+if ($action === 'change_password' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    verifyCsrfToken();
+    $user = requireAuthUser($pdo);
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+    $currentPass = (string)($input['currentPassword'] ?? ($input['current_password'] ?? ''));
+    $newPass = (string)($input['newPassword'] ?? ($input['new_password'] ?? ''));
+
+    if (strlen($newPass) < 8 || !preg_match('/[A-Za-z]/', $newPass) || !preg_match('/[0-9]/', $newPass)) {
+        http_response_code(400);
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Yeni şifrə ən azı 8 simvol olmalı, ən azı bir hərf və bir rəqəm ehtiva etməlidir.'
+        ], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    $stmt = $pdo->prepare("SELECT password_hash FROM mdx_users WHERE id = ? LIMIT 1");
+    $stmt->execute([$user['id']]);
+    $currentHash = $stmt->fetchColumn();
+
+    if (!empty($currentHash) && !password_verify($currentPass, $currentHash)) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Cari şifrə yanlışdır.'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    $newHash = password_hash($newPass, PASSWORD_DEFAULT);
+    $up = $pdo->prepare("UPDATE mdx_users SET password_hash = ? WHERE id = ?");
+    $up->execute([$newHash, $user['id']]);
+
+    echo json_encode(['status' => 'success', 'message' => 'Şifrəniz uğurla yeniləndi.'], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
 if ($action === 'get_users') {
+    requireAdminUser($pdo);
     $stmt = $pdo->query("SELECT id, name, email, role, tier, status, joined_date FROM mdx_users ORDER BY joined_date DESC");
     $users = $stmt->fetchAll();
     echo json_encode(['status' => 'success', 'users' => $users], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
-if (($action === 'register_user' || $action === 'save_user') && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $input = json_decode(file_get_contents('php://input'), true);
-    if (!$input) {
-        $input = $_POST;
+if ($action === 'register_user' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    verifyCsrfToken();
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+    $id = 'usr_' . round(microtime(true) * 1000);
+    $name = trim($input['name'] ?? (($input['firstName'] ?? '') . ' ' . ($input['lastName'] ?? '')));
+    $email = trim($input['email'] ?? '');
+    $password = (string)($input['password'] ?? '');
+
+    if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Düzgün email daxil edin.'], JSON_UNESCAPED_UNICODE);
+        exit();
     }
+    if (strlen($password) < 6) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Şifrə ən azı 6 simvoldan ibarət olmalıdır.'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+    if (!$name) {
+        $name = explode('@', $email)[0];
+    }
+
+    $chk = $pdo->prepare("SELECT id FROM mdx_users WHERE LOWER(email) = LOWER(?) LIMIT 1");
+    $chk->execute([$email]);
+    if ($chk->fetch()) {
+        http_response_code(409);
+        echo json_encode(['status' => 'error', 'message' => 'Bu email artıq qeydiyyatdan keçib.'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    $password_hash = password_hash($password, PASSWORD_DEFAULT);
+    $role = 'Tələbə'; // Public registration strictly assigns Student role
+    $tier = 'Free';
+    $status = 'Aktiv';
+    $joined_date = date('Y-m-d');
+
+    $stmt = $pdo->prepare("
+        INSERT INTO mdx_users (id, name, email, password_hash, role, tier, status, joined_date)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    ");
+    $stmt->execute([$id, $name, $email, $password_hash, $role, $tier, $status, $joined_date]);
+
+    session_regenerate_id(true);
+    $_SESSION['user_id'] = $id;
+    $_SESSION['user_email'] = $email;
+    $_SESSION['user_role'] = $role;
+
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'Qeydiyyat uğurla tamamlandı.',
+        'user' => [
+            'id' => $id,
+            'name' => $name,
+            'email' => $email,
+            'role' => $role,
+            'tier' => $tier,
+            'status' => $status,
+            'joined_date' => $joined_date,
+            'csrf_token' => $_SESSION['csrf_token']
+        ]
+    ], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+if ($action === 'save_user' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
     
     $id = $input['id'] ?? ('usr_' . round(microtime(true) * 1000));
     $name = trim($input['name'] ?? (($input['firstName'] ?? '') . ' ' . ($input['lastName'] ?? '')));
@@ -236,7 +574,7 @@ if (($action === 'register_user' || $action === 'save_user') && $_SERVER['REQUES
     $role = $input['role'] ?? 'Tələbə';
     $tier = $input['tier'] ?? 'Free';
     $status = $input['status'] ?? 'Aktiv';
-    $password = $input['password'] ?? null;
+    $password = !empty($input['password']) ? (string)$input['password'] : null;
     $password_hash = $password ? password_hash($password, PASSWORD_DEFAULT) : null;
     $joined_date = $input['joined_date'] ?? $input['joinedDate'] ?? date('Y-m-d');
 
@@ -279,9 +617,16 @@ if (($action === 'register_user' || $action === 'save_user') && $_SERVER['REQUES
 }
 
 if ($action === 'delete_user' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $input = json_decode(file_get_contents('php://input'), true);
+    requireAdminUser($pdo);
+    verifyCsrfToken();
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
     $id = $input['id'] ?? null;
     if ($id) {
+        if ($id === ($_SESSION['user_id'] ?? '')) {
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => 'Cari daxil olmuş admin hesabı silinə bilməz!'], JSON_UNESCAPED_UNICODE);
+            exit();
+        }
         $stmt = $pdo->prepare("DELETE FROM mdx_users WHERE id = ?");
         $stmt->execute([$id]);
     }
@@ -429,6 +774,8 @@ if ($action === 'get_roles') {
 }
 
 if ($action === 'save_role' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
     $input = json_decode(file_get_contents('php://input'), true);
     if (!$input) {
         $input = $_POST;
@@ -509,6 +856,8 @@ if ($action === 'save_role' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if ($action === 'delete_role' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
     $input = json_decode(file_get_contents('php://input'), true);
     $id = $input['id'] ?? null;
     $code = $input['code'] ?? null;
@@ -538,6 +887,8 @@ if ($action === 'delete_role' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if ($action === 'save_club_tier' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
     $input = json_decode(file_get_contents('php://input'), true);
     if (!$input) $input = $_POST;
 
@@ -577,6 +928,8 @@ if ($action === 'save_club_tier' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if ($action === 'delete_club_tier' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
     $input = json_decode(file_get_contents('php://input'), true);
     $id = $input['id'] ?? null;
     if ($id) {
@@ -588,6 +941,8 @@ if ($action === 'delete_club_tier' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if ($action === 'save_settings' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
     $input = json_decode(file_get_contents('php://input'), true);
     if (!$input) {
         $input = $_POST;
@@ -831,6 +1186,8 @@ if ($action === 'get_form_fields') {
 }
 
 if ($action === 'save_form_field' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
     $input = json_decode(file_get_contents('php://input'), true);
     $id = $input['id'] ?? ('fld_' . uniqid());
     $target_type = $input['target_type'] ?? 'all';
@@ -862,6 +1219,8 @@ if ($action === 'save_form_field' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if ($action === 'delete_form_field' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
     $input = json_decode(file_get_contents('php://input'), true);
     $id = $input['id'] ?? null;
     if ($id) {
@@ -926,6 +1285,8 @@ if ($action === 'get_categories') {
 }
 
 if ($action === 'save_category' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
     $input = json_decode(file_get_contents('php://input'), true);
     $id = $input['id'] ?? ('cat-' . uniqid());
     $slug = $input['slug'] ?? ($input['key'] ?? $id);
@@ -958,6 +1319,8 @@ if ($action === 'save_category' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if ($action === 'delete_category' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
     $input = json_decode(file_get_contents('php://input'), true);
     $id = $input['id'] ?? null;
     if ($id) {
@@ -969,9 +1332,620 @@ if ($action === 'delete_category' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // --------------------------------------------------------
+// 7.5. KURSLAR VƏ PROQRAMLAR APİ (COURSES API)
+// --------------------------------------------------------
+if ($action === 'save_course' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+    $id = trim($input['id'] ?? ('course-' . round(microtime(true) * 1000)));
+    $category = trim($input['category'] ?? 'psychology');
+    $badge = trim($input['badge'] ?? 'KURS');
+    $badge_class = trim($input['badgeClass'] ?? ($input['badge_class'] ?? 'bg-secondary/10 text-secondary'));
+    $duration = trim($input['duration'] ?? '8 Həftə');
+    $title = trim($input['title'] ?? '');
+    $description = trim($input['description'] ?? '');
+    $instructor = trim($input['instructor'] ?? 'Monodoxia Mentor');
+    $instructor_role = trim($input['instructorRole'] ?? ($input['instructor_role'] ?? 'Kouç'));
+    $status = trim($input['status'] ?? 'Qrup qəbulu aktivdir');
+    $occupancy = intval($input['occupancy'] ?? 0);
+    $price = trim($input['price'] ?? '0');
+    $featured = !empty($input['featured']) ? 1 : 0;
+    $is_online = isset($input['isOnline']) ? ($input['isOnline'] ? 1 : 0) : (isset($input['is_online']) ? ($input['is_online'] ? 1 : 0) : 1);
+
+    $translations = $input['translations'] ?? [];
+    $translations_json = is_array($translations) ? json_encode($translations, JSON_UNESCAPED_UNICODE) : (string)$translations;
+
+    $modules = $input['modules'] ?? [];
+    $modules_json = is_array($modules) ? json_encode($modules, JSON_UNESCAPED_UNICODE) : (string)$modules;
+
+    $tags = $input['tags'] ?? [];
+    $tags_json = is_array($tags) ? json_encode($tags, JSON_UNESCAPED_UNICODE) : (string)$tags;
+
+    if (!$title) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Kursun başlığı tələb olunur'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    $stmt = $pdo->prepare("
+        INSERT INTO mdx_courses (id, category, badge, badge_class, duration, title, description, instructor, instructor_role, status, occupancy, price, featured, is_online, translations_json, modules_json, tags_json)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+            category = VALUES(category),
+            badge = VALUES(badge),
+            badge_class = VALUES(badge_class),
+            duration = VALUES(duration),
+            title = VALUES(title),
+            description = VALUES(description),
+            instructor = VALUES(instructor),
+            instructor_role = VALUES(instructor_role),
+            status = VALUES(status),
+            occupancy = VALUES(occupancy),
+            price = VALUES(price),
+            featured = VALUES(featured),
+            is_online = VALUES(is_online),
+            translations_json = VALUES(translations_json),
+            modules_json = VALUES(modules_json),
+            tags_json = VALUES(tags_json)
+    ");
+    $stmt->execute([
+        $id, $category, $badge, $badge_class, $duration, $title, $description,
+        $instructor, $instructor_role, $status, $occupancy, $price, $featured,
+        $is_online, $translations_json, $modules_json, $tags_json
+    ]);
+
+    echo json_encode(['status' => 'success', 'message' => 'Kurs məlumatları bazada saxlanıldı', 'id' => $id], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+if ($action === 'delete_course' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+    $id = $input['id'] ?? null;
+    if ($id) {
+        $stmt = $pdo->prepare("DELETE FROM mdx_courses WHERE id = ?");
+        $stmt->execute([$id]);
+    }
+    echo json_encode(['status' => 'success', 'message' => 'Kurs silindi'], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+// --------------------------------------------------------
+// 7.6. TƏDBİRLƏR VƏ VEBİNARLAR APİ (EVENTS API)
+// --------------------------------------------------------
+if ($action === 'save_event' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+    $id = trim($input['id'] ?? ('event-' . round(microtime(true) * 1000)));
+    $title = trim($input['title'] ?? '');
+    $datetime_label = trim($input['datetime'] ?? ($input['datetime_label'] ?? 'Tezliklə'));
+    $type_badge = trim($input['typeBadge'] ?? ($input['type_badge'] ?? 'VEBİNAR'));
+    $badge_class = trim($input['badgeClass'] ?? ($input['badge_class'] ?? 'bg-secondary/10 text-secondary'));
+    $speaker = trim($input['speaker'] ?? 'Ekspert');
+    $speaker_role = trim($input['speakerRole'] ?? ($input['speaker_role'] ?? 'Spiker'));
+    $capacity = intval($input['capacity'] ?? 100);
+    $registered = intval($input['registered'] ?? 0);
+    $description = trim($input['desc'] ?? ($input['description'] ?? ''));
+    $is_online = isset($input['isOnline']) ? ($input['isOnline'] ? 1 : 0) : (isset($input['is_online']) ? ($input['is_online'] ? 1 : 0) : 1);
+
+    $translations = $input['translations'] ?? [];
+    $translations_json = is_array($translations) ? json_encode($translations, JSON_UNESCAPED_UNICODE) : (string)$translations;
+
+    $tags = $input['tags'] ?? [];
+    $tags_json = is_array($tags) ? json_encode($tags, JSON_UNESCAPED_UNICODE) : (string)$tags;
+
+    if (!$title) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Tədbirin adı tələb olunur'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    $stmt = $pdo->prepare("
+        INSERT INTO mdx_events (id, title, datetime_label, type_badge, badge_class, speaker, speaker_role, capacity, registered, description, is_online, translations_json, tags_json)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+            title = VALUES(title),
+            datetime_label = VALUES(datetime_label),
+            type_badge = VALUES(type_badge),
+            badge_class = VALUES(badge_class),
+            speaker = VALUES(speaker),
+            speaker_role = VALUES(speaker_role),
+            capacity = VALUES(capacity),
+            registered = VALUES(registered),
+            description = VALUES(description),
+            is_online = VALUES(is_online),
+            translations_json = VALUES(translations_json),
+            tags_json = VALUES(tags_json)
+    ");
+    $stmt->execute([
+        $id, $title, $datetime_label, $type_badge, $badge_class, $speaker,
+        $speaker_role, $capacity, $registered, $description, $is_online,
+        $translations_json, $tags_json
+    ]);
+
+    echo json_encode(['status' => 'success', 'message' => 'Tədbir bazada saxlanıldı', 'id' => $id], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+if ($action === 'delete_event' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+    $id = $input['id'] ?? null;
+    if ($id) {
+        $stmt = $pdo->prepare("DELETE FROM mdx_events WHERE id = ?");
+        $stmt->execute([$id]);
+    }
+    echo json_encode(['status' => 'success', 'message' => 'Tədbir silindi'], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+// --------------------------------------------------------
+// 7.7. İCMA VƏ FORUM APİ (COMMUNITY POSTS API)
+// --------------------------------------------------------
+if ($action === 'save_community_post' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $authUser = requireAuthUser($pdo);
+    verifyCsrfToken();
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+    $id = trim($input['id'] ?? ('topic-' . round(microtime(true) * 1000)));
+    $title = trim($input['title'] ?? '');
+    $snippet = trim($input['snippet'] ?? ($input['content'] ?? ''));
+    $content = trim($input['content'] ?? $snippet);
+    $badge = trim($input['badge'] ?? 'İcma Müzakirəsi');
+    $author = trim($input['author'] ?? $authUser['name']);
+    $time_ago = trim($input['time'] ?? ($input['time_ago'] ?? 'İndicə'));
+    $pinned = !empty($input['pinned']) ? 1 : 0;
+    $likes = intval($input['likes'] ?? 0);
+    $replies = intval($input['repliesCount'] ?? ($input['replies'] ?? 0));
+    $author_role = trim($input['authorRole'] ?? ($input['author_role'] ?? $authUser['role']));
+    $author_avatar = trim($input['authorAvatar'] ?? ($input['author_avatar'] ?? ''));
+    $category = trim($input['category'] ?? 'general');
+
+    $translations = $input['translations'] ?? [];
+    $translations_json = is_array($translations) ? json_encode($translations, JSON_UNESCAPED_UNICODE) : (string)$translations;
+
+    if (!$title) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Mövzunun başlığı tələb olunur'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    $stmt = $pdo->prepare("
+        INSERT INTO mdx_community_posts (id, badge, title, snippet, content, author, author_role, author_avatar, time_ago, likes, replies, pinned, category, translations_json)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+            badge = VALUES(badge),
+            title = VALUES(title),
+            snippet = VALUES(snippet),
+            content = VALUES(content),
+            author = VALUES(author),
+            author_role = VALUES(author_role),
+            author_avatar = VALUES(author_avatar),
+            time_ago = VALUES(time_ago),
+            pinned = VALUES(pinned),
+            category = VALUES(category),
+            translations_json = VALUES(translations_json)
+    ");
+    $stmt->execute([
+        $id, $badge, $title, $snippet, $content, $author, $author_role,
+        $author_avatar, $time_ago, $likes, $replies, $pinned, $category,
+        $translations_json
+    ]);
+
+    echo json_encode(['status' => 'success', 'message' => 'İcma mövzusu dərc edildi', 'id' => $id], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+if ($action === 'delete_community_post' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $authUser = requireAuthUser($pdo);
+    verifyCsrfToken();
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+    $id = $input['id'] ?? null;
+    if ($id) {
+        if ($authUser['role'] === 'Admin') {
+            $stmt = $pdo->prepare("DELETE FROM mdx_community_posts WHERE id = ?");
+            $stmt->execute([$id]);
+        } else {
+            $stmt = $pdo->prepare("DELETE FROM mdx_community_posts WHERE id = ? AND author = ?");
+            $stmt->execute([$id, $authUser['name']]);
+        }
+    }
+    echo json_encode(['status' => 'success', 'message' => 'Mövzu silindi'], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+if ($action === 'like_community_post' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+    $id = $input['id'] ?? null;
+    if ($id) {
+        $stmt = $pdo->prepare("UPDATE mdx_community_posts SET likes = likes + 1 WHERE id = ?");
+        $stmt->execute([$id]);
+    }
+    echo json_encode(['status' => 'success', 'message' => 'Bəyənmə qeydə alındı'], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+// --------------------------------------------------------
+// 7.8. KOUÇLAR VƏ EKSPERTLƏR APİ (COACHES API)
+// --------------------------------------------------------
+if ($action === 'save_coach' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+    $id = trim($input['id'] ?? ('coach-' . round(microtime(true) * 1000)));
+    $name = trim($input['name'] ?? '');
+    $title = trim($input['title'] ?? 'Kouç & Ekspert');
+    $bio = trim($input['bio'] ?? ($input['experience'] ?? ''));
+    $rating = floatval($input['rating'] ?? 5.0);
+    $reviews_count = intval($input['reviewsCount'] ?? ($input['reviews_count'] ?? 0));
+    $hourly_rate = trim($input['hourlyRate'] ?? ($input['hourly_rate'] ?? '100 ₼ / saat'));
+    $session_duration = trim($input['sessionDuration'] ?? ($input['session_duration'] ?? '60 dəqiqə'));
+    $avatar_url = trim($input['image'] ?? ($input['avatarUrl'] ?? ($input['avatar_url'] ?? '')));
+    $is_active = isset($input['isActive']) ? ($input['isActive'] ? 1 : 0) : (isset($input['is_active']) ? ($input['is_active'] ? 1 : 0) : 1);
+
+    $specialties = $input['specialties'] ?? [];
+    $specialties_json = is_array($specialties) ? json_encode($specialties, JSON_UNESCAPED_UNICODE) : (string)$specialties;
+
+    $languages = $input['languages'] ?? [];
+    $languages_json = is_array($languages) ? json_encode($languages, JSON_UNESCAPED_UNICODE) : (string)$languages;
+
+    $available_slots = $input['availableSlots'] ?? ($input['available_slots'] ?? []);
+    $available_slots_json = is_array($available_slots) ? json_encode($available_slots, JSON_UNESCAPED_UNICODE) : (string)$available_slots;
+
+    $translations = $input['translations'] ?? [];
+    $translations_json = is_array($translations) ? json_encode($translations, JSON_UNESCAPED_UNICODE) : (string)$translations;
+
+    if (!$name) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Kouç adı tələb olunur'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    $stmt = $pdo->prepare("
+        INSERT INTO mdx_coaches (id, name, title, bio, rating, reviews_count, hourly_rate, session_duration, specialties_json, languages_json, available_slots_json, translations_json, avatar_url, is_active)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+            name = VALUES(name),
+            title = VALUES(title),
+            bio = VALUES(bio),
+            rating = VALUES(rating),
+            reviews_count = VALUES(reviews_count),
+            hourly_rate = VALUES(hourly_rate),
+            session_duration = VALUES(session_duration),
+            specialties_json = VALUES(specialties_json),
+            languages_json = VALUES(languages_json),
+            available_slots_json = VALUES(available_slots_json),
+            translations_json = VALUES(translations_json),
+            avatar_url = VALUES(avatar_url),
+            is_active = VALUES(is_active)
+    ");
+    $stmt->execute([
+        $id, $name, $title, $bio, $rating, $reviews_count, $hourly_rate,
+        $session_duration, $specialties_json, $languages_json,
+        $available_slots_json, $translations_json, $avatar_url, $is_active
+    ]);
+
+    echo json_encode(['status' => 'success', 'message' => 'Kouç profili saxlanıldı', 'id' => $id], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+if ($action === 'delete_coach' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+    $id = $input['id'] ?? null;
+    if ($id) {
+        $stmt = $pdo->prepare("DELETE FROM mdx_coaches WHERE id = ?");
+        $stmt->execute([$id]);
+    }
+    echo json_encode(['status' => 'success', 'message' => 'Kouç silindi'], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+// --------------------------------------------------------
+// 7.9. CMS MƏZMUN BLOKLARI APİ (CMS BLOCKS API)
+// --------------------------------------------------------
+if ($action === 'save_cms_block' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+    $block_key = trim($input['block_key'] ?? ($input['key'] ?? ''));
+    $content = $input['content'] ?? ($input['content_json'] ?? null);
+    $content_json = is_array($content) ? json_encode($content, JSON_UNESCAPED_UNICODE) : (string)$content;
+
+    if (!$block_key || !$content_json) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Blok açarı və məzmun tələb olunur'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    $stmt = $pdo->prepare("
+        INSERT INTO mdx_cms_blocks (block_key, content_json)
+        VALUES (?, ?)
+        ON DUPLICATE KEY UPDATE content_json = VALUES(content_json), updated_at = CURRENT_TIMESTAMP
+    ");
+    $stmt->execute([$block_key, $content_json]);
+
+    echo json_encode(['status' => 'success', 'message' => 'CMS bloku yadda saxlandı', 'block_key' => $block_key], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+if ($action === 'get_cms_content') {
+    try {
+        $stmt = $pdo->query("SELECT block_key, content_json, updated_at FROM mdx_cms_blocks");
+        $rows = $stmt->fetchAll();
+        $blocks = [];
+        foreach ($rows as $r) {
+            $blocks[$r['block_key']] = json_decode($r['content_json'], true) ?: $r['content_json'];
+        }
+        echo json_encode(['status' => 'success', 'blocks' => $blocks], JSON_UNESCAPED_UNICODE);
+    } catch (PDOException $e) {
+        echo json_encode(['status' => 'success', 'blocks' => []], JSON_UNESCAPED_UNICODE);
+    }
+    exit();
+}
+
+// --------------------------------------------------------
+// 7.10. TƏLƏBƏ TƏRƏQQİSİ, SERTİFİKATLAR VƏ REZERVASİYALAR APİ
+// --------------------------------------------------------
+if ($action === 'save_student_progress' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $authUser = requireAuthUser($pdo);
+    verifyCsrfToken();
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+    $course_id = trim($input['course_id'] ?? ($input['courseId'] ?? ''));
+    $lessons = $input['completed_lessons'] ?? ($input['completedLessons'] ?? []);
+    $lessons_json = is_array($lessons) ? json_encode($lessons, JSON_UNESCAPED_UNICODE) : (string)$lessons;
+    $percent = intval($input['percent'] ?? 0);
+
+    if (!$course_id) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Kurs ID tələb olunur'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    $stmt = $pdo->prepare("
+        INSERT INTO mdx_student_progress (user_id, course_id, completed_lessons_json, percent)
+        VALUES (?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE completed_lessons_json = VALUES(completed_lessons_json), percent = VALUES(percent), updated_at = CURRENT_TIMESTAMP
+    ");
+    $stmt->execute([$authUser['id'], $course_id, $lessons_json, $percent]);
+
+    echo json_encode(['status' => 'success', 'message' => 'Tərəqqi yadda saxlandı'], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+if ($action === 'save_certificate' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $authUser = requireAuthUser($pdo);
+    verifyCsrfToken();
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+    $id = trim($input['id'] ?? ('MDX-' . mt_rand(100000, 999999)));
+    $course_id = trim($input['course_id'] ?? ($input['courseId'] ?? ''));
+    $course_title = trim($input['course_title'] ?? ($input['courseTitle'] ?? ''));
+    $student_name = trim($input['student_name'] ?? ($input['studentName'] ?? $authUser['name']));
+    $instructor = trim($input['instructor'] ?? 'Monodoxia Mentor');
+    $issue_date = trim($input['date'] ?? ($input['issue_date'] ?? date('Y-m-d')));
+
+    $stmt = $pdo->prepare("
+        INSERT INTO mdx_student_certificates (id, user_id, course_id, course_title, student_name, instructor, issue_date)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE course_title = VALUES(course_title), student_name = VALUES(student_name)
+    ");
+    $stmt->execute([$id, $authUser['id'], $course_id, $course_title, $student_name, $instructor, $issue_date]);
+
+    echo json_encode(['status' => 'success', 'message' => 'Sertifikat bazada qeydə alındı', 'id' => $id], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+if ($action === 'get_certificates') {
+    $authUser = requireAuthUser($pdo);
+    $stmt = $pdo->prepare("SELECT * FROM mdx_student_certificates WHERE user_id = ? ORDER BY created_at DESC");
+    $stmt->execute([$authUser['id']]);
+    echo json_encode(['status' => 'success', 'certificates' => $stmt->fetchAll()], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+if ($action === 'save_booking' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $authUser = requireAuthUser($pdo);
+    verifyCsrfToken();
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+    $id = trim($input['id'] ?? ('BK-' . round(microtime(true) * 1000)));
+    $coach_id = trim($input['coachId'] ?? ($input['coach_id'] ?? ''));
+    $coach_name = trim($input['coachName'] ?? ($input['coach_name'] ?? ''));
+    $slot = trim($input['slot'] ?? ($input['time'] ?? ''));
+    $format = trim($input['format'] ?? 'Online (Google Meet)');
+    $notes = trim($input['notes'] ?? '');
+
+    $stmt = $pdo->prepare("
+        INSERT INTO mdx_bookings (id, user_id, coach_id, coach_name, slot, format, notes)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    ");
+    $stmt->execute([$id, $authUser['id'], $coach_id, $coach_name, $slot, $format, $notes]);
+
+    echo json_encode(['status' => 'success', 'message' => 'Kouçinq sessiyası rezervasiya edildi', 'id' => $id], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+if ($action === 'get_bookings') {
+    $authUser = requireAuthUser($pdo);
+    if ($authUser['role'] === 'Admin') {
+        $stmt = $pdo->query("SELECT * FROM mdx_bookings ORDER BY created_at DESC");
+    } else {
+        $stmt = $pdo->prepare("SELECT * FROM mdx_bookings WHERE user_id = ? ORDER BY created_at DESC");
+        $stmt->execute([$authUser['id']]);
+    }
+    echo json_encode(['status' => 'success', 'bookings' => $stmt->fetchAll()], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+// --------------------------------------------------------
+// 7.11. LOKAL MƏLUMATLARIN BAZAYA TOPLU SİNXRONİZASİYASI (SYNC ALL LOCAL DATA)
+// --------------------------------------------------------
+if ($action === 'sync_all_local_data' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+    $synced = [];
+
+    // 1. Courses
+    if (!empty($input['courses']) && is_array($input['courses'])) {
+        $cStmt = $pdo->prepare("
+            INSERT INTO mdx_courses (id, category, badge, badge_class, duration, title, description, instructor, instructor_role, status, occupancy, price, featured, is_online, translations_json, modules_json, tags_json)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                category=VALUES(category), badge=VALUES(badge), badge_class=VALUES(badge_class),
+                duration=VALUES(duration), title=VALUES(title), description=VALUES(description),
+                instructor=VALUES(instructor), instructor_role=VALUES(instructor_role),
+                status=VALUES(status), occupancy=VALUES(occupancy), price=VALUES(price),
+                featured=VALUES(featured), is_online=VALUES(is_online),
+                translations_json=VALUES(translations_json), modules_json=VALUES(modules_json),
+                tags_json=VALUES(tags_json)
+        ");
+        foreach ($input['courses'] as $c) {
+            $cStmt->execute([
+                $c['id'], $c['category'] ?? 'psychology', $c['badge'] ?? 'KURS',
+                $c['badgeClass'] ?? ($c['badge_class'] ?? 'bg-secondary/10 text-secondary'),
+                $c['duration'] ?? '', $c['title'] ?? '', $c['description'] ?? '',
+                $c['instructor'] ?? '', $c['instructorRole'] ?? ($c['instructor_role'] ?? ''),
+                $c['status'] ?? 'Qrup qəbulu aktivdir', intval($c['occupancy'] ?? 0),
+                $c['price'] ?? '0', !empty($c['featured']) ? 1 : 0,
+                isset($c['isOnline']) ? ($c['isOnline'] ? 1 : 0) : 1,
+                json_encode($c['translations'] ?? [], JSON_UNESCAPED_UNICODE),
+                json_encode($c['modules'] ?? [], JSON_UNESCAPED_UNICODE),
+                json_encode($c['tags'] ?? [], JSON_UNESCAPED_UNICODE)
+            ]);
+        }
+        $synced['courses'] = count($input['courses']);
+    }
+
+    // 2. Events
+    if (!empty($input['events']) && is_array($input['events'])) {
+        $eStmt = $pdo->prepare("
+            INSERT INTO mdx_events (id, title, datetime_label, type_badge, badge_class, speaker, speaker_role, capacity, registered, description, is_online, translations_json)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                title=VALUES(title), datetime_label=VALUES(datetime_label),
+                type_badge=VALUES(type_badge), badge_class=VALUES(badge_class),
+                speaker=VALUES(speaker), speaker_role=VALUES(speaker_role),
+                capacity=VALUES(capacity), registered=VALUES(registered),
+                description=VALUES(description), is_online=VALUES(is_online),
+                translations_json=VALUES(translations_json)
+        ");
+        foreach ($input['events'] as $e) {
+            $eStmt->execute([
+                $e['id'], $e['title'] ?? '', $e['datetime'] ?? ($e['datetime_label'] ?? ''),
+                $e['typeBadge'] ?? ($e['type_badge'] ?? 'VEBİNAR'),
+                $e['badgeClass'] ?? ($e['badge_class'] ?? ''),
+                $e['speaker'] ?? '', $e['speakerRole'] ?? ($e['speaker_role'] ?? ''),
+                intval($e['capacity'] ?? 100), intval($e['registered'] ?? 0),
+                $e['desc'] ?? ($e['description'] ?? ''),
+                isset($e['isOnline']) ? ($e['isOnline'] ? 1 : 0) : 1,
+                json_encode($e['translations'] ?? [], JSON_UNESCAPED_UNICODE)
+            ]);
+        }
+        $synced['events'] = count($input['events']);
+    }
+
+    // 3. Community Posts
+    if (!empty($input['community']) && is_array($input['community'])) {
+        $cpStmt = $pdo->prepare("
+            INSERT INTO mdx_community_posts (id, badge, title, snippet, content, author, time_ago, likes, replies, pinned, translations_json)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                badge=VALUES(badge), title=VALUES(title), snippet=VALUES(snippet),
+                content=VALUES(content), author=VALUES(author), time_ago=VALUES(time_ago),
+                pinned=VALUES(pinned), translations_json=VALUES(translations_json)
+        ");
+        foreach ($input['community'] as $p) {
+            $cpStmt->execute([
+                $p['id'], $p['badge'] ?? 'İcma Müzakirəsi', $p['title'] ?? '',
+                $p['snippet'] ?? '', $p['content'] ?? ($p['snippet'] ?? ''),
+                $p['author'] ?? 'Rezident', $p['time'] ?? ($p['time_ago'] ?? 'İndicə'),
+                intval($p['likes'] ?? 0), intval($p['repliesCount'] ?? ($p['replies'] ?? 0)),
+                !empty($p['pinned']) ? 1 : 0,
+                json_encode($p['translations'] ?? [], JSON_UNESCAPED_UNICODE)
+            ]);
+        }
+        $synced['community'] = count($input['community']);
+    }
+
+    // 4. Coaches
+    if (!empty($input['coaches']) && is_array($input['coaches'])) {
+        $coStmt = $pdo->prepare("
+            INSERT INTO mdx_coaches (id, name, title, bio, rating, reviews_count, hourly_rate, session_duration, specialties_json, languages_json, available_slots_json, translations_json, avatar_url, is_active)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                name=VALUES(name), title=VALUES(title), bio=VALUES(bio),
+                rating=VALUES(rating), reviews_count=VALUES(reviews_count),
+                hourly_rate=VALUES(hourly_rate), session_duration=VALUES(session_duration),
+                specialties_json=VALUES(specialties_json), languages_json=VALUES(languages_json),
+                available_slots_json=VALUES(available_slots_json),
+                translations_json=VALUES(translations_json), avatar_url=VALUES(avatar_url),
+                is_active=VALUES(is_active)
+        ");
+        foreach ($input['coaches'] as $c) {
+            $coStmt->execute([
+                $c['id'], $c['name'] ?? '', $c['title'] ?? '', $c['bio'] ?? ($c['experience'] ?? ''),
+                floatval($c['rating'] ?? 5.0), intval($c['reviewsCount'] ?? 0),
+                $c['hourlyRate'] ?? '100 ₼ / saat', $c['sessionDuration'] ?? '60 dəqiqə',
+                json_encode($c['specialties'] ?? [], JSON_UNESCAPED_UNICODE),
+                json_encode($c['languages'] ?? [], JSON_UNESCAPED_UNICODE),
+                json_encode($c['availableSlots'] ?? [], JSON_UNESCAPED_UNICODE),
+                json_encode($c['translations'] ?? [], JSON_UNESCAPED_UNICODE),
+                $c['image'] ?? ($c['avatarUrl'] ?? ''),
+                isset($c['isActive']) ? ($c['isActive'] ? 1 : 0) : 1
+            ]);
+        }
+        $synced['coaches'] = count($input['coaches']);
+    }
+
+    // 5. CMS Blocks
+    if (!empty($input['cms_blocks']) && is_array($input['cms_blocks'])) {
+        $cmsStmt = $pdo->prepare("
+            INSERT INTO mdx_cms_blocks (block_key, content_json)
+            VALUES (?, ?)
+            ON DUPLICATE KEY UPDATE content_json=VALUES(content_json), updated_at=CURRENT_TIMESTAMP
+        ");
+        foreach ($input['cms_blocks'] as $key => $content) {
+            $cmsStmt->execute([
+                $key,
+                is_array($content) ? json_encode($content, JSON_UNESCAPED_UNICODE) : (string)$content
+            ]);
+        }
+        $synced['cms_blocks'] = count($input['cms_blocks']);
+    }
+
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'Bütün lokal məlumatlar uğurla Hostinger SQL bazasına sinxronlaşdırıldı!',
+        'synced' => $synced
+    ], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+// --------------------------------------------------------
 // 8. CƏDVƏLLƏRİN AVTOMATİK MİQRASİYASI (MIGRATE TABLES)
 // --------------------------------------------------------
 if ($action === 'migrate' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $isDev = (($_SERVER['SERVER_NAME'] ?? '') === 'localhost' || ($_SERVER['REMOTE_ADDR'] ?? '') === '127.0.0.1');
+    $migrationKey = getenv('MIGRATION_SECRET_KEY') ?: '';
+    $providedKey = $_SERVER['HTTP_X_MIGRATION_KEY'] ?? ($_GET['key'] ?? '');
+
+    $sessionUser = getSessionUser($pdo);
+    $isAdmin = ($sessionUser && $sessionUser['role'] === 'Admin');
+    $hasKey = (!empty($migrationKey) && hash_equals($migrationKey, $providedKey));
+
+    if (!$isDev && !$isAdmin && !$hasKey) {
+        http_response_code(403);
+        echo json_encode([
+            'status' => 'forbidden',
+            'message' => 'Migrasiya əməliyyatı üçün super admin girişi və ya xüsusi açar tələb olunur (403 Forbidden).'
+        ], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
     $results = [];
 
     // 1. mdx_settings
@@ -1197,6 +2171,115 @@ if ($action === 'migrate' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             ('cat-coaching', 'coaching', 'course', 'Kouçinq', 'trending_up', '{\"az\":{\"name\":\"Kouçinq\",\"desc\":\"Liderlik və inkişaf\"},\"en\":{\"name\":\"Coaching\",\"desc\":\"Leadership and growth\"},\"tr\":{\"name\":\"Koçluk\",\"desc\":\"Liderlik ve gelişim\"},\"ru\":{\"name\":\"Коучинг\",\"desc\":\"Лидерство и развитие\"}}'),
             ('cat-meditation', 'meditation', 'course', 'Meditasiya', 'self_improvement', '{\"az\":{\"name\":\"Meditasiya\",\"desc\":\"Sükut və nəfəs praktikaları\"},\"en\":{\"name\":\"Meditation\",\"desc\":\"Stillness and breathwork\"},\"tr\":{\"name\":\"Meditasyon\",\"desc\":\"Sessizlik ve nefes pratikleri\"},\"ru\":{\"name\":\"Медитация\",\"desc\":\"Практики тишины и дыхания\"}}');
         ");
+    }
+
+    // 13. mdx_coaches
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS `mdx_coaches` (
+            `id` varchar(50) NOT NULL,
+            `name` varchar(150) NOT NULL,
+            `title` varchar(255) NOT NULL,
+            `bio` text NOT NULL,
+            `rating` decimal(3,2) NOT NULL DEFAULT 5.0,
+            `reviews_count` int(11) NOT NULL DEFAULT 0,
+            `hourly_rate` varchar(50) NOT NULL,
+            `session_duration` varchar(50) NOT NULL DEFAULT '60 dəqiqə',
+            `specialties_json` text DEFAULT NULL,
+            `languages_json` text DEFAULT NULL,
+            `available_slots_json` longtext DEFAULT NULL,
+            `translations_json` longtext DEFAULT NULL,
+            `avatar_url` varchar(255) DEFAULT NULL,
+            `is_active` tinyint(1) NOT NULL DEFAULT 1,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+    $results[] = 'mdx_coaches';
+
+    // 14. mdx_cms_blocks
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS `mdx_cms_blocks` (
+            `block_key` varchar(100) NOT NULL,
+            `content_json` longtext NOT NULL,
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`block_key`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+    $results[] = 'mdx_cms_blocks';
+
+    // 15. mdx_student_progress
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS `mdx_student_progress` (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `user_id` varchar(50) NOT NULL,
+            `course_id` varchar(50) NOT NULL,
+            `completed_lessons_json` text NOT NULL,
+            `percent` int(11) NOT NULL DEFAULT 0,
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `idx_user_course` (`user_id`, `course_id`),
+            KEY `idx_progress_user` (`user_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+    $results[] = 'mdx_student_progress';
+
+    // 16. mdx_student_certificates
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS `mdx_student_certificates` (
+            `id` varchar(50) NOT NULL,
+            `user_id` varchar(50) NOT NULL,
+            `course_id` varchar(50) DEFAULT NULL,
+            `course_title` varchar(255) NOT NULL,
+            `student_name` varchar(150) NOT NULL,
+            `instructor` varchar(150) DEFAULT NULL,
+            `issue_date` varchar(50) NOT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_cert_user` (`user_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+    $results[] = 'mdx_student_certificates';
+
+    // 17. mdx_bookings
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS `mdx_bookings` (
+            `id` varchar(50) NOT NULL,
+            `user_id` varchar(50) NOT NULL,
+            `coach_id` varchar(50) NOT NULL,
+            `coach_name` varchar(150) NOT NULL,
+            `slot` varchar(100) NOT NULL,
+            `format` varchar(50) NOT NULL DEFAULT 'Online (Google Meet)',
+            `notes` text DEFAULT NULL,
+            `status` varchar(50) NOT NULL DEFAULT 'Təsdiqləndi',
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_booking_user` (`user_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+    $results[] = 'mdx_bookings';
+
+    // Safe dynamic columns alteration on existing tables
+    $alterStatements = [
+        "ALTER TABLE mdx_courses ADD COLUMN translations_json LONGTEXT DEFAULT NULL",
+        "ALTER TABLE mdx_courses ADD COLUMN modules_json LONGTEXT DEFAULT NULL",
+        "ALTER TABLE mdx_courses ADD COLUMN is_online TINYINT(1) DEFAULT 1",
+        "ALTER TABLE mdx_courses ADD COLUMN tags_json TEXT DEFAULT NULL",
+        "ALTER TABLE mdx_events ADD COLUMN speaker_role VARCHAR(150) DEFAULT NULL",
+        "ALTER TABLE mdx_events ADD COLUMN is_online TINYINT(1) DEFAULT 1",
+        "ALTER TABLE mdx_events ADD COLUMN translations_json LONGTEXT DEFAULT NULL",
+        "ALTER TABLE mdx_events ADD COLUMN tags_json TEXT DEFAULT NULL",
+        "ALTER TABLE mdx_community_posts ADD COLUMN content LONGTEXT DEFAULT NULL",
+        "ALTER TABLE mdx_community_posts ADD COLUMN author_role VARCHAR(100) DEFAULT NULL",
+        "ALTER TABLE mdx_community_posts ADD COLUMN author_avatar VARCHAR(255) DEFAULT NULL",
+        "ALTER TABLE mdx_community_posts ADD COLUMN category VARCHAR(50) DEFAULT NULL",
+        "ALTER TABLE mdx_community_posts ADD COLUMN translations_json LONGTEXT DEFAULT NULL",
+        "ALTER TABLE mdx_categories ADD COLUMN translations_json LONGTEXT DEFAULT NULL",
+        "ALTER TABLE mdx_club_tiers ADD COLUMN translations LONGTEXT DEFAULT NULL"
+    ];
+    foreach ($alterStatements as $alterSql) {
+        try {
+            $pdo->exec($alterSql);
+        } catch (PDOException $e) {}
     }
 
     echo json_encode([

@@ -83,7 +83,7 @@ The platform provides users with interactive course explorations, private coachi
 | :--- | :--- |
 | **Frontend Framework** | React 18.3 (Hooks, Context API, Suspense-ready) |
 | **Build Tooling & Bundler** | Vite 5.4 with `@vitejs/plugin-react` |
-| **Styling & Design System** | Vanilla CSS (`css/design-system.css`) with CSS custom properties |
+| **Styling & Design System** | Tailwind CSS (PostCSS) + Design System (`src/index.css`) |
 | **Icons & Typography** | Google Fonts (Playfair Display, Cormorant Garamond, Plus Jakarta Sans), Material Symbols |
 | **Backend API** | PHP 8.x with PDO MySQL (JSON REST endpoints) |
 | **Database** | MySQL 5.7+ / MariaDB 10.3+ (InnoDB, UTF-8 MB4) |
@@ -133,8 +133,6 @@ Monodoxia Academy Web/
 ├── .github/
 │   └── workflows/
 │       └── ci.yml               # GitHub Actions CI workflow
-├── css/
-│   └── design-system.css        # Core custom design tokens, themes & layout utilities
 ├── public/                      # Static assets copied into dist/ upon build
 │   ├── .htaccess                # Apache routing, HTTPS enforcement, and security guards
 │   ├── api.php                  # Production backend API handler
@@ -142,6 +140,7 @@ Monodoxia Academy Web/
 │   ├── db_config.php            # Local/runtime database configuration (ignored by Git)
 │   └── hostinger_monodoxia_schema.sql # Database structure & seed migrations
 ├── src/
+│   ├── index.css                # Tailwind directives & design system CSS tokens
 │   ├── components/              # Modular UI components
 │   │   ├── modals/              # Interactive dialogs (Admin, Auth, App, Player, etc.)
 │   │   ├── About.jsx

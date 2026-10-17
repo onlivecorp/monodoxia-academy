@@ -7,7 +7,7 @@ import PageHero from '../components/PageHero';
 export default function CommunityPage() {
   const { t, currentLang, defaultLang } = useLanguage();
   const {
-    topicsList,
+    communityTopics = [],
     homeContent,
     setNewTopicModalOpen,
     currentUser,
@@ -20,10 +20,13 @@ export default function CommunityPage() {
   const [filterTag, setFilterTag] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
+  const safeTopics = Array.isArray(communityTopics) ? communityTopics : [];
+
   // Extract tags from topics
   const allTags = Array.from(
     new Set(
-      topicsList.flatMap(t => {
+      safeTopics.flatMap(t => {
+        if (!t) return [];
         if (Array.isArray(t.tags)) return t.tags;
         if (typeof t.tag === 'string') return [t.tag];
         return [];
@@ -31,7 +34,8 @@ export default function CommunityPage() {
     )
   );
 
-  const filteredTopics = topicsList.filter(t => {
+  const filteredTopics = safeTopics.filter(t => {
+    if (!t) return false;
     const matchesTag = filterTag === 'all' ||
       (Array.isArray(t.tags) && t.tags.includes(filterTag)) ||
       t.tag === filterTag;
@@ -128,7 +132,7 @@ export default function CommunityPage() {
                           : 'bg-surface-container text-on-surface-variant hover:text-primary'
                       }`}
                     >
-                      Bütün Mövzular ({topicsList.length})
+                      Bütün Mövzular ({safeTopics.length})
                     </button>
                     {allTags.map(tag => (
                       <button
