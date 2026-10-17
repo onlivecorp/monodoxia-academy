@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../i18n/LanguageContext';
-import { APPLICATION_STATUSES, TARGET_TYPE_MAP, PAYMENT_STATUSES, ATTENDANCE_STATUSES } from '../../data/applicationData';
+import {
+  APPLICATION_STATUSES,
+  TARGET_TYPE_MAP,
+  PAYMENT_STATUSES,
+  ATTENDANCE_STATUSES,
+  INITIAL_FORM_FIELDS
+} from '../../data/applicationData';
 
 export default function AdminApplicationsTab() {
   const {
@@ -833,6 +839,8 @@ export default function AdminApplicationsTab() {
                     <option value="text">Qısa Mətn (Text)</option>
                     <option value="textarea">Çoxsətirli Mətn (Textarea)</option>
                     <option value="select">Seçim Siyahısı (Dropdown Select)</option>
+                    <option value="tel">Telefon / WhatsApp (Tel)</option>
+                    <option value="url">Link / Fayl URL (URL)</option>
                     <option value="number">Rəqəm (Number)</option>
                   </select>
                 </div>
