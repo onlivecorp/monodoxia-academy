@@ -2,7 +2,7 @@ import React from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useApp } from '../context/AppContext';
 
-export default function MaintenanceScreen({ onAdminLogin }) {
+export default function MaintenanceScreen({ onAdminLogin, onClosePreview }) {
   const { lang, setLang, supportedLangs } = useLanguage();
   const { platformSettings, homeContent } = useApp();
   const footer = homeContent?.footer || {};
@@ -19,6 +19,20 @@ export default function MaintenanceScreen({ onAdminLogin }) {
 
   return (
     <div className="min-h-screen w-full flex flex-col justify-between items-center bg-[#fbf9f5] text-[#1e293b] relative overflow-hidden select-none px-4 py-8">
+      {onClosePreview && (
+        <div className="relative z-20 w-full max-w-4xl bg-[#05224a] text-white text-xs py-2 px-4 flex items-center justify-between rounded-lg mb-4 shadow-md">
+          <span className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-[16px] text-[#c5a059]">visibility</span>
+            <span><strong>Admin Önizləmə Rejimi:</strong> Ziyarətçilər saytı hazırda bu şəkildə görür.</span>
+          </span>
+          <button
+            onClick={onClosePreview}
+            className="bg-[#c5a059] hover:bg-[#b08b46] text-[#05224a] text-[11px] font-bold px-3 py-1 rounded transition-colors cursor-pointer"
+          >
+            Önizləmədən Çıx
+          </button>
+        </div>
+      )}
       {/* Background Decorative Ambient Radial Glows (Light Theme) */}
       <div 
         className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full pointer-events-none opacity-40 blur-[130px]"

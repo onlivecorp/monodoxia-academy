@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../i18n/LanguageContext';
+import MaintenanceScreen from '../MaintenanceScreen';
 
 export default function AdminMaintenanceTab() {
   const { platformSettings, updatePlatformSettings, homeContent, updateHomeBlock, showToast } = useApp();
   const { supportedLangs } = useLanguage();
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
 
   const getInitialValues = () => ({
     maintenanceMode: Boolean(platformSettings?.maintenanceMode),
@@ -205,13 +207,65 @@ export default function AdminMaintenanceTab() {
               <input
                 type="checkbox"
                 checked={form.maintenanceMode}
-                onChange={e => setForm(prev => ({ ...prev, maintenanceMode: e.target.checked }))}
+                onChange={e => {
+                  const val = e.target.checked;
+                  setForm(prev => ({ ...prev, maintenanceMode: val }));
+                  updatePlatformSettings({ maintenanceMode: val });
+                  showToast(
+                    val 
+                      ? 'Texniki qulluq rejimi AKTİVLƏŞDİRİLDİ (Sayt ziyarətçilərə bağlandı)' 
+                      : 'Texniki qulluq rejimi SÖNDÜRÜLDÜ (Sayt ziyarətçilərə açıldı)', 
+                    val ? 'warning' : 'info'
+                  );
+                }}
                 style={{ accentColor: '#b45309', width: '20px', height: '20px', cursor: 'pointer' }}
               />
               <span style={{ fontSize: '12px', fontWeight: 800, color: form.maintenanceMode ? '#b45309' : '#64748b' }}>
                 {form.maintenanceMode ? 'AKTİV' : 'SÖNDÜRÜLÜB'}
               </span>
             </label>
+          </div>
+
+          {/* Explanation Alert for Admin */}
+          <div style={{
+            background: form.maintenanceMode ? '#fffbeb' : '#f8fafc',
+            border: form.maintenanceMode ? '1.5px solid #fde68a' : '1px solid #e2e8f0',
+            borderRadius: '10px',
+            padding: '12px 16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '12px',
+            flexWrap: 'wrap'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', flex: 1, minWidth: '240px' }}>
+              <span className="material-symbols-outlined" style={{ color: form.maintenanceMode ? '#b45309' : '#64748b', fontSize: '20px', marginTop: '1px' }}>
+                info
+              </span>
+              <div style={{ fontSize: '12px', color: form.maintenanceMode ? '#78350f' : '#475569', lineHeight: 1.5 }}>
+                <strong>Niyə sizdə görünmür?</strong> Siz sistemə <strong>Admin</strong> olaraq daxil olmusunuz. Adminlər saytı idarə edə bilsin deyə sayt sizə açıq qalır. Ziyarətçilər və ya <strong>Gizli Pəncərədə (Incognito)</strong> açanlar isə yalnız Təmir Ekranını görürlər.
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowPreviewModal(true)}
+              style={{
+                background: '#05224a',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '8px 14px',
+                fontSize: '11px',
+                fontWeight: 700,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                cursor: 'pointer'
+              }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#c5a059' }}>visibility</span>
+              <span>Ziyarətçi Kimi Bax</span>
+            </button>
           </div>
 
           {/* 2. Official Contact Support (Mail & Phone) - Highlighted */}
@@ -507,6 +561,22 @@ export default function AdminMaintenanceTab() {
           </div>
         </div>
       </div>
+
+      {/* Fullscreen Preview Modal */}
+      {showPreviewModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 999999,
+          background: '#fbf9f5',
+          overflowY: 'auto'
+        }}>
+          <MaintenanceScreen
+            onAdminLogin={() => setShowPreviewModal(false)}
+            onClosePreview={() => setShowPreviewModal(false)}
+          />
+        </div>
+      )}
     </div>
   );
 }

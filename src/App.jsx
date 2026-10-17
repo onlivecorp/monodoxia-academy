@@ -29,14 +29,18 @@ const AboutPage = lazy(() => import('./pages/AboutPage'));
 
 function AppContent() {
   const { platformSettings, currentUser, setAuthModalOpen, canAccessAdmin, adminModalOpen, currentPage } = useApp();
+  const [previewMaintenance, setPreviewMaintenance] = useState(false);
   const isAdminUser = currentUser?.role === 'Admin' || Boolean(canAccessAdmin?.(currentUser));
-  const isMaintenance = Boolean(platformSettings?.maintenanceMode) && !isAdminUser;
+  const isMaintenance = (Boolean(platformSettings?.maintenanceMode) && !isAdminUser) || previewMaintenance;
 
   if (isMaintenance) {
     return (
       <div className="bg-[#fbf9f5] text-[#1e293b] min-h-screen flex flex-col justify-between">
         <ToastContainer />
-        <MaintenanceScreen onAdminLogin={() => setAuthModalOpen(true)} />
+        <MaintenanceScreen 
+          onAdminLogin={() => setAuthModalOpen(true)} 
+          onClosePreview={previewMaintenance ? () => setPreviewMaintenance(false) : undefined} 
+        />
         <AuthModal />
       </div>
     );
@@ -68,9 +72,18 @@ function AppContent() {
 
       {/* Top Banner if Maintenance Mode is active but user is Admin / Staff */}
       {Boolean(platformSettings?.maintenanceMode) && isAdminUser && !adminModalOpen && (
-        <div className="bg-amber-600 text-white text-xs font-bold py-2 px-4 text-center relative z-30 flex items-center justify-center gap-2 shadow-sm">
-          <span className="material-symbols-outlined text-[16px]">build</span>
-          <span>TEXNİKİ QULLUQ REJİMİ AKTİVDİR — Sayt hazırda yalnız Administrator və Heyət üçün açıqdır.</span>
+        <div className="bg-amber-600 text-white text-xs font-bold py-2 px-4 flex items-center justify-between gap-3 shadow-sm relative z-30 flex-wrap">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-[16px]">build</span>
+            <span>TEXNİKİ QULLUQ REJİMİ AKTİVDİR — Sayt hazırda yalnız Administrator və Heyət üçün açıqdır. Ziyarətçilər Təmir Ekranını görür.</span>
+          </div>
+          <button
+            onClick={() => setPreviewMaintenance(true)}
+            className="bg-white hover:bg-amber-50 text-amber-900 px-2.5 py-1 rounded text-[11px] font-bold transition-colors cursor-pointer flex items-center gap-1 shadow-sm"
+          >
+            <span className="material-symbols-outlined text-[14px]">visibility</span>
+            <span>Ziyarətçi Ekranına Bax</span>
+          </button>
         </div>
       )}
 
