@@ -1368,7 +1368,7 @@ export function AppProvider({ children }) {
     let resolvedPayment = paymentStatus;
     if (resolvedPayment === null || resolvedPayment === undefined) {
       if (newStatus === 'Təsdiqləndi' || newStatus === 'Tamamlandı') {
-        resolvedPayment = 'Ödənilib';
+        resolvedPayment = 'Ödənildi';
       } else if (newStatus === 'Rədd edildi' || newStatus === 'Ləğv edildi') {
         resolvedPayment = 'Qaytarıldı';
       }

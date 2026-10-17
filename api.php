@@ -1116,7 +1116,7 @@ if ($action === 'update_application_status' && $_SERVER['REQUEST_METHOD'] === 'P
     // Avtomatik təsdiq və imtina statusları
     if ($payment_status === null) {
         if ($new_status === 'Təsdiqləndi' || $new_status === 'Tamamlandı') {
-            $payment_status = 'Ödənilib';
+            $payment_status = 'Ödənildi';
         } elseif ($new_status === 'Rədd edildi' || $new_status === 'Ləğv edildi') {
             $payment_status = 'Qaytarıldı';
         }

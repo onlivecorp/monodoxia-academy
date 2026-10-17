@@ -11,10 +11,12 @@ export const APPLICATION_STATUSES = [
 ];
 
 export const PAYMENT_STATUSES = [
-  'Tələb olunmur',
   'Gözlənilir',
-  'Ödənilib',
-  'Qaytarıldı'
+  'Ödənildi',
+  'Qaytarıldı',
+  'İmtina edildi',
+  'Tələb olunmur',
+  'Ödənilib'
 ];
 
 export const ATTENDANCE_STATUSES = [

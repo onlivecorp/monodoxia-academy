@@ -374,18 +374,26 @@ export default function AdminRegistrationsTab() {
 
                       {/* Payment Status */}
                       <td className="py-3.5 px-4">
-                        <span className={`inline-flex items-center gap-1 font-semibold text-xs ${
-                          reg.paymentStatus === 'Ödənilib'
-                            ? 'text-emerald-700 dark:text-emerald-400'
-                            : (reg.paymentStatus === 'Gözlənilir' ? 'text-amber-700 dark:text-amber-400' : 'text-on-surface-variant')
-                        }`}>
-                          <span className="material-symbols-outlined text-[14px]">
-                            {reg.paymentStatus === 'Ödənilib' ? 'check_circle' : (reg.paymentStatus === 'Gözlənilir' ? 'hourglass_top' : 'remove')}
-                          </span>
-                          <span>{reg.paymentStatus}</span>
-                        </span>
+                        <select
+                          value={reg.paymentStatus || 'Gözlənilir'}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            updateApplicationStatus(reg.id, reg.status, reg.adminNote, val, reg.attendanceStatus);
+                          }}
+                          className={`text-xs font-bold px-2 py-1 rounded border border-outline-variant/60 bg-surface-bright focus:outline-none focus:border-secondary cursor-pointer ${
+                            ['Ödənildi', 'Ödənilib'].includes(reg.paymentStatus)
+                              ? 'text-emerald-700 bg-emerald-50 dark:bg-emerald-950/30'
+                              : (['Qaytarıldı', 'İmtina edildi'].includes(reg.paymentStatus)
+                                  ? 'text-rose-700 bg-rose-50 dark:bg-rose-950/30'
+                                  : 'text-amber-700 bg-amber-50 dark:bg-amber-950/30')
+                          }`}
+                        >
+                          {PAYMENT_STATUSES.map(p => (
+                            <option key={p} value={p}>{p}</option>
+                          ))}
+                        </select>
                         {reg.price && reg.price !== '0' && (
-                          <span className="block text-[10px] text-outline mt-0.5">({reg.price})</span>
+                          <span className="block text-[10px] text-outline mt-0.5 font-medium">({reg.price})</span>
                         )}
                       </td>
 
@@ -465,7 +473,7 @@ export default function AdminRegistrationsTab() {
                     let nextPay = editForm.paymentStatus;
                     let nextAtt = editForm.attendanceStatus;
                     if (newStat === 'Təsdiqləndi' || newStat === 'Tamamlandı') {
-                      nextPay = 'Ödənilib';
+                      nextPay = 'Ödənildi';
                       nextAtt = 'İştirak etdi';
                     } else if (newStat === 'Rədd edildi' || newStat === 'Ləğv edildi') {
                       nextPay = 'Qaytarıldı';

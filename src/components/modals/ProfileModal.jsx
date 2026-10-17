@@ -747,7 +747,7 @@ export default function ProfileModal() {
                           </div>
                           <div>
                             <span className="text-[10px] uppercase text-outline block">Ödəniş Statusu</span>
-                            <span className={`font-medium ${app.paymentStatus === 'Ödənilib' ? 'text-emerald-600 font-bold' : 'text-primary'}`}>
+                            <span className={`font-medium ${['Ödənildi', 'Ödənilib'].includes(app.paymentStatus) ? 'text-emerald-600 font-bold' : (['Qaytarıldı', 'İmtina edildi'].includes(app.paymentStatus) ? 'text-rose-600 font-bold' : 'text-primary')}`}>
                               {app.paymentStatus}
                             </span>
                           </div>

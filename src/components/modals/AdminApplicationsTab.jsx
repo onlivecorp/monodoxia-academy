@@ -434,14 +434,29 @@ export default function AdminApplicationsTab() {
                           </td>
 
                           <td className="py-3.5 px-4 text-[11px]">
-                            <div className="leading-tight">
-                              <span className="text-outline">Ödəniş: </span>
-                              <span className={`font-semibold ${app.paymentStatus === 'Ödənilib' ? 'text-emerald-600' : 'text-primary'}`}>
-                                {app.paymentStatus}
-                              </span>
+                            <div className="flex items-center gap-1.5 mb-1">
+                              <span className="text-outline text-[10px]">Ödəniş:</span>
+                              <select
+                                value={app.paymentStatus || 'Gözlənilir'}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  updateApplicationStatus(app.id, app.status, app.adminNote, val, app.attendanceStatus);
+                                }}
+                                className={`text-[11px] font-bold px-2 py-0.5 rounded border border-outline-variant/60 bg-surface-bright focus:outline-none focus:border-secondary cursor-pointer ${
+                                  ['Ödənildi', 'Ödənilib'].includes(app.paymentStatus)
+                                    ? 'text-emerald-700 bg-emerald-50 dark:bg-emerald-950/30'
+                                    : (['Qaytarıldı', 'İmtina edildi'].includes(app.paymentStatus)
+                                        ? 'text-rose-700 bg-rose-50 dark:bg-rose-950/30'
+                                        : 'text-amber-700 bg-amber-50 dark:bg-amber-950/30')
+                                }`}
+                              >
+                                {PAYMENT_STATUSES.map(p => (
+                                  <option key={p} value={p}>{p}</option>
+                                ))}
+                              </select>
                             </div>
-                            <div className="leading-tight mt-1">
-                              <span className="text-outline">İştirak: </span>
+                            <div className="leading-tight">
+                              <span className="text-outline text-[10px]">İştirak: </span>
                               <span className={`font-semibold ${app.attendanceStatus === 'İştirak etdi' ? 'text-emerald-600' : 'text-primary'}`}>
                                 {app.attendanceStatus}
                               </span>
@@ -453,7 +468,7 @@ export default function AdminApplicationsTab() {
                               {/* Quick Approve button */}
                               {app.status !== 'Təsdiqləndi' && (
                                 <button
-                                  onClick={() => updateApplicationStatus(app.id, 'Təsdiqləndi', 'Admin paneldən təsdiqləndi.', 'Ödənilib', 'İştirak etdi')}
+                                  onClick={() => updateApplicationStatus(app.id, 'Təsdiqləndi', 'Admin paneldən təsdiqləndi.', 'Ödənildi', 'İştirak etdi')}
                                   title="Təsdiqlə"
                                   className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 hover:bg-emerald-200 flex items-center justify-center transition-colors"
                                 >
@@ -673,7 +688,7 @@ export default function AdminApplicationsTab() {
                         const newStat = e.target.value;
                         setStatusInput(newStat);
                         if (newStat === 'Təsdiqləndi' || newStat === 'Tamamlandı') {
-                          setPaymentInput('Ödənilib');
+                          setPaymentInput('Ödənildi');
                           setAttendanceInput('İştirak etdi');
                         } else if (newStat === 'Rədd edildi' || newStat === 'Ləğv edildi') {
                           setPaymentInput('Qaytarıldı');
