@@ -32,6 +32,7 @@ export default function Events() {
               ? applicationsList.find(a => a.userId === currentUser.id && a.targetId === e.id && !a.archived)
               : null;
             const targetType = e.typeBadge === 'VEBİNAR' ? 'webinar' : 'event';
+            const isFree = !e.price || ['pulsuz', 'ödənişsiz', '0', '0 ₼', '0 azn'].includes(String(e.price).trim().toLowerCase());
 
             return (
               <div
@@ -39,10 +40,24 @@ export default function Events() {
                 className="bg-surface-container-lowest p-6 rounded border border-outline-variant/60 hover:border-secondary transition-all duration-300 flex flex-col justify-between"
               >
                 <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className={`px-2.5 py-0.5 rounded ${e.badgeClass} font-label-sm text-label-sm uppercase font-semibold`}>
-                      {getLocalized(e, 'typeBadge', currentLang, defaultLang)}
-                    </span>
+                  {e.image && (
+                    <div className="h-40 -mx-6 -mt-6 mb-4 rounded-t overflow-hidden bg-surface-container relative">
+                      <img src={e.image} alt={e.title} className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className={`px-2.5 py-0.5 rounded ${e.badgeClass} font-label-sm text-label-sm uppercase font-semibold`}>
+                        {getLocalized(e, 'typeBadge', currentLang, defaultLang)}
+                      </span>
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                        isFree
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          : 'bg-amber-50 text-amber-700 border border-amber-200'
+                      }`}>
+                        {isFree ? 'Ödənişsiz' : e.price}
+                      </span>
+                    </div>
                     <span className="font-label-sm text-label-sm text-outline">{e.datetime}</span>
                   </div>
                   <h3 className="font-headline-sm text-headline-sm text-primary mb-2">
@@ -52,16 +67,39 @@ export default function Events() {
                     {getLocalized(e, 'desc', currentLang, defaultLang)}
                   </p>
                 </div>
-                <div className="pt-4 border-t border-outline-variant/30 flex items-center justify-between">
+                <div className="pt-4 border-t border-outline-variant/30 flex items-center justify-between gap-2 flex-wrap">
                   <span className="text-xs text-on-surface-variant font-medium">Spiker: {e.speaker}</span>
                   {userApp ? (
-                    <button
-                      onClick={() => openApplication(e, targetType)}
-                      className="px-2.5 py-1 rounded text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200 hover:bg-emerald-200 transition-colors flex items-center gap-1"
-                    >
-                      <span className="material-symbols-outlined text-[14px]">check_circle</span>
-                      <span>Qeydiyyat: {userApp.status}</span>
-                    </button>
+                    userApp.status === 'Təsdiqləndi' ? (
+                      <span className="px-2.5 py-1 rounded text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[14px]">check_circle</span>
+                        <span>Qeydiyyat Təsdiqləndi</span>
+                      </span>
+                    ) : ['Yeni', 'Baxılır', 'Gözləmədə'].includes(userApp.status) ? (
+                      <button
+                        onClick={() => openApplication(e, targetType)}
+                        className="px-2.5 py-1 rounded text-xs font-semibold bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100 transition-colors flex items-center gap-1"
+                      >
+                        <span className="material-symbols-outlined text-[14px] text-amber-600">hourglass_top</span>
+                        <span>Baxılır ({userApp.status})</span>
+                      </button>
+                    ) : ['Rədd edildi', 'İmtina edildi', 'Ləğv edildi'].includes(userApp.status) ? (
+                      <button
+                        onClick={() => openApplication(e, targetType)}
+                        className="px-2.5 py-1 rounded text-xs font-semibold bg-rose-50 text-rose-800 border border-rose-200 hover:bg-rose-100 transition-colors flex items-center gap-1"
+                      >
+                        <span className="material-symbols-outlined text-[14px]">refresh</span>
+                        <span>Yenidən Qeydiyyat</span>
+                      </button>
+                    ) : (
+                      <span className="px-2.5 py-1 rounded text-xs font-semibold bg-surface-container text-primary border border-outline-variant">
+                        {userApp.status}
+                      </span>
+                    )
+                  ) : e.status === 'Tamamlandı' ? (
+                    <span className="text-xs text-outline font-semibold">Tədbir Başa Çatıb</span>
+                  ) : e.status === 'Bağlıdır' ? (
+                    <span className="text-xs text-outline font-semibold">Qeydiyyat Bağlıdır</span>
                   ) : (
                     <button
                       onClick={() => openApplication(e, targetType)}

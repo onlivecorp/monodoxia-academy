@@ -599,6 +599,9 @@ export function AppProvider({ children }) {
                 registered: Number(e.registered) || 0,
                 desc: e.description || e.desc || '',
                 isOnline: e.is_online !== undefined ? Boolean(Number(e.is_online)) : (e.isOnline ?? true),
+                image: e.image || '',
+                price: e.price || 'Pulsuz',
+                status: e.status || 'Aktiv',
                 translations: parsedTrans
               };
             });
@@ -1280,8 +1283,11 @@ export function AppProvider({ children }) {
     }
 
     let title = targetItem.title || targetItem.name || 'Proqram';
-    let price = targetItem.price ? (String(targetItem.price).startsWith('₼') ? targetItem.price : `₼ ${targetItem.price}`) : 'Pulsuz';
-    if (price === '₼ 0' || price === '0') price = 'Pulsuz';
+    let rawPrice = (targetItem.price !== undefined && targetItem.price !== null) ? String(targetItem.price).trim() : '';
+    let price = 'Pulsuz';
+    if (rawPrice && rawPrice !== '0' && !['pulsuz', 'ödənişsiz', 'free'].includes(rawPrice.toLowerCase())) {
+      price = (rawPrice.startsWith('₼') || rawPrice.endsWith('AZN') || rawPrice.endsWith('₼')) ? rawPrice : `${rawPrice} AZN`;
+    }
 
     setActiveApplicationTarget({
       item: targetItem,
@@ -2022,6 +2028,9 @@ export function AppProvider({ children }) {
       speaker: newEvent.speaker,
       capacity: Number(newEvent.capacity) || 100,
       registered: 0,
+      image: newEvent.image || '',
+      price: newEvent.price || (newEvent.isFree ? 'Pulsuz' : '0 ₼'),
+      status: newEvent.status || 'Aktiv',
       translations: {
         ...(newEvent.translations || {}),
         az: {

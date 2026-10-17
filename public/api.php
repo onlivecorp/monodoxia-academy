@@ -1526,6 +1526,9 @@ if ($action === 'save_event' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $registered = intval($input['registered'] ?? 0);
     $description = trim($input['desc'] ?? ($input['description'] ?? ''));
     $is_online = isset($input['isOnline']) ? ($input['isOnline'] ? 1 : 0) : (isset($input['is_online']) ? ($input['is_online'] ? 1 : 0) : 1);
+    $image = trim($input['image'] ?? '');
+    $price = trim($input['price'] ?? 'Pulsuz');
+    $status = trim($input['status'] ?? 'Aktiv');
 
     $translations = $input['translations'] ?? [];
     $translations_json = is_array($translations) ? json_encode($translations, JSON_UNESCAPED_UNICODE) : (string)$translations;
@@ -1543,10 +1546,13 @@ if ($action === 'save_event' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     try { $pdo->exec("ALTER TABLE mdx_events ADD COLUMN is_online TINYINT(1) DEFAULT 1"); } catch (PDOException $e) {}
     try { $pdo->exec("ALTER TABLE mdx_events ADD COLUMN translations_json LONGTEXT DEFAULT NULL"); } catch (PDOException $e) {}
     try { $pdo->exec("ALTER TABLE mdx_events ADD COLUMN tags_json TEXT DEFAULT NULL"); } catch (PDOException $e) {}
+    try { $pdo->exec("ALTER TABLE mdx_events ADD COLUMN image VARCHAR(500) DEFAULT NULL"); } catch (PDOException $e) {}
+    try { $pdo->exec("ALTER TABLE mdx_events ADD COLUMN price VARCHAR(100) DEFAULT 'Pulsuz'"); } catch (PDOException $e) {}
+    try { $pdo->exec("ALTER TABLE mdx_events ADD COLUMN status VARCHAR(50) DEFAULT 'Aktiv'"); } catch (PDOException $e) {}
 
     $stmt = $pdo->prepare("
-        INSERT INTO mdx_events (id, title, datetime_label, type_badge, badge_class, speaker, speaker_role, capacity, registered, description, is_online, translations_json, tags_json)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO mdx_events (id, title, datetime_label, type_badge, badge_class, speaker, speaker_role, capacity, registered, description, is_online, translations_json, tags_json, image, price, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE
             title = VALUES(title),
             datetime_label = VALUES(datetime_label),
@@ -1559,12 +1565,15 @@ if ($action === 'save_event' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             description = VALUES(description),
             is_online = VALUES(is_online),
             translations_json = VALUES(translations_json),
-            tags_json = VALUES(tags_json)
+            tags_json = VALUES(tags_json),
+            image = VALUES(image),
+            price = VALUES(price),
+            status = VALUES(status)
     ");
     $stmt->execute([
         $id, $title, $datetime_label, $type_badge, $badge_class, $speaker,
         $speaker_role, $capacity, $registered, $description, $is_online,
-        $translations_json, $tags_json
+        $translations_json, $tags_json, $image, $price, $status
     ]);
 
     echo json_encode(['status' => 'success', 'message' => 'Tədbir bazada saxlanıldı', 'id' => $id], JSON_UNESCAPED_UNICODE);

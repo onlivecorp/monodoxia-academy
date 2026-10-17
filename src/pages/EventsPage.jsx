@@ -107,17 +107,45 @@ export default function EventsPage() {
               const targetType = e.typeBadge === 'VEBİNAR' ? 'webinar' : 'event';
               const occupancy = Math.min(100, Math.round(((e.registered || 0) / (e.capacity || 100)) * 100));
 
+              const isFree = !e.price || ['pulsuz', 'ödənişsiz', '0', '0 ₼', '0 azn'].includes(String(e.price).trim().toLowerCase());
+
               return (
                 <div
                   key={e.id}
                   className="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-7 flex flex-col justify-between hover:border-secondary transition-all duration-300 shadow-sm hover:shadow-lg group"
                 >
                   <div>
-                    {/* Top Type & Datetime */}
-                    <div className="flex items-center justify-between gap-2 mb-4">
-                      <span className={`px-2.5 py-1 rounded ${e.badgeClass || 'bg-secondary/10 text-secondary'} text-[11px] font-bold uppercase tracking-wider`}>
-                        {getLocalized(e, 'typeBadge', currentLang, defaultLang) || e.typeBadge}
-                      </span>
+                    {/* Event Image Banner if provided */}
+                    {e.image && (
+                      <div className="h-44 -mx-7 -mt-7 mb-5 rounded-t-2xl overflow-hidden bg-surface-container relative">
+                        <img
+                          src={e.image}
+                          alt={e.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+                      </div>
+                    )}
+
+                    {/* Top Badges & Datetime */}
+                    <div className="flex items-center justify-between gap-2 mb-4 flex-wrap">
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2.5 py-1 rounded ${e.badgeClass || 'bg-secondary/10 text-secondary'} text-[11px] font-bold uppercase tracking-wider`}>
+                          {getLocalized(e, 'typeBadge', currentLang, defaultLang) || e.typeBadge}
+                        </span>
+                        <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
+                          isFree
+                            ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-300/40'
+                            : 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-300/40'
+                        }`}>
+                          {isFree ? 'Ödənişsiz' : e.price}
+                        </span>
+                        {e.status && e.status !== 'Aktiv' && (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-surface-container text-on-surface-variant border border-outline-variant">
+                            {e.status}
+                          </span>
+                        )}
+                      </div>
                       <span className="text-xs text-outline font-medium flex items-center gap-1">
                         <span className="material-symbols-outlined text-[14px]">schedule</span>
                         <span>{e.datetime}</span>
@@ -162,16 +190,56 @@ export default function EventsPage() {
                     </div>
                   </div>
 
-                  {/* Actions */}
+                  {/* Actions & Accurate Status Presentation */}
                   <div className="pt-4 border-t border-outline-variant/40">
                     {userApp ? (
-                      <button
-                        onClick={() => openApplication(e, targetType)}
-                        className="w-full py-2.5 px-4 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">check_circle</span>
-                        <span>Qeydiyyatınız mövcuddur: {userApp.status}</span>
-                      </button>
+                      userApp.status === 'Təsdiqləndi' ? (
+                        <div className="w-full py-2.5 px-4 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-300 flex items-center justify-center gap-1.5 shadow-sm">
+                          <span className="material-symbols-outlined text-[16px] text-emerald-700 dark:text-emerald-400">verified</span>
+                          <span>Qeydiyyatınız Təsdiqlənib</span>
+                        </div>
+                      ) : ['Yeni', 'Baxılır', 'Gözləmədə'].includes(userApp.status) ? (
+                        <button
+                          onClick={() => openApplication(e, targetType)}
+                          className="w-full py-2.5 px-4 rounded-lg text-xs font-bold bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100 dark:bg-amber-950/40 dark:text-amber-300 transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+                        >
+                          <span className="material-symbols-outlined text-[16px] text-amber-600">hourglass_top</span>
+                          <span>Müraciətiniz Baxılır ({userApp.status})</span>
+                        </button>
+                      ) : ['Rədd edildi', 'İmtina edildi', 'Ləğv edildi'].includes(userApp.status) ? (
+                        <div className="flex flex-col gap-2">
+                          <div className="w-full py-1.5 px-3 rounded-lg text-[11px] font-semibold bg-rose-50 text-rose-800 border border-rose-200 dark:bg-rose-950/30 dark:text-rose-300 flex items-center justify-between">
+                            <span className="flex items-center gap-1">
+                              <span className="material-symbols-outlined text-[15px] text-rose-600">cancel</span>
+                              <span>Müraciət: {userApp.status}</span>
+                            </span>
+                          </div>
+                          <button
+                            onClick={() => openApplication(e, targetType)}
+                            className="w-full py-2.5 px-4 rounded-lg bg-primary text-on-primary hover:bg-primary/90 text-xs font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                          >
+                            <span className="material-symbols-outlined text-[16px]">refresh</span>
+                            <span>Yenidən Müraciət Et</span>
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => openApplication(e, targetType)}
+                          className="w-full py-2.5 px-4 rounded-lg text-xs font-bold bg-surface-container text-primary border border-outline-variant hover:bg-surface-container-high transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                        >
+                          <span>Müraciət Statusu: {userApp.status}</span>
+                        </button>
+                      )
+                    ) : e.status === 'Tamamlandı' ? (
+                      <div className="w-full py-2.5 px-4 rounded-lg bg-surface-container text-on-surface-variant text-xs font-bold flex items-center justify-center gap-1.5 opacity-80">
+                        <span className="material-symbols-outlined text-[16px]">event_busy</span>
+                        <span>Tədbir Başa Çatıb</span>
+                      </div>
+                    ) : e.status === 'Bağlıdır' ? (
+                      <div className="w-full py-2.5 px-4 rounded-lg bg-surface-container text-on-surface-variant text-xs font-bold flex items-center justify-center gap-1.5 opacity-80">
+                        <span className="material-symbols-outlined text-[16px]">lock</span>
+                        <span>Qeydiyyat Bağlıdır</span>
+                      </div>
                     ) : (
                       <button
                         onClick={() => openApplication(e, targetType)}

@@ -208,27 +208,56 @@ export default function ApplicationModal() {
           ) : existingApp ? (
             /* Existing Application Banner */
             <div className="space-y-4 py-2">
-              <div className="rounded-lg border border-emerald-200 bg-emerald-50/60 dark:bg-emerald-950/20 dark:border-emerald-800 p-4">
+              <div className={`rounded-lg border p-4 ${
+                existingApp.status === 'Təsdiqləndi'
+                  ? 'border-emerald-200 bg-emerald-50/60 dark:bg-emerald-950/20 dark:border-emerald-800'
+                  : ['Yeni', 'Baxılır', 'Gözləmədə'].includes(existingApp.status)
+                  ? 'border-amber-300 bg-amber-50/70 dark:bg-amber-950/30 dark:border-amber-800'
+                  : 'border-outline-variant bg-surface-container-low'
+              }`}>
                 <div className="flex items-start gap-3">
-                  <span className="material-symbols-outlined text-emerald-600 text-[24px] mt-0.5">check_circle</span>
+                  <span className={`material-symbols-outlined text-[24px] mt-0.5 ${
+                    existingApp.status === 'Təsdiqləndi'
+                      ? 'text-emerald-600'
+                      : ['Yeni', 'Baxılır', 'Gözləmədə'].includes(existingApp.status)
+                      ? 'text-amber-600'
+                      : 'text-outline'
+                  }`}>
+                    {existingApp.status === 'Təsdiqləndi' ? 'verified' : ['Yeni', 'Baxılır', 'Gözləmədə'].includes(existingApp.status) ? 'hourglass_top' : 'info'}
+                  </span>
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-bold text-emerald-900 dark:text-emerald-300">
-                        Müraciətiniz Mövcuddur (#{existingApp.id})
+                      <span className={`text-xs font-bold ${
+                        existingApp.status === 'Təsdiqləndi'
+                          ? 'text-emerald-900 dark:text-emerald-300'
+                          : ['Yeni', 'Baxılır', 'Gözləmədə'].includes(existingApp.status)
+                          ? 'text-amber-900 dark:text-amber-300'
+                          : 'text-primary'
+                      }`}>
+                        {existingApp.status === 'Təsdiqləndi' ? 'Müraciətiniz Təsdiqlənib' : 'Müraciətiniz Mövcuddur'} (#{existingApp.id})
                       </span>
                       <span className={`px-2 py-0.5 rounded text-[11px] font-bold border ${statusMeta?.badgeClass}`}>
                         {existingApp.status}
                       </span>
                     </div>
-                    <p className="text-xs text-emerald-800/90 dark:text-emerald-300/80 leading-relaxed">
-                      Siz artıq <strong>{existingApp.targetTitle}</strong> üçün müraciət göndərmisiniz. Təkrar göndərmə tələb olunmur.
+                    <p className={`text-xs leading-relaxed ${
+                      existingApp.status === 'Təsdiqləndi'
+                        ? 'text-emerald-800/90 dark:text-emerald-300/80'
+                        : ['Yeni', 'Baxılır', 'Gözləmədə'].includes(existingApp.status)
+                        ? 'text-amber-800/90 dark:text-amber-300/80'
+                        : 'text-on-surface-variant'
+                    }`}>
+                      {existingApp.status === 'Təsdiqləndi'
+                        ? <>Təbriklər! <strong>{existingApp.targetTitle}</strong> üzrə qeydiyyatınız təsdiq olunub.</>
+                        : <>Siz artıq <strong>{existingApp.targetTitle}</strong> üçün müraciət göndərmisiniz. Hal-hazırda nəzərdən keçirilir.</>
+                      }
                     </p>
-                    <div className="mt-3 pt-3 border-t border-emerald-200/60 dark:border-emerald-800 text-[11px] space-y-1 text-on-surface-variant">
+                    <div className="mt-3 pt-3 border-t border-outline-variant/40 text-[11px] space-y-1 text-on-surface-variant">
                       <div><strong>Tarix:</strong> {existingApp.appliedAt}</div>
                       <div><strong>Ödəniş Statusu:</strong> {existingApp.paymentStatus}</div>
                       <div><strong>İştirak Statusu:</strong> {existingApp.attendanceStatus}</div>
                       {existingApp.adminNote && (
-                        <div className="p-2 rounded bg-surface-bright/70 border border-emerald-200/50 text-xs text-primary mt-2">
+                        <div className="p-2 rounded bg-surface-bright/70 border border-outline-variant text-xs text-primary mt-2">
                           <strong>Admin Qeydi:</strong> {existingApp.adminNote}
                         </div>
                       )}

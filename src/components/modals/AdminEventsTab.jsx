@@ -143,6 +143,10 @@ export default function AdminEventsTab() {
   const [newEventCapacity, setNewEventCapacity] = useState('100');
   const [newEventTypeBadge, setNewEventTypeBadge] = useState('VEBİNAR');
   const [newEventDesc, setNewEventDesc] = useState('');
+  const [newEventImage, setNewEventImage] = useState('');
+  const [newEventIsFree, setNewEventIsFree] = useState(true);
+  const [newEventPrice, setNewEventPrice] = useState('');
+  const [newEventStatus, setNewEventStatus] = useState('Aktiv');
   const [newEventTranslations, setNewEventTranslations] = useState({});
   const [newEventTransOpen, setNewEventTransOpen] = useState(false);
   const [newEventTransLang, setNewEventTransLang] = useState('en');
@@ -155,6 +159,17 @@ export default function AdminEventsTab() {
 
   // Delete Confirmation State
   const [eventToDelete, setEventToDelete] = useState(null);
+
+  const handleFileToDataUrl = (file, callback) => {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      showToast('Yalnız şəkil faylı seçə bilərsiniz', 'warning');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => callback(e.target.result);
+    reader.readAsDataURL(file);
+  };
 
   // Filtered Events
   const filteredEvents = useMemo(() => {
@@ -176,7 +191,15 @@ export default function AdminEventsTab() {
   }, [filteredEvents, currentPage]);
 
   const handleOpenEdit = (eventItem) => {
-    setEditingEvent(eventItem);
+    const rawPrice = eventItem.price ? String(eventItem.price).trim() : '';
+    const isFree = !rawPrice || ['pulsuz', 'ödənişsiz', '0', '0 ₼', '0 azn'].includes(rawPrice.toLowerCase());
+    setEditingEvent({
+      ...eventItem,
+      image: eventItem.image || '',
+      isFree: isFree,
+      price: isFree ? '' : rawPrice,
+      status: eventItem.status || 'Aktiv'
+    });
     const raw = eventItem.rawDatetime || parseToDateTimeLocal(eventItem.datetime) || '';
     setEditEventRawDate(raw);
   };
@@ -202,6 +225,7 @@ export default function AdminEventsTab() {
       showToast('Zəhmət olmasa tədbirin başlığını və tarixini qeyd edin', 'warning');
       return;
     }
+    const finalPrice = newEventIsFree ? 'Pulsuz' : (newEventPrice.trim() || 'Pulsuz');
     addEvent({
       title: newEventTitle.trim(),
       speaker: newEventSpeaker || 'Dr. Leyla Əliyeva',
@@ -211,6 +235,9 @@ export default function AdminEventsTab() {
       registered: 0,
       typeBadge: newEventTypeBadge,
       desc: newEventDesc || 'İnteraktiv masterklas və praktiki sessiya.',
+      image: newEventImage.trim(),
+      price: finalPrice,
+      status: newEventStatus || 'Aktiv',
       translations: {
         ...(newEventTranslations || {}),
         az: {
@@ -225,6 +252,10 @@ export default function AdminEventsTab() {
     setNewEventRawDate('');
     setNewEventDate('');
     setNewEventDesc('');
+    setNewEventImage('');
+    setNewEventIsFree(true);
+    setNewEventPrice('');
+    setNewEventStatus('Aktiv');
     setNewEventTranslations({});
     setNewEventTransOpen(false);
     setShowAddForm(false);
@@ -233,6 +264,7 @@ export default function AdminEventsTab() {
   const handleSaveEditEvent = (e) => {
     e.preventDefault();
     if (!editingEvent) return;
+    const finalPrice = editingEvent.isFree ? 'Pulsuz' : (editingEvent.price?.trim() || 'Pulsuz');
     updateEvent(editingEvent.id, {
       title: editingEvent.title,
       speaker: editingEvent.speaker,
@@ -242,6 +274,9 @@ export default function AdminEventsTab() {
       registered: editingEvent.registered !== undefined ? Number(editingEvent.registered) : 0,
       typeBadge: editingEvent.typeBadge,
       desc: editingEvent.desc,
+      image: (editingEvent.image || '').trim(),
+      price: finalPrice,
+      status: editingEvent.status || 'Aktiv',
       translations: {
         ...(editingEvent.translations || {}),
         az: {
@@ -397,6 +432,159 @@ export default function AdminEventsTab() {
               />
             </div>
 
+            {/* Image upload & URL */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label className="admin-label">Tədbir Şəkli (URL və ya Şəkil Yüklə)</label>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <input
+                  type="text"
+                  placeholder="https://... və ya fayl seçin"
+                  value={editingEvent.image || ''}
+                  onChange={(e) => setEditingEvent({ ...editingEvent, image: e.target.value })}
+                  className="admin-input"
+                  style={{ flex: 1 }}
+                />
+                <label style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '7px 12px',
+                  borderRadius: '6px',
+                  background: '#f8fafc',
+                  border: '1px solid #cbd5e1',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  color: '#334155',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap'
+                }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>upload_file</span>
+                  <span>Şəkil Seç</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        handleFileToDataUrl(e.target.files[0], (dataUrl) => {
+                          setEditingEvent(prev => ({ ...prev, image: dataUrl }));
+                        });
+                      }
+                    }}
+                  />
+                </label>
+              </div>
+              {editingEvent.image && (
+                <div style={{ position: 'relative', width: '120px', height: '70px', borderRadius: '6px', overflow: 'hidden', border: '1px solid #e2e8f0', marginTop: '4px' }}>
+                  <img src={editingEvent.image} alt="Tədbir" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <button
+                    type="button"
+                    onClick={() => setEditingEvent({ ...editingEvent, image: '' })}
+                    title="Şəkli sil"
+                    style={{
+                      position: 'absolute',
+                      top: '3px',
+                      right: '3px',
+                      background: 'rgba(239, 68, 68, 0.9)',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '50%',
+                      width: '18px',
+                      height: '18px',
+                      fontSize: '11px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Price & Status */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+              <div>
+                <label className="admin-label">Ödəniş Növü</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setEditingEvent({ ...editingEvent, isFree: true, price: '' })}
+                    style={{
+                      flex: 1,
+                      padding: '7px 10px',
+                      borderRadius: '6px',
+                      border: editingEvent.isFree ? '1px solid #10b981' : '1px solid #cbd5e1',
+                      background: editingEvent.isFree ? '#ecfdf5' : '#ffffff',
+                      color: editingEvent.isFree ? '#047857' : '#64748b',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>money_off</span>
+                    <span>Ödənişsiz (Pulsuz)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditingEvent({ ...editingEvent, isFree: false })}
+                    style={{
+                      flex: 1,
+                      padding: '7px 10px',
+                      borderRadius: '6px',
+                      border: !editingEvent.isFree ? '1px solid #b45309' : '1px solid #cbd5e1',
+                      background: !editingEvent.isFree ? '#fffbeb' : '#ffffff',
+                      color: !editingEvent.isFree ? '#b45309' : '#64748b',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>payments</span>
+                    <span>Ödənişli</span>
+                  </button>
+                </div>
+              </div>
+
+              {!editingEvent.isFree && (
+                <div>
+                  <label className="admin-label">Məbləğ / Qiymət (AZN) *</label>
+                  <input
+                    type="text"
+                    required={!editingEvent.isFree}
+                    placeholder="məs: 25 AZN və ya 50 ₼"
+                    value={editingEvent.price || ''}
+                    onChange={(e) => setEditingEvent({ ...editingEvent, price: e.target.value })}
+                    className="admin-input"
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className="admin-label">Tədbir Statusu</label>
+                <select
+                  value={editingEvent.status || 'Aktiv'}
+                  onChange={(e) => setEditingEvent({ ...editingEvent, status: e.target.value })}
+                  className="admin-select"
+                >
+                  <option value="Aktiv">Aktiv (Qeydiyyat Açıqdır)</option>
+                  <option value="Gözlənilir">Gözlənilir (Planlaşdırılır)</option>
+                  <option value="Tamamlandı">Tamamlandı (Başa Çatdı)</option>
+                  <option value="Bağlıdır">Bağlıdır (Qeydiyyat Dayandırılıb)</option>
+                </select>
+              </div>
+            </div>
+
             {/* Inline Translations Panel - Events */}
             <AdminInlineTranslator
               item={editingEvent}
@@ -526,6 +714,159 @@ export default function AdminEventsTab() {
             />
           </div>
 
+          {/* Image upload & URL for New Event */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label className="admin-label">Tədbir Şəkli (URL və ya Şəkil Yüklə)</label>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <input
+                type="text"
+                placeholder="https://... və ya fayl seçin"
+                value={newEventImage}
+                onChange={(e) => setNewEventImage(e.target.value)}
+                className="admin-input"
+                style={{ flex: 1 }}
+              />
+              <label style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '7px 12px',
+                borderRadius: '6px',
+                background: '#f8fafc',
+                border: '1px solid #cbd5e1',
+                fontSize: '11px',
+                fontWeight: 600,
+                color: '#334155',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap'
+              }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>upload_file</span>
+                <span>Şəkil Seç</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      handleFileToDataUrl(e.target.files[0], (dataUrl) => {
+                        setNewEventImage(dataUrl);
+                      });
+                    }
+                  }}
+                />
+              </label>
+            </div>
+            {newEventImage && (
+              <div style={{ position: 'relative', width: '120px', height: '70px', borderRadius: '6px', overflow: 'hidden', border: '1px solid #e2e8f0', marginTop: '4px' }}>
+                <img src={newEventImage} alt="Yeni tədbir" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <button
+                  type="button"
+                  onClick={() => setNewEventImage('')}
+                  title="Şəkli sil"
+                  style={{
+                    position: 'absolute',
+                    top: '3px',
+                    right: '3px',
+                    background: 'rgba(239, 68, 68, 0.9)',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: '18px',
+                    height: '18px',
+                    fontSize: '11px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Price & Status for New Event */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+            <div>
+              <label className="admin-label">Ödəniş Növü</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => { setNewEventIsFree(true); setNewEventPrice(''); }}
+                  style={{
+                    flex: 1,
+                    padding: '7px 10px',
+                    borderRadius: '6px',
+                    border: newEventIsFree ? '1px solid #10b981' : '1px solid #cbd5e1',
+                    background: newEventIsFree ? '#ecfdf5' : '#ffffff',
+                    color: newEventIsFree ? '#047857' : '#64748b',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>money_off</span>
+                  <span>Ödənişsiz (Pulsuz)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setNewEventIsFree(false)}
+                  style={{
+                    flex: 1,
+                    padding: '7px 10px',
+                    borderRadius: '6px',
+                    border: !newEventIsFree ? '1px solid #b45309' : '1px solid #cbd5e1',
+                    background: !newEventIsFree ? '#fffbeb' : '#ffffff',
+                    color: !newEventIsFree ? '#b45309' : '#64748b',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>payments</span>
+                  <span>Ödənişli</span>
+                </button>
+              </div>
+            </div>
+
+            {!newEventIsFree && (
+              <div>
+                <label className="admin-label">Məbləğ / Qiymət (AZN) *</label>
+                <input
+                  type="text"
+                  required={!newEventIsFree}
+                  placeholder="məs: 25 AZN və ya 50 ₼"
+                  value={newEventPrice}
+                  onChange={(e) => setNewEventPrice(e.target.value)}
+                  className="admin-input"
+                />
+              </div>
+            )}
+
+            <div>
+              <label className="admin-label">Tədbir Statusu</label>
+              <select
+                value={newEventStatus}
+                onChange={(e) => setNewEventStatus(e.target.value)}
+                className="admin-select"
+              >
+                <option value="Aktiv">Aktiv (Qeydiyyat Açıqdır)</option>
+                <option value="Gözlənilir">Gözlənilir (Planlaşdırılır)</option>
+                <option value="Tamamlandı">Tamamlandı (Başa Çatdı)</option>
+                <option value="Bağlıdır">Bağlıdır (Qeydiyyat Dayandırılıb)</option>
+              </select>
+            </div>
+          </div>
+
           {/* Inline Translations Panel - New Event */}
           <AdminInlineTranslator
             item={{
@@ -625,46 +966,104 @@ export default function AdminEventsTab() {
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {paginatedEvents.map(e => (
-            <div key={e.id} className="admin-list-item" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
-              <div style={{ flex: 1, minWidth: '280px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
-                  <span className="admin-badge-gold">{e.typeBadge}</span>
-                  <span style={{ fontSize: '11px', color: '#64748b' }}>{e.datetime}</span>
-                  <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '4px', background: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0', fontFamily: 'monospace' }}>
-                    {e.registered || 0} / {e.capacity} İştirakçı
-                  </span>
+          {paginatedEvents.map(e => {
+            const isFree = !e.price || ['pulsuz', 'ödənişsiz', '0', '0 ₼', '0 azn'].includes(String(e.price).trim().toLowerCase());
+            const statusColor = e.status === 'Tamamlandı'
+              ? { bg: '#f1f5f9', text: '#475569', border: '#cbd5e1' }
+              : e.status === 'Gözlənilir'
+              ? { bg: '#eff6ff', text: '#1d4ed8', border: '#bfdbfe' }
+              : e.status === 'Bağlıdır'
+              ? { bg: '#fff1f2', text: '#be123c', border: '#fecdd3' }
+              : { bg: '#ecfdf5', text: '#047857', border: '#a7f3d0' };
+
+            return (
+              <div key={e.id} className="admin-list-item" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: '280px' }}>
+                  {/* Thumbnail */}
+                  <div style={{
+                    width: '64px',
+                    height: '64px',
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    background: '#f1f5f9',
+                    border: '1px solid #e2e8f0',
+                    flexShrink: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    {e.image ? (
+                      <img src={e.image} alt={e.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <span className="material-symbols-outlined" style={{ fontSize: '28px', color: '#94a3b8' }}>
+                        event
+                      </span>
+                    )}
+                  </div>
+
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
+                      <span className="admin-badge-gold">{e.typeBadge}</span>
+                      <span style={{
+                        fontSize: '10px',
+                        fontWeight: 700,
+                        padding: '2px 7px',
+                        borderRadius: '4px',
+                        background: statusColor.bg,
+                        color: statusColor.text,
+                        border: `1px solid ${statusColor.border}`
+                      }}>
+                        {e.status || 'Aktiv'}
+                      </span>
+                      <span style={{
+                        fontSize: '10px',
+                        fontWeight: 700,
+                        padding: '2px 7px',
+                        borderRadius: '4px',
+                        background: isFree ? '#ecfdf5' : '#fffbeb',
+                        color: isFree ? '#047857' : '#b45309',
+                        border: isFree ? '1px solid #a7f3d0' : '1px solid #fde68a'
+                      }}>
+                        {isFree ? 'Ödənişsiz' : e.price}
+                      </span>
+                      <span style={{ fontSize: '11px', color: '#64748b' }}>{e.datetime}</span>
+                      <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '4px', background: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0', fontFamily: 'monospace' }}>
+                        {e.registered || 0} / {e.capacity} İştirakçı
+                      </span>
+                    </div>
+                    <h5 style={{ fontSize: '15px', fontWeight: 700, fontFamily: "'Playfair Display',serif", color: '#0f172a', margin: '0 0 4px 0' }}>
+                      "{e.title}"
+                    </h5>
+                    {e.desc && <p style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.5, margin: '0 0 8px 0', maxWidth: '700px' }}>{e.desc}</p>}
+                    <div style={{ fontSize: '11px', color: '#64748b' }}>
+                      Aparıcı / Spiker: <strong style={{ color: '#0f172a' }}>{e.speaker}</strong>
+                    </div>
+                  </div>
                 </div>
-                <h5 style={{ fontSize: '15px', fontWeight: 700, fontFamily: "'Playfair Display',serif", color: '#0f172a', margin: '0 0 4px 0' }}>
-                  "{e.title}"
-                </h5>
-                {e.desc && <p style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.5, margin: '0 0 8px 0', maxWidth: '700px' }}>{e.desc}</p>}
-                <div style={{ fontSize: '11px', color: '#64748b' }}>
-                  Aparıcı / Spiker: <strong style={{ color: '#0f172a' }}>{e.speaker}</strong>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                  <button
+                    type="button"
+                    onClick={() => handleOpenEdit(e)}
+                    className="admin-btn-edit"
+                    title="Tədbiri redaktə et"
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>edit</span>
+                    <span>Redaktə</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEventToDelete(e)}
+                    className="admin-btn-danger"
+                    title="Sil"
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>delete</span>
+                    <span>Sil</span>
+                  </button>
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                <button
-                  type="button"
-                  onClick={() => handleOpenEdit(e)}
-                  className="admin-btn-edit"
-                  title="Tədbiri redaktə et"
-                >
-                  <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>edit</span>
-                  <span>Redaktə</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEventToDelete(e)}
-                  className="admin-btn-danger"
-                  title="Sil"
-                >
-                  <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>delete</span>
-                  <span>Sil</span>
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
