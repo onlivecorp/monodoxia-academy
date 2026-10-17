@@ -243,7 +243,7 @@ if ($action === 'get_all') {
     $languages = $safeQuery("SELECT * FROM mdx_languages WHERE is_active = 1 ORDER BY sort_order ASC");
     $translations = $safeQuery("SELECT * FROM mdx_translations");
     $applications = $safeQuery("SELECT * FROM mdx_applications WHERE archived = 0 ORDER BY applied_at DESC");
-    $form_fields = $safeQuery("SELECT * FROM mdx_application_form_fields WHERE is_active = 1 ORDER BY sort_order ASC");
+    $form_fields = $safeQuery("SELECT * FROM mdx_application_form_fields ORDER BY sort_order ASC");
     $notifications = $safeQuery("SELECT * FROM mdx_notifications ORDER BY created_at DESC LIMIT 50");
     $categories = $safeQuery("SELECT * FROM mdx_categories ORDER BY created_at ASC");
     $roles = $safeQuery("SELECT * FROM mdx_roles ORDER BY is_system DESC, name ASC");
@@ -1212,8 +1212,23 @@ if ($action === 'save_form_field' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $translations = $input['translations'] ?? [];
     $translations_json = is_array($translations) ? json_encode($translations, JSON_UNESCAPED_UNICODE) : (string)($translations ?: '{}');
 
-    // Auto-ensure translations_json column exists
+    // Auto-ensure table and translations_json column exist
     try {
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS `mdx_application_form_fields` (
+                `id` varchar(64) NOT NULL,
+                `target_type` varchar(32) NOT NULL DEFAULT 'all',
+                `label` varchar(255) NOT NULL,
+                `field_type` varchar(32) NOT NULL DEFAULT 'text',
+                `options_json` text DEFAULT NULL,
+                `placeholder` varchar(255) DEFAULT NULL,
+                `is_required` tinyint(1) NOT NULL DEFAULT 0,
+                `is_active` tinyint(1) NOT NULL DEFAULT 1,
+                `sort_order` int(11) NOT NULL DEFAULT 0,
+                `translations_json` longtext DEFAULT NULL,
+                PRIMARY KEY (`id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ");
         $pdo->exec("ALTER TABLE mdx_application_form_fields ADD COLUMN translations_json LONGTEXT DEFAULT NULL");
     } catch (PDOException $e) {}
 
@@ -1247,7 +1262,7 @@ if ($action === 'save_form_field' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             'isRequired' => (bool)$is_required,
             'isActive' => (bool)$is_active,
             'sortOrder' => $sort_order,
-            'translations' => is_array($translations) ? $translations : (json_decode($translations_json ?: '{}', true) ?: {})
+            'translations' => is_array($translations) ? $translations : (json_decode($translations_json ?: '{}', true) ?: [])
         ]
     ], JSON_UNESCAPED_UNICODE);
     exit();

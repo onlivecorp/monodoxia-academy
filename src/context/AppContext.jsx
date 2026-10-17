@@ -1392,53 +1392,71 @@ export function AppProvider({ children }) {
   // Form Fields Management
   const addFormField = (fieldData) => {
     const newField = {
-      id: 'fld_' + Date.now(),
-      targetType: fieldData.targetType || 'all',
-      target_type: fieldData.targetType || 'all',
-      label: fieldData.label,
-      fieldType: fieldData.fieldType || 'text',
-      field_type: fieldData.fieldType || 'text',
+      id: fieldData.id || ('fld_' + Date.now()),
+      targetType: fieldData.targetType || fieldData.target_type || 'all',
+      target_type: fieldData.targetType || fieldData.target_type || 'all',
+      label: fieldData.label || '',
+      fieldType: fieldData.fieldType || fieldData.field_type || 'text',
+      field_type: fieldData.fieldType || fieldData.field_type || 'text',
       options: fieldData.options || [],
       placeholder: fieldData.placeholder || '',
-      isRequired: Boolean(fieldData.isRequired),
-      is_required: fieldData.isRequired ? 1 : 0,
-      isActive: true,
-      is_active: 1,
-      sortOrder: (formFieldsList.length + 1),
-      sort_order: (formFieldsList.length + 1),
+      isRequired: Boolean(fieldData.isRequired !== undefined ? fieldData.isRequired : fieldData.is_required),
+      is_required: (fieldData.isRequired || fieldData.is_required) ? 1 : 0,
+      isActive: fieldData.isActive !== undefined ? Boolean(fieldData.isActive) : true,
+      is_active: (fieldData.isActive !== undefined ? fieldData.isActive : true) ? 1 : 0,
+      sortOrder: fieldData.sortOrder || fieldData.sort_order || (formFieldsList.length + 1),
+      sort_order: fieldData.sortOrder || fieldData.sort_order || (formFieldsList.length + 1),
       translations: fieldData.translations || {}
     };
-    setFormFieldsList(prev => [...prev, newField]);
+
+    setFormFieldsList(prev => {
+      const next = [...prev, newField];
+      localStorage.setItem('monodoxia_form_fields', JSON.stringify(next));
+      return next;
+    });
     showToast(`Form sahəsi əlavə edildi: ${newField.label}`, 'success');
 
     apiCall('save_form_field', newField).catch(() => {});
   };
 
   const updateFormField = (id, updates) => {
-    let mergedField = null;
-    setFormFieldsList(prev => prev.map(f => {
-      if (f.id === id) {
-        mergedField = {
-          ...f,
-          ...updates,
-          target_type: updates.targetType || updates.target_type || f.targetType || f.target_type,
-          field_type: updates.fieldType || updates.field_type || f.fieldType || f.field_type,
-          is_required: updates.isRequired !== undefined ? (updates.isRequired ? 1 : 0) : f.is_required,
-          translations: updates.translations || f.translations || {}
-        };
-        return mergedField;
-      }
-      return f;
-    }));
-    showToast('Form sahəsi yeniləndi', 'success');
+    const current = formFieldsList.find(f => f.id === id) || {};
+    const mergedField = {
+      ...current,
+      ...updates,
+      id,
+      targetType: updates.targetType || updates.target_type || current.targetType || current.target_type || 'all',
+      target_type: updates.targetType || updates.target_type || current.targetType || current.target_type || 'all',
+      fieldType: updates.fieldType || updates.field_type || current.fieldType || current.field_type || 'text',
+      field_type: updates.fieldType || updates.field_type || current.fieldType || current.field_type || 'text',
+      label: updates.label !== undefined ? updates.label : (current.label || ''),
+      placeholder: updates.placeholder !== undefined ? updates.placeholder : (current.placeholder || ''),
+      options: updates.options !== undefined ? updates.options : (current.options || []),
+      isRequired: updates.isRequired !== undefined ? Boolean(updates.isRequired) : Boolean(current.isRequired),
+      is_required: updates.isRequired !== undefined ? (updates.isRequired ? 1 : 0) : (current.is_required ? 1 : 0),
+      isActive: updates.isActive !== undefined ? Boolean(updates.isActive) : (current.isActive !== undefined ? Boolean(current.isActive) : true),
+      is_active: updates.isActive !== undefined ? (updates.isActive ? 1 : 0) : (current.is_active !== undefined ? (current.is_active ? 1 : 0) : 1),
+      sortOrder: updates.sortOrder || updates.sort_order || current.sortOrder || current.sort_order || 0,
+      sort_order: updates.sortOrder || updates.sort_order || current.sortOrder || current.sort_order || 0,
+      translations: updates.translations || current.translations || {}
+    };
 
-    if (mergedField) {
-      apiCall('save_form_field', mergedField).catch(() => {});
-    }
+    setFormFieldsList(prev => {
+      const next = prev.map(f => f.id === id ? mergedField : f);
+      localStorage.setItem('monodoxia_form_fields', JSON.stringify(next));
+      return next;
+    });
+
+    showToast('Form sahəsi yeniləndi', 'success');
+    apiCall('save_form_field', mergedField).catch(() => {});
   };
 
   const deleteFormField = (id) => {
-    setFormFieldsList(prev => prev.filter(f => f.id !== id));
+    setFormFieldsList(prev => {
+      const next = prev.filter(f => f.id !== id);
+      localStorage.setItem('monodoxia_form_fields', JSON.stringify(next));
+      return next;
+    });
     showToast('Form sahəsi silindi', 'info');
 
     apiCall('delete_form_field', { id }).catch(() => {});
