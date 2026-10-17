@@ -45,9 +45,14 @@ export default function ApplicationModal() {
       .sort((a, b) => (a.sortOrder || a.sort_order || 0) - (b.sortOrder || b.sort_order || 0));
   }, [formFieldsList, activeApplicationTarget]);
 
+  const hasPhoneField = useMemo(() => {
+    return relevantFields.some(f => f.id === 'fld_phone' || f.fieldType === 'tel');
+  }, [relevantFields]);
+
   useEffect(() => {
     if (activeApplicationTarget && currentUser) {
-      setUserPhone(currentUser.phone || '+994 ');
+      const defaultPhone = currentUser.phone || '+994 ';
+      setUserPhone(defaultPhone);
       setUserNote('');
       setValidationErrors({});
       // Set defaults for select fields
@@ -57,6 +62,8 @@ export default function ApplicationModal() {
         const opts = (trans.options && trans.options.length > 0) ? trans.options : (f.options || []);
         if (f.fieldType === 'select' && opts.length > 0) {
           initialResp[f.id] = opts[0];
+        } else if (f.id === 'fld_phone' || f.fieldType === 'tel') {
+          initialResp[f.id] = defaultPhone;
         } else {
           initialResp[f.id] = '';
         }
@@ -79,6 +86,9 @@ export default function ApplicationModal() {
 
   const handleFieldChange = (fieldId, val) => {
     setFormResponses(prev => ({ ...prev, [fieldId]: val }));
+    if (fieldId === 'fld_phone') {
+      setUserPhone(val);
+    }
     if (validationErrors[fieldId]) {
       setValidationErrors(prev => ({ ...prev, [fieldId]: null }));
     }
@@ -92,14 +102,16 @@ export default function ApplicationModal() {
     }
 
     const errors = {};
-    if (!userPhone.trim() || userPhone.trim() === '+994') {
+    const finalPhone = (hasPhoneField ? (formResponses['fld_phone'] || userPhone) : userPhone).trim();
+
+    if (!hasPhoneField && (!finalPhone || finalPhone === '+994')) {
       errors.phone = 'Əlaqə nömrəsi qeyd olunmalıdır.';
     }
 
     relevantFields.forEach(f => {
       if (f.isRequired) {
         const val = formResponses[f.id];
-        if (!val || !String(val).trim()) {
+        if (!val || !String(val).trim() || (f.fieldType === 'tel' && String(val).trim() === '+994')) {
           const trans = f.translations?.[lang] || {};
           const fLabel = trans.label || f.label;
           errors[f.id] = `${fLabel} mütləq doldurulmalıdır.`;
@@ -119,7 +131,7 @@ export default function ApplicationModal() {
         targetId: activeApplicationTarget.id,
         targetTitle: activeApplicationTarget.title,
         price: activeApplicationTarget.price,
-        userPhone: userPhone.trim(),
+        userPhone: finalPhone || currentUser.phone || '',
         userNote: userNote.trim(),
         formResponses: formResponses
       });
@@ -268,22 +280,24 @@ export default function ApplicationModal() {
                 </span>
               </div>
 
-              {/* Contact Phone */}
-              <div>
-                <label className="block text-xs font-semibold text-primary mb-1">
-                  Əlaqə Nömrəsi (WhatsApp) <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={userPhone}
-                  onChange={(e) => setUserPhone(e.target.value)}
-                  placeholder="+994 50 123 45 67"
-                  className="w-full px-3 py-2 rounded border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
-                />
-                {validationErrors.phone && (
-                  <span className="text-[11px] text-red-500 mt-1 block">{validationErrors.phone}</span>
-                )}
-              </div>
+              {/* Contact Phone (Fallback if not configured in dynamic fields) */}
+              {!hasPhoneField && (
+                <div>
+                  <label className="block text-xs font-semibold text-primary mb-1">
+                    Əlaqə Nömrəsi (WhatsApp) <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    value={userPhone}
+                    onChange={(e) => setUserPhone(e.target.value)}
+                    placeholder="+994 50 123 45 67"
+                    className="w-full px-3 py-2 rounded border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
+                  />
+                  {validationErrors.phone && (
+                    <span className="text-[11px] text-red-500 mt-1 block">{validationErrors.phone}</span>
+                  )}
+                </div>
+              )}
 
               {/* Dynamic Custom Fields */}
               {relevantFields.map(field => {
@@ -336,13 +350,19 @@ export default function ApplicationModal() {
                   );
                 }
 
+                const inputType = field.fieldType === 'number'
+                  ? 'number'
+                  : (field.fieldType === 'tel' || field.id === 'fld_phone'
+                      ? 'tel'
+                      : (field.fieldType === 'url' ? 'url' : 'text'));
+
                 return (
                   <div key={field.id}>
                     <label className="block text-xs font-semibold text-primary mb-1">
                       {label} {isRequired && <span className="text-red-500">*</span>}
                     </label>
                     <input
-                      type={field.fieldType === 'number' ? 'number' : 'text'}
+                      type={inputType}
                       value={formResponses[field.id] || ''}
                       onChange={(e) => handleFieldChange(field.id, e.target.value)}
                       placeholder={placeholder}
