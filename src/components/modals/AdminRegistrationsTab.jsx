@@ -460,7 +460,27 @@ export default function AdminRegistrationsTab() {
                 <label className="block font-bold text-primary mb-1">Müraciət Statusu</label>
                 <select
                   value={editForm.status}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, status: e.target.value }))}
+                  onChange={(e) => {
+                    const newStat = e.target.value;
+                    let nextPay = editForm.paymentStatus;
+                    let nextAtt = editForm.attendanceStatus;
+                    if (newStat === 'Təsdiqləndi' || newStat === 'Tamamlandı') {
+                      nextPay = 'Ödənilib';
+                      nextAtt = 'İştirak etdi';
+                    } else if (newStat === 'Rədd edildi' || newStat === 'Ləğv edildi') {
+                      nextPay = 'Qaytarıldı';
+                      nextAtt = 'İştirak etmədi';
+                    } else if (['Yeni', 'Baxılır', 'Gözləmədə'].includes(newStat)) {
+                      nextPay = 'Gözlənilir';
+                      nextAtt = 'Gözlənilir';
+                    }
+                    setEditForm(prev => ({
+                      ...prev,
+                      status: newStat,
+                      paymentStatus: nextPay,
+                      attendanceStatus: nextAtt
+                    }));
+                  }}
                   className="w-full px-3 py-2 rounded border border-outline-variant bg-surface-bright text-xs font-semibold focus:outline-none focus:border-secondary"
                 >
                   {APPLICATION_STATUSES.map(s => (

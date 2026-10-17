@@ -453,7 +453,7 @@ export default function AdminApplicationsTab() {
                               {/* Quick Approve button */}
                               {app.status !== 'Təsdiqləndi' && (
                                 <button
-                                  onClick={() => updateApplicationStatus(app.id, 'Təsdiqləndi', 'Admin paneldən təsdiqləndi.')}
+                                  onClick={() => updateApplicationStatus(app.id, 'Təsdiqləndi', 'Admin paneldən təsdiqləndi.', 'Ödənilib', 'İştirak etdi')}
                                   title="Təsdiqlə"
                                   className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 hover:bg-emerald-200 flex items-center justify-center transition-colors"
                                 >
@@ -464,7 +464,7 @@ export default function AdminApplicationsTab() {
                               {/* Quick Reject button */}
                               {app.status !== 'Rədd edildi' && (
                                 <button
-                                  onClick={() => updateApplicationStatus(app.id, 'Rədd edildi', 'Meyarlara uyğun hesab edilmədi.')}
+                                  onClick={() => updateApplicationStatus(app.id, 'Rədd edildi', 'Meyarlara uyğun hesab edilmədi.', 'Qaytarıldı', 'İştirak etmədi')}
                                   title="Rədd et"
                                   className="w-7 h-7 rounded-lg bg-rose-100 text-rose-800 hover:bg-rose-200 flex items-center justify-center transition-colors"
                                 >
@@ -669,7 +669,20 @@ export default function AdminApplicationsTab() {
                     <label className="block text-[11px] font-bold text-primary mb-1">Müraciət Statusu</label>
                     <select
                       value={statusInput}
-                      onChange={(e) => setStatusInput(e.target.value)}
+                      onChange={(e) => {
+                        const newStat = e.target.value;
+                        setStatusInput(newStat);
+                        if (newStat === 'Təsdiqləndi' || newStat === 'Tamamlandı') {
+                          setPaymentInput('Ödənilib');
+                          setAttendanceInput('İştirak etdi');
+                        } else if (newStat === 'Rədd edildi' || newStat === 'Ləğv edildi') {
+                          setPaymentInput('Qaytarıldı');
+                          setAttendanceInput('İştirak etmədi');
+                        } else if (['Yeni', 'Baxılır', 'Gözləmədə'].includes(newStat)) {
+                          setPaymentInput('Gözlənilir');
+                          setAttendanceInput('Gözlənilir');
+                        }
+                      }}
                       className="w-full px-2.5 py-1.5 rounded border border-outline-variant bg-surface-bright text-xs font-semibold focus:outline-none focus:border-secondary"
                     >
                       {APPLICATION_STATUSES.map(s => (

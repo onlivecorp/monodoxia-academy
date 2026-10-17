@@ -1365,14 +1365,32 @@ export function AppProvider({ children }) {
   const updateApplicationStatus = (appId, newStatus, adminNote = null, paymentStatus = null, attendanceStatus = null) => {
     let updatedApp = null;
 
+    let resolvedPayment = paymentStatus;
+    if (resolvedPayment === null || resolvedPayment === undefined) {
+      if (newStatus === 'Təsdiqləndi' || newStatus === 'Tamamlandı') {
+        resolvedPayment = 'Ödənilib';
+      } else if (newStatus === 'Rədd edildi' || newStatus === 'Ləğv edildi') {
+        resolvedPayment = 'Qaytarıldı';
+      }
+    }
+
+    let resolvedAttendance = attendanceStatus;
+    if (resolvedAttendance === null || resolvedAttendance === undefined) {
+      if (newStatus === 'Təsdiqləndi' || newStatus === 'Tamamlandı') {
+        resolvedAttendance = 'İştirak etdi';
+      } else if (newStatus === 'Rədd edildi' || newStatus === 'Ləğv edildi') {
+        resolvedAttendance = 'İştirak etmədi';
+      }
+    }
+
     setApplicationsList(prev => prev.map(app => {
       if (app.id === appId) {
         updatedApp = {
           ...app,
           status: newStatus,
           adminNote: adminNote !== null ? adminNote : app.adminNote,
-          paymentStatus: paymentStatus !== null ? paymentStatus : app.paymentStatus,
-          attendanceStatus: attendanceStatus !== null ? attendanceStatus : app.attendanceStatus
+          paymentStatus: resolvedPayment !== null && resolvedPayment !== undefined ? resolvedPayment : app.paymentStatus,
+          attendanceStatus: resolvedAttendance !== null && resolvedAttendance !== undefined ? resolvedAttendance : app.attendanceStatus
         };
         return updatedApp;
       }
@@ -1430,8 +1448,8 @@ export function AppProvider({ children }) {
         id: appId,
         status: newStatus,
         admin_note: adminNote,
-        payment_status: paymentStatus,
-        attendance_status: attendanceStatus
+        payment_status: updatedApp.paymentStatus,
+        attendance_status: updatedApp.attendanceStatus
       }).catch(() => {});
     }
   };
