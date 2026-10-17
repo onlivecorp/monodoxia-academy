@@ -52,8 +52,15 @@ export default function Academy() {
         </div>
 
         {/* Course Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {filteredCourses.map(c => {
+        {filteredCourses.length === 0 ? (
+          <div className="text-center py-16 px-4 rounded bg-surface-container-lowest border border-outline-variant/50 max-w-xl mx-auto shadow-sm">
+            <span className="material-symbols-outlined text-[44px] text-outline mb-2">school</span>
+            <p className="text-sm font-semibold text-primary font-serif">Hal-hazırda aktiv kurs mövcud deyil</p>
+            <p className="text-xs text-on-surface-variant mt-1">Yeni proqramlar və qeydiyyat tarixləri tezliklə elan olunacaqdır.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {filteredCourses.map(c => {
             const prog = progress[c.id] ? progress[c.id].percent : 0;
             const courseTitle = getLocalized(c, 'title', currentLang, defaultLang);
             const courseDesc = getLocalized(c, 'description', currentLang, defaultLang);
@@ -156,16 +163,19 @@ export default function Academy() {
               );
             })}
           </div>
+        )}
 
-        <div className="mt-12 text-center">
-          <a
-            className="inline-flex items-center gap-2 border border-secondary text-primary hover:bg-secondary/10 px-8 py-3 rounded text-label-md font-label-md tracking-wider transition-colors"
-            href="#akademiya"
-          >
-            <span>Bütün kurslara bax ({coursesList.length} Proqram)</span>
-            <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
-          </a>
-        </div>
+        {coursesList.length > 0 && (
+          <div className="mt-12 text-center">
+            <a
+              className="inline-flex items-center gap-2 border border-secondary text-primary hover:bg-secondary/10 px-8 py-3 rounded text-label-md font-label-md tracking-wider transition-colors"
+              href="#akademiya"
+            >
+              <span>Bütün kurslara bax ({coursesList.length} Proqram)</span>
+              <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+            </a>
+          </div>
+        )}
       </div>
     </section>
   );

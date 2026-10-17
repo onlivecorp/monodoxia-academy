@@ -127,16 +127,22 @@ export default function AcademyPage() {
 
           {/* Course Grid */}
           {filteredCourses.length === 0 ? (
-            <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-xl p-12 text-center max-w-md mx-auto">
+            <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-xl p-12 text-center max-w-md mx-auto shadow-sm">
               <span className="material-symbols-outlined text-4xl text-outline mb-2">school</span>
-              <h3 className="font-serif text-lg font-bold text-primary mb-1">Axtarışa uyğun kurs tapılmadı</h3>
-              <p className="text-xs text-on-surface-variant mb-4">Axtarış sözünü dəyişdirin və ya bütün kurslar bölməsinə keçin.</p>
-              <button
-                onClick={() => { setFilter('all'); setSearchQuery(''); }}
-                className="px-4 py-2 rounded bg-secondary text-on-secondary text-xs font-semibold"
-              >
-                Bütün Kursları Göstər
-              </button>
+              <h3 className="font-serif text-lg font-bold text-primary mb-1">
+                {coursesList.length === 0 ? 'Hal-hazırda aktiv kurs mövcud deyil' : 'Axtarışa uyğun kurs tapılmadı'}
+              </h3>
+              <p className="text-xs text-on-surface-variant mb-4">
+                {coursesList.length === 0 ? 'Yeni proqramlar və qeydiyyat tarixləri tezliklə elan olunacaqdır.' : 'Axtarış sözünü dəyişdirin və ya bütün kurslar bölməsinə keçin.'}
+              </p>
+              {coursesList.length > 0 && (
+                <button
+                  onClick={() => { setFilter('all'); setSearchQuery(''); }}
+                  className="px-4 py-2 rounded bg-secondary text-on-secondary text-xs font-semibold"
+                >
+                  Bütün Kursları Göstər
+                </button>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">

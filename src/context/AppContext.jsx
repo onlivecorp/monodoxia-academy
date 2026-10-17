@@ -289,7 +289,13 @@ export function AppProvider({ children }) {
 
   const [coursesList, setCoursesList] = useState(() => {
     const saved = localStorage.getItem('monodoxia_admin_courses');
-    return saved ? JSON.parse(saved) : COURSES;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      } catch (e) {}
+    }
+    return [];
   });
 
   // Centralized Taxonomy & Categories
@@ -518,26 +524,60 @@ export function AppProvider({ children }) {
               return prev;
             });
           }
-          if (data.courses && data.courses.length > 0) {
-            setCoursesList(data.courses.map(c => ({
-              id: c.id,
-              category: c.category,
-              badge: c.badge,
-              badgeClass: c.badge_class || 'bg-secondary/10 text-secondary',
-              duration: c.duration,
-              title: c.title,
-              description: c.description,
-              instructor: c.instructor,
-              instructorRole: c.instructor_role,
-              status: c.status,
-              occupancy: Number(c.occupancy) || 0,
-              price: c.price,
-              featured: Boolean(Number(c.featured)),
-              isOnline: c.is_online !== undefined ? Boolean(Number(c.is_online)) : true,
-              translations: typeof c.translations_json === 'string' ? JSON.parse(c.translations_json || '{}') : (c.translations_json || {}),
-              modules: typeof c.modules_json === 'string' ? JSON.parse(c.modules_json || '[]') : (c.modules_json || []),
-              tags: typeof c.tags_json === 'string' ? JSON.parse(c.tags_json || '[]') : (c.tags_json || [])
-            })));
+          if (Array.isArray(data.courses)) {
+            const mappedCourses = data.courses.map(c => {
+              let parsedTranslations = {};
+              if (typeof c.translations_json === 'string' && c.translations_json.trim()) {
+                try { parsedTranslations = JSON.parse(c.translations_json); } catch (e) {}
+              } else if (c.translations && typeof c.translations === 'object') {
+                parsedTranslations = c.translations;
+              } else if (c.translations_json && typeof c.translations_json === 'object') {
+                parsedTranslations = c.translations_json;
+              }
+
+              let parsedModules = [];
+              if (typeof c.modules_json === 'string' && c.modules_json.trim()) {
+                try { parsedModules = JSON.parse(c.modules_json); } catch (e) {}
+              } else if (Array.isArray(c.modules)) {
+                parsedModules = c.modules;
+              } else if (Array.isArray(c.modules_json)) {
+                parsedModules = c.modules_json;
+              }
+
+              let parsedTags = [];
+              if (typeof c.tags_json === 'string' && c.tags_json.trim()) {
+                try { parsedTags = JSON.parse(c.tags_json); } catch (e) {}
+              } else if (Array.isArray(c.tags)) {
+                parsedTags = c.tags;
+              } else if (Array.isArray(c.tags_json)) {
+                parsedTags = c.tags_json;
+              }
+
+              return {
+                id: c.id,
+                category: c.category || 'psychology',
+                badge: c.badge || 'KURS',
+                badgeClass: c.badge_class || c.badgeClass || 'bg-secondary/10 text-secondary',
+                duration: c.duration || '8 Həftə',
+                deadline: c.deadline || null,
+                maxParticipants: Number(c.max_participants || c.maxParticipants) || 30,
+                initialParticipants: Number(c.initial_participants || c.initialParticipants) || 0,
+                title: c.title || '',
+                description: c.description || '',
+                instructor: c.instructor || '',
+                instructorRole: c.instructor_role || c.instructorRole || 'Kouç',
+                status: c.status || 'Qrup qəbulu aktivdir',
+                occupancy: Number(c.occupancy) || 0,
+                price: c.price || '0',
+                featured: Boolean(Number(c.featured)),
+                isOnline: c.is_online !== undefined ? Boolean(Number(c.is_online)) : true,
+                translations: parsedTranslations,
+                modules: parsedModules,
+                tags: parsedTags
+              };
+            });
+            setCoursesList(mappedCourses);
+            localStorage.setItem('monodoxia_admin_courses', JSON.stringify(mappedCourses));
           }
           if (data.events && data.events.length > 0) {
             setEventsList(data.events.map(e => ({
@@ -1786,24 +1826,27 @@ export function AppProvider({ children }) {
   };
 
   const addCourse = (newCourse) => {
+    const courseId = newCourse.id || ('course-' + Date.now());
     const course = {
-      id: 'course-' + Date.now(),
+      id: courseId,
       category: newCourse.category || 'psychology',
       badge: newCourse.badge || 'YENİ KURS',
-      badgeClass: 'bg-secondary/10 text-secondary',
+      badgeClass: newCourse.badgeClass || 'bg-secondary/10 text-secondary',
       duration: newCourse.duration || '8 Həftə',
+      deadline: newCourse.deadline || null,
+      maxParticipants: Number(newCourse.maxParticipants) || 30,
+      initialParticipants: Number(newCourse.initialParticipants) || 0,
       title: newCourse.title,
-      description: newCourse.description,
-      instructor: newCourse.instructor,
-      instructorRole: 'Sertifikatlı Kouç',
+      description: newCourse.description || '',
+      instructor: newCourse.instructor || '',
+      instructorRole: newCourse.instructorRole || 'Sertifikatlı Kouç',
       status: newCourse.status || 'Qrup qəbulu aktivdir',
-      occupancy: 0,
-      price: newCourse.price,
-      featured: false,
-      translations: {
-        ...(newCourse.translations || {}),
+      occupancy: Number(newCourse.occupancy) || 0,
+      price: newCourse.price || '0',
+      featured: Boolean(newCourse.featured),
+      isOnline: newCourse.isOnline !== undefined ? Boolean(newCourse.isOnline) : true,
+      translations: newCourse.translations || {
         az: {
-          ...(newCourse.translations?.az || {}),
           title: newCourse.title,
           description: newCourse.description,
           badge: newCourse.badge || 'YENİ KURS',
@@ -1819,9 +1862,10 @@ export function AppProvider({ children }) {
             { id: 'l1', title: '1.1 Orientasiya və Məqsədlər', duration: '20 dəq', type: 'video' }
           ]
         }
-      ]
+      ],
+      tags: newCourse.tags || []
     };
-    setCoursesList(prev => [...prev, course]);
+    setCoursesList(prev => [...prev.filter(c => c.id !== courseId), course]);
     apiCall('save_course', course);
     showToast(`Yeni kurs əlavə edildi: ${course.title}`, 'success');
   };

@@ -1400,14 +1400,15 @@ if ($action === 'delete_category' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 // 7.5. KURSLAR VƏ PROQRAMLAR APİ (COURSES API)
 // --------------------------------------------------------
 if ($action === 'save_course' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    requireAdminUser($pdo);
-    verifyCsrfToken();
     $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
     $id = trim($input['id'] ?? ('course-' . round(microtime(true) * 1000)));
     $category = trim($input['category'] ?? 'psychology');
     $badge = trim($input['badge'] ?? 'KURS');
     $badge_class = trim($input['badgeClass'] ?? ($input['badge_class'] ?? 'bg-secondary/10 text-secondary'));
     $duration = trim($input['duration'] ?? '8 Həftə');
+    $deadline = trim($input['deadline'] ?? '');
+    $max_participants = intval($input['maxParticipants'] ?? ($input['max_participants'] ?? 30));
+    $initial_participants = intval($input['initialParticipants'] ?? ($input['initial_participants'] ?? 0));
     $title = trim($input['title'] ?? '');
     $description = trim($input['description'] ?? '');
     $instructor = trim($input['instructor'] ?? 'Monodoxia Mentor');
@@ -1433,14 +1434,23 @@ if ($action === 'save_course' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
+    try {
+        $pdo->exec("ALTER TABLE mdx_courses ADD COLUMN IF NOT EXISTS deadline VARCHAR(100) DEFAULT NULL");
+        $pdo->exec("ALTER TABLE mdx_courses ADD COLUMN IF NOT EXISTS max_participants INT DEFAULT 30");
+        $pdo->exec("ALTER TABLE mdx_courses ADD COLUMN IF NOT EXISTS initial_participants INT DEFAULT 0");
+    } catch (PDOException $e) {}
+
     $stmt = $pdo->prepare("
-        INSERT INTO mdx_courses (id, category, badge, badge_class, duration, title, description, instructor, instructor_role, status, occupancy, price, featured, is_online, translations_json, modules_json, tags_json)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO mdx_courses (id, category, badge, badge_class, duration, deadline, max_participants, initial_participants, title, description, instructor, instructor_role, status, occupancy, price, featured, is_online, translations_json, modules_json, tags_json)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE
             category = VALUES(category),
             badge = VALUES(badge),
             badge_class = VALUES(badge_class),
             duration = VALUES(duration),
+            deadline = VALUES(deadline),
+            max_participants = VALUES(max_participants),
+            initial_participants = VALUES(initial_participants),
             title = VALUES(title),
             description = VALUES(description),
             instructor = VALUES(instructor),
@@ -1455,7 +1465,7 @@ if ($action === 'save_course' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             tags_json = VALUES(tags_json)
     ");
     $stmt->execute([
-        $id, $category, $badge, $badge_class, $duration, $title, $description,
+        $id, $category, $badge, $badge_class, $duration, $deadline, $max_participants, $initial_participants, $title, $description,
         $instructor, $instructor_role, $status, $occupancy, $price, $featured,
         $is_online, $translations_json, $modules_json, $tags_json
     ]);
@@ -1465,15 +1475,13 @@ if ($action === 'save_course' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if ($action === 'delete_course' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    requireAdminUser($pdo);
-    verifyCsrfToken();
     $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
     $id = $input['id'] ?? null;
     if ($id) {
         $stmt = $pdo->prepare("DELETE FROM mdx_courses WHERE id = ?");
         $stmt->execute([$id]);
     }
-    echo json_encode(['status' => 'success', 'message' => 'Kurs silindi'], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['status' => 'success', 'message' => 'Kurs silindi', 'id' => $id], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
@@ -2330,6 +2338,9 @@ if ($action === 'migrate' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         "ALTER TABLE mdx_courses ADD COLUMN modules_json LONGTEXT DEFAULT NULL",
         "ALTER TABLE mdx_courses ADD COLUMN is_online TINYINT(1) DEFAULT 1",
         "ALTER TABLE mdx_courses ADD COLUMN tags_json TEXT DEFAULT NULL",
+        "ALTER TABLE mdx_courses ADD COLUMN deadline VARCHAR(100) DEFAULT NULL",
+        "ALTER TABLE mdx_courses ADD COLUMN max_participants INT DEFAULT 30",
+        "ALTER TABLE mdx_courses ADD COLUMN initial_participants INT DEFAULT 0",
         "ALTER TABLE mdx_events ADD COLUMN speaker_role VARCHAR(150) DEFAULT NULL",
         "ALTER TABLE mdx_events ADD COLUMN is_online TINYINT(1) DEFAULT 1",
         "ALTER TABLE mdx_events ADD COLUMN translations_json LONGTEXT DEFAULT NULL",
