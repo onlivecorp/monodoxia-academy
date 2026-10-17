@@ -79,15 +79,16 @@ export default function ClubPage() {
 
           {/* All Membership Tiers Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-            {clubTiersList.map((tier) => {
+            {(clubTiersList || []).map((tier) => {
               const currentTierStr = typeof userTier === 'string' ? userTier : (userTier?.id || userTier?.name || '');
               const isCurrentTier = currentTierStr.toLowerCase() === (tier.id || '').toLowerCase();
-              const isPopular = tier.id === 'premium';
+              const isPopular = tier.id === 'premium' || Boolean(tier.popular);
               const rawPrice = Number(tier.price) || 0;
               const displayPrice = billingCycle === 'annual' && rawPrice > 0
                 ? Math.round(rawPrice * 10)
                 : rawPrice;
-              const periodText = billingCycle === 'annual' && rawPrice > 0 ? '/ illik' : tier.period;
+              const periodText = billingCycle === 'annual' && rawPrice > 0 ? '/ illik' : (tier.period || '/ aylıq');
+              const tierName = getLocalized(tier, 'name', currentLang, defaultLang) || tier.name || tier.id || 'Klub Rezidentliyi';
 
               return (
                 <div
@@ -184,30 +185,35 @@ export default function ClubPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {(club.perks || [
+              {(Array.isArray(club.perks) && club.perks.length > 0 ? club.perks : [
                 "Həftəlik canlı mentorluq və mastermind sessiyaları",
                 "Özəl meditasiya və təcrübə arxivi (100+ saat)",
                 "Qapalı intellektual icma müzakirələri",
                 "Oflayn tədbirlərə və retreat-lərə VIP giriş"
-              ]).map((perk, pIdx) => (
-                <div key={pIdx} className="flex items-start gap-4 p-5 rounded-xl bg-surface-container-lowest border border-outline-variant/40">
-                  <div className="w-10 h-10 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
-                    <span className="material-symbols-outlined text-xl">
-                      {pIdx === 0 ? 'psychology' : pIdx === 1 ? 'graphic_eq' : pIdx === 2 ? 'forum' : 'nature_people'}
-                    </span>
+              ]).map((perk, pIdx) => {
+                const perkStr = typeof perk === 'string' ? perk : (perk?.text || perk?.title || '');
+                const title = perkStr.includes(':') ? perkStr.split(':')[0] : perkStr;
+                const desc = perkStr.includes(':') ? perkStr.split(':')[1] : (perk?.desc || '');
+                return (
+                  <div key={pIdx} className="flex items-start gap-4 p-5 rounded-xl bg-surface-container-lowest border border-outline-variant/40">
+                    <div className="w-10 h-10 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
+                      <span className="material-symbols-outlined text-xl">
+                        {pIdx === 0 ? 'psychology' : pIdx === 1 ? 'graphic_eq' : pIdx === 2 ? 'forum' : 'nature_people'}
+                      </span>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm text-primary mb-1">
+                        {title}
+                      </h4>
+                      {desc ? (
+                        <p className="text-xs text-on-surface-variant leading-relaxed">
+                          {desc}
+                        </p>
+                      ) : null}
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-bold text-sm text-primary mb-1">
-                      {perk.split(':')[0] || perk}
-                    </h4>
-                    {perk.includes(':') && (
-                      <p className="text-xs text-on-surface-variant leading-relaxed">
-                        {perk.split(':')[1]}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 

@@ -7,6 +7,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import ToastContainer from './components/ToastContainer';
 import MaintenanceScreen from './components/MaintenanceScreen';
+import ErrorBoundary from './components/ErrorBoundary';
 
 import AuthModal from './components/modals/AuthModal';
 const OnboardingModal = lazy(() => import('./components/modals/OnboardingModal'));
@@ -76,13 +77,15 @@ function AppContent() {
       <SafetyBanner />
       <Header />
       <main className="flex-1">
-        <Suspense fallback={
-          <div className="min-h-[40vh] flex items-center justify-center text-secondary">
-            <div className="w-8 h-8 border-2 border-secondary border-t-transparent rounded-full animate-spin" />
-          </div>
-        }>
-          {renderCurrentPage()}
-        </Suspense>
+        <ErrorBoundary>
+          <Suspense fallback={
+            <div className="min-h-[40vh] flex items-center justify-center text-secondary">
+              <div className="w-8 h-8 border-2 border-secondary border-t-transparent rounded-full animate-spin" />
+            </div>
+          }>
+            {renderCurrentPage()}
+          </Suspense>
+        </ErrorBoundary>
       </main>
       <Footer />
 
