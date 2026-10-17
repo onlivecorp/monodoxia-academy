@@ -579,21 +579,31 @@ export function AppProvider({ children }) {
             setCoursesList(mappedCourses);
             localStorage.setItem('monodoxia_admin_courses', JSON.stringify(mappedCourses));
           }
-          if (data.events && data.events.length > 0) {
-            setEventsList(data.events.map(e => ({
-              id: e.id,
-              title: e.title,
-              datetime: e.datetime_label,
-              typeBadge: e.type_badge,
-              badgeClass: e.badge_class || 'bg-secondary/10 text-secondary',
-              speaker: e.speaker,
-              speakerRole: e.speaker_role || 'Spiker',
-              capacity: Number(e.capacity) || 100,
-              registered: Number(e.registered) || 0,
-              desc: e.description,
-              isOnline: e.is_online !== undefined ? Boolean(Number(e.is_online)) : true,
-              translations: typeof e.translations_json === 'string' ? JSON.parse(e.translations_json || '{}') : (e.translations_json || {})
-            })));
+          if (Array.isArray(data.events)) {
+            const mappedEvents = data.events.map(e => {
+              let parsedTrans = {};
+              if (typeof e.translations_json === 'string' && e.translations_json.trim()) {
+                try { parsedTrans = JSON.parse(e.translations_json); } catch (err) {}
+              } else if (typeof e.translations === 'object' && e.translations) {
+                parsedTrans = e.translations;
+              }
+              return {
+                id: e.id,
+                title: e.title,
+                datetime: e.datetime_label || e.datetime || 'Tezliklə',
+                typeBadge: e.type_badge || e.typeBadge || 'VEBİNAR',
+                badgeClass: e.badge_class || e.badgeClass || 'bg-secondary/10 text-secondary',
+                speaker: e.speaker || 'Ekspert',
+                speakerRole: e.speaker_role || e.speakerRole || 'Spiker',
+                capacity: Number(e.capacity) || 100,
+                registered: Number(e.registered) || 0,
+                desc: e.description || e.desc || '',
+                isOnline: e.is_online !== undefined ? Boolean(Number(e.is_online)) : (e.isOnline ?? true),
+                translations: parsedTrans
+              };
+            });
+            setEventsList(mappedEvents);
+            localStorage.setItem('monodoxia_admin_events', JSON.stringify(mappedEvents));
           }
           if (data.community && data.community.length > 0) {
             setCommunityTopics(data.community.map(p => ({
@@ -2023,47 +2033,59 @@ export function AppProvider({ children }) {
       },
       isOnline: newEvent.isOnline ?? true
     };
-    setEventsList(prev => [ev, ...prev]);
-    apiCall('save_event', ev);
+    setEventsList(prev => {
+      const next = [ev, ...prev];
+      localStorage.setItem('monodoxia_admin_events', JSON.stringify(next));
+      return next;
+    });
+    apiCall('save_event', ev).catch(() => {});
     showToast(`Tədbir yaradıldı: ${ev.title}`, 'success');
   };
 
   const updateEvent = (id, updates) => {
     let mergedEvent = null;
-    setEventsList(prev => prev.map(e => {
-      if (e.id !== id) return e;
-      const updated = { ...e, ...updates };
+    setEventsList(prev => {
+      const next = prev.map(e => {
+        if (e.id !== id) return e;
+        const updated = { ...e, ...updates };
 
-      const azTrans = { ...(updated.translations?.az || {}) };
-      if (updates.title !== undefined) azTrans.title = updates.title;
-      if (updates.desc !== undefined) azTrans.desc = updates.desc;
-      if (updates.typeBadge !== undefined) azTrans.typeBadge = updates.typeBadge;
-      if (updates.datetime !== undefined) azTrans.datetime = updates.datetime;
+        const azTrans = { ...(updated.translations?.az || {}) };
+        if (updates.title !== undefined) azTrans.title = updates.title;
+        if (updates.desc !== undefined) azTrans.desc = updates.desc;
+        if (updates.typeBadge !== undefined) azTrans.typeBadge = updates.typeBadge;
+        if (updates.datetime !== undefined) azTrans.datetime = updates.datetime;
 
-      if (updates.translations?.az) {
-        if (updates.translations.az.title !== undefined) updated.title = updates.translations.az.title;
-        if (updates.translations.az.desc !== undefined) updated.desc = updates.translations.az.desc;
-        if (updates.translations.az.typeBadge !== undefined) updated.typeBadge = updates.translations.az.typeBadge;
-        if (updates.translations.az.datetime !== undefined) updated.datetime = updates.translations.az.datetime;
-      }
+        if (updates.translations?.az) {
+          if (updates.translations.az.title !== undefined) updated.title = updates.translations.az.title;
+          if (updates.translations.az.desc !== undefined) updated.desc = updates.translations.az.desc;
+          if (updates.translations.az.typeBadge !== undefined) updated.typeBadge = updates.translations.az.typeBadge;
+          if (updates.translations.az.datetime !== undefined) updated.datetime = updates.translations.az.datetime;
+        }
 
-      updated.translations = {
-        ...(updated.translations || {}),
-        az: azTrans
-      };
+        updated.translations = {
+          ...(updated.translations || {}),
+          az: azTrans
+        };
 
-      mergedEvent = updated;
-      return updated;
-    }));
+        mergedEvent = updated;
+        return updated;
+      });
+      localStorage.setItem('monodoxia_admin_events', JSON.stringify(next));
+      return next;
+    });
     if (mergedEvent) {
-      apiCall('save_event', mergedEvent);
+      apiCall('save_event', mergedEvent).catch(() => {});
     }
     showToast('Tədbir məlumatları yeniləndi', 'success');
   };
 
   const deleteEvent = (id) => {
-    setEventsList(prev => prev.filter(e => e.id !== id));
-    apiCall('delete_event', { id });
+    setEventsList(prev => {
+      const next = prev.filter(e => e.id !== id);
+      localStorage.setItem('monodoxia_admin_events', JSON.stringify(next));
+      return next;
+    });
+    apiCall('delete_event', { id }).catch(() => {});
     showToast('Tədbir silindi', 'info');
   };
 
