@@ -1323,21 +1323,18 @@ export function AppProvider({ children }) {
 
     // Also try API sync in background if configured
     try {
-      fetch('/api.php?action=submit_application', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: newApp.userId,
-          user_name: newApp.userName,
-          user_email: newApp.userEmail,
-          user_phone: newApp.userPhone,
-          target_type: newApp.targetType,
-          target_id: newApp.targetId,
-          target_title: newApp.targetTitle,
-          price: newApp.price,
-          form_responses: newApp.formResponses,
-          user_note: newApp.userNote
-        })
+      apiCall('submit_application', {
+        id: newApp.id,
+        user_id: newApp.userId,
+        user_name: newApp.userName,
+        user_email: newApp.userEmail,
+        user_phone: newApp.userPhone,
+        target_type: newApp.targetType,
+        target_id: newApp.targetId,
+        target_title: newApp.targetTitle,
+        price: newApp.price,
+        form_responses: newApp.formResponses,
+        user_note: newApp.userNote
       }).catch(() => {});
     } catch (e) {}
 
@@ -1391,25 +1388,18 @@ export function AppProvider({ children }) {
       showToast(`Müraciət statusu yeniləndi: ${newStatus}`, 'success');
 
       // Sync with API
-      try {
-        fetch('/api.php?action=update_application_status', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            id: appId,
-            status: newStatus,
-            admin_note: adminNote,
-            payment_status: paymentStatus,
-            attendance_status: attendanceStatus
-          })
-        }).catch(() => {});
-      } catch (e) {}
+      apiCall('update_application_status', {
+        id: appId,
+        status: newStatus,
+        admin_note: adminNote,
+        payment_status: paymentStatus,
+        attendance_status: attendanceStatus
+      }).catch(() => {});
     }
   };
 
   const cancelApplication = (appId) => {
     updateApplicationStatus(appId, 'Ləğv edildi', 'İstifadəçi tərəfindən ləğv edildi.');
-    // Note: updateApplicationStatus already calls showToast — no duplicate toast here
   };
 
   const deleteApplication = (appId, permanent = false) => {
@@ -1420,13 +1410,7 @@ export function AppProvider({ children }) {
     }
     showToast('Müraciət silindi / arxivləşdirildi.', 'info');
 
-    try {
-      fetch('/api.php?action=delete_application', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: appId, permanent })
-      }).catch(() => {});
-    } catch (e) {}
+    apiCall('delete_application', { id: appId, permanent }).catch(() => {});
   };
 
   // Form Fields Management

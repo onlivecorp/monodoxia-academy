@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { APPLICATION_STATUSES, TARGET_TYPE_MAP } from '../../data/applicationData';
+import { APPLICATION_STATUSES, TARGET_TYPE_MAP, INITIAL_FORM_FIELDS } from '../../data/applicationData';
+import { useLanguage } from '../../i18n/LanguageContext';
+import { getLocalized } from '../../i18n/localize';
 
 export default function ProfileModal() {
+  const { currentLang, defaultLang, t } = useLanguage();
   const {
     profileModalOpen,
     setProfileModalOpen,
@@ -14,6 +17,8 @@ export default function ProfileModal() {
     setOnboardingOpen,
     applicationsList,
     cancelApplication,
+    deleteApplication,
+    formFieldsList = [],
     userNotifications,
     markNotificationRead,
     clearNotifications,
@@ -71,6 +76,36 @@ export default function ProfileModal() {
   const myApplications = (applicationsList || []).filter(a => a.userId === currentUser.id && !a.archived);
   const myNotifications = (userNotifications || []).filter(n => n.userId === currentUser.id);
   const unreadCount = myNotifications.filter(n => !n.isRead).length;
+
+  const fallbackFieldDict = {
+    fld_phone: { az: 'Əlaqə Nömrəsi (WhatsApp)', en: 'Contact Number (WhatsApp)', tr: 'İletişim Numarası (WhatsApp)', ru: 'Контактный Номер (WhatsApp)' },
+    fld_exp: { az: 'Təcrübə / Hazırlıq Səviyyəniz', en: 'Experience / Preparation Level', tr: 'Deneyim / Hazırlık Seviyeniz', ru: 'Опыт / Уровень Подготовки' },
+    fld_goal: { az: 'Müraciət Məqsədi və Gözləntiləriniz', en: 'Application Purpose & Expectations', tr: 'Başvuru Amacı ve Beklentileriniz', ru: 'Цель Заявки и Ожидания' },
+    fld_prof: { az: 'Peşəniz və Hazırkı Fəaliyyət Sahəniz', en: 'Profession & Current Field', tr: 'Mesleğiniz ve Mevcut Faaliyet Alanınız', ru: 'Профессия и Сфера Деятельности' },
+    fld_file: { az: 'CV / Rezüme və ya Sənəd Linki', en: 'CV / Resume or Document Link', tr: 'CV / Özgeçmiş veya Belge Bağlantısı', ru: 'CV / Резюме или Ссылка на Документ' },
+    fld_telegram: { az: 'Telegram İstifadəçi Adınız (@username)', en: 'Telegram Username (@username)', tr: 'Telegram Kullanıcı Adınız (@username)', ru: 'Имя Пользователя Telegram (@username)' },
+    fld_source: { az: 'Tədbir haqqında haradan eşitmisiniz?', en: 'Where did you hear about the event?', tr: 'Etkinliği nereden duydunuz?', ru: 'Откуда вы узнали о мероприятии?' }
+  };
+
+  const getFieldLabel = (fieldKey) => {
+    // 1. Check formFieldsList from AppContext
+    const foundInList = (formFieldsList || []).find(f => f.id === fieldKey || f.key === fieldKey);
+    if (foundInList) {
+      return getLocalized(foundInList, 'label', currentLang, defaultLang, foundInList.label || fieldKey);
+    }
+    // 2. Check INITIAL_FORM_FIELDS
+    const foundInInitial = (INITIAL_FORM_FIELDS || []).find(f => f.id === fieldKey || f.key === fieldKey);
+    if (foundInInitial) {
+      return getLocalized(foundInInitial, 'label', currentLang, defaultLang, foundInInitial.label || fieldKey);
+    }
+    // 3. Fallback dictionary
+    if (fallbackFieldDict[fieldKey]) {
+      const dict = fallbackFieldDict[fieldKey];
+      return dict[currentLang] || dict[defaultLang] || dict.az || fieldKey;
+    }
+    // 4. Clean up raw keys like fld_1792261416101 or underscores
+    return fieldKey.replace(/^fld_/, '').replace(/_/g, ' ');
+  };
 
   const handleAvatarFile = (e) => {
     const file = e.target.files?.[0];
@@ -765,14 +800,31 @@ export default function ProfileModal() {
 
                             {canCancel && (
                               <button
-                                onClick={() => {
-                                  if (window.confirm('Bu müraciəti ləğv etmək istədiyinizdən əminsiniz?')) {
-                                    cancelApplication(app.id);
-                                  }
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  cancelApplication(app.id);
                                 }}
-                                className="text-rose-600 hover:text-rose-800 text-[11px] font-semibold hover:underline"
+                                className="text-rose-600 hover:text-rose-800 text-[11px] font-semibold hover:underline flex items-center gap-1 transition-colors"
                               >
+                                <span className="material-symbols-outlined text-[14px]">cancel</span>
                                 Müraciəti Ləğv Et
+                              </button>
+                            )}
+                            {app.status === 'Ləğv edildi' && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  deleteApplication(app.id, true);
+                                }}
+                                className="text-outline hover:text-rose-600 text-[11px] font-medium hover:underline flex items-center gap-1 transition-colors"
+                                title="Müraciəti tarixçədən təmizlə"
+                              >
+                                <span className="material-symbols-outlined text-[13px]">delete</span>
+                                Sil
                               </button>
                             )}
                           </div>
@@ -790,9 +842,13 @@ export default function ProfileModal() {
                               </div>
                             )}
                             {Object.entries(app.formResponses || {}).map(([key, val]) => (
-                              <div key={key}>
-                                <strong className="text-on-surface-variant block">{key}:</strong>
-                                <span className="text-primary">{String(val)}</span>
+                              <div key={key} className="bg-surface-bright/60 p-2 rounded border border-outline-variant/20">
+                                <strong className="text-on-surface-variant block text-[11px] font-semibold mb-0.5">
+                                  {getFieldLabel(key)}:
+                                </strong>
+                                <span className="text-primary font-medium text-xs break-words">
+                                  {String(val || '—')}
+                                </span>
                               </div>
                             ))}
                           </div>

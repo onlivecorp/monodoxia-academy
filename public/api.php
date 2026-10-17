@@ -1062,10 +1062,18 @@ if ($action === 'submit_application' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    $app_id = 'APP-' . strtoupper(substr(uniqid(), -6));
+    $app_id = !empty($input['id']) ? trim($input['id']) : ('APP-' . strtoupper(substr(uniqid(), -6)));
     $stmt = $pdo->prepare("
         INSERT INTO mdx_applications (id, user_id, user_name, user_email, user_phone, target_type, target_id, target_title, price, form_responses, user_note, status, payment_status, attendance_status, applied_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Yeni', 'Tələb olunmur', 'Gözlənilir', NOW())
+        ON DUPLICATE KEY UPDATE
+            user_name = VALUES(user_name),
+            user_email = VALUES(user_email),
+            user_phone = VALUES(user_phone),
+            target_title = VALUES(target_title),
+            price = VALUES(price),
+            form_responses = VALUES(form_responses),
+            user_note = VALUES(user_note)
     ");
     $stmt->execute([$app_id, $user_id, $user_name, $user_email, $user_phone, $target_type, $target_id, $target_title, $price, $form_responses, $user_note]);
 
@@ -1092,10 +1100,10 @@ if ($action === 'submit_application' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if ($action === 'update_application_status' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $input = json_decode(file_get_contents('php://input'), true);
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
 
-    $id = $input['id'] ?? null;
-    $new_status = $input['status'] ?? null;
+    $id = trim($input['id'] ?? '');
+    $new_status = trim($input['status'] ?? '');
     $admin_note = $input['admin_note'] ?? null;
     $payment_status = $input['payment_status'] ?? null;
     $attendance_status = $input['attendance_status'] ?? null;
@@ -1103,17 +1111,6 @@ if ($action === 'update_application_status' && $_SERVER['REQUEST_METHOD'] === 'P
     if (!$id || !$new_status) {
         http_response_code(400);
         echo json_encode(['status' => 'error', 'message' => 'ID və status tələb olunur.'], JSON_UNESCAPED_UNICODE);
-        exit();
-    }
-
-    // Fetch existing
-    $getStmt = $pdo->prepare("SELECT * FROM mdx_applications WHERE id = ?");
-    $getStmt->execute([$id]);
-    $app = $getStmt->fetch();
-
-    if (!$app) {
-        http_response_code(404);
-        echo json_encode(['status' => 'error', 'message' => 'Müraciət tapılmadı.'], JSON_UNESCAPED_UNICODE);
         exit();
     }
 
@@ -1138,32 +1135,7 @@ if ($action === 'update_application_status' && $_SERVER['REQUEST_METHOD'] === 'P
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
 
-    // Notify user
-    try {
-        $notifType = ($new_status === 'Təsdiqləndi' || $new_status === 'Tamamlandı') ? 'success' : (($new_status === 'Rədd edildi' || $new_status === 'Ləğv edildi') ? 'error' : 'warning');
-        $notifMsg = "Sizin \"{$app['target_title']}\" müraciətinizin statusu yeniləndi: {$new_status}.";
-        if ($admin_note) {
-            $notifMsg .= " Qeyd: {$admin_note}";
-        }
-
-        $notifStmt = $pdo->prepare("
-            INSERT INTO mdx_notifications (id, user_id, title, message, type, is_read, created_at)
-            VALUES (?, ?, ?, ?, ?, 0, NOW())
-        ");
-        $notifStmt->execute([
-            'NOTIF-' . uniqid(),
-            $app['user_id'],
-            "Status Yeniləndi: {$new_status}",
-            $notifMsg,
-            $notifType
-        ]);
-    } catch (PDOException $ne) {}
-
-    echo json_encode([
-        'status' => 'success',
-        'message' => "Müraciət statusu uğurla yeniləndi ({$new_status})",
-        'id' => $id
-    ], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['status' => 'success', 'message' => 'Müraciət statusu yeniləndi', 'id' => $id, 'status' => $new_status], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
