@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
+import { useLanguage } from '../../i18n/LanguageContext';
 import { TARGET_TYPE_MAP, APPLICATION_STATUSES } from '../../data/applicationData';
 
 export default function ApplicationModal() {
+  const { lang } = useLanguage();
   const {
     applicationModalOpen,
     setApplicationModalOpen,
@@ -50,15 +52,17 @@ export default function ApplicationModal() {
       // Set defaults for select fields
       const initialResp = {};
       relevantFields.forEach(f => {
-        if (f.fieldType === 'select' && f.options && f.options.length > 0) {
-          initialResp[f.id] = f.options[0];
+        const trans = f.translations?.[lang] || {};
+        const opts = (trans.options && trans.options.length > 0) ? trans.options : (f.options || []);
+        if (f.fieldType === 'select' && opts.length > 0) {
+          initialResp[f.id] = opts[0];
         } else {
           initialResp[f.id] = '';
         }
       });
       setFormResponses(initialResp);
     }
-  }, [activeApplicationTarget, currentUser, relevantFields]);
+  }, [activeApplicationTarget, currentUser, relevantFields, lang]);
 
   if (!applicationModalOpen || !activeApplicationTarget) return null;
 
@@ -95,7 +99,9 @@ export default function ApplicationModal() {
       if (f.isRequired) {
         const val = formResponses[f.id];
         if (!val || !String(val).trim()) {
-          errors[f.id] = `${f.label} mütləq doldurulmalıdır.`;
+          const trans = f.translations?.[lang] || {};
+          const fLabel = trans.label || f.label;
+          errors[f.id] = `${fLabel} mütləq doldurulmalıdır.`;
         }
       }
     });
@@ -282,19 +288,27 @@ export default function ApplicationModal() {
               {relevantFields.map(field => {
                 const isRequired = field.isRequired;
                 const err = validationErrors[field.id];
+                const trans = field.translations?.[lang] || {};
+                const label = trans.label || field.label;
+                const placeholder = trans.placeholder !== undefined && trans.placeholder !== ''
+                  ? trans.placeholder
+                  : (field.placeholder || '');
+                const options = (trans.options && trans.options.length > 0)
+                  ? trans.options
+                  : (field.options || []);
 
                 if (field.fieldType === 'select') {
                   return (
                     <div key={field.id}>
                       <label className="block text-xs font-semibold text-primary mb-1">
-                        {field.label} {isRequired && <span className="text-red-500">*</span>}
+                        {label} {isRequired && <span className="text-red-500">*</span>}
                       </label>
                       <select
                         value={formResponses[field.id] || ''}
                         onChange={(e) => handleFieldChange(field.id, e.target.value)}
                         className="w-full px-3 py-2 rounded border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
                       >
-                        {(field.options || []).map((opt, idx) => (
+                        {options.map((opt, idx) => (
                           <option key={idx} value={opt}>{opt}</option>
                         ))}
                       </select>
@@ -307,13 +321,13 @@ export default function ApplicationModal() {
                   return (
                     <div key={field.id}>
                       <label className="block text-xs font-semibold text-primary mb-1">
-                        {field.label} {isRequired && <span className="text-red-500">*</span>}
+                        {label} {isRequired && <span className="text-red-500">*</span>}
                       </label>
                       <textarea
                         rows={2}
                         value={formResponses[field.id] || ''}
                         onChange={(e) => handleFieldChange(field.id, e.target.value)}
-                        placeholder={field.placeholder || ''}
+                        placeholder={placeholder}
                         className="w-full px-3 py-2 rounded border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
                       />
                       {err && <span className="text-[11px] text-red-500 mt-1 block">{err}</span>}
@@ -324,13 +338,13 @@ export default function ApplicationModal() {
                 return (
                   <div key={field.id}>
                     <label className="block text-xs font-semibold text-primary mb-1">
-                      {field.label} {isRequired && <span className="text-red-500">*</span>}
+                      {label} {isRequired && <span className="text-red-500">*</span>}
                     </label>
                     <input
                       type={field.fieldType === 'number' ? 'number' : 'text'}
                       value={formResponses[field.id] || ''}
                       onChange={(e) => handleFieldChange(field.id, e.target.value)}
-                      placeholder={field.placeholder || ''}
+                      placeholder={placeholder}
                       className="w-full px-3 py-2 rounded border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
                     />
                     {err && <span className="text-[11px] text-red-500 mt-1 block">{err}</span>}

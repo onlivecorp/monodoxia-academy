@@ -671,6 +671,20 @@ export function AppProvider({ children }) {
               appliedAt: a.applied_at
             })));
           }
+          if (data.form_fields && data.form_fields.length > 0) {
+            setFormFieldsList(data.form_fields.map(f => ({
+              id: f.id,
+              targetType: f.target_type,
+              label: f.label,
+              fieldType: f.field_type,
+              options: typeof f.options_json === 'string' ? JSON.parse(f.options_json || '[]') : (f.options_json || []),
+              placeholder: f.placeholder || '',
+              isRequired: Boolean(Number(f.is_required)),
+              isActive: Boolean(Number(f.is_active ?? 1)),
+              sortOrder: Number(f.sort_order) || 0,
+              translations: typeof f.translations_json === 'string' ? JSON.parse(f.translations_json || '{}') : (f.translations_json || {})
+            })));
+          }
           if (data.settings && data.settings.length > 0) {
             const mappedSettings = {};
             data.settings.forEach(s => {
@@ -1361,7 +1375,8 @@ export function AppProvider({ children }) {
       placeholder: fieldData.placeholder || '',
       isRequired: Boolean(fieldData.isRequired),
       isActive: true,
-      sortOrder: (formFieldsList.length + 1)
+      sortOrder: (formFieldsList.length + 1),
+      translations: fieldData.translations || {}
     };
     setFormFieldsList(prev => [...prev, newField]);
     showToast(`Form sahəsi əlavə edildi: ${newField.label}`, 'success');

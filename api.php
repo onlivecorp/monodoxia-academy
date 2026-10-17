@@ -1196,18 +1196,20 @@ if ($action === 'save_form_field' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     verifyCsrfToken();
     $input = json_decode(file_get_contents('php://input'), true);
     $id = $input['id'] ?? ('fld_' . uniqid());
-    $target_type = $input['target_type'] ?? 'all';
+    $target_type = $input['target_type'] ?? ($input['targetType'] ?? 'all');
     $label = $input['label'] ?? '';
-    $field_type = $input['field_type'] ?? 'text';
+    $field_type = $input['field_type'] ?? ($input['fieldType'] ?? 'text');
     $options_json = is_array($input['options'] ?? null) ? json_encode($input['options'], JSON_UNESCAPED_UNICODE) : ($input['options_json'] ?? null);
     $placeholder = $input['placeholder'] ?? '';
     $is_required = !empty($input['is_required']) || !empty($input['isRequired']) ? 1 : 0;
-    $is_active = isset($input['is_active']) ? ($input['is_active'] ? 1 : 0) : 1;
+    $is_active = isset($input['is_active']) ? ($input['is_active'] ? 1 : 0) : (isset($input['isActive']) ? ($input['isActive'] ? 1 : 0) : 1);
     $sort_order = intval($input['sort_order'] ?? ($input['sortOrder'] ?? 0));
+    $translations = $input['translations'] ?? [];
+    $translations_json = is_array($translations) ? json_encode($translations, JSON_UNESCAPED_UNICODE) : (string)($translations ?: '{}');
 
     $stmt = $pdo->prepare("
-        INSERT INTO mdx_application_form_fields (id, target_type, label, field_type, options_json, placeholder, is_required, is_active, sort_order)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO mdx_application_form_fields (id, target_type, label, field_type, options_json, placeholder, is_required, is_active, sort_order, translations_json)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE
             target_type = VALUES(target_type),
             label = VALUES(label),
@@ -1216,9 +1218,10 @@ if ($action === 'save_form_field' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             placeholder = VALUES(placeholder),
             is_required = VALUES(is_required),
             is_active = VALUES(is_active),
-            sort_order = VALUES(sort_order)
+            sort_order = VALUES(sort_order),
+            translations_json = VALUES(translations_json)
     ");
-    $stmt->execute([$id, $target_type, $label, $field_type, $options_json, $placeholder, $is_required, $is_active, $sort_order]);
+    $stmt->execute([$id, $target_type, $label, $field_type, $options_json, $placeholder, $is_required, $is_active, $sort_order, $translations_json]);
 
     echo json_encode(['status' => 'success', 'message' => 'Form sahəsi yadda saxlandı', 'id' => $id], JSON_UNESCAPED_UNICODE);
     exit();
@@ -2129,6 +2132,7 @@ if ($action === 'migrate' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             `is_required` tinyint(1) NOT NULL DEFAULT 0,
             `is_active` tinyint(1) NOT NULL DEFAULT 1,
             `sort_order` int(11) NOT NULL DEFAULT 0,
+            `translations_json` longtext DEFAULT NULL,
             PRIMARY KEY (`id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
@@ -2280,7 +2284,8 @@ if ($action === 'migrate' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         "ALTER TABLE mdx_community_posts ADD COLUMN category VARCHAR(50) DEFAULT NULL",
         "ALTER TABLE mdx_community_posts ADD COLUMN translations_json LONGTEXT DEFAULT NULL",
         "ALTER TABLE mdx_categories ADD COLUMN translations_json LONGTEXT DEFAULT NULL",
-        "ALTER TABLE mdx_club_tiers ADD COLUMN translations LONGTEXT DEFAULT NULL"
+        "ALTER TABLE mdx_club_tiers ADD COLUMN translations LONGTEXT DEFAULT NULL",
+        "ALTER TABLE mdx_application_form_fields ADD COLUMN translations_json LONGTEXT DEFAULT NULL"
     ];
     foreach ($alterStatements as $alterSql) {
         try {

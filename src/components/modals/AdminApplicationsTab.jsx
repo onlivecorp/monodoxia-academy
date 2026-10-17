@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
+import { useLanguage } from '../../i18n/LanguageContext';
 import { APPLICATION_STATUSES, TARGET_TYPE_MAP, PAYMENT_STATUSES, ATTENDANCE_STATUSES } from '../../data/applicationData';
 
 export default function AdminApplicationsTab() {
@@ -15,6 +16,25 @@ export default function AdminApplicationsTab() {
     showToast
   } = useApp();
 
+  const { supportedLangs = [] } = useLanguage();
+  const langList = (supportedLangs && supportedLangs.length > 0 ? supportedLangs : ['az', 'en', 'tr', 'ru']).map(l => {
+    if (typeof l === 'string') return { code: l, name: l.toUpperCase() };
+    return {
+      code: l.code || 'az',
+      name: l.name || (l.code || 'az').toUpperCase()
+    };
+  });
+
+  const emptyFieldTranslations = () => {
+    const res = {};
+    const baseCodes = ['az', 'en', 'tr', 'ru'];
+    const codes = [...new Set([...baseCodes, ...langList.map(l => l.code)])];
+    codes.forEach(c => {
+      res[c] = { label: '', placeholder: '', optionsText: '' };
+    });
+    return res;
+  };
+
   const [activeSubTab, setActiveSubTab] = useState('list'); // 'list' | 'fields'
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
@@ -28,13 +48,12 @@ export default function AdminApplicationsTab() {
   // Form Field Builder State
   const [showAddFieldModal, setShowAddFieldModal] = useState(false);
   const [editingField, setEditingField] = useState(null);
+  const [fieldModalLangTab, setFieldModalLangTab] = useState('az');
   const [fieldForm, setFieldForm] = useState({
     targetType: 'all',
-    label: '',
     fieldType: 'text',
-    optionsText: '',
-    placeholder: '',
-    isRequired: false
+    isRequired: false,
+    translations: emptyFieldTranslations()
   });
 
   // Filtered applications
@@ -95,60 +114,93 @@ export default function AdminApplicationsTab() {
     showToast(`Müraciət məlumatları yeniləndi (#${selectedApp.id})`, 'success');
   };
 
-  const handleSaveField = (e) => {
-    e.preventDefault();
-    if (!fieldForm.label.trim()) {
-      showToast('Sahənin adı boş ola bilməz', 'error');
-      return;
-    }
-
-    const options = fieldForm.fieldType === 'select'
-      ? fieldForm.optionsText.split(',').map(s => s.trim()).filter(Boolean)
-      : [];
-
-    if (editingField) {
-      updateFormField(editingField.id, {
-        targetType: fieldForm.targetType,
-        label: fieldForm.label.trim(),
-        fieldType: fieldForm.fieldType,
-        options,
-        placeholder: fieldForm.placeholder.trim(),
-        isRequired: fieldForm.isRequired
-      });
-    } else {
-      addFormField({
-        targetType: fieldForm.targetType,
-        label: fieldForm.label.trim(),
-        fieldType: fieldForm.fieldType,
-        options,
-        placeholder: fieldForm.placeholder.trim(),
-        isRequired: fieldForm.isRequired
-      });
-    }
-
-    setShowAddFieldModal(false);
+  const openAddField = () => {
     setEditingField(null);
     setFieldForm({
       targetType: 'all',
-      label: '',
       fieldType: 'text',
-      optionsText: '',
-      placeholder: '',
-      isRequired: false
+      isRequired: false,
+      translations: emptyFieldTranslations()
     });
+    setFieldModalLangTab('az');
+    setShowAddFieldModal(true);
   };
 
   const openEditField = (f) => {
     setEditingField(f);
+    const existingTrans = f.translations || {};
+    const trans = emptyFieldTranslations();
+    Object.keys(trans).forEach(code => {
+      const t = existingTrans[code] || {};
+      trans[code] = {
+        label: t.label || (code === 'az' ? f.label || '' : ''),
+        placeholder: t.placeholder !== undefined ? t.placeholder : (code === 'az' ? f.placeholder || '' : ''),
+        optionsText: Array.isArray(t.options)
+          ? t.options.join(', ')
+          : (typeof t.optionsText === 'string'
+              ? t.optionsText
+              : (code === 'az' && Array.isArray(f.options) ? f.options.join(', ') : ''))
+      };
+    });
     setFieldForm({
       targetType: f.targetType || 'all',
-      label: f.label || '',
       fieldType: f.fieldType || 'text',
-      optionsText: (f.options || []).join(', '),
-      placeholder: f.placeholder || '',
-      isRequired: Boolean(f.isRequired)
+      isRequired: Boolean(f.isRequired),
+      translations: trans
     });
+    setFieldModalLangTab('az');
     setShowAddFieldModal(true);
+  };
+
+  const handleSaveField = (e) => {
+    e.preventDefault();
+    const azData = fieldForm.translations?.az || {};
+    const primaryLabel = (azData.label || Object.values(fieldForm.translations || {}).find(t => t.label?.trim())?.label || '').trim();
+
+    if (!primaryLabel) {
+      showToast('Sahənin adı (AZ) və ya ən azı bir dildə qeyd olunmalıdır', 'error');
+      return;
+    }
+
+    const cleanTranslations = {};
+    Object.keys(fieldForm.translations || {}).forEach(code => {
+      const t = fieldForm.translations[code] || {};
+      const opts = fieldForm.fieldType === 'select' && t.optionsText
+        ? t.optionsText.split(',').map(s => s.trim()).filter(Boolean)
+        : [];
+      cleanTranslations[code] = {
+        label: (t.label || '').trim(),
+        placeholder: (t.placeholder || '').trim(),
+        options: opts
+      };
+    });
+
+    const primaryOptions = fieldForm.fieldType === 'select'
+      ? (cleanTranslations.az?.options?.length > 0
+          ? cleanTranslations.az.options
+          : Object.values(cleanTranslations).find(t => t.options?.length > 0)?.options || [])
+      : [];
+
+    const primaryPlaceholder = cleanTranslations.az?.placeholder || '';
+
+    const payload = {
+      targetType: fieldForm.targetType,
+      label: primaryLabel,
+      fieldType: fieldForm.fieldType,
+      options: primaryOptions,
+      placeholder: primaryPlaceholder,
+      isRequired: fieldForm.isRequired,
+      translations: cleanTranslations
+    };
+
+    if (editingField) {
+      updateFormField(editingField.id, payload);
+    } else {
+      addFormField(payload);
+    }
+
+    setShowAddFieldModal(false);
+    setEditingField(null);
   };
 
   return (
@@ -450,18 +502,7 @@ export default function AdminApplicationsTab() {
               </p>
             </div>
             <button
-              onClick={() => {
-                setEditingField(null);
-                setFieldForm({
-                  targetType: 'all',
-                  label: '',
-                  fieldType: 'text',
-                  optionsText: '',
-                  placeholder: '',
-                  isRequired: false
-                });
-                setShowAddFieldModal(true);
-              }}
+              onClick={openAddField}
               className="px-4 py-2 rounded-lg bg-primary text-surface-bright hover:bg-[#112240] text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-sm"
             >
               <span className="material-symbols-outlined text-[16px]">add</span>
@@ -502,6 +543,26 @@ export default function AdminApplicationsTab() {
                         <strong>Variantlar:</strong> {field.options.join(', ')}
                       </div>
                     )}
+
+                    {/* Language Badges */}
+                    <div className="flex items-center gap-1 mt-2">
+                      {langList.map(l => {
+                        const hasTrans = Boolean(field.translations?.[l.code]?.label || (l.code === 'az' && field.label));
+                        return (
+                          <span
+                            key={l.code}
+                            title={hasTrans ? `${l.name}: ${field.translations?.[l.code]?.label || field.label}` : `${l.name}: Tərcümə yoxdur`}
+                            className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase transition-colors ${
+                              hasTrans
+                                ? 'bg-secondary/15 text-secondary border border-secondary/30'
+                                : 'bg-surface-container/50 text-outline opacity-40 border border-outline-variant/30'
+                            }`}
+                          >
+                            {l.code}
+                          </span>
+                        );
+                      })}
+                    </div>
                   </div>
 
                   <div className="pt-3 border-t border-outline-variant/20 flex items-center justify-between text-xs mt-3">
@@ -719,86 +780,180 @@ export default function AdminApplicationsTab() {
       {/* ======================================================== */}
       {showAddFieldModal && (
         <div className="fixed inset-0 z-[60] modal-backdrop flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-surface-bright rounded-xl border border-outline-variant shadow-2xl max-w-md w-full my-auto overflow-hidden animate-fadeIn relative">
+          <div className="bg-surface-bright rounded-xl border border-outline-variant shadow-2xl max-w-lg w-full my-auto overflow-hidden animate-fadeIn relative">
             <div className="p-4 border-b border-outline-variant/40 flex items-center justify-between bg-surface-container/20">
-              <h3 className="font-bold text-sm text-primary">
-                {editingField ? 'Sahəni Redaktə Et' : 'Yeni Form Sahəsi Əlavə Et'}
-              </h3>
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-secondary text-[20px]">dynamic_form</span>
+                <h3 className="font-bold text-sm text-primary">
+                  {editingField ? 'Sahəni Redaktə Et (Çoxdilli)' : 'Yeni Form Sahəsi Əlavə Et (Çoxdilli)'}
+                </h3>
+              </div>
               <button onClick={() => setShowAddFieldModal(false)} className="text-outline hover:text-primary">
                 <span className="material-symbols-outlined text-[18px]">close</span>
               </button>
             </div>
 
-            <form onSubmit={handleSaveField} className="p-4 space-y-3 text-xs">
-              <div>
-                <label className="block font-bold text-primary mb-1">Məzmun Kateqoriyası</label>
-                <select
-                  value={fieldForm.targetType}
-                  onChange={(e) => setFieldForm(prev => ({ ...prev, targetType: e.target.value }))}
-                  className="w-full px-3 py-2 rounded border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
-                >
-                  <option value="all">Bütün Müraciətlər (Hamısı)</option>
-                  <option value="course">Yalnız Kurslar</option>
-                  <option value="club">Yalnız Coaching Club</option>
-                  <option value="event">Yalnız Tədbirlər</option>
-                  <option value="webinar">Yalnız Vebinarlar</option>
-                  <option value="community">Yalnız İcma və Forum</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block font-bold text-primary mb-1">Sahənin Adı (Label) *</label>
-                <input
-                  type="text"
-                  value={fieldForm.label}
-                  onChange={(e) => setFieldForm(prev => ({ ...prev, label: e.target.value }))}
-                  placeholder="Məsələn: Təcrübəniz, WhatsApp Nömrəsi, CV Linki..."
-                  className="w-full px-3 py-2 rounded border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold text-primary mb-1">Sahənin Növü (Input Type)</label>
-                <select
-                  value={fieldForm.fieldType}
-                  onChange={(e) => setFieldForm(prev => ({ ...prev, fieldType: e.target.value }))}
-                  className="w-full px-3 py-2 rounded border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
-                >
-                  <option value="text">Qısa Mətn (Text)</option>
-                  <option value="textarea">Çoxsətirli Mətn (Textarea)</option>
-                  <option value="select">Seçim Siyahısı (Dropdown Select)</option>
-                  <option value="number">Rəqəm (Number)</option>
-                  <option value="checkbox">Bəli/Xeyr (Checkbox)</option>
-                </select>
-              </div>
-
-              {fieldForm.fieldType === 'select' && (
+            <form onSubmit={handleSaveField} className="p-4 space-y-4 text-xs">
+              {/* General Settings */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-3 border-b border-outline-variant/30">
                 <div>
-                  <label className="block font-bold text-primary mb-1">
-                    Variantlar (Vergüllə ayırın)
-                  </label>
-                  <input
-                    type="text"
-                    value={fieldForm.optionsText}
-                    onChange={(e) => setFieldForm(prev => ({ ...prev, optionsText: e.target.value }))}
-                    placeholder="Məsələn: Başlanğıc, Orta, İrəli"
+                  <label className="block font-bold text-primary mb-1">Məzmun Kateqoriyası</label>
+                  <select
+                    value={fieldForm.targetType}
+                    onChange={(e) => setFieldForm(prev => ({ ...prev, targetType: e.target.value }))}
                     className="w-full px-3 py-2 rounded border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
-                  />
+                  >
+                    <option value="all">Bütün Müraciətlər (Hamısı)</option>
+                    <option value="course">Yalnız Kurslar</option>
+                    <option value="club">Yalnız Coaching Club</option>
+                    <option value="event">Yalnız Tədbirlər</option>
+                    <option value="webinar">Yalnız Vebinarlar</option>
+                    <option value="community">Yalnız İcma və Forum</option>
+                  </select>
                 </div>
-              )}
 
-              <div>
-                <label className="block font-bold text-primary mb-1">Köməkçi Mətn (Placeholder)</label>
-                <input
-                  type="text"
-                  value={fieldForm.placeholder}
-                  onChange={(e) => setFieldForm(prev => ({ ...prev, placeholder: e.target.value }))}
-                  placeholder="İstifadəçiyə görünəcək ipucu mətn..."
-                  className="w-full px-3 py-2 rounded border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
-                />
+                <div>
+                  <label className="block font-bold text-primary mb-1">Sahənin Növü (Input Type)</label>
+                  <select
+                    value={fieldForm.fieldType}
+                    onChange={(e) => setFieldForm(prev => ({ ...prev, fieldType: e.target.value }))}
+                    className="w-full px-3 py-2 rounded border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
+                  >
+                    <option value="text">Qısa Mətn (Text)</option>
+                    <option value="textarea">Çoxsətirli Mətn (Textarea)</option>
+                    <option value="select">Seçim Siyahısı (Dropdown Select)</option>
+                    <option value="number">Rəqəm (Number)</option>
+                  </select>
+                </div>
               </div>
 
+              {/* Language Switcher Tabs */}
+              <div className="bg-surface-container/30 border border-outline-variant/40 rounded-lg p-3 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-secondary text-[16px]">translate</span>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+                      Dillər üzrə Tərcümələr
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {langList.map(l => {
+                      const isCurrent = fieldModalLangTab === l.code;
+                      const hasValue = Boolean(fieldForm.translations?.[l.code]?.label?.trim());
+                      return (
+                        <button
+                          key={l.code}
+                          type="button"
+                          onClick={() => setFieldModalLangTab(l.code)}
+                          className={`px-2.5 py-1 rounded text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 transition-all ${
+                            isCurrent
+                              ? 'bg-secondary text-primary shadow-sm font-extrabold'
+                              : 'bg-surface-bright border border-outline-variant/50 text-on-surface-variant hover:border-secondary/50'
+                          }`}
+                        >
+                          <span>{l.code}</span>
+                          {hasValue && (
+                            <span className={`w-1.5 h-1.5 rounded-full ${isCurrent ? 'bg-primary' : 'bg-emerald-500'}`} />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Active Language Inputs */}
+                <div className="space-y-3 pt-1">
+                  <div>
+                    <label className="block font-bold text-primary mb-1">
+                      [{fieldModalLangTab.toUpperCase()}] Sahənin Adı (Label) {fieldModalLangTab === 'az' && '*'}
+                    </label>
+                    <input
+                      type="text"
+                      value={fieldForm.translations?.[fieldModalLangTab]?.label || ''}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setFieldForm(prev => ({
+                          ...prev,
+                          translations: {
+                            ...prev.translations,
+                            [fieldModalLangTab]: {
+                              ...prev.translations?.[fieldModalLangTab],
+                              label: val
+                            }
+                          }
+                        }));
+                      }}
+                      placeholder={`Məsələn: ${
+                        fieldModalLangTab === 'az' ? 'Təcrübəniz, WhatsApp Nömrəsi, CV Linki...' :
+                        fieldModalLangTab === 'en' ? 'Your Experience, WhatsApp Number, CV Link...' :
+                        fieldModalLangTab === 'tr' ? 'Deneyiminiz, WhatsApp Numarası, CV Linki...' :
+                        'Ваш опыт, номер WhatsApp, ссылка на резюме...'
+                      }`}
+                      className="w-full px-3 py-2 rounded border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
+                      required={fieldModalLangTab === 'az'}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-primary mb-1">
+                      [{fieldModalLangTab.toUpperCase()}] Köməkçi Mətn (Placeholder)
+                    </label>
+                    <input
+                      type="text"
+                      value={fieldForm.translations?.[fieldModalLangTab]?.placeholder || ''}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setFieldForm(prev => ({
+                          ...prev,
+                          translations: {
+                            ...prev.translations,
+                            [fieldModalLangTab]: {
+                              ...prev.translations?.[fieldModalLangTab],
+                              placeholder: val
+                            }
+                          }
+                        }));
+                      }}
+                      placeholder={`İstifadəçiyə görünəcək ipucu mətn (${fieldModalLangTab.toUpperCase()})...`}
+                      className="w-full px-3 py-2 rounded border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
+                    />
+                  </div>
+
+                  {fieldForm.fieldType === 'select' && (
+                    <div>
+                      <label className="block font-bold text-primary mb-1">
+                        [{fieldModalLangTab.toUpperCase()}] Variantlar (Vergüllə ayırın)
+                      </label>
+                      <input
+                        type="text"
+                        value={fieldForm.translations?.[fieldModalLangTab]?.optionsText || ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setFieldForm(prev => ({
+                            ...prev,
+                            translations: {
+                              ...prev.translations,
+                              [fieldModalLangTab]: {
+                                ...prev.translations?.[fieldModalLangTab],
+                                optionsText: val
+                              }
+                            }
+                          }));
+                        }}
+                        placeholder={`Məs: ${
+                          fieldModalLangTab === 'az' ? 'Başlanğıc, Orta, İrəli' :
+                          fieldModalLangTab === 'en' ? 'Beginner, Intermediate, Advanced' :
+                          fieldModalLangTab === 'tr' ? 'Başlangıç, Orta, İleri' :
+                          'Начинающий, Средний, Продвинутый'
+                        }`}
+                        className="w-full px-3 py-2 rounded border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Requirement Checkbox */}
               <div>
                 <label className="flex items-center gap-2 cursor-pointer select-none">
                   <input
@@ -811,6 +966,7 @@ export default function AdminApplicationsTab() {
                 </label>
               </div>
 
+              {/* Action Buttons */}
               <div className="pt-3 border-t border-outline-variant/30 flex justify-end gap-2">
                 <button
                   type="button"
