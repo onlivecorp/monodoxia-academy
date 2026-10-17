@@ -45,9 +45,6 @@ export default function ApplicationModal() {
       .sort((a, b) => (a.sortOrder || a.sort_order || 0) - (b.sortOrder || b.sort_order || 0));
   }, [formFieldsList, activeApplicationTarget]);
 
-  const hasPhoneField = useMemo(() => {
-    return relevantFields.some(f => f.id === 'fld_phone' || f.fieldType === 'tel');
-  }, [relevantFields]);
 
   useEffect(() => {
     if (activeApplicationTarget && currentUser) {
@@ -102,11 +99,7 @@ export default function ApplicationModal() {
     }
 
     const errors = {};
-    const finalPhone = (hasPhoneField ? (formResponses['fld_phone'] || userPhone) : userPhone).trim();
-
-    if (!hasPhoneField && (!finalPhone || finalPhone === '+994')) {
-      errors.phone = 'Əlaqə nömrəsi qeyd olunmalıdır.';
-    }
+    const finalPhone = (formResponses['fld_phone'] || userPhone || currentUser?.phone || '').trim();
 
     relevantFields.forEach(f => {
       if (f.isRequired) {
@@ -280,24 +273,6 @@ export default function ApplicationModal() {
                 </span>
               </div>
 
-              {/* Contact Phone (Fallback if not configured in dynamic fields) */}
-              {!hasPhoneField && (
-                <div>
-                  <label className="block text-xs font-semibold text-primary mb-1">
-                    Əlaqə Nömrəsi (WhatsApp) <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="tel"
-                    value={userPhone}
-                    onChange={(e) => setUserPhone(e.target.value)}
-                    placeholder="+994 50 123 45 67"
-                    className="w-full px-3 py-2 rounded border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
-                  />
-                  {validationErrors.phone && (
-                    <span className="text-[11px] text-red-500 mt-1 block">{validationErrors.phone}</span>
-                  )}
-                </div>
-              )}
 
               {/* Dynamic Custom Fields */}
               {relevantFields.map(field => {
