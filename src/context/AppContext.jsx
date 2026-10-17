@@ -692,6 +692,15 @@ export function AppProvider({ children }) {
               mappedSettings.contactPhone = resolvedPhone;
               mappedSettings.contact_phone = resolvedPhone;
             }
+            if (mappedSettings.maintenanceMode !== undefined) {
+              const b = Boolean(mappedSettings.maintenanceMode === true || mappedSettings.maintenanceMode === 'true' || mappedSettings.maintenanceMode === 1 || mappedSettings.maintenanceMode === '1');
+              mappedSettings.maintenanceMode = b;
+              mappedSettings.maintenance_mode = b ? '1' : '0';
+            } else if (mappedSettings.maintenance_mode !== undefined) {
+              const b = Boolean(mappedSettings.maintenance_mode === '1' || mappedSettings.maintenance_mode === 1 || mappedSettings.maintenance_mode === true || mappedSettings.maintenance_mode === 'true');
+              mappedSettings.maintenanceMode = b;
+              mappedSettings.maintenance_mode = b ? '1' : '0';
+            }
             setPlatformSettings(prev => ({ ...prev, ...mappedSettings }));
           }
           if (data.roles && data.roles.length > 0) {
@@ -2005,14 +2014,16 @@ export function AppProvider({ children }) {
       if (newSettings.contact_phone !== undefined && !newSettings.contactPhone) {
         merged.contactPhone = newSettings.contact_phone;
       }
+      if (newSettings.maintenanceMode !== undefined) {
+        merged.maintenance_mode = newSettings.maintenanceMode ? '1' : '0';
+      }
+      if (newSettings.maintenance_mode !== undefined) {
+        merged.maintenanceMode = Boolean(newSettings.maintenance_mode === '1' || newSettings.maintenance_mode === 1 || newSettings.maintenance_mode === true);
+      }
       try {
         localStorage.setItem('monodoxia_admin_settings', JSON.stringify(merged));
       } catch (e) {}
-      fetch('/api.php?action=save_settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(merged)
-      }).catch(() => {});
+      apiFetch('save_settings', 'POST', merged).catch(() => {});
       return merged;
     });
     showToast('Platforma parametrləri yeniləndi', 'success');

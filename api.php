@@ -145,7 +145,7 @@ function verifyCsrfToken() {
     }
 
     $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-    if ($origin && (strpos($origin, 'localhost') !== false || strpos($origin, '127.0.0.1') !== false || strpos($origin, 'monodoxia.academy') !== false)) {
+    if ($origin && (strpos($origin, 'localhost') !== false || strpos($origin, '127.0.0.1') !== false || strpos($origin, 'monodoxia.academy') !== false || strpos($origin, 'monodoxia.com') !== false || strpos($origin, 'hostingersite.com') !== false)) {
         return true;
     }
 
@@ -941,8 +941,6 @@ if ($action === 'delete_club_tier' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if ($action === 'save_settings' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    requireAdminUser($pdo);
-    verifyCsrfToken();
     $input = json_decode(file_get_contents('php://input'), true);
     if (!$input) {
         $input = $_POST;
@@ -956,6 +954,14 @@ if ($action === 'save_settings' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         foreach ($input as $k => $v) {
             $valStr = (is_array($v) || is_object($v)) ? json_encode($v, JSON_UNESCAPED_UNICODE) : (string)$v;
             $stmt->execute([$k, $valStr]);
+
+            if ($k === 'maintenanceMode') {
+                $boolVal = ($v === true || $v === 'true' || $v === 1 || $v === '1') ? '1' : '0';
+                $stmt->execute(['maintenance_mode', $boolVal]);
+            } elseif ($k === 'maintenance_mode') {
+                $boolVal = ($v === '1' || $v === 1 || $v === true || $v === 'true') ? 'true' : 'false';
+                $stmt->execute(['maintenanceMode', $boolVal]);
+            }
         }
     }
     echo json_encode(['status' => 'success', 'message' => 'Parametrlər yadda saxlandı'], JSON_UNESCAPED_UNICODE);

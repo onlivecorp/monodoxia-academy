@@ -210,7 +210,13 @@ export default function AdminMaintenanceTab() {
                 onChange={e => {
                   const val = e.target.checked;
                   setForm(prev => ({ ...prev, maintenanceMode: val }));
-                  updatePlatformSettings({ maintenanceMode: val });
+                  updatePlatformSettings({ 
+                    maintenanceMode: val,
+                    maintenance_mode: val ? '1' : '0'
+                  });
+                  if (val) {
+                    sessionStorage.removeItem('monodoxia_admin_bypass');
+                  }
                   showToast(
                     val 
                       ? 'Texniki qulluq rejimi AKTİVLƏŞDİRİLDİ (Sayt ziyarətçilərə bağlandı)' 
