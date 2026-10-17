@@ -30,6 +30,8 @@ export default function AdminUsersTab() {
   // Add User Form States
   const [newUserName, setNewUserName] = useState('');
   const [newUserEmail, setNewUserEmail] = useState('');
+  const [newUserPassword, setNewUserPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const [newUserRole, setNewUserRole] = useState('Tələbə');
   const [newUserTier, setNewUserTier] = useState('Free');
   const [newUserTranslations, setNewUserTranslations] = useState({});
@@ -70,9 +72,16 @@ export default function AdminUsersTab() {
       showToast('Zəhmət olmasa ad və email sahələrini doldurun', 'warning');
       return;
     }
+    const pwd = (newUserPassword || '').trim();
+    if (pwd && pwd.length < 6) {
+      showToast('Şifrə ən azı 6 simvoldan ibarət olmalıdır', 'warning');
+      return;
+    }
+    const finalPassword = pwd || '123456';
     addUser({
       name: newUserName.trim(),
       email: newUserEmail.trim(),
+      password: finalPassword,
       role: newUserRole,
       tier: newUserTier,
       status: 'Aktiv',
@@ -80,12 +89,13 @@ export default function AdminUsersTab() {
     });
     setNewUserName('');
     setNewUserEmail('');
+    setNewUserPassword('');
     setNewUserRole('Tələbə');
     setNewUserTier('Free');
     setNewUserTranslations({});
     setNewUserTransOpen(false);
     setShowAddForm(false);
-    showToast(`İstifadəçi uğurla əlavə edildi`, 'success');
+    showToast(`İstifadəçi uğurla əlavə edildi (İlkin şifrə: ${finalPassword})`, 'success');
   };
 
   const handleUserAvatarFile = (e) => {
@@ -718,6 +728,42 @@ export default function AdminUsersTab() {
                 <option>Premium</option>
                 <option>VIP</option>
               </select>
+            </div>
+            <div>
+              <label className="admin-label">Giriş Şifrəsi</label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showNewPassword ? 'text' : 'password'}
+                  placeholder="İlkin şifrə (məs: 123456)"
+                  value={newUserPassword}
+                  onChange={e => setNewUserPassword(e.target.value)}
+                  className="admin-input"
+                  style={{ paddingRight: '36px' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(p => !p)}
+                  style={{
+                    position: 'absolute',
+                    right: '8px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: '#64748b',
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+                    {showNewPassword ? 'visibility_off' : 'visibility'}
+                  </span>
+                </button>
+              </div>
+              <span style={{ fontSize: '10px', color: '#64748b', display: 'block', marginTop: '2px' }}>
+                Boş saxlanılarsa, avtomatik "123456" şifrəsi təyin olunacaq.
+              </span>
             </div>
           </div>
 

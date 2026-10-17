@@ -1508,19 +1508,13 @@ export function AppProvider({ children }) {
     }
     showToast('İstifadəçi məlumatı yeniləndi', 'success');
     const target = usersList.find(u => u.id === id);
-    if (target) {
-      const merged = { ...target, ...updates };
-      fetch('/api.php?action=save_user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(merged)
-      }).catch(() => {});
-    }
+    const merged = { ...(target || {}), ...updates, id };
+    apiCall('save_user', merged).catch(() => {});
   };
 
   const addUser = (newUser) => {
     const user = {
-      id: 'u_' + Date.now(),
+      id: 'usr_' + Date.now(),
       ...newUser,
       translations: newUser.translations || {},
       status: newUser.status || 'Aktiv',
@@ -1529,11 +1523,7 @@ export function AppProvider({ children }) {
     setUsersList(prev => [user, ...prev]);
     showToast(`İstifadəçi əlavə edildi: ${user.name}`, 'success');
 
-    fetch('/api.php?action=save_user', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(user)
-    }).catch(() => {});
+    apiCall('save_user', user).catch(() => {});
   };
 
   const deleteUser = (id) => {
@@ -1554,11 +1544,7 @@ export function AppProvider({ children }) {
     setUsersList(prev => prev.filter(u => u.id !== id));
     showToast('İstifadəçi silindi', 'info');
 
-    fetch('/api.php?action=delete_user', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id })
-    }).catch(() => {});
+    apiCall('delete_user', { id }).catch(() => {});
   };
 
   // ========================================================
