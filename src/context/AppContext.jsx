@@ -612,17 +612,41 @@ export function AppProvider({ children }) {
               translations: typeof p.translations_json === 'string' ? JSON.parse(p.translations_json || '{}') : (p.translations_json || {})
             })));
           }
-          if (data.club_tiers && data.club_tiers.length > 0) {
-            setClubTiersList(data.club_tiers.map(t => ({
-              id: t.id,
-              name: t.name,
-              price: t.price,
-              period: t.period,
-              popular: Boolean(Number(t.popular)),
-              active: t.active !== undefined ? Boolean(Number(t.active)) : true,
-              features: typeof t.features_json === 'string' ? JSON.parse(t.features_json || '[]') : (t.features_json || []),
-              translations: typeof t.translations === 'string' ? JSON.parse(t.translations || '{}') : (t.translations || {})
-            })));
+          if (Array.isArray(data.club_tiers)) {
+            const mappedTiers = data.club_tiers.map(t => {
+              let parsedFeatures = [];
+              if (typeof t.features_json === 'string' && t.features_json.trim()) {
+                try { parsedFeatures = JSON.parse(t.features_json); } catch (e) {}
+              } else if (Array.isArray(t.features)) {
+                parsedFeatures = t.features;
+              } else if (Array.isArray(t.features_json)) {
+                parsedFeatures = t.features_json;
+              }
+
+              let parsedTranslations = {};
+              if (typeof t.translations === 'string' && t.translations.trim()) {
+                try { parsedTranslations = JSON.parse(t.translations); } catch (e) {}
+              } else if (t.translations && typeof t.translations === 'object') {
+                parsedTranslations = t.translations;
+              } else if (typeof t.translations_json === 'string' && t.translations_json.trim()) {
+                try { parsedTranslations = JSON.parse(t.translations_json); } catch (e) {}
+              }
+
+              return {
+                id: t.id,
+                name: t.name,
+                price: t.price,
+                period: t.period,
+                popular: Boolean(Number(t.popular)),
+                active: t.active !== undefined ? Boolean(Number(t.active)) : true,
+                features: parsedFeatures,
+                translations: parsedTranslations
+              };
+            });
+            if (mappedTiers.length > 0) {
+              setClubTiersList(mappedTiers);
+              localStorage.setItem('monodoxia_admin_tiers', JSON.stringify(mappedTiers));
+            }
           }
           if (data.categories && data.categories.length > 0) {
             setCategoriesList(data.categories.map(cat => ({
@@ -1861,41 +1885,43 @@ export function AppProvider({ children }) {
   };
 
   const updateClubTier = (id, updates) => {
-    setClubTiersList(prev => prev.map(t => {
-      if (t.id === id) {
-        const updated = { ...t, ...updates };
-        if (typeof updated.features === 'string') {
-          updated.features = updated.features.split('\n').map(s => s.trim()).filter(Boolean);
+    let updatedTier = null;
+    setClubTiersList(prev => {
+      const next = prev.map(t => {
+        if (t.id === id) {
+          const updated = { ...t, ...updates };
+          if (typeof updated.features === 'string') {
+            updated.features = updated.features.split('\n').map(s => s.trim()).filter(Boolean);
+          }
+
+          const azTrans = { ...(updated.translations?.az || {}) };
+          if (updates.name !== undefined) azTrans.name = updates.name;
+          if (updates.period !== undefined) azTrans.period = updates.period;
+          if (updates.features !== undefined) azTrans.features = updated.features;
+
+          if (updates.translations?.az) {
+            if (updates.translations.az.name !== undefined) updated.name = updates.translations.az.name;
+            if (updates.translations.az.period !== undefined) updated.period = updates.translations.az.period;
+            if (updates.translations.az.features !== undefined) updated.features = updates.translations.az.features;
+          }
+
+          updated.translations = {
+            ...(updated.translations || {}),
+            az: azTrans
+          };
+
+          updatedTier = updated;
+          return updated;
         }
+        return t;
+      });
+      localStorage.setItem('monodoxia_admin_tiers', JSON.stringify(next));
+      return next;
+    });
 
-        const azTrans = { ...(updated.translations?.az || {}) };
-        if (updates.name !== undefined) azTrans.name = updates.name;
-        if (updates.period !== undefined) azTrans.period = updates.period;
-        if (updates.features !== undefined) azTrans.features = updated.features;
-
-        if (updates.translations?.az) {
-          if (updates.translations.az.name !== undefined) updated.name = updates.translations.az.name;
-          if (updates.translations.az.period !== undefined) updated.period = updates.translations.az.period;
-          if (updates.translations.az.features !== undefined) updated.features = updates.translations.az.features;
-        }
-
-        updated.translations = {
-          ...(updated.translations || {}),
-          az: azTrans
-        };
-
-        try {
-          fetch('/api.php?action=save_club_tier', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(updated)
-          }).catch(() => {});
-        } catch (e) {}
-
-        return updated;
-      }
-      return t;
-    }));
+    if (updatedTier) {
+      apiCall('save_club_tier', updatedTier).catch(() => {});
+    }
     showToast('Abunəlik tarifi yeniləndi', 'success');
   };
 
@@ -1922,29 +1948,25 @@ export function AppProvider({ children }) {
         : (newTier.features || '').split('\n').map(s => s.trim()).filter(Boolean),
       active: true
     };
-    setClubTiersList(prev => [...prev, tier]);
+    setClubTiersList(prev => {
+      const next = [...prev, tier];
+      localStorage.setItem('monodoxia_admin_tiers', JSON.stringify(next));
+      return next;
+    });
     showToast(`Yeni abunəlik paketi əlavə edildi: ${tier.name}`, 'success');
 
-    try {
-      fetch('/api.php?action=save_club_tier', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(tier)
-      }).catch(() => {});
-    } catch (e) {}
+    apiCall('save_club_tier', tier).catch(() => {});
   };
 
   const deleteClubTier = (id) => {
-    setClubTiersList(prev => prev.filter(t => t.id !== id));
+    setClubTiersList(prev => {
+      const next = prev.filter(t => t.id !== id);
+      localStorage.setItem('monodoxia_admin_tiers', JSON.stringify(next));
+      return next;
+    });
     showToast('Abunəlik paketi silindi', 'info');
 
-    try {
-      fetch('/api.php?action=delete_club_tier', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id })
-      }).catch(() => {});
-    } catch (e) {}
+    apiCall('delete_club_tier', { id }).catch(() => {});
   };
 
   const addEvent = (newEvent) => {

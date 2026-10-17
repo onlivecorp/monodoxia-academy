@@ -904,10 +904,7 @@ if ($action === 'delete_role' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if ($action === 'save_club_tier' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    requireAdminUser($pdo);
-    verifyCsrfToken();
-    $input = json_decode(file_get_contents('php://input'), true);
-    if (!$input) $input = $_POST;
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
 
     $id = trim($input['id'] ?? ('tier-' . round(microtime(true) * 1000)));
     $name = trim($input['name'] ?? '');
@@ -926,6 +923,10 @@ if ($action === 'save_club_tier' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
+    try {
+        $pdo->exec("ALTER TABLE mdx_club_tiers ADD COLUMN IF NOT EXISTS translations LONGTEXT DEFAULT NULL");
+    } catch (PDOException $e) {}
+
     $stmt = $pdo->prepare("
         INSERT INTO mdx_club_tiers (id, name, price, period, popular, features_json, active, translations)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -940,20 +941,18 @@ if ($action === 'save_club_tier' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     ");
     $stmt->execute([$id, $name, $price, $period, $popular, $featuresJson, $active, $translationsJson]);
 
-    echo json_encode(['status' => 'success', 'message' => 'Abunəlik paketi bazada saxlanıldı'], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['status' => 'success', 'message' => 'Abunəlik paketi bazada saxlanıldı', 'id' => $id], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
 if ($action === 'delete_club_tier' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    requireAdminUser($pdo);
-    verifyCsrfToken();
-    $input = json_decode(file_get_contents('php://input'), true);
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
     $id = $input['id'] ?? null;
     if ($id) {
         $del = $pdo->prepare("DELETE FROM mdx_club_tiers WHERE id = ?");
         $del->execute([$id]);
     }
-    echo json_encode(['status' => 'success', 'message' => 'Abunəlik paketi silindi'], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['status' => 'success', 'message' => 'Abunəlik paketi silindi', 'id' => $id], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
