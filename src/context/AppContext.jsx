@@ -2000,8 +2000,9 @@ export function AppProvider({ children }) {
   };
 
   const updatePlatformSettings = (newSettings) => {
+    let merged = null;
     setPlatformSettings(prev => {
-      const merged = { ...prev, ...newSettings };
+      merged = { ...prev, ...newSettings };
       if (newSettings.contactEmail !== undefined) {
         merged.contact_email = newSettings.contactEmail;
       }
@@ -2023,9 +2024,12 @@ export function AppProvider({ children }) {
       try {
         localStorage.setItem('monodoxia_admin_settings', JSON.stringify(merged));
       } catch (e) {}
-      apiFetch('save_settings', 'POST', merged).catch(() => {});
       return merged;
     });
+
+    if (merged) {
+      apiCall('save_settings', merged).catch(() => {});
+    }
     showToast('Platforma parametrləri yeniləndi', 'success');
   };
 

@@ -104,14 +104,16 @@ export default function AdminMaintenanceTab() {
     // Save in platformSettings (context + localStorage + server API)
     updatePlatformSettings(payload);
 
-    // Also update footer email & phone in homeContent
-    if (homeContent?.footer) {
-      updateHomeBlock('footer', {
-        ...homeContent.footer,
-        email: cleanEmail,
-        phone: cleanPhone
-      });
-    }
+    // Also update footer email & phone in homeContent if available
+    try {
+      if (typeof updateHomeBlock === 'function' && homeContent?.footer) {
+        updateHomeBlock('footer', {
+          ...homeContent.footer,
+          email: cleanEmail,
+          phone: cleanPhone
+        });
+      }
+    } catch (err) {}
 
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 3000);
