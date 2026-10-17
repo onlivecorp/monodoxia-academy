@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import { LanguageProvider } from './i18n/LanguageContext';
 import { AppProvider, useApp } from './context/AppContext';
 
@@ -120,10 +120,12 @@ function AppContent() {
 
 export default function App() {
   return (
-    <LanguageProvider>
-      <AppProvider>
-        <AppContent />
-      </AppProvider>
-    </LanguageProvider>
+    <ErrorBoundary>
+      <LanguageProvider>
+        <AppProvider>
+          <AppContent />
+        </AppProvider>
+      </LanguageProvider>
+    </ErrorBoundary>
   );
 }
