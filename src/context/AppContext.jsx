@@ -672,18 +672,43 @@ export function AppProvider({ children }) {
             })));
           }
           if (data.form_fields && data.form_fields.length > 0) {
-            setFormFieldsList(data.form_fields.map(f => ({
-              id: f.id,
-              targetType: f.target_type,
-              label: f.label,
-              fieldType: f.field_type,
-              options: typeof f.options_json === 'string' ? JSON.parse(f.options_json || '[]') : (f.options_json || []),
-              placeholder: f.placeholder || '',
-              isRequired: Boolean(Number(f.is_required)),
-              isActive: Boolean(Number(f.is_active ?? 1)),
-              sortOrder: Number(f.sort_order) || 0,
-              translations: typeof f.translations_json === 'string' ? JSON.parse(f.translations_json || '{}') : (f.translations_json || {})
-            })));
+            setFormFieldsList(data.form_fields.map(f => {
+              let parsedTrans = {};
+              try {
+                parsedTrans = typeof f.translations_json === 'string' ? JSON.parse(f.translations_json || '{}') : (f.translations_json || {});
+              } catch (e) {}
+
+              const opts = typeof f.options_json === 'string' ? JSON.parse(f.options_json || '[]') : (f.options_json || []);
+
+              if (!parsedTrans || Object.keys(parsedTrans).length === 0) {
+                const matchInitial = INITIAL_FORM_FIELDS.find(initF => initF.id === f.id);
+                if (matchInitial?.translations) {
+                  parsedTrans = matchInitial.translations;
+                } else {
+                  parsedTrans = {
+                    az: { label: f.label || '', placeholder: f.placeholder || '', options: opts }
+                  };
+                }
+              }
+
+              return {
+                id: f.id,
+                targetType: f.target_type || 'all',
+                target_type: f.target_type || 'all',
+                label: f.label,
+                fieldType: f.field_type || 'text',
+                field_type: f.field_type || 'text',
+                options: opts,
+                placeholder: f.placeholder || '',
+                isRequired: Boolean(Number(f.is_required)),
+                is_required: Number(f.is_required) || 0,
+                isActive: Boolean(Number(f.is_active ?? 1)),
+                is_active: Number(f.is_active ?? 1),
+                sortOrder: Number(f.sort_order) || 0,
+                sort_order: Number(f.sort_order) || 0,
+                translations: parsedTrans
+              };
+            }));
           }
           if (data.settings && data.settings.length > 0) {
             const mappedSettings = {};
@@ -1369,51 +1394,54 @@ export function AppProvider({ children }) {
     const newField = {
       id: 'fld_' + Date.now(),
       targetType: fieldData.targetType || 'all',
+      target_type: fieldData.targetType || 'all',
       label: fieldData.label,
       fieldType: fieldData.fieldType || 'text',
+      field_type: fieldData.fieldType || 'text',
       options: fieldData.options || [],
       placeholder: fieldData.placeholder || '',
       isRequired: Boolean(fieldData.isRequired),
+      is_required: fieldData.isRequired ? 1 : 0,
       isActive: true,
+      is_active: 1,
       sortOrder: (formFieldsList.length + 1),
+      sort_order: (formFieldsList.length + 1),
       translations: fieldData.translations || {}
     };
     setFormFieldsList(prev => [...prev, newField]);
     showToast(`Form sahəsi əlavə edildi: ${newField.label}`, 'success');
 
-    try {
-      fetch('/api.php?action=save_form_field', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newField)
-      }).catch(() => {});
-    } catch (e) {}
+    apiCall('save_form_field', newField).catch(() => {});
   };
 
   const updateFormField = (id, updates) => {
-    setFormFieldsList(prev => prev.map(f => f.id === id ? { ...f, ...updates } : f));
+    let mergedField = null;
+    setFormFieldsList(prev => prev.map(f => {
+      if (f.id === id) {
+        mergedField = {
+          ...f,
+          ...updates,
+          target_type: updates.targetType || updates.target_type || f.targetType || f.target_type,
+          field_type: updates.fieldType || updates.field_type || f.fieldType || f.field_type,
+          is_required: updates.isRequired !== undefined ? (updates.isRequired ? 1 : 0) : f.is_required,
+          translations: updates.translations || f.translations || {}
+        };
+        return mergedField;
+      }
+      return f;
+    }));
     showToast('Form sahəsi yeniləndi', 'success');
 
-    try {
-      fetch('/api.php?action=save_form_field', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, ...updates })
-      }).catch(() => {});
-    } catch (e) {}
+    if (mergedField) {
+      apiCall('save_form_field', mergedField).catch(() => {});
+    }
   };
 
   const deleteFormField = (id) => {
     setFormFieldsList(prev => prev.filter(f => f.id !== id));
     showToast('Form sahəsi silindi', 'info');
 
-    try {
-      fetch('/api.php?action=delete_form_field', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id })
-      }).catch(() => {});
-    } catch (e) {}
+    apiCall('delete_form_field', { id }).catch(() => {});
   };
 
   // Notifications

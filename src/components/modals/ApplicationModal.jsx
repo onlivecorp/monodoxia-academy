@@ -40,8 +40,9 @@ export default function ApplicationModal() {
   const relevantFields = useMemo(() => {
     if (!activeApplicationTarget) return [];
     return formFieldsList
-      .filter(f => f.isActive && (f.targetType === 'all' || f.targetType === activeApplicationTarget.type))
-      .sort((a, b) => a.sortOrder - b.sortOrder);
+      .filter(f => (f.isActive !== false && f.is_active !== 0) &&
+        (f.targetType === 'all' || f.target_type === 'all' || f.targetType === activeApplicationTarget.type || f.target_type === activeApplicationTarget.type))
+      .sort((a, b) => (a.sortOrder || a.sort_order || 0) - (b.sortOrder || b.sort_order || 0));
   }, [formFieldsList, activeApplicationTarget]);
 
   useEffect(() => {

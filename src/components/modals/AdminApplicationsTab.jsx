@@ -128,24 +128,32 @@ export default function AdminApplicationsTab() {
 
   const openEditField = (f) => {
     setEditingField(f);
-    const existingTrans = f.translations || {};
+    const initMatch = INITIAL_FORM_FIELDS.find(item => item.id === f.id);
+    const existingTrans = (f.translations && Object.keys(f.translations).length > 0)
+      ? f.translations
+      : (initMatch?.translations || {});
     const trans = emptyFieldTranslations();
     Object.keys(trans).forEach(code => {
       const t = existingTrans[code] || {};
+      const initT = initMatch?.translations?.[code] || {};
       trans[code] = {
-        label: t.label || (code === 'az' ? f.label || '' : ''),
-        placeholder: t.placeholder !== undefined ? t.placeholder : (code === 'az' ? f.placeholder || '' : ''),
-        optionsText: Array.isArray(t.options)
+        label: t.label || initT.label || (code === 'az' ? f.label || '' : ''),
+        placeholder: t.placeholder !== undefined && t.placeholder !== ''
+          ? t.placeholder
+          : (initT.placeholder !== undefined && initT.placeholder !== '' ? initT.placeholder : (code === 'az' ? f.placeholder || '' : '')),
+        optionsText: Array.isArray(t.options) && t.options.length > 0
           ? t.options.join(', ')
-          : (typeof t.optionsText === 'string'
+          : (typeof t.optionsText === 'string' && t.optionsText
               ? t.optionsText
-              : (code === 'az' && Array.isArray(f.options) ? f.options.join(', ') : ''))
+              : (Array.isArray(initT.options) && initT.options.length > 0
+                  ? initT.options.join(', ')
+                  : (code === 'az' && Array.isArray(f.options) ? f.options.join(', ') : '')))
       };
     });
     setFieldForm({
-      targetType: f.targetType || 'all',
-      fieldType: f.fieldType || 'text',
-      isRequired: Boolean(f.isRequired),
+      targetType: f.targetType || f.target_type || 'all',
+      fieldType: f.fieldType || f.field_type || 'text',
+      isRequired: Boolean(f.isRequired !== undefined ? f.isRequired : f.is_required),
       translations: trans
     });
     setFieldModalLangTab('az');
@@ -185,11 +193,14 @@ export default function AdminApplicationsTab() {
 
     const payload = {
       targetType: fieldForm.targetType,
+      target_type: fieldForm.targetType,
       label: primaryLabel,
       fieldType: fieldForm.fieldType,
+      field_type: fieldForm.fieldType,
       options: primaryOptions,
       placeholder: primaryPlaceholder,
       isRequired: fieldForm.isRequired,
+      is_required: fieldForm.isRequired ? 1 : 0,
       translations: cleanTranslations
     };
 
