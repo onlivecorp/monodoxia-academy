@@ -753,7 +753,7 @@ export default function ProfileModal() {
                           </div>
                           <div>
                             <span className="text-[10px] uppercase text-outline block">İştirak Statusu</span>
-                            <span className={`font-medium ${app.attendanceStatus === 'İştirak etdi' ? 'text-emerald-600 font-bold' : 'text-primary'}`}>
+                            <span className={`font-medium ${['İştirak edəcək', 'İştirak etdi'].includes(app.attendanceStatus) ? 'text-emerald-600 font-bold' : (['İştirak etməyəcək', 'İştirak etmədi'].includes(app.attendanceStatus) ? 'text-rose-600 font-bold' : 'text-primary')}`}>
                               {app.attendanceStatus}
                             </span>
                           </div>

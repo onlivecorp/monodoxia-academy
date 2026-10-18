@@ -206,11 +206,33 @@ const INITIAL_SQL_CONFIG = {
 
 const AppContext = createContext();
 
+export function safeSetLocalStorage(key, val) {
+  try {
+    const serialized = typeof val === 'string' ? val : JSON.stringify(val);
+    localStorage.setItem(key, serialized);
+  } catch (err) {
+    console.warn(`localStorage save failed for ${key}:`, err);
+    if (key === 'monodoxia_admin_events' && Array.isArray(val)) {
+      try {
+        const stripped = val.map(ev => ({
+          ...ev,
+          image: (ev && typeof ev.image === 'string' && ev.image.startsWith('data:')) ? '' : (ev?.image || '')
+        }));
+        localStorage.setItem(key, JSON.stringify(stripped));
+      } catch (e2) {}
+    }
+  }
+}
+
 export function AppProvider({ children }) {
   // Current User Session
   const [currentUser, setCurrentUser] = useState(() => {
-    const saved = localStorage.getItem('monodoxia_user');
-    return saved ? JSON.parse(saved) : null;
+    try {
+      const saved = localStorage.getItem('monodoxia_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      return null;
+    }
   });
 
   // SQL Database Configuration for Hostings
@@ -310,8 +332,16 @@ export function AppProvider({ children }) {
   });
 
   const [eventsList, setEventsList] = useState(() => {
-    const saved = localStorage.getItem('monodoxia_admin_events');
-    return saved ? JSON.parse(saved) : EVENTS;
+    try {
+      const saved = localStorage.getItem('monodoxia_admin_events');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {
+      console.warn('Error reading monodoxia_admin_events from localStorage:', e);
+    }
+    return EVENTS;
   });
 
   const [communityTopics, setCommunityTopics] = useState(() => {
@@ -606,7 +636,7 @@ export function AppProvider({ children }) {
               };
             });
             setEventsList(mappedEvents);
-            localStorage.setItem('monodoxia_admin_events', JSON.stringify(mappedEvents));
+            safeSetLocalStorage('monodoxia_admin_events', mappedEvents);
           }
           if (data.community && data.community.length > 0) {
             setCommunityTopics(data.community.map(p => ({
@@ -886,7 +916,7 @@ export function AppProvider({ children }) {
   }, [clubTiersList]);
 
   useEffect(() => {
-    localStorage.setItem('monodoxia_admin_events', JSON.stringify(eventsList));
+    safeSetLocalStorage('monodoxia_admin_events', eventsList);
   }, [eventsList]);
 
   useEffect(() => {
@@ -1393,9 +1423,9 @@ export function AppProvider({ children }) {
     let resolvedAttendance = attendanceStatus;
     if (resolvedAttendance === null || resolvedAttendance === undefined) {
       if (newStatus === 'Təsdiqləndi' || newStatus === 'Tamamlandı') {
-        resolvedAttendance = 'İştirak etdi';
+        resolvedAttendance = 'İştirak edəcək';
       } else if (newStatus === 'Rədd edildi' || newStatus === 'Ləğv edildi') {
-        resolvedAttendance = 'İştirak etmədi';
+        resolvedAttendance = 'İştirak etməyəcək';
       }
     }
 
@@ -2044,10 +2074,12 @@ export function AppProvider({ children }) {
     };
     setEventsList(prev => {
       const next = [ev, ...prev];
-      localStorage.setItem('monodoxia_admin_events', JSON.stringify(next));
+      safeSetLocalStorage('monodoxia_admin_events', next);
       return next;
     });
-    apiCall('save_event', ev).catch(() => {});
+    apiCall('save_event', ev).catch(err => {
+      console.error('save_event API call failed:', err);
+    });
     showToast(`Tədbir yaradıldı: ${ev.title}`, 'success');
   };
 
@@ -2079,11 +2111,13 @@ export function AppProvider({ children }) {
         mergedEvent = updated;
         return updated;
       });
-      localStorage.setItem('monodoxia_admin_events', JSON.stringify(next));
+      safeSetLocalStorage('monodoxia_admin_events', next);
       return next;
     });
     if (mergedEvent) {
-      apiCall('save_event', mergedEvent).catch(() => {});
+      apiCall('save_event', mergedEvent).catch(err => {
+        console.error('save_event API update failed:', err);
+      });
     }
     showToast('Tədbir məlumatları yeniləndi', 'success');
   };
@@ -2091,10 +2125,12 @@ export function AppProvider({ children }) {
   const deleteEvent = (id) => {
     setEventsList(prev => {
       const next = prev.filter(e => e.id !== id);
-      localStorage.setItem('monodoxia_admin_events', JSON.stringify(next));
+      safeSetLocalStorage('monodoxia_admin_events', next);
       return next;
     });
-    apiCall('delete_event', { id }).catch(() => {});
+    apiCall('delete_event', { id }).catch(err => {
+      console.error('delete_event API call failed:', err);
+    });
     showToast('Tədbir silindi', 'info');
   };
 

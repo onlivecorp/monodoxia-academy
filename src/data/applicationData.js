@@ -21,6 +21,8 @@ export const PAYMENT_STATUSES = [
 
 export const ATTENDANCE_STATUSES = [
   'Gözlənilir',
+  'İştirak edəcək',
+  'İştirak etməyəcək',
   'İştirak etdi',
   'İştirak etmədi',
   'Onlayn qoşuldu'

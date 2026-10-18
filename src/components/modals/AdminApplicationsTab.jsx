@@ -455,11 +455,26 @@ export default function AdminApplicationsTab() {
                                 ))}
                               </select>
                             </div>
-                            <div className="leading-tight">
-                              <span className="text-outline text-[10px]">İştirak: </span>
-                              <span className={`font-semibold ${app.attendanceStatus === 'İştirak etdi' ? 'text-emerald-600' : 'text-primary'}`}>
-                                {app.attendanceStatus}
-                              </span>
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-outline text-[10px]">İştirak:</span>
+                              <select
+                                value={app.attendanceStatus || 'Gözlənilir'}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  updateApplicationStatus(app.id, app.status, app.adminNote, app.paymentStatus, val);
+                                }}
+                                className={`text-[11px] font-bold px-2 py-0.5 rounded border border-outline-variant/60 bg-surface-bright focus:outline-none focus:border-secondary cursor-pointer ${
+                                  ['İştirak edəcək', 'İştirak etdi'].includes(app.attendanceStatus)
+                                    ? 'text-emerald-700 bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300'
+                                    : (['İştirak etməyəcək', 'İştirak etmədi'].includes(app.attendanceStatus)
+                                        ? 'text-rose-700 bg-rose-50 dark:bg-rose-950/30 border-rose-300'
+                                        : 'text-amber-700 bg-amber-50 dark:bg-amber-950/30 border-amber-300')
+                                }`}
+                              >
+                                {ATTENDANCE_STATUSES.map(a => (
+                                  <option key={a} value={a}>{a}</option>
+                                ))}
+                              </select>
                             </div>
                           </td>
 
@@ -468,7 +483,7 @@ export default function AdminApplicationsTab() {
                               {/* Quick Approve button */}
                               {app.status !== 'Təsdiqləndi' && (
                                 <button
-                                  onClick={() => updateApplicationStatus(app.id, 'Təsdiqləndi', 'Admin paneldən təsdiqləndi.', 'Ödənildi', 'İştirak etdi')}
+                                  onClick={() => updateApplicationStatus(app.id, 'Təsdiqləndi', 'Admin paneldən təsdiqləndi.', 'Ödənildi', 'İştirak edəcək')}
                                   title="Təsdiqlə"
                                   className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 hover:bg-emerald-200 flex items-center justify-center transition-colors"
                                 >
@@ -479,7 +494,7 @@ export default function AdminApplicationsTab() {
                               {/* Quick Reject button */}
                               {app.status !== 'Rədd edildi' && (
                                 <button
-                                  onClick={() => updateApplicationStatus(app.id, 'Rədd edildi', 'Meyarlara uyğun hesab edilmədi.', 'Qaytarıldı', 'İştirak etmədi')}
+                                  onClick={() => updateApplicationStatus(app.id, 'Rədd edildi', 'Meyarlara uyğun hesab edilmədi.', 'Qaytarıldı', 'İştirak etməyəcək')}
                                   title="Rədd et"
                                   className="w-7 h-7 rounded-lg bg-rose-100 text-rose-800 hover:bg-rose-200 flex items-center justify-center transition-colors"
                                 >
@@ -689,10 +704,10 @@ export default function AdminApplicationsTab() {
                         setStatusInput(newStat);
                         if (newStat === 'Təsdiqləndi' || newStat === 'Tamamlandı') {
                           setPaymentInput('Ödənildi');
-                          setAttendanceInput('İştirak etdi');
+                          setAttendanceInput('İştirak edəcək');
                         } else if (newStat === 'Rədd edildi' || newStat === 'Ləğv edildi') {
                           setPaymentInput('Qaytarıldı');
-                          setAttendanceInput('İştirak etmədi');
+                          setAttendanceInput('İştirak etməyəcək');
                         } else if (['Yeni', 'Baxılır', 'Gözləmədə'].includes(newStat)) {
                           setPaymentInput('Gözlənilir');
                           setAttendanceInput('Gözlənilir');

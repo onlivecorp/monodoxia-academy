@@ -167,17 +167,52 @@ export default function AdminEventsTab() {
       return;
     }
     const reader = new FileReader();
-    reader.onload = (e) => callback(e.target.result);
+    reader.onload = (e) => {
+      const dataUrl = e.target.result;
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const maxDim = 800;
+          let width = img.width;
+          let height = img.height;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressed = canvas.toDataURL('image/jpeg', 0.8);
+          callback(compressed);
+        } catch (err) {
+          callback(dataUrl);
+        }
+      };
+      img.onerror = () => callback(dataUrl);
+      img.src = dataUrl;
+    };
     reader.readAsDataURL(file);
   };
 
   // Filtered Events
   const filteredEvents = useMemo(() => {
-    return eventsList.filter(e => {
-      const matchSearch = (e.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          (e.speaker || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          (e.desc || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          (e.datetime || '').toLowerCase().includes(searchTerm.toLowerCase());
+    return (eventsList || []).filter(e => {
+      if (!e) return false;
+      const titleStr = typeof e.title === 'string' ? e.title : (e.title?.az || '');
+      const speakerStr = typeof e.speaker === 'string' ? e.speaker : '';
+      const descStr = typeof e.desc === 'string' ? e.desc : (e.desc?.az || '');
+      const datetimeStr = typeof e.datetime === 'string' ? e.datetime : '';
+      const matchSearch = titleStr.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          speakerStr.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          descStr.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          datetimeStr.toLowerCase().includes(searchTerm.toLowerCase());
       const matchType = typeFilter === 'all' || e.typeBadge === typeFilter;
       return matchSearch && matchType;
     });

@@ -1123,9 +1123,9 @@ if ($action === 'update_application_status' && $_SERVER['REQUEST_METHOD'] === 'P
     }
     if ($attendance_status === null) {
         if ($new_status === 'Təsdiqləndi' || $new_status === 'Tamamlandı') {
-            $attendance_status = 'İştirak etdi';
+            $attendance_status = 'İştirak edəcək';
         } elseif ($new_status === 'Rədd edildi' || $new_status === 'Ləğv edildi') {
-            $attendance_status = 'İştirak etmədi';
+            $attendance_status = 'İştirak etməyəcək';
         }
     }
 
@@ -1546,9 +1546,12 @@ if ($action === 'save_event' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     try { $pdo->exec("ALTER TABLE mdx_events ADD COLUMN is_online TINYINT(1) DEFAULT 1"); } catch (PDOException $e) {}
     try { $pdo->exec("ALTER TABLE mdx_events ADD COLUMN translations_json LONGTEXT DEFAULT NULL"); } catch (PDOException $e) {}
     try { $pdo->exec("ALTER TABLE mdx_events ADD COLUMN tags_json TEXT DEFAULT NULL"); } catch (PDOException $e) {}
-    try { $pdo->exec("ALTER TABLE mdx_events ADD COLUMN image VARCHAR(500) DEFAULT NULL"); } catch (PDOException $e) {}
+    try { $pdo->exec("ALTER TABLE mdx_events ADD COLUMN image LONGTEXT DEFAULT NULL"); } catch (PDOException $e) {}
+    try { $pdo->exec("ALTER TABLE mdx_events MODIFY COLUMN image LONGTEXT DEFAULT NULL"); } catch (PDOException $e) {}
     try { $pdo->exec("ALTER TABLE mdx_events ADD COLUMN price VARCHAR(100) DEFAULT 'Pulsuz'"); } catch (PDOException $e) {}
+    try { $pdo->exec("ALTER TABLE mdx_events MODIFY COLUMN price VARCHAR(100) DEFAULT 'Pulsuz'"); } catch (PDOException $e) {}
     try { $pdo->exec("ALTER TABLE mdx_events ADD COLUMN status VARCHAR(50) DEFAULT 'Aktiv'"); } catch (PDOException $e) {}
+    try { $pdo->exec("ALTER TABLE mdx_events MODIFY COLUMN status VARCHAR(50) DEFAULT 'Aktiv'"); } catch (PDOException $e) {}
 
     $stmt = $pdo->prepare("
         INSERT INTO mdx_events (id, title, datetime_label, type_badge, badge_class, speaker, speaker_role, capacity, registered, description, is_online, translations_json, tags_json, image, price, status)
@@ -1570,14 +1573,20 @@ if ($action === 'save_event' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             price = VALUES(price),
             status = VALUES(status)
     ");
-    $stmt->execute([
-        $id, $title, $datetime_label, $type_badge, $badge_class, $speaker,
-        $speaker_role, $capacity, $registered, $description, $is_online,
-        $translations_json, $tags_json, $image, $price, $status
-    ]);
 
-    echo json_encode(['status' => 'success', 'message' => 'Tədbir bazada saxlanıldı', 'id' => $id], JSON_UNESCAPED_UNICODE);
-    exit();
+    try {
+        $stmt->execute([
+            $id, $title, $datetime_label, $type_badge, $badge_class, $speaker,
+            $speaker_role, $capacity, $registered, $description, $is_online,
+            $translations_json, $tags_json, $image, $price, $status
+        ]);
+        echo json_encode(['status' => 'success', 'message' => 'Tədbir bazada saxlanıldı', 'id' => $id], JSON_UNESCAPED_UNICODE);
+        exit();
+    } catch (PDOException $e) {
+        http_response_code(500);
+        echo json_encode(['status' => 'error', 'message' => 'Baza xətası: ' . $e->getMessage()], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
 }
 
 if ($action === 'delete_event' && $_SERVER['REQUEST_METHOD'] === 'POST') {

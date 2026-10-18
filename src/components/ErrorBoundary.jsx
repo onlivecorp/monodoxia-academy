@@ -20,6 +20,15 @@ export default class ErrorBoundary extends React.Component {
     window.location.reload();
   };
 
+  handleCleanReset = () => {
+    try {
+      localStorage.removeItem('monodoxia_admin_events');
+    } catch (e) {}
+    this.setState({ hasError: false, error: null });
+    window.location.hash = '';
+    window.location.reload();
+  };
+
   render() {
     if (this.state.hasError) {
       return (
@@ -31,20 +40,31 @@ export default class ErrorBoundary extends React.Component {
             <h3 className="font-serif text-xl font-bold text-primary mb-2">
               Səhifə yüklənərkən xəta baş verdi
             </h3>
-            <p className="text-xs text-on-surface-variant leading-relaxed mb-6">
+            <p className="text-xs text-on-surface-variant leading-relaxed mb-4">
               Məlumatların göstərilməsi zamanı gözlənilməz texniki xəta qeydə alındı. Ana səhifəyə qayıtmaqla və ya səhifəni yeniləməklə davam edə bilərsiniz.
             </p>
-            <div className="flex items-center justify-center gap-3">
+            {this.state.error?.message && (
+              <div className="mb-5 p-2.5 rounded bg-rose-50 text-rose-700 text-[11px] font-mono text-left max-h-24 overflow-auto border border-rose-200">
+                {this.state.error.message}
+              </div>
+            )}
+            <div className="flex items-center justify-center gap-2 flex-wrap">
               <button
                 onClick={this.handleReset}
-                className="px-5 py-2.5 rounded-lg bg-primary text-on-primary font-bold text-xs hover:bg-primary/90 transition-all cursor-pointer shadow-sm"
+                className="px-4 py-2 rounded-lg bg-primary text-on-primary font-bold text-xs hover:bg-primary/90 transition-all cursor-pointer shadow-sm"
               >
                 Yenidən Yüklə
+              </button>
+              <button
+                onClick={this.handleCleanReset}
+                className="px-4 py-2 rounded-lg bg-secondary text-on-secondary font-bold text-xs hover:bg-secondary/90 transition-all cursor-pointer shadow-sm"
+              >
+                Keşi Təmizlə & Yenilə
               </button>
               <a
                 href="#"
                 onClick={() => { window.location.hash = ''; window.location.reload(); }}
-                className="px-5 py-2.5 rounded-lg border border-outline-variant text-on-surface font-semibold text-xs hover:bg-surface-container transition-all"
+                className="px-4 py-2 rounded-lg border border-outline-variant text-on-surface font-semibold text-xs hover:bg-surface-container transition-all"
               >
                 Ana Səhifə
               </a>

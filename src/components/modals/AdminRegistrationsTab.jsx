@@ -62,7 +62,7 @@ export default function AdminRegistrationsTab() {
   // Metrics
   const totalCount = activeRegistrations.length;
   const paidCount = activeRegistrations.filter(r => r.paymentStatus === 'Ödənilib').length;
-  const attendedCount = activeRegistrations.filter(r => r.attendanceStatus === 'İştirak etdi').length;
+  const attendedCount = activeRegistrations.filter(r => ['İştirak edəcək', 'İştirak etdi'].includes(r.attendanceStatus)).length;
   const approvedCount = activeRegistrations.filter(r => r.status === 'Təsdiqləndi').length;
 
   // Export to CSV
@@ -399,16 +399,24 @@ export default function AdminRegistrationsTab() {
 
                       {/* Attendance Status */}
                       <td className="py-3.5 px-4">
-                        <span className={`inline-flex items-center gap-1 font-semibold text-xs ${
-                          reg.attendanceStatus === 'İştirak etdi'
-                            ? 'text-emerald-700 dark:text-emerald-400'
-                            : (reg.attendanceStatus === 'İştirak etmədi' ? 'text-rose-700 dark:text-rose-400' : 'text-on-surface-variant')
-                        }`}>
-                          <span className="material-symbols-outlined text-[14px]">
-                            {reg.attendanceStatus === 'İştirak etdi' ? 'done_all' : (reg.attendanceStatus === 'İştirak etmədi' ? 'cancel' : 'pending')}
-                          </span>
-                          <span>{reg.attendanceStatus}</span>
-                        </span>
+                        <select
+                          value={reg.attendanceStatus || 'Gözlənilir'}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            updateApplicationStatus(reg.id, reg.status, reg.adminNote, reg.paymentStatus, val);
+                          }}
+                          className={`text-[11px] font-bold px-2 py-0.5 rounded border border-outline-variant/60 bg-surface-bright focus:outline-none focus:border-secondary cursor-pointer ${
+                            ['İştirak edəcək', 'İştirak etdi'].includes(reg.attendanceStatus)
+                              ? 'text-emerald-700 bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300'
+                              : (['İştirak etməyəcək', 'İştirak etmədi'].includes(reg.attendanceStatus)
+                                  ? 'text-rose-700 bg-rose-50 dark:bg-rose-950/30 border-rose-300'
+                                  : 'text-amber-700 bg-amber-50 dark:bg-amber-950/30 border-amber-300')
+                          }`}
+                        >
+                          {ATTENDANCE_STATUSES.map(a => (
+                            <option key={a} value={a}>{a}</option>
+                          ))}
+                        </select>
                       </td>
 
                       {/* Actions */}
@@ -474,10 +482,10 @@ export default function AdminRegistrationsTab() {
                     let nextAtt = editForm.attendanceStatus;
                     if (newStat === 'Təsdiqləndi' || newStat === 'Tamamlandı') {
                       nextPay = 'Ödənildi';
-                      nextAtt = 'İştirak etdi';
+                      nextAtt = 'İştirak edəcək';
                     } else if (newStat === 'Rədd edildi' || newStat === 'Ləğv edildi') {
                       nextPay = 'Qaytarıldı';
-                      nextAtt = 'İştirak etmədi';
+                      nextAtt = 'İştirak etməyəcək';
                     } else if (['Yeni', 'Baxılır', 'Gözləmədə'].includes(newStat)) {
                       nextPay = 'Gözlənilir';
                       nextAtt = 'Gözlənilir';
