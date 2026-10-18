@@ -46,15 +46,7 @@ export default function MaintenanceScreen({ onAdminLogin, onClosePreview }) {
       {/* Top Bar Branding & Language Switcher */}
       <header className="relative z-10 w-full max-w-4xl flex items-center justify-between border-b border-[#e2d9c8] pb-5">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#c5a059] to-[#8a6a1f] p-[1px] shadow-md">
-            <div className="w-full h-full bg-[#fbf9f5] rounded-xl flex items-center justify-center">
-              <span className="material-symbols-outlined text-[#8a6a1f] text-[22px]">psychology_alt</span>
-            </div>
-          </div>
-          <div>
-            <h1 className="font-serif text-lg sm:text-xl font-bold text-[#05224a] tracking-wide leading-none">MONODOXIA</h1>
-            <p className="text-[10px] tracking-widest uppercase text-[#8a6a1f] font-semibold mt-0.5">Academy · Baku</p>
-          </div>
+          <img src="/logo.png" alt="Monodoxia Academy" className="h-12 w-auto object-contain" />
         </div>
 
         <div className="flex items-center gap-3">

@@ -17,7 +17,7 @@ export default function CertificateModal() {
           <span className="material-symbols-outlined text-[22px]">close</span>
         </button>
 
-        <span className="material-symbols-outlined text-secondary text-[48px] mb-2">workspace_premium</span>
+        <img src="/logo.png" alt="Monodoxia Academy" className="h-14 w-auto mx-auto object-contain mb-2" />
         <div className="font-label-sm text-secondary tracking-widest uppercase">MONODOXIA ACADEMY</div>
         <h3 className="font-display-lg text-2xl font-serif text-primary mt-1 mb-4">
           Təltifnamə və Məzuniyyət Sertifikatı

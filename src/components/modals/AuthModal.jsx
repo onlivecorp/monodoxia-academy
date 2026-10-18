@@ -44,7 +44,11 @@ export default function AuthModal() {
           <span className="material-symbols-outlined text-[22px]">close</span>
         </button>
 
-        <div className="flex border-b border-outline-variant/60 pt-4 px-6 gap-6">
+        <div className="pt-6 pb-1 px-6 flex items-center justify-center">
+          <img src="/logo.png" alt="Monodoxia Academy" className="h-12 w-auto object-contain" />
+        </div>
+
+        <div className="flex border-b border-outline-variant/60 pt-3 px-6 gap-6">
           <button
             onClick={() => setAuthModalTab('login')}
             className={`pb-3 text-sm font-semibold transition-all ${

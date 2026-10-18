@@ -154,19 +154,8 @@ export default function AdminModal() {
             </button>
 
             {/* Logo Mark */}
-            <div style={{
-              background: 'linear-gradient(135deg,rgba(197,160,89,0.18) 0%,rgba(197,160,89,0.06) 100%)',
-              border: '1px solid rgba(197,160,89,0.3)',
-              borderRadius: '8px',
-              width: '34px',
-              height: '34px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#b45309' }}>
-                admin_panel_settings
-              </span>
+            <div className="flex items-center justify-center p-1 bg-white rounded-lg border border-slate-200 shadow-xs h-9 w-9">
+              <img src="/logo.png" alt="Logo" className="h-7 w-auto object-contain" />
             </div>
 
             <div>

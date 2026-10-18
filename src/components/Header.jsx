@@ -21,7 +21,7 @@ export default function Header() {
     getPageUrl
   } = useApp();
 
-  const logoUrl = homeContent?.navbar?.logoUrl;
+  const logoUrl = homeContent?.navbar?.logoUrl || '/logo.png';
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -47,27 +47,16 @@ export default function Header() {
           }}
           className="flex items-center gap-3 group shrink-0 cursor-pointer"
         >
-          {logoUrl ? (
-            <img src={logoUrl} alt="Logo" className="h-10 w-auto object-contain" />
-          ) : (
-            <>
-              <div className="w-10 h-10 rounded bg-primary-container border border-secondary/40 flex items-center justify-center text-secondary shadow-sm transition-transform duration-300 group-hover:scale-105">
-                <svg viewBox="0 0 24 24" className="w-6 h-6 fill-none stroke-current" strokeWidth="1.5">
-                  <circle cx="12" cy="12" r="9" stroke="currentColor" strokeOpacity="0.4" />
-                  <polygon points="12,3 15,12 12,21 9,12" stroke="currentColor" fill="currentColor" fillOpacity="0.2" />
-                  <circle cx="12" cy="12" r="2.5" fill="currentColor" />
-                </svg>
-              </div>
-              <div className="flex flex-col">
-                <span className="font-serif text-lg tracking-widest text-primary font-semibold leading-none">
-                  MONODOXIA
-                </span>
-                <span className="text-[10px] tracking-[0.25em] text-secondary uppercase font-sans mt-1 font-medium">
-                  ACADEMY
-                </span>
-              </div>
-            </>
-          )}
+          <img
+            src={logoUrl}
+            alt="Monodoxia Academy"
+            className="h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+            onError={(e) => {
+              if (e.currentTarget.src !== window.location.origin + '/logo.png') {
+                e.currentTarget.src = '/logo.png';
+              }
+            }}
+          />
         </a>
 
         {/* CENTER DESKTOP NAVIGATION LINKS */}

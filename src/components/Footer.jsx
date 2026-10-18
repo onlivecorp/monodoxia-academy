@@ -17,7 +17,7 @@ export default function Footer() {
           {/* BRAND */}
           <div className="lg:col-span-5 space-y-4">
             <a
-              className="inline-block cursor-pointer"
+              className="inline-flex items-center p-2.5 bg-white/95 backdrop-blur-sm rounded-xl shadow-md border border-white/20 transition-transform hover:scale-105 cursor-pointer"
               href={getPageUrl ? getPageUrl('home') : '/'}
               onClick={(e) => {
                 e.preventDefault();
@@ -26,8 +26,13 @@ export default function Footer() {
             >
               <img
                 alt="Monodoxia Academy"
-                className="h-10 md:h-12 w-auto object-contain brightness-0 invert"
-                src={footer.logoUrl || "https://lh3.googleusercontent.com/aida/AEtjO1Ud98aRG900y6U00sYKP3tPpJm2M8DOTtpOTm-yCKU1-KoIjXzck8LkNUZdIXLZCRhGkaBOPjFJI6jFegMuTxHL6Dm0z4tn4kd1uP-5Ww85geF1sh1ER7t3Oql4l_nLbT6KcbyVI7gdLHhrqv8JOeTfFP1KaLl4S8KCpZ713-fQYpNMUfE36W-Cz4-OXs9eSeAsw7TuNvQt0Fyc8jzIdOtN-9lJwrWssyk055OT8Oc3R6NR1QlJbq6WLA"}
+                className="h-10 md:h-12 w-auto object-contain"
+                src={footer.logoUrl || "/logo.png"}
+                onError={(e) => {
+                  if (e.currentTarget.src !== window.location.origin + '/logo.png') {
+                    e.currentTarget.src = '/logo.png';
+                  }
+                }}
               />
             </a>
             <p className="font-body-md text-body-md text-on-primary-container max-w-sm leading-relaxed">
