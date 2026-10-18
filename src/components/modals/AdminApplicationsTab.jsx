@@ -439,7 +439,11 @@ export default function AdminApplicationsTab() {
                           </td>
 
                           <td className="py-3.5 px-4 font-medium text-primary">
-                            {app.price || 'Pulsuz'}
+                            {app.targetType === 'community' || app.targetType === 'forum' ? (
+                              <span className="text-outline text-[11px]">—</span>
+                            ) : (
+                              app.price || 'Pulsuz'
+                            )}
                           </td>
 
                           <td className="py-3.5 px-4">
@@ -783,7 +787,9 @@ export default function AdminApplicationsTab() {
                   </span>
                   <div className="font-bold text-primary text-sm">{selectedApp.targetTitle}</div>
                   <div className="text-on-surface-variant">Kateqoriya: <strong className="uppercase">{selectedApp.targetType}</strong></div>
-                  <div className="text-on-surface-variant">Məbləğ: <strong>{selectedApp.price || 'Pulsuz'}</strong></div>
+                  {selectedApp.targetType !== 'community' && selectedApp.targetType !== 'forum' && (
+                    <div className="text-on-surface-variant">Məbləğ: <strong>{selectedApp.price || 'Pulsuz'}</strong></div>
+                  )}
                   <div className="text-[10px] text-outline mt-1">Müraciət Tarixi: {selectedApp.appliedAt}</div>
                   {selectedApp.updatedAt && (
                     <div className="text-[10px] text-secondary mt-0.5 font-medium">Son Yenilənmə: {selectedApp.updatedAt}</div>

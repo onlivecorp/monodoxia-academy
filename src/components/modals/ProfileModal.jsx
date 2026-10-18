@@ -747,11 +747,13 @@ export default function ProfileModal() {
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3 text-xs text-on-surface-variant">
-                          <div>
-                            <span className="text-[10px] uppercase text-outline block">Məbləğ</span>
-                            <span className="font-medium text-primary">{app.price || 'Pulsuz'}</span>
-                          </div>
+                        <div className={`grid gap-2 pt-3 text-xs text-on-surface-variant ${app.targetType === 'community' || app.targetType === 'forum' ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-2 sm:grid-cols-4'}`}>
+                          {app.targetType !== 'community' && app.targetType !== 'forum' && (
+                            <div>
+                              <span className="text-[10px] uppercase text-outline block">Məbləğ</span>
+                              <span className="font-medium text-primary">{app.price || 'Pulsuz'}</span>
+                            </div>
+                          )}
                           {app.targetType === 'community' || app.targetType === 'forum' ? (
                             <>
                               <div>
