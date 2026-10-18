@@ -75,7 +75,13 @@ export default function ProfileModal() {
   if (!profileModalOpen || !currentUser) return null;
 
   const myApplications = (applicationsList || []).filter(a => String(a.userId) === String(currentUser?.id) && !a.archived);
-  const myNotifications = (userNotifications || []).filter(n => String(n.userId) === String(currentUser?.id));
+  const myNotifications = (userNotifications || []).filter(n => {
+    if (!currentUser?.id) return false;
+    const nUid = String(n.userId || '').replace(/^#/, '');
+    const cUid = String(currentUser.id || '').replace(/^#/, '');
+    const nAlt = nUid.startsWith('u') ? nUid.slice(1) : ('u' + nUid);
+    return nUid === cUid || nAlt === cUid || String(n.userId) === String(currentUser.id);
+  });
   const unreadCount = myNotifications.filter(n => !n.isRead).length;
 
   const fallbackFieldDict = {
@@ -876,8 +882,9 @@ export default function ProfileModal() {
                 </div>
                 {myNotifications.length > 0 && (
                   <button
-                    onClick={clearNotifications}
-                    className="text-xs text-rose-600 hover:underline flex items-center gap-1"
+                    type="button"
+                    onClick={() => clearNotifications('all')}
+                    className="text-xs text-rose-600 hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-[14px]">delete_sweep</span>
                     Təmizlə

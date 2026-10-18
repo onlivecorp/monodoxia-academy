@@ -1788,16 +1788,29 @@ export function AppProvider({ children }) {
     apiCall('mark_notification_read', { id: notifId, user_id: currentUser?.id }).catch(() => {});
   };
 
-  const clearNotifications = (notifId = 'all') => {
+  const clearNotifications = (arg = 'all') => {
+    // If called directly from an event handler like onClick={clearNotifications}, arg is the React SyntheticEvent
+    const isSingle = typeof arg === 'string' && arg !== 'all' && arg.trim() !== '';
+    const notifId = isSingle ? arg : 'all';
     const userId = currentUser?.id;
+
     if (notifId === 'all') {
       setUserNotifications(prev => {
-        const remaining = userId ? prev.filter(n => String(n.userId) !== String(userId)) : [];
+        const remaining = userId
+          ? prev.filter(n => {
+              const nUid = String(n.userId || '').replace(/^#/, '');
+              const cUid = String(userId || '').replace(/^#/, '');
+              const nAlt = nUid.startsWith('u') ? nUid.slice(1) : ('u' + nUid);
+              return nUid !== cUid && nAlt !== cUid && String(n.userId) !== String(userId);
+            })
+          : [];
         safeSetLocalStorage('monodoxia_notifications', remaining);
         return remaining;
       });
       if (userId) {
         apiCall('clear_notifications', { user_id: userId }).catch(() => {});
+      } else {
+        apiCall('clear_notifications', {}).catch(() => {});
       }
       showToast('Bildirişlər təmizləndi', 'info');
     } else {
@@ -1812,7 +1825,9 @@ export function AppProvider({ children }) {
   };
 
   const deleteNotification = (notifId) => {
-    clearNotifications(notifId);
+    if (typeof notifId === 'string' && notifId) {
+      clearNotifications(notifId);
+    }
   };
 
   const updateCurrentUser = (updates) => {

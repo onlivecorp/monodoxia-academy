@@ -1436,8 +1436,12 @@ if ($action === 'clear_notifications' && $_SERVER['REQUEST_METHOD'] === 'POST') 
         $stmt = $pdo->prepare("DELETE FROM mdx_notifications WHERE id = ?");
         $stmt->execute([$id]);
     } else if ($user_id) {
-        $stmt = $pdo->prepare("DELETE FROM mdx_notifications WHERE user_id = ?");
-        $stmt->execute([$user_id]);
+        $cleanId = ltrim($user_id, '#');
+        $altId = (strpos($cleanId, 'u') === 0) ? substr($cleanId, 1) : ('u' . $cleanId);
+        $stmt = $pdo->prepare("DELETE FROM mdx_notifications WHERE user_id = ? OR user_id = ? OR user_id = ?");
+        $stmt->execute([$user_id, $cleanId, $altId]);
+    } else {
+        $pdo->exec("DELETE FROM mdx_notifications");
     }
 
     echo json_encode(['status' => 'success', 'message' => 'Bildirişlər bazadan təmizləndi'], JSON_UNESCAPED_UNICODE);
