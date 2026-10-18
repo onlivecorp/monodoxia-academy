@@ -1,4 +1,4 @@
-import React, { useState, Suspense, lazy } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { LanguageProvider } from './i18n/LanguageContext';
 import { AppProvider, useApp } from './context/AppContext';
 
