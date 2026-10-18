@@ -1146,6 +1146,12 @@ if ($action === 'update_application_status' && $_SERVER['REQUEST_METHOD'] === 'P
     $admin_note = $input['admin_note'] ?? null;
     $payment_status = $input['payment_status'] ?? null;
     $attendance_status = $input['attendance_status'] ?? null;
+    $user_phone = $input['user_phone'] ?? null;
+    $user_name = $input['user_name'] ?? null;
+    $user_note = $input['user_note'] ?? null;
+    $form_responses = isset($input['form_responses'])
+        ? (is_array($input['form_responses']) ? json_encode($input['form_responses'], JSON_UNESCAPED_UNICODE) : $input['form_responses'])
+        : null;
 
     if (!$id || !$new_status) {
         http_response_code(400);
@@ -1155,7 +1161,7 @@ if ($action === 'update_application_status' && $_SERVER['REQUEST_METHOD'] === 'P
 
     // Avtomatik təsdiq və imtina statusları
     if ($payment_status === null) {
-        if ($new_status === 'Təsdiqləndi' || $new_status === 'Tamamlandı') {
+        if ($new_status === 'Təsdiqləndi' || new_status === 'Tamamlandı') {
             $payment_status = 'Ödənildi';
         } elseif ($new_status === 'Rədd edildi' || $new_status === 'Ləğv edildi') {
             $payment_status = 'Qaytarıldı';
@@ -1184,6 +1190,22 @@ if ($action === 'update_application_status' && $_SERVER['REQUEST_METHOD'] === 'P
         $sql .= ", attendance_status = ?";
         $params[] = $attendance_status;
     }
+    if ($user_phone !== null) {
+        $sql .= ", user_phone = ?";
+        $params[] = $user_phone;
+    }
+    if ($user_name !== null) {
+        $sql .= ", user_name = ?";
+        $params[] = $user_name;
+    }
+    if ($user_note !== null) {
+        $sql .= ", user_note = ?";
+        $params[] = $user_note;
+    }
+    if ($form_responses !== null) {
+        $sql .= ", form_responses = ?";
+        $params[] = $form_responses;
+    }
     $sql .= " WHERE id = ?";
     $params[] = $id;
 
@@ -1198,7 +1220,14 @@ if ($action === 'update_application_status' && $_SERVER['REQUEST_METHOD'] === 'P
 
         if ($app) {
             $notifType = ($new_status === 'Təsdiqləndi' || $new_status === 'Tamamlandı') ? 'success' : (in_array($new_status, ['Rədd edildi', 'Ləğv edildi']) ? 'error' : 'warning');
-            $notifMsg = "Sizin \"{$app['target_title']}\" müraciətinizin statusu yeniləndi: {$new_status}." . ($admin_note ? " Qeyd: {$admin_note}" : "");
+            
+            $details = [];
+            if (!empty($payment_status) && $payment_status !== 'Tələb olunmur') $details[] = "Ödəniş: " . $payment_status;
+            if (!empty($attendance_status)) $details[] = "İştirak: " . $attendance_status;
+            if (!empty($admin_note)) $details[] = "Qeyd: " . $admin_note;
+            $detailsText = !empty($details) ? ' (' . implode(' | ', $details) . ')' : '';
+
+            $notifMsg = "Sizin \"{$app['target_title']}\" müraciətinizin statusu yeniləndi: {$new_status}.{$detailsText}";
 
             $notifStmt = $pdo->prepare("
                 INSERT INTO mdx_notifications (id, user_id, title, message, type, is_read, created_at)

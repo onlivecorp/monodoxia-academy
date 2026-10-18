@@ -50,6 +50,8 @@ export default function AdminApplicationsTab() {
   const [statusInput, setStatusInput] = useState('');
   const [paymentInput, setPaymentInput] = useState('');
   const [attendanceInput, setAttendanceInput] = useState('');
+  const [phoneInput, setPhoneInput] = useState('');
+  const [userNoteInput, setUserNoteInput] = useState('');
 
   // Form Field Builder State
   const [showAddFieldModal, setShowAddFieldModal] = useState(false);
@@ -99,6 +101,8 @@ export default function AdminApplicationsTab() {
     setStatusInput(app.status);
     setPaymentInput(app.paymentStatus || 'Tələb olunmur');
     setAttendanceInput(app.attendanceStatus || 'Gözlənilir');
+    setPhoneInput(app.userPhone || '');
+    setUserNoteInput(app.userNote || '');
   };
 
   const handleSaveAppDetails = () => {
@@ -108,16 +112,21 @@ export default function AdminApplicationsTab() {
       statusInput,
       adminNoteInput.trim(),
       paymentInput,
-      attendanceInput
+      attendanceInput,
+      {
+        userPhone: phoneInput.trim(),
+        userNote: userNoteInput.trim()
+      }
     );
     setSelectedApp(prev => ({
       ...prev,
       status: statusInput,
       adminNote: adminNoteInput.trim(),
       paymentStatus: paymentInput,
-      attendanceStatus: attendanceInput
+      attendanceStatus: attendanceInput,
+      userPhone: phoneInput.trim(),
+      userNote: userNoteInput.trim()
     }));
-    showToast(`Müraciət məlumatları yeniləndi (#${selectedApp.id})`, 'success');
   };
 
   const openAddField = () => {
@@ -665,6 +674,17 @@ export default function AdminApplicationsTab() {
 
             {/* Body */}
             <div className="p-5 overflow-y-auto flex-1 space-y-4 text-xs">
+              {/* Live User Notification Info Alert */}
+              <div className="p-3 rounded-xl bg-secondary/10 border border-secondary/30 flex items-start gap-2.5">
+                <span className="material-symbols-outlined text-secondary text-[20px] mt-0.5 shrink-0">notifications_active</span>
+                <div>
+                  <strong className="text-secondary font-bold block text-xs">Avtomatik İstifadəçi Bildirişi</strong>
+                  <p className="text-[11px] text-on-surface-variant mt-0.5 leading-relaxed">
+                    Burada edilən hər bir status dəyişimi, ödəniş/iştirak yeniləməsi və admin qeydi dərhal istifadəçinin kabinetində görünəcək və bildiriş zənginə çatdırılacaq.
+                  </p>
+                </div>
+              </div>
+
               {/* Applicant & Target Info Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-xl bg-surface-container/20 border border-outline-variant/40">
                 <div>
@@ -673,8 +693,20 @@ export default function AdminApplicationsTab() {
                   </span>
                   <div className="font-bold text-primary text-sm">{selectedApp.userName}</div>
                   <div className="text-on-surface-variant">{selectedApp.userEmail}</div>
-                  <div className="text-secondary mt-1 font-semibold">{selectedApp.userPhone || 'Telefon qeyd edilməyib'}</div>
-                  <div className="text-[10px] text-outline mt-1">İstifadəçi ID: {selectedApp.userId}</div>
+                  <div className="text-[10px] text-outline mt-1 mb-2">İstifadəçi ID: {selectedApp.userId}</div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-outline mb-1">
+                      Əlaqə Nömrəsi / WhatsApp
+                    </label>
+                    <input
+                      type="text"
+                      value={phoneInput}
+                      onChange={(e) => setPhoneInput(e.target.value)}
+                      placeholder="+994 (50) 000-00-00"
+                      className="w-full px-2.5 py-1.5 rounded border border-outline-variant bg-surface-bright text-xs font-semibold focus:outline-none focus:border-secondary"
+                    />
+                  </div>
                 </div>
 
                 <div>
@@ -685,6 +717,9 @@ export default function AdminApplicationsTab() {
                   <div className="text-on-surface-variant">Kateqoriya: <strong className="uppercase">{selectedApp.targetType}</strong></div>
                   <div className="text-on-surface-variant">Məbləğ: <strong>{selectedApp.price || 'Pulsuz'}</strong></div>
                   <div className="text-[10px] text-outline mt-1">Müraciət Tarixi: {selectedApp.appliedAt}</div>
+                  {selectedApp.updatedAt && (
+                    <div className="text-[10px] text-secondary mt-0.5 font-medium">Son Yenilənmə: {selectedApp.updatedAt}</div>
+                  )}
                 </div>
               </div>
 

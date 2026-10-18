@@ -759,7 +759,7 @@ export function AppProvider({ children }) {
             })));
           }
           if (data.applications && data.applications.length > 0) {
-            setApplicationsList(data.applications.map(a => ({
+            const mappedApps = data.applications.map(a => ({
               id: a.id,
               userId: a.user_id,
               userName: a.user_name,
@@ -776,7 +776,27 @@ export function AppProvider({ children }) {
               formResponses: typeof a.form_responses === 'string' ? JSON.parse(a.form_responses || '{}') : (a.form_responses || {}),
               userNote: a.user_note,
               appliedAt: a.applied_at
-            })));
+            }));
+            setApplicationsList(mappedApps);
+            safeSetLocalStorage('monodoxia_applications', mappedApps);
+          }
+          if (Array.isArray(data.notifications) && data.notifications.length > 0) {
+            const mappedNotifs = data.notifications.map(n => ({
+              id: n.id,
+              userId: n.user_id,
+              title: n.title,
+              message: n.message,
+              type: n.type || 'info',
+              isRead: Boolean(Number(n.is_read)),
+              createdAt: n.created_at ? n.created_at.replace('T', ' ').substring(0, 16) : ''
+            }));
+            setUserNotifications(prev => {
+              const remoteIds = new Set(mappedNotifs.map(x => x.id));
+              const localUnsynced = prev.filter(x => !remoteIds.has(x.id));
+              const merged = [...mappedNotifs, ...localUnsynced];
+              safeSetLocalStorage('monodoxia_notifications', merged);
+              return merged;
+            });
           }
           if (data.form_fields && data.form_fields.length > 0) {
             setFormFieldsList(data.form_fields.map(f => {
@@ -966,6 +986,104 @@ export function AppProvider({ children }) {
   useEffect(() => {
     localStorage.setItem('monodoxia_notifications', JSON.stringify(userNotifications));
   }, [userNotifications]);
+
+  // Real-time Multi-Tab Synchronization
+  useEffect(() => {
+    const handleStorage = (e) => {
+      if (e.key === 'monodoxia_applications' && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          if (Array.isArray(parsed)) setApplicationsList(parsed);
+        } catch (err) {}
+      }
+      if (e.key === 'monodoxia_notifications' && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          if (Array.isArray(parsed)) setUserNotifications(parsed);
+        } catch (err) {}
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
+
+  // Periodic and Window-Focus Live Background Sync
+  useEffect(() => {
+    let isSubscribed = true;
+    const fetchLiveUpdates = async () => {
+      try {
+        const res = await fetch('/api.php?action=get_all', { credentials: 'include' });
+        const data = await res.json().catch(() => null);
+        if (!isSubscribed || data?.status !== 'success') return;
+
+        if (Array.isArray(data.applications) && data.applications.length > 0) {
+          const remoteApps = data.applications.map(a => ({
+            id: a.id,
+            userId: a.user_id,
+            userName: a.user_name,
+            userEmail: a.user_email,
+            userPhone: a.user_phone,
+            targetType: a.target_type,
+            targetId: a.target_id,
+            targetTitle: a.target_title,
+            price: a.price,
+            status: a.status,
+            paymentStatus: a.payment_status,
+            attendanceStatus: a.attendance_status,
+            adminNote: a.admin_note,
+            formResponses: typeof a.form_responses === 'string' ? JSON.parse(a.form_responses || '{}') : (a.form_responses || {}),
+            userNote: a.user_note,
+            appliedAt: a.applied_at
+          }));
+
+          setApplicationsList(prev => {
+            if (currentUser) {
+              remoteApps.forEach(rApp => {
+                if (rApp.userId === currentUser.id) {
+                  const match = prev.find(p => p.id === rApp.id);
+                  if (match && match.status !== rApp.status) {
+                    showToast(`"${rApp.targetTitle}" müraciətinizin statusu yeniləndi: ${rApp.status}`, 'info');
+                  }
+                }
+              });
+            }
+            safeSetLocalStorage('monodoxia_applications', remoteApps);
+            return remoteApps;
+          });
+        }
+
+        if (Array.isArray(data.notifications) && data.notifications.length > 0) {
+          const remoteNotifs = data.notifications.map(n => ({
+            id: n.id,
+            userId: n.user_id,
+            title: n.title,
+            message: n.message,
+            type: n.type || 'info',
+            isRead: Boolean(Number(n.is_read)),
+            createdAt: n.created_at ? n.created_at.replace('T', ' ').substring(0, 16) : ''
+          }));
+
+          setUserNotifications(prev => {
+            const remoteIds = new Set(remoteNotifs.map(x => x.id));
+            const localOnly = prev.filter(x => !remoteIds.has(x.id));
+            const merged = [...remoteNotifs, ...localOnly];
+            safeSetLocalStorage('monodoxia_notifications', merged);
+            return merged;
+          });
+        }
+      } catch (err) {}
+    };
+
+    const intervalId = setInterval(fetchLiveUpdates, 20000);
+    const handleFocus = () => fetchLiveUpdates();
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      isSubscribed = false;
+      clearInterval(intervalId);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [currentUser]);
 
   const showToast = (message, type = 'info') => {
     const id = Date.now();
@@ -1408,8 +1526,20 @@ export function AppProvider({ children }) {
     return { success: true, application: newApp };
   };
 
-  const updateApplicationStatus = (appId, newStatus, adminNote = null, paymentStatus = null, attendanceStatus = null) => {
-    let updatedApp = null;
+  const updateApplicationStatus = (
+    appId,
+    newStatus,
+    adminNote = null,
+    paymentStatus = null,
+    attendanceStatus = null,
+    extraUpdates = {}
+  ) => {
+    // 1. Locate existing application synchronously
+    const currentApp = applicationsList.find(a => a.id === appId);
+    if (!currentApp) {
+      console.warn('updateApplicationStatus: application not found for ID', appId);
+      return;
+    }
 
     let resolvedPayment = paymentStatus;
     if (resolvedPayment === null || resolvedPayment === undefined) {
@@ -1417,6 +1547,8 @@ export function AppProvider({ children }) {
         resolvedPayment = 'Ödənildi';
       } else if (newStatus === 'Rədd edildi' || newStatus === 'Ləğv edildi') {
         resolvedPayment = 'Qaytarıldı';
+      } else {
+        resolvedPayment = currentApp.paymentStatus || 'Gözlənilir';
       }
     }
 
@@ -1426,78 +1558,109 @@ export function AppProvider({ children }) {
         resolvedAttendance = 'İştirak edəcək';
       } else if (newStatus === 'Rədd edildi' || newStatus === 'Ləğv edildi') {
         resolvedAttendance = 'İştirak etməyəcək';
+      } else {
+        resolvedAttendance = currentApp.attendanceStatus || 'Gözlənilir';
       }
     }
 
-    setApplicationsList(prev => prev.map(app => {
-      if (app.id === appId) {
-        updatedApp = {
-          ...app,
-          status: newStatus,
-          adminNote: adminNote !== null ? adminNote : app.adminNote,
-          paymentStatus: resolvedPayment !== null && resolvedPayment !== undefined ? resolvedPayment : app.paymentStatus,
-          attendanceStatus: resolvedAttendance !== null && resolvedAttendance !== undefined ? resolvedAttendance : app.attendanceStatus
-        };
-        return updatedApp;
-      }
-      return app;
-    }));
+    const resolvedStatus = newStatus || currentApp.status;
+    const resolvedAdminNote = adminNote !== null ? adminNote : (currentApp.adminNote || '');
 
-    if (updatedApp) {
-      // In-app notification for the applicant
-      const notifType = (newStatus === 'Təsdiqləndi' || newStatus === 'Tamamlandı') ? 'success' : (['Rədd edildi', 'Ləğv edildi'].includes(newStatus) ? 'error' : 'warning');
-      const notifMsg = `"${updatedApp.targetTitle}" müraciətinizin statusu yeniləndi: ${newStatus}.${adminNote ? ' Qeyd: ' + adminNote : ''}`;
+    const updatedApp = {
+      ...currentApp,
+      ...(extraUpdates || {}),
+      status: resolvedStatus,
+      adminNote: resolvedAdminNote,
+      paymentStatus: resolvedPayment,
+      attendanceStatus: resolvedAttendance,
+      updatedAt: new Date().toISOString().replace('T', ' ').substring(0, 16)
+    };
 
-      const newNotif = {
-        id: 'notif-' + Date.now(),
-        userId: updatedApp.userId,
-        title: `Müraciət Statusu: ${newStatus}`,
-        message: notifMsg,
-        type: notifType,
-        isRead: false,
-        createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16)
-      };
-      setUserNotifications(prev => [newNotif, ...prev]);
+    // Update state & localStorage immediately
+    setApplicationsList(prev => {
+      const nextList = prev.map(app => (app.id === appId ? updatedApp : app));
+      safeSetLocalStorage('monodoxia_applications', nextList);
+      return nextList;
+    });
 
-      // If approved, update live event/course occupancy
-      if (newStatus === 'Təsdiqləndi') {
-        if (updatedApp.targetType === 'event' || updatedApp.targetType === 'webinar') {
-          setEventsList(prev => prev.map(e => e.id === updatedApp.targetId ? { ...e, registered: Math.min(e.capacity, (e.registered || 0) + 1) } : e));
-        } else if (updatedApp.targetType === 'course') {
-          setCoursesList(prev => prev.map(c => c.id === updatedApp.targetId ? { ...c, occupancy: Math.min(100, (c.occupancy || 0) + 2) } : c));
-        } else if (updatedApp.targetType === 'club') {
-          let approvedTier = 'Basic';
-          const title = updatedApp.targetTitle || '';
-          if (title.toLowerCase().includes('vip')) {
-            approvedTier = 'VIP';
-          } else if (title.toLowerCase().includes('premium')) {
-            approvedTier = 'Premium';
-          } else if (title.toLowerCase().includes('basic')) {
-            approvedTier = 'Basic';
-          } else if (updatedApp.targetId) {
-            approvedTier = updatedApp.targetId.replace('tier-', '').toUpperCase();
-          }
-          setUserTier(approvedTier);
-          localStorage.setItem('monodoxia_tier', approvedTier);
+    // In-app notification for the applicant
+    const notifType = (resolvedStatus === 'Təsdiqləndi' || resolvedStatus === 'Tamamlandı')
+      ? 'success'
+      : (['Rədd edildi', 'Ləğv edildi'].includes(resolvedStatus) ? 'error' : 'warning');
 
-          // If the approved application belongs to current user, update currentUser.tier
-          if (currentUser && currentUser.id === updatedApp.userId) {
-            updateCurrentUser({ tier: approvedTier });
-          }
+    const details = [];
+    if (resolvedPayment && resolvedPayment !== 'Tələb olunmur') details.push(`Ödəniş: ${resolvedPayment}`);
+    if (resolvedAttendance) details.push(`İştirak: ${resolvedAttendance}`);
+    if (resolvedAdminNote) details.push(`Qeyd: ${resolvedAdminNote}`);
+    const detailsSuffix = details.length > 0 ? ` (${details.join(' | ')})` : '';
+
+    const notifMsg = `"${updatedApp.targetTitle}" müraciətinizin statusu yeniləndi: ${resolvedStatus}.${detailsSuffix}`;
+
+    const newNotif = {
+      id: 'notif-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+      userId: updatedApp.userId,
+      title: `Müraciət Statusu: ${resolvedStatus}`,
+      message: notifMsg,
+      type: notifType,
+      isRead: false,
+      createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16)
+    };
+
+    setUserNotifications(prev => {
+      const nextNotifs = [newNotif, ...prev];
+      safeSetLocalStorage('monodoxia_notifications', nextNotifs);
+      return nextNotifs;
+    });
+
+    // If approved, update live event/course occupancy
+    if (resolvedStatus === 'Təsdiqləndi') {
+      if (updatedApp.targetType === 'event' || updatedApp.targetType === 'webinar') {
+        setEventsList(prev => prev.map(e => e.id === updatedApp.targetId ? { ...e, registered: Math.min(e.capacity, (e.registered || 0) + 1) } : e));
+      } else if (updatedApp.targetType === 'course') {
+        setCoursesList(prev => prev.map(c => c.id === updatedApp.targetId ? { ...c, occupancy: Math.min(100, (c.occupancy || 0) + 2) } : c));
+      } else if (updatedApp.targetType === 'club') {
+        let approvedTier = 'Basic';
+        const title = updatedApp.targetTitle || '';
+        if (title.toLowerCase().includes('vip')) {
+          approvedTier = 'VIP';
+        } else if (title.toLowerCase().includes('premium')) {
+          approvedTier = 'Premium';
+        } else if (title.toLowerCase().includes('basic')) {
+          approvedTier = 'Basic';
+        } else if (updatedApp.targetId) {
+          approvedTier = updatedApp.targetId.replace('tier-', '').toUpperCase();
+        }
+        setUserTier(approvedTier);
+        localStorage.setItem('monodoxia_tier', approvedTier);
+
+        // If the approved application belongs to current user, update currentUser.tier
+        if (currentUser && currentUser.id === updatedApp.userId) {
+          updateCurrentUser({ tier: approvedTier });
         }
       }
-
-      showToast(`Müraciət statusu yeniləndi: ${newStatus}`, 'success');
-
-      // Sync with API
-      apiCall('update_application_status', {
-        id: appId,
-        status: newStatus,
-        admin_note: adminNote,
-        payment_status: updatedApp.paymentStatus,
-        attendance_status: updatedApp.attendanceStatus
-      }).catch(() => {});
     }
+
+    // Broadcast across local tabs & dispatch custom event
+    try {
+      window.dispatchEvent(new CustomEvent('monodoxia:application_updated', { detail: updatedApp }));
+    } catch (e) {}
+
+    showToast(`Müraciət statusu yeniləndi: ${resolvedStatus}`, notifType);
+
+    // Sync with API
+    apiCall('update_application_status', {
+      id: appId,
+      status: resolvedStatus,
+      admin_note: resolvedAdminNote,
+      payment_status: resolvedPayment,
+      attendance_status: resolvedAttendance,
+      user_phone: updatedApp.userPhone,
+      user_name: updatedApp.userName,
+      user_note: updatedApp.userNote,
+      form_responses: updatedApp.formResponses
+    }).catch(err => {
+      console.warn('API update_application_status sync failed:', err);
+    });
   };
 
   const cancelApplication = (appId) => {
