@@ -23,18 +23,24 @@ export default function AboutPage() {
       >
         <div className="flex flex-wrap items-center gap-4 mt-6 pt-6 border-t border-outline-variant/40 text-xs text-on-surface-variant">
           <div className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-secondary text-[18px]">psychology</span>
-            <span>Elmi & Psixoloji Əsaslar</span>
+            <span className="material-symbols-outlined text-secondary text-[18px]">
+              {about.heroBadge1Icon || 'psychology'}
+            </span>
+            <span>{getLocalized(about, 'heroBadge1Text', currentLang, defaultLang) || 'Elmi & Psixoloji Əsaslar'}</span>
           </div>
           <div className="w-1 h-1 rounded-full bg-outline-variant" />
           <div className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-secondary text-[18px]">auto_stories</span>
-            <span>Qədim Fəlsəfi Miras</span>
+            <span className="material-symbols-outlined text-secondary text-[18px]">
+              {about.heroBadge2Icon || 'auto_stories'}
+            </span>
+            <span>{getLocalized(about, 'heroBadge2Text', currentLang, defaultLang) || 'Qədim Fəlsəfi Miras'}</span>
           </div>
           <div className="w-1 h-1 rounded-full bg-outline-variant" />
           <div className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-secondary text-[18px]">verified</span>
-            <span>Etik Təhlükəsizlik Zəmanəti</span>
+            <span className="material-symbols-outlined text-secondary text-[18px]">
+              {about.heroBadge3Icon || 'verified'}
+            </span>
+            <span>{getLocalized(about, 'heroBadge3Text', currentLang, defaultLang) || 'Etik Təhlükəsizlik Zəmanəti'}</span>
           </div>
         </div>
       </PageHero>
@@ -50,26 +56,26 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center">
             <span className="text-xs text-secondary font-bold uppercase tracking-widest block mb-2">
-              Monodoxia Manifesti
+              {getLocalized(about, 'manifestoBadge', currentLang, defaultLang) || 'Monodoxia Manifesti'}
             </span>
             <h2 className="font-serif text-2xl sm:text-3xl font-bold text-primary mb-6">
-              "İnsan xarici dünyanı fəth etməzdən əvvəl öz daxili krallığını kəşf etməlidir."
+              {getLocalized(about, 'manifestoTitle', currentLang, defaultLang) || '"İnsan xarici dünyanı fəth etməzdən əvvəl öz daxili krallığını kəşf etməlidir."'}
             </h2>
             <p className="text-xs sm:text-sm text-on-surface-variant leading-relaxed mb-8">
-              Müasir dünyada informasiya həddindən artıq çox, fərqindəlik isə azdır. Monodoxia Academy hər kəsin daxilindəki sükutu dinləməsi, emosional və psixoloji bütövlüyünü bərpa etməsi üçün təhlükəsiz bir platformadır.
+              {getLocalized(about, 'manifestoDesc', currentLang, defaultLang) || 'Müasir dünyada informasiya həddindən artıq çox, fərqindəlik isə azdır. Monodoxia Academy hər kəsin daxilindəki sükutu dinləməsi, emosional və psixoloji bütövlüyünü bərpa etməsi üçün təhlükəsiz bir platformadır.'}
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4">
               <button
                 onClick={() => navigateTo('akademiya')}
                 className="px-6 py-3 rounded-lg bg-primary text-on-primary font-bold text-xs hover:bg-primary/90 transition-all cursor-pointer shadow-sm"
               >
-                Akademiyanı Kəşf Et
+                {getLocalized(about, 'manifestoBtn1Text', currentLang, defaultLang) || 'Akademiyanı Kəşf Et'}
               </button>
               <button
                 onClick={() => navigateTo('club')}
                 className="px-6 py-3 rounded-lg border border-secondary text-secondary font-bold text-xs hover:bg-secondary/10 transition-all cursor-pointer"
               >
-                Coaching Club-a Qoşul
+                {getLocalized(about, 'manifestoBtn2Text', currentLang, defaultLang) || 'Coaching Club-a Qoşul'}
               </button>
             </div>
           </div>

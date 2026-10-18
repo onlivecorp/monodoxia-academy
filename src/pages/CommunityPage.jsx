@@ -86,13 +86,17 @@ export default function CommunityPage() {
         <div className="flex flex-wrap items-center justify-between gap-4 mt-6 pt-6 border-t border-outline-variant/40">
           <div className="flex flex-wrap items-center gap-4 text-xs text-on-surface-variant">
             <div className="flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-secondary text-[18px]">verified_user</span>
-              <span>Konfidensiallıq və Qarşılıqlı Hörmət</span>
+              <span className="material-symbols-outlined text-secondary text-[18px]">
+                {community.heroBadge1Icon || 'verified_user'}
+              </span>
+              <span>{getLocalized(community, 'heroBadge1Text', currentLang, defaultLang) || 'Konfidensiallıq və Qarşılıqlı Hörmət'}</span>
             </div>
             <div className="w-1 h-1 rounded-full bg-outline-variant" />
             <div className="flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-secondary text-[18px]">psychology</span>
-              <span>Moderasiya Olunan Dərin Dialoq</span>
+              <span className="material-symbols-outlined text-secondary text-[18px]">
+                {community.heroBadge2Icon || 'psychology'}
+              </span>
+              <span>{getLocalized(community, 'heroBadge2Text', currentLang, defaultLang) || 'Moderasiya Olunan Dərin Dialoq'}</span>
             </div>
           </div>
 
@@ -264,21 +268,34 @@ export default function CommunityPage() {
               {/* Community Rules Card */}
               <div className="bg-surface-container-low border border-outline-variant/60 rounded-2xl p-6">
                 <div className="flex items-center gap-2 mb-4 text-primary">
-                  <span className="material-symbols-outlined text-secondary text-xl">shield</span>
-                  <h4 className="font-serif text-base font-bold">İcma Etikası və Qaydaları</h4>
+                  <span className="material-symbols-outlined text-secondary text-xl">
+                    {community.rulesIcon || 'shield'}
+                  </span>
+                  <h4 className="font-serif text-base font-bold">
+                    {getLocalized(community, 'rulesTitle', currentLang, defaultLang) || 'İcma Etikası və Qaydaları'}
+                  </h4>
                 </div>
                 <div className="space-y-3 text-xs text-on-surface-variant leading-relaxed">
                   <div className="flex items-start gap-2">
                     <span className="material-symbols-outlined text-secondary text-[16px] shrink-0 mt-0.5">check_circle</span>
-                    <span><strong>Məxfilik prinsipi:</strong> Müzakirə olunan şəxsi təcrübələr və etiraflar icmadan kənara çıxarılmır.</span>
+                    <span>
+                      <strong>{getLocalized(community, 'rule1Title', currentLang, defaultLang) || 'Məxfilik prinsipi:'} </strong>
+                      {getLocalized(community, 'rule1Desc', currentLang, defaultLang) || 'Müzakirə olunan şəxsi təcrübələr və etiraflar icmadan kənara çıxarılmır.'}
+                    </span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="material-symbols-outlined text-secondary text-[16px] shrink-0 mt-0.5">check_circle</span>
-                    <span><strong>Konstruktiv yanaşma:</strong> Qınaq və mühakimə yoxdur; hər fikir təkamül nöqteyi-nəzərindən dinlənilir.</span>
+                    <span>
+                      <strong>{getLocalized(community, 'rule2Title', currentLang, defaultLang) || 'Konstruktiv yanaşma:'} </strong>
+                      {getLocalized(community, 'rule2Desc', currentLang, defaultLang) || 'Qınaq və mühakimə yoxdur; hər fikir təkamül nöqteyi-nəzərindən dinlənilir.'}
+                    </span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="material-symbols-outlined text-secondary text-[16px] shrink-0 mt-0.5">check_circle</span>
-                    <span><strong>Səthilikdən uzaq:</strong> Siyasi, polemik və ya kommersiya xarakterli paylaşımlar qadağandır.</span>
+                    <span>
+                      <strong>{getLocalized(community, 'rule3Title', currentLang, defaultLang) || 'Səthilikdən uzaq:'} </strong>
+                      {getLocalized(community, 'rule3Desc', currentLang, defaultLang) || 'Siyasi, polemik və ya kommersiya xarakterli paylaşımlar qadağandır.'}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -286,19 +303,19 @@ export default function CommunityPage() {
               {/* Weekly Discussion Theme */}
               <div className="bg-secondary/10 border border-secondary/30 rounded-2xl p-6">
                 <span className="text-[10px] font-bold text-secondary uppercase tracking-widest block mb-1">
-                  Həftənin Fəlsəfi Mövzusu
+                  {getLocalized(community, 'weeklyBadge', currentLang, defaultLang) || 'Həftənin Fəlsəfi Mövzusu'}
                 </span>
                 <h4 className="font-serif text-lg font-bold text-primary mb-2">
-                  "Daxili təzyiq qarşısında şüurlu müşahidəçi qalmaq necə mümkündür?"
+                  {getLocalized(community, 'weeklyTitle', currentLang, defaultLang) || '"Daxili təzyiq qarşısında şüurlu müşahidəçi qalmaq necə mümkündür?"'}
                 </h4>
                 <p className="text-xs text-on-surface-variant leading-relaxed mb-4">
-                  Bu həftə mentorlarımızın fasilitasiyası ilə emosional reaktivliyi idarə etməyin nevrobioloji yollarını müzakirə edirik.
+                  {getLocalized(community, 'weeklyDesc', currentLang, defaultLang) || 'Bu həftə mentorlarımızın fasilitasiyası ilə emosional reaktivliyi idarə etməyin nevrobioloji yollarını müzakirə edirik.'}
                 </p>
                 <button
                   onClick={handleCreateTopic}
                   className="w-full py-2 px-3 rounded-lg bg-secondary text-on-secondary font-bold text-xs hover:bg-secondary/90 transition-all text-center cursor-pointer shadow-sm"
                 >
-                  Müzakirəyə Qoşul
+                  {getLocalized(community, 'weeklyBtnText', currentLang, defaultLang) || 'Müzakirəyə Qoşul'}
                 </button>
               </div>
 

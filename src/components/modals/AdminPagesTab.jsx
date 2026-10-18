@@ -903,7 +903,7 @@ export default function AdminPagesTab() {
                   <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#c5a059' }}>school</span>
                   <span>Akademiya Səhifəsi (#akademiya)</span>
                 </h5>
-                <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0' }}>Kurslar, kateqoriyalar və akademik tədris zəmanəti mətni</p>
+                <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0' }}>Kurslar, kateqoriyalar, axtarış mesajları və akademik tədris zəmanəti kartları</p>
               </div>
 
               <button
@@ -926,10 +926,103 @@ export default function AdminPagesTab() {
               showToast={showToast}
             />
 
-            <PageField label="Səhifə Üst Etiketi (Badge)" block={academyData} setBlock={setAcademyData} fieldKey="badge" placeholder="Məs: Akademik Tədris" />
-            <PageField label="Səhifə Əsas Başlığı (Title)" block={academyData} setBlock={setAcademyData} fieldKey="title" placeholder="Məs: Kurslar və Sertifikasiya Proqramları" />
-            <PageField label="Səhifə Təsviri (Desc)" block={academyData} setBlock={setAcademyData} fieldKey="desc" multiline rows={3} placeholder="Akademiyanın təhsil istiqaməti haqqında geniş izah..." />
-            <PageField label="Düymə Mətni (CTA)" block={academyData} setBlock={setAcademyData} fieldKey="ctaText" placeholder="Məs: Kurslara Bax" />
+            {/* Əsas Hero Başlıqları */}
+            <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>1. Əsas Hero Başlıq və Təsvir</span>
+              <PageField label="Səhifə Üst Etiketi (Badge)" block={academyData} setBlock={setAcademyData} fieldKey="badge" placeholder="Məs: Akademik Tədris" />
+              <PageField label="Səhifə Əsas Başlığı (Title)" block={academyData} setBlock={setAcademyData} fieldKey="title" placeholder="Məs: Kurslar və Sertifikasiya Proqramları" />
+              <PageField label="Səhifə Təsviri (Desc)" block={academyData} setBlock={setAcademyData} fieldKey="desc" multiline rows={3} placeholder="Akademiyanın təhsil istiqaməti haqqında geniş izah..." />
+              <PageField label="Düymə Mətni (CTA)" block={academyData} setBlock={setAcademyData} fieldKey="ctaText" placeholder="Məs: Kurslara Bax" />
+            </div>
+
+            {/* Hero Quick Badges */}
+            <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>2. Hero Altındakı 3 Qısa İkonlu Bənd</span>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label className="admin-label">1-ci Bənd İkonu</label>
+                  <input type="text" className="admin-input" value={academyData.heroBadge1Icon || 'verified'} onChange={e => setAcademyData(p => ({ ...p, heroBadge1Icon: e.target.value }))} />
+                  <PageField label="1-ci Bənd Mətni" block={academyData} setBlock={setAcademyData} fieldKey="heroBadge1Text" placeholder="Beynəlxalq QR Sertifikat" />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label className="admin-label">2-ci Bənd İkonu</label>
+                  <input type="text" className="admin-input" value={academyData.heroBadge2Icon || 'psychology'} onChange={e => setAcademyData(p => ({ ...p, heroBadge2Icon: e.target.value }))} />
+                  <PageField label="2-ci Bənd Mətni" block={academyData} setBlock={setAcademyData} fieldKey="heroBadge2Text" placeholder="ICF & PhD Mentorlar" />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label className="admin-label">3-cü Bənd İkonu</label>
+                  <input type="text" className="admin-input" value={academyData.heroBadge3Icon || 'laptop_chromebook'} onChange={e => setAcademyData(p => ({ ...p, heroBadge3Icon: e.target.value }))} />
+                  <PageField label="3-cü Bənd Mətni" block={academyData} setBlock={setAcademyData} fieldKey="heroBadge3Text" placeholder="Ömürlük Giriş və LMS Arxiv" />
+                </div>
+              </div>
+            </div>
+
+            {/* Axtarış və Boş Nəticə Mesajları */}
+            <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>3. Axtarış və Boş Nəticə Mesajları</span>
+              <PageField label="Axtarış Giriş Mətni (Placeholder)" block={academyData} setBlock={setAcademyData} fieldKey="searchPlaceholder" placeholder="Kurs və ya kouç axtar..." />
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '10px' }}>
+                <PageField label="Aktiv Kurs Yoxdur — Başlıq" block={academyData} setBlock={setAcademyData} fieldKey="emptyTitle" placeholder="Hal-hazırda aktiv kurs mövcud deyil" />
+                <PageField label="Aktiv Kurs Yoxdur — İzah" block={academyData} setBlock={setAcademyData} fieldKey="emptyDesc" multiline rows={2} placeholder="Yeni proqramlar və qeydiyyat tarixləri tezliklə elan olunacaqdır." />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '10px' }}>
+                <PageField label="Filter Sıfırla Düyməsi" block={academyData} setBlock={setAcademyData} fieldKey="resetFilterBtnText" placeholder="Filteri sıfırla" />
+                <PageField label="Bütün Kursları Göstər Düyməsi" block={academyData} setBlock={setAcademyData} fieldKey="showAllBtnText" placeholder="Bütün Kursları Göstər" />
+              </div>
+            </div>
+
+            {/* Tədris Zəmanəti Kartları */}
+            <div style={{ background: '#fefce8', padding: '14px', borderRadius: '8px', border: '1.5px solid #fef08a', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '13px', fontWeight: 800, color: '#854d0e', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>verified</span>
+                  <span>4. Səhifənin Aşağı Zəmanət Kartları (3 Ədəd Kart)</span>
+                </span>
+                <span style={{ fontSize: '10px', background: '#fef08a', color: '#854d0e', padding: '2px 8px', borderRadius: '4px', fontWeight: 700 }}>Alt Bölmə</span>
+              </div>
+              <p style={{ fontSize: '11px', color: '#713f12', margin: 0 }}>
+                Kursların altında yerləşən "Rəsmi QR Sertifikat", "Fərdi Mentor Əlaqəsi" və "Daimi Material Girişi" kartlarının ikon, başlıq və izahları:
+              </p>
+
+              {/* Kart 1 */}
+              <div style={{ background: '#ffffff', padding: '12px', borderRadius: '8px', border: '1px solid #fde047', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: '#854d0e' }}>1-ci Kart (Sertifikat Zəmanəti)</span>
+                <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '10px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <label className="admin-label">İkon</label>
+                    <input type="text" className="admin-input" value={academyData.guarantee1Icon || 'verified'} onChange={e => setAcademyData(p => ({ ...p, guarantee1Icon: e.target.value }))} />
+                  </div>
+                  <PageField label="Kart Başlığı" block={academyData} setBlock={setAcademyData} fieldKey="guarantee1Title" placeholder="Rəsmi QR Sertifikat" />
+                </div>
+                <PageField label="Kart Təsviri" block={academyData} setBlock={setAcademyData} fieldKey="guarantee1Desc" multiline rows={2} placeholder="İmtahanı uğurla başa vuran məzunlarımıza..." />
+              </div>
+
+              {/* Kart 2 */}
+              <div style={{ background: '#ffffff', padding: '12px', borderRadius: '8px', border: '1px solid #fde047', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: '#854d0e' }}>2-ci Kart (Mentor Əlaqəsi)</span>
+                <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '10px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <label className="admin-label">İkon</label>
+                    <input type="text" className="admin-input" value={academyData.guarantee2Icon || 'co_present'} onChange={e => setAcademyData(p => ({ ...p, guarantee2Icon: e.target.value }))} />
+                  </div>
+                  <PageField label="Kart Başlığı" block={academyData} setBlock={setAcademyData} fieldKey="guarantee2Title" placeholder="Fərdi Mentor Əlaqəsi" />
+                </div>
+                <PageField label="Kart Təsviri" block={academyData} setBlock={setAcademyData} fieldKey="guarantee2Desc" multiline rows={2} placeholder="Hər bir kurs çərçivəsində tələbələrə ev tapşırıqlarının auditində..." />
+              </div>
+
+              {/* Kart 3 */}
+              <div style={{ background: '#ffffff', padding: '12px', borderRadius: '8px', border: '1px solid #fde047', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: '#854d0e' }}>3-cü Kart (Material Girişi)</span>
+                <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '10px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <label className="admin-label">İkon</label>
+                    <input type="text" className="admin-input" value={academyData.guarantee3Icon || 'all_inclusive'} onChange={e => setAcademyData(p => ({ ...p, guarantee3Icon: e.target.value }))} />
+                  </div>
+                  <PageField label="Kart Başlığı" block={academyData} setBlock={setAcademyData} fieldKey="guarantee3Title" placeholder="Daimi Material Girişi" />
+                </div>
+                <PageField label="Kart Təsviri" block={academyData} setBlock={setAcademyData} fieldKey="guarantee3Desc" multiline rows={2} placeholder="Kursu bitirdikdən sonra da bütün video dərslər..." />
+              </div>
+            </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px solid #f1f5f9' }}>
               <button
@@ -939,7 +1032,7 @@ export default function AdminPagesTab() {
                 style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>save</span>
-                <span>Akademiya Məlumatlarını Yadda Saxla</span>
+                <span>Akademiya Səhifəsinin Bütün Məlumatlarını Yadda Saxla</span>
               </button>
             </div>
           </div>
@@ -977,9 +1070,98 @@ export default function AdminPagesTab() {
               showToast={showToast}
             />
 
-            <PageField label="Səhifə Üst Etiketi (Badge)" block={coachesData} setBlock={setCoachesData} fieldKey="badge" placeholder="Məs: Ekspert Heyəti" />
-            <PageField label="Səhifə Əsas Başlığı (Title)" block={coachesData} setBlock={setCoachesData} fieldKey="title" placeholder="Məs: Beynəlxalq Sertifikatlı Mentorlarımız" />
-            <PageField label="Səhifə Təsviri (Desc)" block={coachesData} setBlock={setCoachesData} fieldKey="desc" multiline rows={3} placeholder="Mentorların təcrübəsi və kouçinq prosesi haqqında..." />
+            {/* Əsas Hero Başlıqları */}
+            <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>1. Əsas Hero Başlıq və Təsvir</span>
+              <PageField label="Səhifə Üst Etiketi (Badge)" block={coachesData} setBlock={setCoachesData} fieldKey="badge" placeholder="Məs: Ekspert Heyəti" />
+              <PageField label="Səhifə Əsas Başlığı (Title)" block={coachesData} setBlock={setCoachesData} fieldKey="title" placeholder="Məs: Fərdi Kouçinq və Mentorluq" />
+              <PageField label="Səhifə Təsviri (Desc)" block={coachesData} setBlock={setCoachesData} fieldKey="desc" multiline rows={3} placeholder="Mentorların təcrübəsi və kouçinq prosesi haqqında..." />
+            </div>
+
+            {/* Hero Quick Badges */}
+            <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>2. Hero Altındakı 3 Qısa İkonlu Bənd</span>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label className="admin-label">1-ci Bənd İkonu</label>
+                  <input type="text" className="admin-input" value={coachesData.heroBadge1Icon || 'verified_user'} onChange={e => setCoachesData(p => ({ ...p, heroBadge1Icon: e.target.value }))} />
+                  <PageField label="1-ci Bənd Mətni" block={coachesData} setBlock={setCoachesData} fieldKey="heroBadge1Text" placeholder="ICF Etik Məcəlləsi" />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label className="admin-label">2-ci Bənd İkonu</label>
+                  <input type="text" className="admin-input" value={coachesData.heroBadge2Icon || 'lock'} onChange={e => setCoachesData(p => ({ ...p, heroBadge2Icon: e.target.value }))} />
+                  <PageField label="2-ci Bənd Mətni" block={coachesData} setBlock={setCoachesData} fieldKey="heroBadge2Text" placeholder="100% Tam Konfidensiallıq" />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label className="admin-label">3-cü Bənd İkonu</label>
+                  <input type="text" className="admin-input" value={coachesData.heroBadge3Icon || 'videocam'} onChange={e => setCoachesData(p => ({ ...p, heroBadge3Icon: e.target.value }))} />
+                  <PageField label="3-cü Bənd Mətni" block={coachesData} setBlock={setCoachesData} fieldKey="heroBadge3Text" placeholder="Təhlükəsiz Onlayn Otaqlar" />
+                </div>
+              </div>
+            </div>
+
+            {/* İş Metodologiyası və Standartlar (4 Mərhələ) */}
+            <div style={{ background: '#fefce8', padding: '14px', borderRadius: '8px', border: '1.5px solid #fef08a', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '13px', fontWeight: 800, color: '#854d0e', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>psychology</span>
+                  <span>3. Fərdi Kouçinq Standartları və 4 Mərhələ</span>
+                </span>
+                <span style={{ fontSize: '10px', background: '#fef08a', color: '#854d0e', padding: '2px 8px', borderRadius: '4px', fontWeight: 700 }}>Metodologiya</span>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+                <PageField label="Bölmə Üst Etiketi" block={coachesData} setBlock={setCoachesData} fieldKey="standardsBadge" placeholder="İş Metodologiyası" />
+                <PageField label="Bölmə Başlığı" block={coachesData} setBlock={setCoachesData} fieldKey="standardsTitle" placeholder="Monodoxia Fərdi Kouçinq Standartları" />
+              </div>
+              <PageField label="Bölmə İzahı" block={coachesData} setBlock={setCoachesData} fieldKey="standardsDesc" multiline rows={2} placeholder="Hər bir fərdlə iş prosesi elmi əsaslı psixoloji çərçivədə..." />
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '10px', marginTop: '6px' }}>
+                {/* Addım 1 */}
+                <div style={{ background: '#ffffff', padding: '10px', borderRadius: '6px', border: '1px solid #fde047' }}>
+                  <div style={{ display: 'flex', gap: '8px', marginBottom: '6px' }}>
+                    <input type="text" className="admin-input" style={{ width: '45px', textAlign: 'center', fontWeight: 700 }} value={coachesData.step1Num || '01'} onChange={e => setCoachesData(p => ({ ...p, step1Num: e.target.value }))} />
+                    <div style={{ flex: 1 }}>
+                      <PageField label="1-ci Addım Başlığı" block={coachesData} setBlock={setCoachesData} fieldKey="step1Title" placeholder="Daxili Diaqnostika" />
+                    </div>
+                  </div>
+                  <PageField label="1-ci Addım İzahı" block={coachesData} setBlock={setCoachesData} fieldKey="step1Desc" multiline rows={2} />
+                </div>
+
+                {/* Addım 2 */}
+                <div style={{ background: '#ffffff', padding: '10px', borderRadius: '6px', border: '1px solid #fde047' }}>
+                  <div style={{ display: 'flex', gap: '8px', marginBottom: '6px' }}>
+                    <input type="text" className="admin-input" style={{ width: '45px', textAlign: 'center', fontWeight: 700 }} value={coachesData.step2Num || '02'} onChange={e => setCoachesData(p => ({ ...p, step2Num: e.target.value }))} />
+                    <div style={{ flex: 1 }}>
+                      <PageField label="2-ci Addım Başlığı" block={coachesData} setBlock={setCoachesData} fieldKey="step2Title" placeholder="İnkişaf Strategiyası" />
+                    </div>
+                  </div>
+                  <PageField label="2-ci Addım İzahı" block={coachesData} setBlock={setCoachesData} fieldKey="step2Desc" multiline rows={2} />
+                </div>
+
+                {/* Addım 3 */}
+                <div style={{ background: '#ffffff', padding: '10px', borderRadius: '6px', border: '1px solid #fde047' }}>
+                  <div style={{ display: 'flex', gap: '8px', marginBottom: '6px' }}>
+                    <input type="text" className="admin-input" style={{ width: '45px', textAlign: 'center', fontWeight: 700 }} value={coachesData.step3Num || '03'} onChange={e => setCoachesData(p => ({ ...p, step3Num: e.target.value }))} />
+                    <div style={{ flex: 1 }}>
+                      <PageField label="3-cü Addım Başlığı" block={coachesData} setBlock={setCoachesData} fieldKey="step3Title" placeholder="Müntəzəm Seanslar" />
+                    </div>
+                  </div>
+                  <PageField label="3-cü Addım İzahı" block={coachesData} setBlock={setCoachesData} fieldKey="step3Desc" multiline rows={2} />
+                </div>
+
+                {/* Addım 4 */}
+                <div style={{ background: '#ffffff', padding: '10px', borderRadius: '6px', border: '1px solid #fde047' }}>
+                  <div style={{ display: 'flex', gap: '8px', marginBottom: '6px' }}>
+                    <input type="text" className="admin-input" style={{ width: '45px', textAlign: 'center', fontWeight: 700 }} value={coachesData.step4Num || '04'} onChange={e => setCoachesData(p => ({ ...p, step4Num: e.target.value }))} />
+                    <div style={{ flex: 1 }}>
+                      <PageField label="4-cü Addım Başlığı" block={coachesData} setBlock={setCoachesData} fieldKey="step4Title" placeholder="Davamlı Monitorinq" />
+                    </div>
+                  </div>
+                  <PageField label="4-cü Addım İzahı" block={coachesData} setBlock={setCoachesData} fieldKey="step4Desc" multiline rows={2} />
+                </div>
+              </div>
+            </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px solid #f1f5f9' }}>
               <button
@@ -989,7 +1171,7 @@ export default function AdminPagesTab() {
                 style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>save</span>
-                <span>Kouçinq Məlumatlarını Yadda Saxla</span>
+                <span>Kouçinq Səhifəsinin Bütün Məlumatlarını Yadda Saxla</span>
               </button>
             </div>
           </div>
@@ -1028,26 +1210,68 @@ export default function AdminPagesTab() {
                 showToast={showToast}
               />
 
-              <PageField label="Üst Etiket (Badge)" block={clubData} setBlock={setClubData} fieldKey="badge" placeholder="Məs: QAPALI İCMA ÜZVLÜYÜ" />
-              <PageField label="Klub Başlığı (Title)" block={clubData} setBlock={setClubData} fieldKey="title" placeholder="Məs: Monodoxia Coaching Club — Həmfikirlərin Seçilmiş Məkanı" />
-              <PageField label="Klub Təsviri (Desc)" block={clubData} setBlock={setClubData} fieldKey="desc" multiline rows={3} />
-              
-              <PageImageField label="Klub Şəkli (Opsional)" value={clubData.image} onChange={v => setClubData(p => ({ ...p, image: v }))} />
+              {/* 1. Hero */}
+              <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>1. Hero Başlığı və Təsviri</span>
+                <PageField label="Üst Etiket (Badge)" block={clubData} setBlock={setClubData} fieldKey="badge" placeholder="Məs: QAPALI İCMA ÜZVLÜYÜ" />
+                <PageField label="Klub Başlığı (Title)" block={clubData} setBlock={setClubData} fieldKey="title" placeholder="Məs: Monodoxia Coaching Club — Həmfikirlərin Seçilmiş Məkanı" />
+                <PageField label="Klub Təsviri (Desc)" block={clubData} setBlock={setClubData} fieldKey="desc" multiline rows={3} />
+              </div>
 
-              <PageField
-                label="Klub İmtiyazları (Perks - hər sətirdə bir bənd)"
-                block={clubData}
-                setBlock={setClubData}
-                fieldKey="perks"
-                isArray={true}
-                multiline={true}
-                rows={4}
-                placeholder="Hər sətirdə bir imtiyaz yazın..."
-              />
+              {/* 2. Hero Quick Badges */}
+              <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>2. Hero Altındakı 3 Qısa İkonlu Bənd</span>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                    <label className="admin-label">1-ci Bənd İkonu</label>
+                    <input type="text" className="admin-input" value={clubData.heroBadge1Icon || 'verified'} onChange={e => setClubData(p => ({ ...p, heroBadge1Icon: e.target.value }))} />
+                    <PageField label="1-ci Bənd Mətni" block={clubData} setBlock={setClubData} fieldKey="heroBadge1Text" placeholder="Məhdud Sayda Üzvlük" />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                    <label className="admin-label">2-ci Bənd İkonu</label>
+                    <input type="text" className="admin-input" value={clubData.heroBadge2Icon || 'groups'} onChange={e => setClubData(p => ({ ...p, heroBadge2Icon: e.target.value }))} />
+                    <PageField label="2-ci Bənd Mətni" block={clubData} setBlock={setClubData} fieldKey="heroBadge2Text" placeholder="Həftəlik Mastermind" />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                    <label className="admin-label">3-cü Bənd İkonu</label>
+                    <input type="text" className="admin-input" value={clubData.heroBadge3Icon || 'spa'} onChange={e => setClubData(p => ({ ...p, heroBadge3Icon: e.target.value }))} />
+                    <PageField label="3-cü Bənd Mətni" block={clubData} setBlock={setClubData} fieldKey="heroBadge3Text" placeholder="100+ Saatlıq Meditasiya Arxivi" />
+                  </div>
+                </div>
+              </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
-                <PageField label="Müraciət Düyməsi (CTA)" block={clubData} setBlock={setClubData} fieldKey="ctaBtnText" placeholder="Məs: Kluba qoşul" />
-                <PageField label="Məhdudiyyət Xəbərdarlığı" block={clubData} setBlock={setClubData} fieldKey="limitedText" placeholder="Məs: Məhdud sayda yer: Aylıq qəbul" />
+              {/* 3. İmtiyazlar Bölməsi */}
+              <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>3. Klub İmtiyazları Bölməsi Başlıqları</span>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+                  <PageField label="Bölmə Üst Etiketi" block={clubData} setBlock={setClubData} fieldKey="perksBadge" placeholder="Klub İmtiyazları" />
+                  <PageField label="Bölmə Başlığı" block={clubData} setBlock={setClubData} fieldKey="perksTitle" placeholder="Coaching Club Rezidentlərinə Nələr Təqdim Olunur?" />
+                </div>
+                <PageField label="Bölmə İzahı" block={clubData} setBlock={setClubData} fieldKey="perksDesc" multiline rows={2} />
+                <PageField
+                  label="Klub İmtiyazları (Perks - hər sətirdə bir bənd)"
+                  block={clubData}
+                  setBlock={setClubData}
+                  fieldKey="perks"
+                  isArray={true}
+                  multiline={true}
+                  rows={4}
+                  placeholder="Hər sətirdə bir imtiyaz yazın..."
+                />
+              </div>
+
+              {/* 4. Aylıq Məhdud Qəbul Xəbərdarlıq Banneri */}
+              <div style={{ background: '#fefce8', padding: '12px', borderRadius: '8px', border: '1.5px solid #fef08a', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <span style={{ fontSize: '12px', fontWeight: 800, color: '#854d0e' }}>4. Məhdud Qəbul Siyasəti Xəbərdarlıq Kartı (Aşağı Banner)</span>
+                <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '10px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <label className="admin-label">İkon</label>
+                    <input type="text" className="admin-input" value={clubData.noticeIcon || 'lock'} onChange={e => setClubData(p => ({ ...p, noticeIcon: e.target.value }))} />
+                  </div>
+                  <PageField label="Xəbərdarlıq Başlığı" block={clubData} setBlock={setClubData} fieldKey="noticeTitle" placeholder="Məhdud Sayda Qəbul Siyasəti" />
+                </div>
+                <PageField label="Xəbərdarlıq Mətni" block={clubData} setBlock={setClubData} fieldKey="noticeDesc" multiline rows={2} placeholder="Daxili intellektual təhlükəsizliyi və məxfiliyi qorumaq üçün hər ay yalnız 25 yeni rezident qəbul edilir." />
+                <PageField label="Düymə Mətni (CTA)" block={clubData} setBlock={setClubData} fieldKey="noticeBtnText" placeholder="Müraciət Ərizəsi Göndər" />
               </div>
             </div>
 
@@ -1088,7 +1312,7 @@ export default function AdminPagesTab() {
                   style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>save</span>
-                  <span>Coaching Club Məlumatlarını Yadda Saxla</span>
+                  <span>Coaching Club Səhifəsinin Bütün Məlumatlarını Yadda Saxla</span>
                 </button>
               </div>
             </div>
@@ -1104,7 +1328,7 @@ export default function AdminPagesTab() {
                   <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#c5a059' }}>event</span>
                   <span>Tədbirlər Səhifəsi (#tedbirler)</span>
                 </h5>
-                <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0' }}>Canlı təqvim qrafiki, vebinarlar və emalatxana məlumatları</p>
+                <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0' }}>Canlı təqvim qrafiki, vebinarlar, spikerlik əməkdaşlığı</p>
               </div>
 
               <button
@@ -1127,10 +1351,47 @@ export default function AdminPagesTab() {
               showToast={showToast}
             />
 
-            <PageField label="Səhifə Üst Etiketi (Badge)" block={eventsData} setBlock={setEventsData} fieldKey="badge" placeholder="Məs: Canlı Təqvim" />
-            <PageField label="Səhifə Əsas Başlığı (Title)" block={eventsData} setBlock={setEventsData} fieldKey="title" placeholder="Məs: Yaxınlaşan Tədbirlər və Masterklaslar" />
-            <PageField label="Səhifə Təsviri (Desc)" block={eventsData} setBlock={setEventsData} fieldKey="desc" multiline rows={3} placeholder="Canlı interaktiv vebinarlar..." />
-            <PageField label="Təqvim Düyməsi Mətni" block={eventsData} setBlock={setEventsData} fieldKey="calendarBtnText" placeholder="Məs: Bütün Təqvim" />
+            {/* 1. Hero Başlığı */}
+            <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>1. Əsas Hero Başlığı</span>
+              <PageField label="Səhifə Üst Etiketi (Badge)" block={eventsData} setBlock={setEventsData} fieldKey="badge" placeholder="Məs: Canlı Təqvim" />
+              <PageField label="Səhifə Əsas Başlığı (Title)" block={eventsData} setBlock={setEventsData} fieldKey="title" placeholder="Məs: Yaxınlaşan Tədbirlər və Masterklaslar" />
+              <PageField label="Səhifə Təsviri (Desc)" block={eventsData} setBlock={setEventsData} fieldKey="desc" multiline rows={3} placeholder="Canlı interaktiv vebinarlar..." />
+              <PageField label="Təqvim Düyməsi Mətni" block={eventsData} setBlock={setEventsData} fieldKey="calendarBtnText" placeholder="Məs: Bütün Təqvim" />
+            </div>
+
+            {/* 2. Hero Quick Badges */}
+            <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>2. Hero Altındakı 3 Qısa İkonlu Bənd</span>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label className="admin-label">1-ci Bənd İkonu</label>
+                  <input type="text" className="admin-input" value={eventsData.heroBadge1Icon || 'calendar_month'} onChange={e => setEventsData(p => ({ ...p, heroBadge1Icon: e.target.value }))} />
+                  <PageField label="1-ci Bənd Mətni" block={eventsData} setBlock={setEventsData} fieldKey="heroBadge1Text" placeholder="Canlı Təqvim Qrafiki" />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label className="admin-label">2-ci Bənd İkonu</label>
+                  <input type="text" className="admin-input" value={eventsData.heroBadge2Icon || 'co_present'} onChange={e => setEventsData(p => ({ ...p, heroBadge2Icon: e.target.value }))} />
+                  <PageField label="2-ci Bənd Mətni" block={eventsData} setBlock={setEventsData} fieldKey="heroBadge2Text" placeholder="İnteraktiv Q&A Sessiyaları" />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label className="admin-label">3-cü Bənd İkonu</label>
+                  <input type="text" className="admin-input" value={eventsData.heroBadge3Icon || 'mic'} onChange={e => setEventsData(p => ({ ...p, heroBadge3Icon: e.target.value }))} />
+                  <PageField label="3-cü Bənd Mətni" block={eventsData} setBlock={setEventsData} fieldKey="heroBadge3Text" placeholder="Spikerlik İmkanı" />
+                </div>
+              </div>
+            </div>
+
+            {/* 3. Spikerlik və Əməkdaşlıq Banneri */}
+            <div style={{ background: '#fefce8', padding: '14px', borderRadius: '8px', border: '1.5px solid #fef08a', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <span style={{ fontSize: '13px', fontWeight: 800, color: '#854d0e' }}>3. Spikerlik & Əməkdaşlıq Bölməsi</span>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+                <PageField label="Bölmə Üst Etiketi" block={eventsData} setBlock={setEventsData} fieldKey="speakerBadge" placeholder="Spikerlik & Əməkdaşlıq" />
+                <PageField label="Bölmə Başlığı" block={eventsData} setBlock={setEventsData} fieldKey="speakerTitle" placeholder="Monodoxia Platformasında Öz Vebinarını və ya Tədbirini Təşkil Et" />
+              </div>
+              <PageField label="Bölmə İzahı" block={eventsData} setBlock={setEventsData} fieldKey="speakerDesc" multiline rows={2} />
+              <PageField label="Düymə Mətni (CTA)" block={eventsData} setBlock={setEventsData} fieldKey="speakerBtnText" placeholder="Spiker kimi Müraciət Et" />
+            </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px solid #f1f5f9' }}>
               <button
@@ -1140,7 +1401,7 @@ export default function AdminPagesTab() {
                 style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>save</span>
-                <span>Tədbirlər Səhifəsini Yadda Saxla</span>
+                <span>Tədbirlər Səhifəsinin Bütün Məlumatlarını Yadda Saxla</span>
               </button>
             </div>
           </div>
@@ -1155,7 +1416,7 @@ export default function AdminPagesTab() {
                   <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#c5a059' }}>forum</span>
                   <span>İcma Səhifəsi (#icma)</span>
                 </h5>
-                <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0' }}>İntellektual şəbəkə, gündəlik müzakirələr və dialoq qaydaları</p>
+                <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0' }}>İntellektual şəbəkə, həftənin mövzusu və qaydalar kartı</p>
               </div>
 
               <button
@@ -1178,20 +1439,73 @@ export default function AdminPagesTab() {
               showToast={showToast}
             />
 
-            <PageField label="Səhifə Üst Etiketi (Badge)" block={communityData} setBlock={setCommunityData} fieldKey="badge" placeholder="Məs: İntellektual Şəbəkə" />
-            <PageField label="Səhifə Əsas Başlığı (Title)" block={communityData} setBlock={setCommunityData} fieldKey="title" placeholder="Məs: Düşüncə və Təcrübə Mübadiləsi" />
-            <PageField label="Səhifə Təsviri (Desc)" block={communityData} setBlock={setCommunityData} fieldKey="desc" multiline rows={3} placeholder="Akademiyamızın tələbələri üçün gündəlik dialoq sahəsi..." />
-            <PageField label="Yeni Mövzu Düymə Mətni" block={communityData} setBlock={setCommunityData} fieldKey="newTopicBtnText" placeholder="Məs: Yeni Mövzu Başlat" />
+            {/* 1. Hero Başlığı */}
+            <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>1. Əsas Hero Başlığı</span>
+              <PageField label="Səhifə Üst Etiketi (Badge)" block={communityData} setBlock={setCommunityData} fieldKey="badge" placeholder="Məs: İntellektual Şəbəkə" />
+              <PageField label="Səhifə Əsas Başlığı (Title)" block={communityData} setBlock={setCommunityData} fieldKey="title" placeholder="Məs: Düşüncə və Təcrübə Mübadiləsi" />
+              <PageField label="Səhifə Təsviri (Desc)" block={communityData} setBlock={setCommunityData} fieldKey="desc" multiline rows={3} placeholder="Akademiyamızın tələbələri üçün gündəlik dialoq sahəsi..." />
+              <PageField label="Yeni Mövzu Düymə Mətni" block={communityData} setBlock={setCommunityData} fieldKey="newTopicBtnText" placeholder="Məs: Yeni Mövzu Başlat" />
+            </div>
 
-            <PageField
-              label="İcma Xüsusiyyətləri / Bəndləri (hər sətirdə bir maddə)"
-              block={communityData}
-              setBlock={setCommunityData}
-              fieldKey="bullets"
-              isArray={true}
-              multiline={true}
-              rows={3}
-            />
+            {/* 2. Hero Quick Badges */}
+            <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>2. Hero Altındakı 3 Qısa İkonlu Bənd</span>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label className="admin-label">1-ci Bənd İkonu</label>
+                  <input type="text" className="admin-input" value={communityData.heroBadge1Icon || 'shield'} onChange={e => setCommunityData(p => ({ ...p, heroBadge1Icon: e.target.value }))} />
+                  <PageField label="1-ci Bənd Mətni" block={communityData} setBlock={setCommunityData} fieldKey="heroBadge1Text" placeholder="Təhlükəsiz Məkan" />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label className="admin-label">2-ci Bənd İkonu</label>
+                  <input type="text" className="admin-input" value={communityData.heroBadge2Icon || 'psychology'} onChange={e => setCommunityData(p => ({ ...p, heroBadge2Icon: e.target.value }))} />
+                  <PageField label="2-ci Bənd Mətni" block={communityData} setBlock={setCommunityData} fieldKey="heroBadge2Text" placeholder="Fəlsəfi Dialoq" />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label className="admin-label">3-cü Bənd İkonu</label>
+                  <input type="text" className="admin-input" value={communityData.heroBadge3Icon || 'forum'} onChange={e => setCommunityData(p => ({ ...p, heroBadge3Icon: e.target.value }))} />
+                  <PageField label="3-cü Bənd Mətni" block={communityData} setBlock={setCommunityData} fieldKey="heroBadge3Text" placeholder="Aktiv Müzakirələr" />
+                </div>
+              </div>
+            </div>
+
+            {/* 3. İcma Qaydaları və Etika Kartı */}
+            <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '10px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label className="admin-label">Qaydalar İkonu</label>
+                  <input type="text" className="admin-input" value={communityData.rulesIcon || 'gavel'} onChange={e => setCommunityData(p => ({ ...p, rulesIcon: e.target.value }))} />
+                </div>
+                <PageField label="3. Qaydalar Kartı Başlığı" block={communityData} setBlock={setCommunityData} fieldKey="rulesTitle" placeholder="İcma Etikası və Qaydaları" />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+                <div style={{ background: '#ffffff', padding: '10px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                  <PageField label="1-ci Qayda Başlığı" block={communityData} setBlock={setCommunityData} fieldKey="rule1Title" placeholder="Məxfilik prinsipi:" />
+                  <PageField label="1-ci Qayda İzahı" block={communityData} setBlock={setCommunityData} fieldKey="rule1Desc" multiline rows={2} />
+                </div>
+                <div style={{ background: '#ffffff', padding: '10px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                  <PageField label="2-ci Qayda Başlığı" block={communityData} setBlock={setCommunityData} fieldKey="rule2Title" placeholder="Konstruktiv yanaşma:" />
+                  <PageField label="2-ci Qayda İzahı" block={communityData} setBlock={setCommunityData} fieldKey="rule2Desc" multiline rows={2} />
+                </div>
+                <div style={{ background: '#ffffff', padding: '10px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                  <PageField label="3-cü Qayda Başlığı" block={communityData} setBlock={setCommunityData} fieldKey="rule3Title" placeholder="Səthilikdən uzaq:" />
+                  <PageField label="3-cü Qayda İzahı" block={communityData} setBlock={setCommunityData} fieldKey="rule3Desc" multiline rows={2} />
+                </div>
+              </div>
+            </div>
+
+            {/* 4. Həftəlik Mövzu Kartı */}
+            <div style={{ background: '#fefce8', padding: '14px', borderRadius: '8px', border: '1.5px solid #fef08a', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <span style={{ fontSize: '13px', fontWeight: 800, color: '#854d0e' }}>4. Həftənin Fəlsəfi Mövzusu Bölməsi</span>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+                <PageField label="Mövzu Üst Etiketi" block={communityData} setBlock={setCommunityData} fieldKey="weeklyBadge" placeholder="Həftənin Fəlsəfi Mövzusu" />
+                <PageField label="Mövzu Başlığı" block={communityData} setBlock={setCommunityData} fieldKey="weeklyTitle" placeholder="Daxili təzyiq qarşısında şüurlu müşahidəçi qalmaq necə mümkündür?" />
+              </div>
+              <PageField label="Mövzu İzahı" block={communityData} setBlock={setCommunityData} fieldKey="weeklyDesc" multiline rows={2} />
+              <PageField label="Düymə Mətni (CTA)" block={communityData} setBlock={setCommunityData} fieldKey="weeklyBtnText" placeholder="Müzakirəyə Qoşul" />
+            </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px solid #f1f5f9' }}>
               <button
@@ -1201,7 +1515,7 @@ export default function AdminPagesTab() {
                 style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>save</span>
-                <span>İcma Səhifəsini Yadda Saxla</span>
+                <span>İcma Səhifəsinin Bütün Məlumatlarını Yadda Saxla</span>
               </button>
             </div>
           </div>
@@ -1215,9 +1529,9 @@ export default function AdminPagesTab() {
                 <div>
                   <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#c5a059' }}>auto_stories</span>
-                    <span>Haqqımızda Səhifəsi (#haqqimizda) — Məram & Əsas Media</span>
+                    <span>Haqqımızda Səhifəsi (#haqqimizda) — Məram, Media və Manifest</span>
                   </h5>
-                  <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0' }}>Akademiyanın fəlsəfəsi, sol media şəkli/videosu və vizual çərçivə stili</p>
+                  <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0' }}>Akademiyanın fəlsəfəsi, sol media şəkli/videosu, 3 dəyər bəndi və manifest bloku</p>
                 </div>
 
                 <button
@@ -1240,9 +1554,35 @@ export default function AdminPagesTab() {
                 showToast={showToast}
               />
 
-              <PageField label="Səhifə Üst Etiketi (Badge)" block={aboutData} setBlock={setAboutData} fieldKey="badge" placeholder="Məs: Akademiyanın Məramı" />
-              <PageField label="Səhifə Əsas Başlığı (Title)" block={aboutData} setBlock={setAboutData} fieldKey="title" placeholder="Məs: Daxili ahəngdarlıq və şüurlu həyat üçün..." />
-              <PageField label="Səhifə Təsviri (Desc)" block={aboutData} setBlock={setAboutData} fieldKey="desc" multiline rows={3} />
+              {/* 1. Hero Başlığı */}
+              <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>1. Əsas Hero Başlığı və Məram</span>
+                <PageField label="Səhifə Üst Etiketi (Badge)" block={aboutData} setBlock={setAboutData} fieldKey="badge" placeholder="Məs: Akademiyanın Məramı" />
+                <PageField label="Səhifə Əsas Başlığı (Title)" block={aboutData} setBlock={setAboutData} fieldKey="title" placeholder="Məs: Daxili ahəngdarlıq və şüurlu həyat üçün..." />
+                <PageField label="Səhifə Təsviri (Desc)" block={aboutData} setBlock={setAboutData} fieldKey="desc" multiline rows={3} />
+              </div>
+
+              {/* 2. Hero Quick Badges */}
+              <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>2. Hero Altındakı 3 Qısa İkonlu Bənd</span>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                    <label className="admin-label">1-ci Bənd İkonu</label>
+                    <input type="text" className="admin-input" value={aboutData.heroBadge1Icon || 'psychology'} onChange={e => setAboutData(p => ({ ...p, heroBadge1Icon: e.target.value }))} />
+                    <PageField label="1-ci Bənd Mətni" block={aboutData} setBlock={setAboutData} fieldKey="heroBadge1Text" placeholder="Elmi & Psixoloji Əsaslar" />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                    <label className="admin-label">2-ci Bənd İkonu</label>
+                    <input type="text" className="admin-input" value={aboutData.heroBadge2Icon || 'auto_stories'} onChange={e => setAboutData(p => ({ ...p, heroBadge2Icon: e.target.value }))} />
+                    <PageField label="2-ci Bənd Mətni" block={aboutData} setBlock={setAboutData} fieldKey="heroBadge2Text" placeholder="Qədim Fəlsəfi Miras" />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                    <label className="admin-label">3-cü Bənd İkonu</label>
+                    <input type="text" className="admin-input" value={aboutData.heroBadge3Icon || 'verified'} onChange={e => setAboutData(p => ({ ...p, heroBadge3Icon: e.target.value }))} />
+                    <PageField label="3-cü Bənd Mətni" block={aboutData} setBlock={setAboutData} fieldKey="heroBadge3Text" placeholder="Etik Təhlükəsizlik Zəmanəti" />
+                  </div>
+                </div>
+              </div>
 
               {/* Media Type & URL */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px', background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
@@ -1312,6 +1652,20 @@ export default function AdminPagesTab() {
                 <PageField label="Sağ Alt Etiket" block={aboutData} setBlock={setAboutData} fieldKey="imageBadgeRight" placeholder="Məs: 01 / SÜKUT" />
               </div>
 
+              {/* 3. Monodoxia Manifesti Bölməsi */}
+              <div style={{ background: '#fefce8', padding: '14px', borderRadius: '8px', border: '1.5px solid #fef08a', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <span style={{ fontSize: '13px', fontWeight: 800, color: '#854d0e' }}>3. Monodoxia Manifesti Bölməsi (Aşağı Hissə)</span>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+                  <PageField label="Manifest Etiketi" block={aboutData} setBlock={setAboutData} fieldKey="manifestoBadge" placeholder="Monodoxia Manifesti" />
+                  <PageField label="Manifest Başlıq Sitatı" block={aboutData} setBlock={setAboutData} fieldKey="manifestoTitle" placeholder='"İnsan xarici dünyanı fəth etməzdən əvvəl..."' />
+                </div>
+                <PageField label="Manifest İzahı" block={aboutData} setBlock={setAboutData} fieldKey="manifestoDesc" multiline rows={2} />
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+                  <PageField label="1-ci Düymə Mətni (Akademiya)" block={aboutData} setBlock={setAboutData} fieldKey="manifestoBtn1Text" placeholder="Akademiyanı Kəşf Et" />
+                  <PageField label="2-ci Düymə Mətni (Club)" block={aboutData} setBlock={setAboutData} fieldKey="manifestoBtn2Text" placeholder="Coaching Club-a Qoşul" />
+                </div>
+              </div>
+
               <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '8px' }}>
                 <button
                   type="button"
@@ -1320,7 +1674,7 @@ export default function AdminPagesTab() {
                   style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>save</span>
-                  <span>Haqqımızda Məlumatlarını Yadda Saxla</span>
+                  <span>Haqqımızda Səhifəsinin Bütün Məlumatlarını Yadda Saxla</span>
                 </button>
               </div>
             </div>

@@ -30,18 +30,24 @@ export default function ClubPage() {
       >
         <div className="flex flex-wrap items-center gap-4 mt-6 pt-6 border-t border-outline-variant/40 text-xs text-on-surface-variant">
           <div className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-secondary text-[18px]">verified</span>
-            <span>Məhdud Sayda Üzvlük</span>
+            <span className="material-symbols-outlined text-secondary text-[18px]">
+              {club.heroBadge1Icon || 'verified'}
+            </span>
+            <span>{getLocalized(club, 'heroBadge1Text', currentLang, defaultLang) || 'Məhdud Sayda Üzvlük'}</span>
           </div>
           <div className="w-1 h-1 rounded-full bg-outline-variant" />
           <div className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-secondary text-[18px]">groups</span>
-            <span>Həftəlik Mastermind</span>
+            <span className="material-symbols-outlined text-secondary text-[18px]">
+              {club.heroBadge2Icon || 'groups'}
+            </span>
+            <span>{getLocalized(club, 'heroBadge2Text', currentLang, defaultLang) || 'Həftəlik Mastermind'}</span>
           </div>
           <div className="w-1 h-1 rounded-full bg-outline-variant" />
           <div className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-secondary text-[18px]">spa</span>
-            <span>100+ Saatlıq Meditasiya Arxivi</span>
+            <span className="material-symbols-outlined text-secondary text-[18px]">
+              {club.heroBadge3Icon || 'spa'}
+            </span>
+            <span>{getLocalized(club, 'heroBadge3Text', currentLang, defaultLang) || '100+ Saatlıq Meditasiya Arxivi'}</span>
           </div>
         </div>
       </PageHero>
@@ -187,12 +193,14 @@ export default function ClubPage() {
           {/* Club Perks Highlights */}
           <div className="bg-surface-container-low border border-outline-variant/60 rounded-3xl p-8 sm:p-12 mb-16">
             <div className="max-w-3xl mb-10">
-              <span className="text-xs text-secondary font-semibold uppercase tracking-widest">Klub İmtiyazları</span>
+              <span className="text-xs text-secondary font-semibold uppercase tracking-widest">
+                {getLocalized(club, 'perksBadge', currentLang, defaultLang) || 'Klub İmtiyazları'}
+              </span>
               <h2 className="font-serif text-2xl sm:text-3xl font-bold text-primary mt-1 mb-3">
-                Coaching Club Rezidentlərinə Nələr Təqdim Olunur?
+                {getLocalized(club, 'perksTitle', currentLang, defaultLang) || 'Coaching Club Rezidentlərinə Nələr Təqdim Olunur?'}
               </h2>
               <p className="text-xs sm:text-sm text-on-surface-variant leading-relaxed">
-                Klubumuz sadəcə qrup deyil, hər bir üzvünün zehni, emosional və peşəkar təkamülünü sürətləndirən intellektual ailədir.
+                {getLocalized(club, 'perksDesc', currentLang, defaultLang) || 'Klubumuz sadəcə qrup deyil, hər bir üzvünün zehni, emosional və peşəkar təkamülünü sürətləndirən intellektual ailədir.'}
               </p>
             </div>
 
@@ -233,12 +241,16 @@ export default function ClubPage() {
           <div className="bg-secondary/10 border border-secondary/30 rounded-2xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-secondary text-on-secondary flex items-center justify-center shrink-0 shadow-sm">
-                <span className="material-symbols-outlined text-2xl">lock</span>
+                <span className="material-symbols-outlined text-2xl">
+                  {club.noticeIcon || 'lock'}
+                </span>
               </div>
               <div>
-                <h4 className="font-serif text-lg font-bold text-primary">Məhdud Sayda Qəbul Siyasəti</h4>
+                <h4 className="font-serif text-lg font-bold text-primary">
+                  {getLocalized(club, 'noticeTitle', currentLang, defaultLang) || 'Məhdud Sayda Qəbul Siyasəti'}
+                </h4>
                 <p className="text-xs text-on-surface-variant mt-0.5">
-                  Daxili intellektual təhlükəsizliyi və məxfiliyi qorumaq üçün hər ay yalnız 25 yeni rezident qəbul edilir.
+                  {getLocalized(club, 'noticeDesc', currentLang, defaultLang) || 'Daxili intellektual təhlükəsizliyi və məxfiliyi qorumaq üçün hər ay yalnız 25 yeni rezident qəbul edilir.'}
                 </p>
               </div>
             </div>
@@ -246,7 +258,7 @@ export default function ClubPage() {
               onClick={() => openApplication({ id: 'club-resident', title: 'Coaching Club Rezidentlik Müraciəti' }, 'club')}
               className="px-6 py-3 rounded-lg bg-primary text-on-primary font-bold text-xs hover:bg-primary/90 transition-all shrink-0 cursor-pointer shadow-sm"
             >
-              Müraciət Ərizəsi Göndər
+              {getLocalized(club, 'noticeBtnText', currentLang, defaultLang) || 'Müraciət Ərizəsi Göndər'}
             </button>
           </div>
 

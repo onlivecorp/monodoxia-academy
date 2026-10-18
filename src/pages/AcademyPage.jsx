@@ -49,18 +49,24 @@ export default function AcademyPage() {
         {/* Quick Academy Badges */}
         <div className="flex flex-wrap items-center gap-4 mt-6 pt-6 border-t border-outline-variant/40 text-xs text-on-surface-variant">
           <div className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-secondary text-[18px]">verified</span>
-            <span>Beynəlxalq QR Sertifikat</span>
+            <span className="material-symbols-outlined text-secondary text-[18px]">
+              {academy.heroBadge1Icon || 'verified'}
+            </span>
+            <span>{getLocalized(academy, 'heroBadge1Text', currentLang, defaultLang) || 'Beynəlxalq QR Sertifikat'}</span>
           </div>
           <div className="w-1 h-1 rounded-full bg-outline-variant" />
           <div className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-secondary text-[18px]">psychology</span>
-            <span>ICF & PhD Mentorlar</span>
+            <span className="material-symbols-outlined text-secondary text-[18px]">
+              {academy.heroBadge2Icon || 'psychology'}
+            </span>
+            <span>{getLocalized(academy, 'heroBadge2Text', currentLang, defaultLang) || 'ICF & PhD Mentorlar'}</span>
           </div>
           <div className="w-1 h-1 rounded-full bg-outline-variant" />
           <div className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-secondary text-[18px]">laptop_chromebook</span>
-            <span>Ömürlük Giriş və LMS Arxiv</span>
+            <span className="material-symbols-outlined text-secondary text-[18px]">
+              {academy.heroBadge3Icon || 'laptop_chromebook'}
+            </span>
+            <span>{getLocalized(academy, 'heroBadge3Text', currentLang, defaultLang) || 'Ömürlük Giriş və LMS Arxiv'}</span>
           </div>
         </div>
       </PageHero>
@@ -76,7 +82,7 @@ export default function AcademyPage() {
               <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">search</span>
               <input
                 type="text"
-                placeholder="Kurs və ya kouç axtar..."
+                placeholder={getLocalized(academy, 'searchPlaceholder', currentLang, defaultLang) || 'Kurs və ya kouç axtar...'}
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 className="w-full pl-9 pr-4 py-2 text-sm rounded bg-surface border border-outline-variant focus:border-secondary focus:outline-none transition-colors"
@@ -120,7 +126,7 @@ export default function AcademyPage() {
             <span>Tapılan kurslar: <strong className="text-primary font-semibold">{filteredCourses.length}</strong></span>
             {filter !== 'all' && (
               <button onClick={() => setFilter('all')} className="text-secondary hover:underline cursor-pointer">
-                Filteri sıfırla
+                {getLocalized(academy, 'resetFilterBtnText', currentLang, defaultLang) || 'Filteri sıfırla'}
               </button>
             )}
           </div>
@@ -130,17 +136,21 @@ export default function AcademyPage() {
             <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-xl p-12 text-center max-w-md mx-auto shadow-sm">
               <span className="material-symbols-outlined text-4xl text-outline mb-2">school</span>
               <h3 className="font-serif text-lg font-bold text-primary mb-1">
-                {coursesList.length === 0 ? 'Hal-hazırda aktiv kurs mövcud deyil' : 'Axtarışa uyğun kurs tapılmadı'}
+                {coursesList.length === 0
+                  ? (getLocalized(academy, 'emptyTitle', currentLang, defaultLang) || 'Hal-hazırda aktiv kurs mövcud deyil')
+                  : (getLocalized(academy, 'notFoundTitle', currentLang, defaultLang) || 'Axtarışa uyğun kurs tapılmadı')}
               </h3>
               <p className="text-xs text-on-surface-variant mb-4">
-                {coursesList.length === 0 ? 'Yeni proqramlar və qeydiyyat tarixləri tezliklə elan olunacaqdır.' : 'Axtarış sözünü dəyişdirin və ya bütün kurslar bölməsinə keçin.'}
+                {coursesList.length === 0
+                  ? (getLocalized(academy, 'emptyDesc', currentLang, defaultLang) || 'Yeni proqramlar və qeydiyyat tarixləri tezliklə elan olunacaqdır.')
+                  : (getLocalized(academy, 'notFoundDesc', currentLang, defaultLang) || 'Axtarış sözünü dəyişdirin və ya bütün kurslar bölməsinə keçin.')}
               </p>
               {coursesList.length > 0 && (
                 <button
                   onClick={() => { setFilter('all'); setSearchQuery(''); }}
-                  className="px-4 py-2 rounded bg-secondary text-on-secondary text-xs font-semibold"
+                  className="px-4 py-2 rounded bg-secondary text-on-secondary text-xs font-semibold cursor-pointer"
                 >
-                  Bütün Kursları Göstər
+                  {getLocalized(academy, 'showAllBtnText', currentLang, defaultLang) || 'Bütün Kursları Göstər'}
                 </button>
               )}
             </div>
@@ -275,36 +285,48 @@ export default function AcademyPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
-                  <span className="material-symbols-outlined text-2xl">verified</span>
+                  <span className="material-symbols-outlined text-2xl">
+                    {academy.guarantee1Icon || 'verified'}
+                  </span>
                 </div>
                 <div>
-                  <h4 className="font-serif text-base font-bold text-primary mb-1">Rəsmi QR Sertifikat</h4>
+                  <h4 className="font-serif text-base font-bold text-primary mb-1">
+                    {getLocalized(academy, 'guarantee1Title', currentLang, defaultLang) || 'Rəsmi QR Sertifikat'}
+                  </h4>
                   <p className="text-xs text-on-surface-variant leading-relaxed">
-                    İmtahanı uğurla başa vuran məzunlarımıza qlobal səviyyədə onlayn təsdiqlənən rəsmi QR kodlu sertifikat verilir.
+                    {getLocalized(academy, 'guarantee1Desc', currentLang, defaultLang) || 'İmtahanı uğurla başa vuran məzunlarımıza qlobal səviyyədə onlayn təsdiqlənən rəsmi QR kodlu sertifikat verilir.'}
                   </p>
                 </div>
               </div>
 
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
-                  <span className="material-symbols-outlined text-2xl">co_present</span>
+                  <span className="material-symbols-outlined text-2xl">
+                    {academy.guarantee2Icon || 'co_present'}
+                  </span>
                 </div>
                 <div>
-                  <h4 className="font-serif text-base font-bold text-primary mb-1">Fərdi Mentor Əlaqəsi</h4>
+                  <h4 className="font-serif text-base font-bold text-primary mb-1">
+                    {getLocalized(academy, 'guarantee2Title', currentLang, defaultLang) || 'Fərdi Mentor Əlaqəsi'}
+                  </h4>
                   <p className="text-xs text-on-surface-variant leading-relaxed">
-                    Hər bir kurs çərçivəsində tələbələrə ev tapşırıqlarının auditində fərdi mentor rəyi və istiqamətləndirmə təmin edilir.
+                    {getLocalized(academy, 'guarantee2Desc', currentLang, defaultLang) || 'Hər bir kurs çərçivəsində tələbələrə ev tapşırıqlarının auditində fərdi mentor rəyi və istiqamətləndirmə təmin edilir.'}
                   </p>
                 </div>
               </div>
 
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
-                  <span className="material-symbols-outlined text-2xl">all_inclusive</span>
+                  <span className="material-symbols-outlined text-2xl">
+                    {academy.guarantee3Icon || 'all_inclusive'}
+                  </span>
                 </div>
                 <div>
-                  <h4 className="font-serif text-base font-bold text-primary mb-1">Daimi Material Girişi</h4>
+                  <h4 className="font-serif text-base font-bold text-primary mb-1">
+                    {getLocalized(academy, 'guarantee3Title', currentLang, defaultLang) || 'Daimi Material Girişi'}
+                  </h4>
                   <p className="text-xs text-on-surface-variant leading-relaxed">
-                    Kursu bitirdikdən sonra da bütün video dərslər, audio meditasiyalar və iş dəftərləri şəxsi kabinetinizdə qalır.
+                    {getLocalized(academy, 'guarantee3Desc', currentLang, defaultLang) || 'Kursu bitirdikdən sonra da bütün video dərslər, audio meditasiyalar və iş dəftərləri şəxsi kabinetinizdə qalır.'}
                   </p>
                 </div>
               </div>

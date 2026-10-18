@@ -45,18 +45,24 @@ export default function CoachingPage() {
       >
         <div className="flex flex-wrap items-center gap-4 mt-6 pt-6 border-t border-outline-variant/40 text-xs text-on-surface-variant">
           <div className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-secondary text-[18px]">verified_user</span>
-            <span>ICF Etik Məcəlləsi</span>
+            <span className="material-symbols-outlined text-secondary text-[18px]">
+              {coachesCms.heroBadge1Icon || 'verified_user'}
+            </span>
+            <span>{getLocalized(coachesCms, 'heroBadge1Text', currentLang, defaultLang) || 'ICF Etik Məcəlləsi'}</span>
           </div>
           <div className="w-1 h-1 rounded-full bg-outline-variant" />
           <div className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-secondary text-[18px]">lock</span>
-            <span>100% Tam Konfidensiallıq</span>
+            <span className="material-symbols-outlined text-secondary text-[18px]">
+              {coachesCms.heroBadge2Icon || 'lock'}
+            </span>
+            <span>{getLocalized(coachesCms, 'heroBadge2Text', currentLang, defaultLang) || '100% Tam Konfidensiallıq'}</span>
           </div>
           <div className="w-1 h-1 rounded-full bg-outline-variant" />
           <div className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-secondary text-[18px]">videocam</span>
-            <span>Təhlükəsiz Onlayn Otaqlar</span>
+            <span className="material-symbols-outlined text-secondary text-[18px]">
+              {coachesCms.heroBadge3Icon || 'videocam'}
+            </span>
+            <span>{getLocalized(coachesCms, 'heroBadge3Text', currentLang, defaultLang) || 'Təhlükəsiz Onlayn Otaqlar'}</span>
           </div>
         </div>
       </PageHero>
@@ -175,45 +181,63 @@ export default function CoachingPage() {
           {/* Coaching Standards & Methodology Section */}
           <div className="bg-surface-container-low border border-outline-variant/60 rounded-2xl p-8 sm:p-12 mb-16">
             <div className="text-center max-w-2xl mx-auto mb-10">
-              <span className="text-xs text-secondary font-semibold uppercase tracking-widest">İş Metodologiyası</span>
+              <span className="text-xs text-secondary font-semibold uppercase tracking-widest">
+                {getLocalized(coachesCms, 'standardsBadge', currentLang, defaultLang) || 'İş Metodologiyası'}
+              </span>
               <h2 className="font-serif text-2xl sm:text-3xl font-bold text-primary mt-1 mb-3">
-                Monodoxia Fərdi Kouçinq Standartları
+                {getLocalized(coachesCms, 'standardsTitle', currentLang, defaultLang) || 'Monodoxia Fərdi Kouçinq Standartları'}
               </h2>
               <p className="text-xs sm:text-sm text-on-surface-variant">
-                Hər bir fərdlə iş prosesi elmi əsaslı psixoloji çərçivədə və tamamilə fərdiləşdirilmiş addımlarla aparılır.
+                {getLocalized(coachesCms, 'standardsDesc', currentLang, defaultLang) || 'Hər bir fərdlə iş prosesi elmi əsaslı psixoloji çərçivədə və tamamilə fərdiləşdirilmiş addımlarla aparılır.'}
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/40">
-                <span className="font-serif text-2xl font-bold text-secondary mb-2 block">01</span>
-                <h4 className="font-bold text-sm text-primary mb-1">Daxili Diaqnostika</h4>
+                <span className="font-serif text-2xl font-bold text-secondary mb-2 block">
+                  {coachesCms.step1Num || '01'}
+                </span>
+                <h4 className="font-bold text-sm text-primary mb-1">
+                  {getLocalized(coachesCms, 'step1Title', currentLang, defaultLang) || 'Daxili Diaqnostika'}
+                </h4>
                 <p className="text-xs text-on-surface-variant leading-relaxed">
-                  İlkin görüşdə cari maneələr, emosional bloklar və hədəflər müəyyən edilir.
+                  {getLocalized(coachesCms, 'step1Desc', currentLang, defaultLang) || 'İlkin görüşdə cari maneələr, emosional bloklar və hədəflər müəyyən edilir.'}
                 </p>
               </div>
 
               <div className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/40">
-                <span className="font-serif text-2xl font-bold text-secondary mb-2 block">02</span>
-                <h4 className="font-bold text-sm text-primary mb-1">İnkişaf Strategiyası</h4>
+                <span className="font-serif text-2xl font-bold text-secondary mb-2 block">
+                  {coachesCms.step2Num || '02'}
+                </span>
+                <h4 className="font-bold text-sm text-primary mb-1">
+                  {getLocalized(coachesCms, 'step2Title', currentLang, defaultLang) || 'İnkişaf Strategiyası'}
+                </h4>
                 <p className="text-xs text-on-surface-variant leading-relaxed">
-                  Şəxsin xarakterinə və həyat ritminə uyğun fərdi transformasiya xəritəsi cızılır.
+                  {getLocalized(coachesCms, 'step2Desc', currentLang, defaultLang) || 'Şəxsin xarakterinə və həyat ritminə uyğun fərdi transformasiya xəritəsi cızılır.'}
                 </p>
               </div>
 
               <div className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/40">
-                <span className="font-serif text-2xl font-bold text-secondary mb-2 block">03</span>
-                <h4 className="font-bold text-sm text-primary mb-1">Müntəzəm Seanslar</h4>
+                <span className="font-serif text-2xl font-bold text-secondary mb-2 block">
+                  {coachesCms.step3Num || '03'}
+                </span>
+                <h4 className="font-bold text-sm text-primary mb-1">
+                  {getLocalized(coachesCms, 'step3Title', currentLang, defaultLang) || 'Müntəzəm Seanslar'}
+                </h4>
                 <p className="text-xs text-on-surface-variant leading-relaxed">
-                  Həftəlik və ya 2 həftədən bir keçirilən 60 dəqiqəlik dərin fərdi sessiyalar.
+                  {getLocalized(coachesCms, 'step3Desc', currentLang, defaultLang) || 'Həftəlik və ya 2 həftədən bir keçirilən 60 dəqiqəlik dərin fərdi sessiyalar.'}
                 </p>
               </div>
 
               <div className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/40">
-                <span className="font-serif text-2xl font-bold text-secondary mb-2 block">04</span>
-                <h4 className="font-bold text-sm text-primary mb-1">Davamlı Monitorinq</h4>
+                <span className="font-serif text-2xl font-bold text-secondary mb-2 block">
+                  {coachesCms.step4Num || '04'}
+                </span>
+                <h4 className="font-bold text-sm text-primary mb-1">
+                  {getLocalized(coachesCms, 'step4Title', currentLang, defaultLang) || 'Davamlı Monitorinq'}
+                </h4>
                 <p className="text-xs text-on-surface-variant leading-relaxed">
-                  Seanslar arası praktiki tapşırıqlar, fərdi rəy və davamlı inkişafın təhlili.
+                  {getLocalized(coachesCms, 'step4Desc', currentLang, defaultLang) || 'Seanslar arası praktiki tapşırıqlar, fərdi rəy və davamlı inkişafın təhlili.'}
                 </p>
               </div>
             </div>
