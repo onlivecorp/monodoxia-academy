@@ -752,18 +752,43 @@ export default function ProfileModal() {
                             <span className="text-[10px] uppercase text-outline block">Məbləğ</span>
                             <span className="font-medium text-primary">{app.price || 'Pulsuz'}</span>
                           </div>
-                          <div>
-                            <span className="text-[10px] uppercase text-outline block">Ödəniş Statusu</span>
-                            <span className={`font-medium ${['Ödənildi', 'Ödənilib'].includes(app.paymentStatus) ? 'text-emerald-600 font-bold' : (['Qaytarıldı', 'İmtina edildi'].includes(app.paymentStatus) ? 'text-rose-600 font-bold' : 'text-primary')}`}>
-                              {app.paymentStatus}
-                            </span>
-                          </div>
-                          <div>
-                            <span className="text-[10px] uppercase text-outline block">İştirak Statusu</span>
-                            <span className={`font-medium ${['İştirak edəcək', 'İştirak etdi'].includes(app.attendanceStatus) ? 'text-emerald-600 font-bold' : (['İştirak etməyəcək', 'İştirak etmədi'].includes(app.attendanceStatus) ? 'text-rose-600 font-bold' : 'text-primary')}`}>
-                              {app.attendanceStatus}
-                            </span>
-                          </div>
+                          {app.targetType === 'community' || app.targetType === 'forum' ? (
+                            <>
+                              <div>
+                                <span className="text-[10px] uppercase text-outline block">Önə Çıxarma</span>
+                                <span className={`font-semibold flex items-center gap-1 ${(app.isPinned ?? app.pinned) ? 'text-amber-600' : 'text-on-surface-variant'}`}>
+                                  <span className="material-symbols-outlined text-[13px]">
+                                    {(app.isPinned ?? app.pinned) ? 'push_pin' : 'remove'}
+                                  </span>
+                                  <span>{(app.isPinned ?? app.pinned) ? 'Önə Çıxarılıb' : 'Standart'}</span>
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-[10px] uppercase text-outline block">Rəy İcazəsi</span>
+                                <span className={`font-semibold flex items-center gap-1 ${app.allowComments === false ? 'text-rose-600' : 'text-emerald-600'}`}>
+                                  <span className="material-symbols-outlined text-[13px]">
+                                    {app.allowComments === false ? 'lock' : 'chat'}
+                                  </span>
+                                  <span>{app.allowComments === false ? 'Bağlıdır' : 'Açıqdır'}</span>
+                                </span>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <div>
+                                <span className="text-[10px] uppercase text-outline block">Ödəniş Statusu</span>
+                                <span className={`font-medium ${['Ödənildi', 'Ödənilib'].includes(app.paymentStatus) ? 'text-emerald-600 font-bold' : (['Qaytarıldı', 'İmtina edildi'].includes(app.paymentStatus) ? 'text-rose-600 font-bold' : 'text-primary')}`}>
+                                  {app.paymentStatus}
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-[10px] uppercase text-outline block">İştirak Statusu</span>
+                                <span className={`font-medium ${['İştirak edəcək', 'İştirak etdi'].includes(app.attendanceStatus) ? 'text-emerald-600 font-bold' : (['İştirak etməyəcək', 'İştirak etmədi'].includes(app.attendanceStatus) ? 'text-rose-600 font-bold' : 'text-primary')}`}>
+                                  {app.attendanceStatus}
+                                </span>
+                              </div>
+                            </>
+                          )}
                           <div>
                             <span className="text-[10px] uppercase text-outline block">Əlaqə</span>
                             <span className="font-medium text-primary">{app.userPhone || 'Qeyd olunmayıb'}</span>
@@ -900,7 +925,15 @@ export default function ProfileModal() {
               ) : (
                 <div className="space-y-2.5">
                   {myNotifications.map(notif => {
-                    const icon = notif.type === 'success' ? 'check_circle' : (notif.type === 'error' ? 'error' : (notif.type === 'warning' ? 'schedule' : 'info'));
+                    const isTopicNotif = notif.category === 'community' || (notif.title && (notif.title.includes('Mövzu') || notif.title.includes('İcma')));
+                    let icon = notif.type === 'success' ? 'check_circle' : (notif.type === 'error' ? 'error' : (notif.type === 'warning' ? 'schedule' : 'info'));
+                    if (isTopicNotif) {
+                      if (notif.type === 'success') icon = 'verified';
+                      else if (notif.type === 'error') icon = 'cancel';
+                      else if (notif.type === 'warning') icon = 'pending';
+                      else icon = 'forum';
+                    }
+
                     const iconColor = notif.type === 'success' ? 'text-emerald-600' : (notif.type === 'error' ? 'text-rose-600' : (notif.type === 'warning' ? 'text-amber-600' : 'text-blue-600'));
 
                     return (
@@ -912,7 +945,7 @@ export default function ProfileModal() {
                         className={`p-3.5 rounded-xl border text-xs flex items-start gap-3 transition-colors ${
                           notif.isRead
                             ? 'bg-surface-bright border-outline-variant/30 text-on-surface-variant'
-                            : 'bg-secondary/5 border-secondary/30 text-primary font-medium shadow-sm cursor-pointer'
+                            : (isTopicNotif ? 'bg-amber-500/5 border-amber-500/30 text-primary font-medium shadow-sm cursor-pointer' : 'bg-secondary/5 border-secondary/30 text-primary font-medium shadow-sm cursor-pointer')
                         }`}
                       >
                         <span className={`material-symbols-outlined text-[20px] ${iconColor} mt-0.5 shrink-0`}>
@@ -920,7 +953,14 @@ export default function ProfileModal() {
                         </span>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between mb-1 gap-2">
-                            <span className="font-bold text-primary truncate">{notif.title}</span>
+                            <div className="flex items-center gap-1.5 truncate">
+                              {isTopicNotif && (
+                                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-secondary/10 text-secondary uppercase tracking-wider shrink-0">
+                                  İCMA
+                                </span>
+                              )}
+                              <span className="font-bold text-primary truncate">{notif.title}</span>
+                            </div>
                             <div className="flex items-center gap-2 shrink-0">
                               <span className="text-[10px] text-outline">{notif.createdAt}</span>
                               <button

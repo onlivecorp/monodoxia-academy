@@ -1222,19 +1222,38 @@ if ($action === 'update_application_status' && $_SERVER['REQUEST_METHOD'] === 'P
         if ($app) {
             $notifType = ($new_status === 'Təsdiqləndi' || $new_status === 'Tamamlandı') ? 'success' : (in_array($new_status, ['Rədd edildi', 'Ləğv edildi']) ? 'error' : 'warning');
             
-            $details = [];
-            if (!empty($payment_status) && $payment_status !== 'Tələb olunmur') $details[] = "Ödəniş: " . $payment_status;
-            if (!empty($attendance_status)) $details[] = "İştirak: " . $attendance_status;
-            if (!empty($admin_note)) $details[] = "Qeyd: " . $admin_note;
-            $detailsText = !empty($details) ? ' (' . implode(' | ', $details) . ')' : '';
+            $isTopic = ($app['target_type'] === 'community' || $app['target_type'] === 'forum');
+            $notifTitle = "Müraciət Statusu: {$new_status}";
 
-            $notifMsg = "Sizin \"{$app['target_title']}\" müraciətinizin statusu yeniləndi: {$new_status}.{$detailsText}";
-            if ($app['target_type'] === 'community' || $app['target_type'] === 'forum') {
+            if ($isTopic) {
+                $topicNote = !empty($admin_note) ? " Moderator Qeydi: \"{$admin_note}\"" : '';
                 if ($new_status === 'Təsdiqləndi') {
-                    $notifMsg = "Təbriklər! \"{$app['target_title']}\" adlı icma mövzunuz administrator tərəfindən təsdiqləndi və saytda dərc edildi.{$detailsText}";
-                } elseif ($new_status === 'Rədd edildi' || $new_status === 'Ləğv edildi') {
-                    $notifMsg = "Təəssüf ki, \"{$app['target_title']}\" adlı icma mövzusu üzrə müraciətiniz qəbul edilmədi.{$detailsText}";
+                    $notifTitle = 'Mövzunuz Dərc Edildi';
+                    $pinTxt = (!empty($input['is_pinned']) || !empty($app['is_pinned'])) ? ' Önə çıxarılan mövzu olaraq sabitləndi.' : '';
+                    $notifMsg = "Təbriklər! \"{$app['target_title']}\" adlı icma mövzunuz təsdiqləndi və forumda dərc edildi.{$pinTxt}" . ($topicNote ? " ({$topicNote})" : '');
+                } elseif ($new_status === 'Rədd edildi') {
+                    $notifTitle = 'Mövzu Qəbul Edilmədi';
+                    $notifMsg = "\"{$app['target_title']}\" adlı icma mövzusu təklifiniz icma etik qaydalarına uyğun görülmədi." . ($topicNote ? " ({$topicNote})" : '');
+                } elseif ($new_status === 'Ləğv edildi') {
+                    $notifTitle = 'Mövzu Sorğusu Ləğv Edildi';
+                    $notifMsg = "\"{$app['target_title']}\" adlı icma mövzusu sorğunuz ləğv edildi." . ($topicNote ? " ({$topicNote})" : '');
+                } elseif ($new_status === 'Baxılır') {
+                    $notifTitle = 'Mövzunuz Moderator Baxışındadır';
+                    $notifMsg = "\"{$app['target_title']}\" adlı icma mövzunuz moderator heyəti tərəfindən nəzərdən keçirilir." . ($topicNote ? " ({$topicNote})" : '');
+                } elseif ($new_status === 'Gözləmədə') {
+                    $notifTitle = 'Mövzu Gözləmə Rejimindədir';
+                    $notifMsg = "\"{$app['target_title']}\" adlı mövzunuz növbəti redaksiya planına uyğun olaraq gözləməyə alındı." . ($topicNote ? " ({$topicNote})" : '');
+                } else {
+                    $notifTitle = "Mövzu Statusu: {$new_status}";
+                    $notifMsg = "\"{$app['target_title']}\" adlı mövzunuzun vəziyyəti: {$new_status}." . ($topicNote ? " ({$topicNote})" : '');
                 }
+            } else {
+                $details = [];
+                if (!empty($payment_status) && $payment_status !== 'Tələb olunmur') $details[] = "Ödəniş: " . $payment_status;
+                if (!empty($attendance_status) && $attendance_status !== 'Tələb olunmur') $details[] = "İştirak: " . $attendance_status;
+                if (!empty($admin_note)) $details[] = "Qeyd: " . $admin_note;
+                $detailsText = !empty($details) ? ' (' . implode(' | ', $details) . ')' : '';
+                $notifMsg = "Sizin \"{$app['target_title']}\" müraciətinizin statusu yeniləndi: {$new_status}.{$detailsText}";
             }
 
             $notif_id = !empty($input['notification_id']) ? trim($input['notification_id']) : ('NOTIF-' . uniqid());
@@ -1246,7 +1265,7 @@ if ($action === 'update_application_status' && $_SERVER['REQUEST_METHOD'] === 'P
             $notifStmt->execute([
                 $notif_id,
                 $app['user_id'],
-                "Müraciət Statusu: {$new_status}",
+                $notifTitle,
                 $notifMsg,
                 $notifType
             ]);

@@ -1684,29 +1684,51 @@ export function AppProvider({ children }) {
     });
 
     // In-app notification for the applicant
+    const isTopic = updatedApp.targetType === 'community' || updatedApp.targetType === 'forum';
     const notifType = (resolvedStatus === 'Təsdiqləndi' || resolvedStatus === 'Tamamlandı')
       ? 'success'
       : (['Rədd edildi', 'Ləğv edildi'].includes(resolvedStatus) ? 'error' : 'warning');
 
-    const details = [];
-    if (resolvedPayment && resolvedPayment !== 'Tələb olunmur') details.push(`Ödəniş: ${resolvedPayment}`);
-    if (resolvedAttendance) details.push(`İştirak: ${resolvedAttendance}`);
-    if (resolvedAdminNote) details.push(`Qeyd: ${resolvedAdminNote}`);
-    const detailsSuffix = details.length > 0 ? ` (${details.join(' | ')})` : '';
+    let notifTitle = `Müraciət Statusu: ${resolvedStatus}`;
+    let notifMsg = '';
 
-    let notifMsg = `"${updatedApp.targetTitle}" müraciətinizin statusu yeniləndi: ${resolvedStatus}.${detailsSuffix}`;
-    if (updatedApp.targetType === 'community' || updatedApp.targetType === 'forum') {
+    if (isTopic) {
+      const topicNotes = resolvedAdminNote ? ` Moderator Qeydi: "${resolvedAdminNote}"` : '';
       if (resolvedStatus === 'Təsdiqləndi') {
-        notifMsg = `Təbriklər! "${updatedApp.targetTitle}" adlı icma mövzunuz administrator tərəfindən təsdiqləndi və saytda dərc edildi.${detailsSuffix}`;
-      } else if (resolvedStatus === 'Rədd edildi' || resolvedStatus === 'Ləğv edildi') {
-        notifMsg = `Təəssüf ki, "${updatedApp.targetTitle}" adlı icma mövzusu üzrə müraciətiniz qəbul edilmədi.${detailsSuffix}`;
+        notifTitle = 'Mövzunuz Dərc Edildi';
+        const pinText = (updatedApp.isPinned ?? updatedApp.pinned) ? ' Önə çıxarılan mövzu olaraq sabitləndi.' : '';
+        const commentText = updatedApp.allowComments === false ? ' Mövzu rəylərə bağlı rejimdədir.' : ' Müzakirə və rəylərə açıqdır.';
+        notifMsg = `Təbriklər! "${updatedApp.targetTitle}" adlı icma mövzunuz moderator heyəti tərəfindən təsdiqləndi və forumda dərc edildi.${pinText}${commentText}${topicNotes ? ' (' + topicNotes.trim() + ')' : ''}`;
+      } else if (resolvedStatus === 'Rədd edildi') {
+        notifTitle = 'Mövzu Qəbul Edilmədi';
+        notifMsg = `"${updatedApp.targetTitle}" adlı icma mövzusu üzrə təklifiniz icma standartlarına və ya etik qaydalara uyğun görülmədi.${topicNotes ? ' (' + topicNotes.trim() + ')' : ''}`;
+      } else if (resolvedStatus === 'Ləğv edildi') {
+        notifTitle = 'Mövzu Sorğusu Ləğv Edildi';
+        notifMsg = `"${updatedApp.targetTitle}" adlı icma mövzusu sorğunuz ləğv edildi.${topicNotes ? ' (' + topicNotes.trim() + ')' : ''}`;
+      } else if (resolvedStatus === 'Baxılır') {
+        notifTitle = 'Mövzunuz Moderator Baxışındadır';
+        notifMsg = `"${updatedApp.targetTitle}" adlı icma mövzusu moderator heyəti tərəfindən nəzərdən keçirilir.${topicNotes ? ' (' + topicNotes.trim() + ')' : ''}`;
+      } else if (resolvedStatus === 'Gözləmədə') {
+        notifTitle = 'Mövzu Gözləmə Rejimindədir';
+        notifMsg = `"${updatedApp.targetTitle}" adlı mövzunuz növbəti redaksiya planına uyğun olaraq gözləməyə alındı.${topicNotes ? ' (' + topicNotes.trim() + ')' : ''}`;
+      } else {
+        notifTitle = `Mövzu Statusu: ${resolvedStatus}`;
+        notifMsg = `"${updatedApp.targetTitle}" adlı mövzunuzun vəziyyəti: ${resolvedStatus}.${topicNotes ? ' (' + topicNotes.trim() + ')' : ''}`;
       }
+    } else {
+      const details = [];
+      if (resolvedPayment && resolvedPayment !== 'Tələb olunmur') details.push(`Ödəniş: ${resolvedPayment}`);
+      if (resolvedAttendance && resolvedAttendance !== 'Tələb olunmur') details.push(`İştirak: ${resolvedAttendance}`);
+      if (resolvedAdminNote) details.push(`Qeyd: ${resolvedAdminNote}`);
+      const detailsSuffix = details.length > 0 ? ` (${details.join(' | ')})` : '';
+      notifMsg = `"${updatedApp.targetTitle}" müraciətinizin statusu yeniləndi: ${resolvedStatus}.${detailsSuffix}`;
     }
 
     const newNotif = {
       id: 'notif-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
       userId: updatedApp.userId,
-      title: `Müraciət Statusu: ${resolvedStatus}`,
+      category: isTopic ? 'community' : 'application',
+      title: notifTitle,
       message: notifMsg,
       type: notifType,
       isRead: false,
