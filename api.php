@@ -195,6 +195,37 @@ function requireAdminUser($pdo) {
     exit();
 }
 
+function saveBase64Image($base64Data, $prefix = 'event') {
+    if (empty($base64Data) || strpos($base64Data, 'data:image/') !== 0) {
+        return $base64Data;
+    }
+    if (strlen($base64Data) < 200) {
+        return '';
+    }
+    if (!preg_match('/^data:image\/(\w+);base64,(.+)$/', $base64Data, $matches)) {
+        return $base64Data;
+    }
+    $ext = strtolower($matches[1]);
+    if ($ext === 'jpeg') $ext = 'jpg';
+    if (!in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'gif'])) {
+        $ext = 'jpg';
+    }
+    $decoded = base64_decode($matches[2]);
+    if (!$decoded || strlen($decoded) < 50) {
+        return '';
+    }
+    $uploadDir = __DIR__ . '/uploads/events';
+    if (!file_exists($uploadDir)) {
+        @mkdir($uploadDir, 0755, true);
+    }
+    $fileName = $prefix . '_' . time() . '_' . substr(md5(uniqid()), 0, 8) . '.' . $ext;
+    $filePath = $uploadDir . '/' . $fileName;
+    if (@file_put_contents($filePath, $decoded) !== false) {
+        return '/uploads/events/' . $fileName;
+    }
+    return $base64Data;
+}
+
 // --------------------------------------------------------
 // 1. STATUS VƏ PING YOXLANILMASI
 // --------------------------------------------------------
@@ -204,6 +235,9 @@ if ($action === 'status') {
     try {
         $stmt = $pdo->query("SHOW TABLES LIKE 'mdx_%'");
         $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        try {
+            $pdo->exec("UPDATE mdx_events SET image = '' WHERE image LIKE 'data:image/%' AND LENGTH(image) <= 500");
+        } catch (PDOException $e2) {}
     } catch (PDOException $ex) {}
     $latency = round((microtime(true) - $startTime) * 1000, 1);
 
@@ -238,6 +272,12 @@ if ($action === 'get_all') {
     $courses = $safeQuery("SELECT * FROM mdx_courses");
     $tiers = $safeQuery("SELECT * FROM mdx_club_tiers");
     $events = $safeQuery("SELECT * FROM mdx_events");
+    foreach ($events as &$ev) {
+        if (!empty($ev['image']) && strpos($ev['image'], 'data:image/') === 0 && strlen($ev['image']) <= 500) {
+            $ev['image'] = '';
+        }
+    }
+    unset($ev);
     $community = $safeQuery("SELECT * FROM mdx_community_posts");
     $settings = $safeQuery("SELECT * FROM mdx_settings");
     $languages = $safeQuery("SELECT * FROM mdx_languages WHERE is_active = 1 ORDER BY sort_order ASC");
@@ -1511,6 +1551,46 @@ if ($action === 'delete_course' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // --------------------------------------------------------
+// 7.5.5. ŞƏKİL VƏ MEDİA YÜKLƏMƏ APİ (IMAGE UPLOAD)
+// --------------------------------------------------------
+if ($action === 'upload_image' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $uploadDir = __DIR__ . '/uploads/events';
+    if (!file_exists($uploadDir)) {
+        @mkdir($uploadDir, 0755, true);
+    }
+
+    if (!empty($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+        $file = $_FILES['image'];
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        if (!in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'])) {
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => 'Yalnız şəkil faylları qəbul edilir (.jpg, .png, .webp)'], JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+        $fileName = 'event_' . time() . '_' . substr(md5(uniqid()), 0, 8) . '.' . $ext;
+        $dest = $uploadDir . '/' . $fileName;
+        if (move_uploaded_file($file['tmp_name'], $dest)) {
+            echo json_encode(['status' => 'success', 'url' => '/uploads/events/' . $fileName], JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+    }
+
+    $raw = file_get_contents('php://input');
+    $data = json_decode($raw, true);
+    if (!empty($data['image'])) {
+        $savedUrl = saveBase64Image($data['image'], 'event');
+        if ($savedUrl && strpos($savedUrl, '/uploads/') === 0) {
+            echo json_encode(['status' => 'success', 'url' => $savedUrl], JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+    }
+
+    http_response_code(400);
+    echo json_encode(['status' => 'error', 'message' => 'Şəkil yüklənmədi və ya fayl natamamdır'], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+// --------------------------------------------------------
 // 7.6. TƏDBİRLƏR VƏ VEBİNARLAR APİ (EVENTS API)
 // --------------------------------------------------------
 if ($action === 'save_event' && $_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -1527,6 +1607,15 @@ if ($action === 'save_event' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $description = trim($input['desc'] ?? ($input['description'] ?? ''));
     $is_online = isset($input['isOnline']) ? ($input['isOnline'] ? 1 : 0) : (isset($input['is_online']) ? ($input['is_online'] ? 1 : 0) : 1);
     $image = trim($input['image'] ?? '');
+
+    // If image is a base64 string, auto-save to real file on disk!
+    if (!empty($image) && strpos($image, 'data:image/') === 0) {
+        $savedPath = saveBase64Image($image, 'event_' . preg_replace('/[^a-zA-Z0-9_-]/', '', $id));
+        if (!empty($savedPath)) {
+            $image = $savedPath;
+        }
+    }
+
     $price = trim($input['price'] ?? 'Pulsuz');
     $status = trim($input['status'] ?? 'Aktiv');
 

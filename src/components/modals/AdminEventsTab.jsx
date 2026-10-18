@@ -160,12 +160,33 @@ export default function AdminEventsTab() {
   // Delete Confirmation State
   const [eventToDelete, setEventToDelete] = useState(null);
 
-  const handleFileToDataUrl = (file, callback) => {
+  const handleFileToDataUrl = async (file, callback) => {
     if (!file) return;
     if (!file.type.startsWith('image/')) {
       showToast('Yalnız şəkil faylı seçə bilərsiniz', 'warning');
       return;
     }
+    // Try server-side direct upload first to get clean lightweight URL
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await fetch('api.php?action=upload_image', {
+        method: 'POST',
+        body: formData
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.status === 'success' && data.url) {
+          callback(data.url);
+          showToast('Şəkil uğurla yükləndi!', 'success');
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('Direct upload to api.php failed, falling back to local canvas compression', err);
+    }
+
+    // Local client-side canvas compression fallback
     const reader = new FileReader();
     reader.onload = (e) => {
       const dataUrl = e.target.result;
@@ -191,6 +212,7 @@ export default function AdminEventsTab() {
           ctx.drawImage(img, 0, 0, width, height);
           const compressed = canvas.toDataURL('image/jpeg', 0.8);
           callback(compressed);
+          showToast('Şəkil hazırlandı!', 'success');
         } catch (err) {
           callback(dataUrl);
         }
@@ -510,31 +532,69 @@ export default function AdminEventsTab() {
                 </label>
               </div>
               {editingEvent.image && (
-                <div style={{ position: 'relative', width: '120px', height: '70px', borderRadius: '6px', overflow: 'hidden', border: '1px solid #e2e8f0', marginTop: '4px' }}>
-                  <img src={editingEvent.image} alt="Tədbir" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  <button
-                    type="button"
-                    onClick={() => setEditingEvent({ ...editingEvent, image: '' })}
-                    title="Şəkli sil"
-                    style={{
-                      position: 'absolute',
-                      top: '3px',
-                      right: '3px',
-                      background: 'rgba(239, 68, 68, 0.9)',
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: '50%',
-                      width: '18px',
-                      height: '18px',
-                      fontSize: '11px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    ✕
-                  </button>
+                <div style={{ marginTop: '4px' }}>
+                  <div style={{ position: 'relative', width: '130px', height: '76px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #cbd5e1', background: '#f8fafc' }}>
+                    <img
+                      src={editingEvent.image}
+                      alt="Tədbir"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        if (e.target.nextElementSibling) {
+                          e.target.nextElementSibling.style.display = 'flex';
+                        }
+                      }}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                    <div
+                      style={{
+                        display: 'none',
+                        width: '100%',
+                        height: '100%',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: '#fef2f2',
+                        color: '#b91c1c',
+                        fontSize: '10px',
+                        fontWeight: 600,
+                        textAlign: 'center',
+                        padding: '4px'
+                      }}
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#ef4444' }}>broken_image</span>
+                      <span>Format xətası</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setEditingEvent({ ...editingEvent, image: '' })}
+                      title="Şəkli sil"
+                      style={{
+                        position: 'absolute',
+                        top: '4px',
+                        right: '4px',
+                        background: 'rgba(239, 68, 68, 0.9)',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '50%',
+                        width: '20px',
+                        height: '20px',
+                        fontSize: '11px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  {editingEvent.image.startsWith('data:') && editingEvent.image.length <= 500 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: '#dc2626', background: '#fef2f2', border: '1px solid #fecaca', padding: '6px 10px', borderRadius: '6px', marginTop: '6px' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>warning</span>
+                      <span>Köhnə şəkil bazada natamam saxlanılıb. Zəhmət olmasa <strong>Şəkil Seç</strong> düyməsi ilə yenidən yükləyin.</span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -792,31 +852,63 @@ export default function AdminEventsTab() {
               </label>
             </div>
             {newEventImage && (
-              <div style={{ position: 'relative', width: '120px', height: '70px', borderRadius: '6px', overflow: 'hidden', border: '1px solid #e2e8f0', marginTop: '4px' }}>
-                <img src={newEventImage} alt="Yeni tədbir" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                <button
-                  type="button"
-                  onClick={() => setNewEventImage('')}
-                  title="Şəkli sil"
-                  style={{
-                    position: 'absolute',
-                    top: '3px',
-                    right: '3px',
-                    background: 'rgba(239, 68, 68, 0.9)',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '50%',
-                    width: '18px',
-                    height: '18px',
-                    fontSize: '11px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  ✕
-                </button>
+              <div style={{ marginTop: '4px' }}>
+                <div style={{ position: 'relative', width: '130px', height: '76px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #cbd5e1', background: '#f8fafc' }}>
+                  <img
+                    src={newEventImage}
+                    alt="Yeni tədbir"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      if (e.target.nextElementSibling) {
+                        e.target.nextElementSibling.style.display = 'flex';
+                      }
+                    }}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                  <div
+                    style={{
+                      display: 'none',
+                      width: '100%',
+                      height: '100%',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: '#fef2f2',
+                      color: '#b91c1c',
+                      fontSize: '10px',
+                      fontWeight: 600,
+                      textAlign: 'center',
+                      padding: '4px'
+                    }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#ef4444' }}>broken_image</span>
+                    <span>Format xətası</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setNewEventImage('')}
+                    title="Şəkli sil"
+                    style={{
+                      position: 'absolute',
+                      top: '4px',
+                      right: '4px',
+                      background: 'rgba(239, 68, 68, 0.9)',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '50%',
+                      width: '20px',
+                      height: '20px',
+                      fontSize: '11px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
               </div>
             )}
           </div>
