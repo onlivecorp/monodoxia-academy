@@ -5,7 +5,7 @@ import { useApp } from '../context/AppContext';
 
 export default function Footer() {
   const { currentLang, defaultLang, changeLang, supportedLangs, t } = useLanguage();
-  const { homeContent, platformSettings, navigateTo } = useApp();
+  const { homeContent, platformSettings, navigateTo, getPageUrl } = useApp();
   const footer = homeContent?.footer || {};
   const contactEmail = platformSettings?.contactEmail || footer.email || 'contact@monodoxia.academy';
   const contactPhone = platformSettings?.contactPhone || footer.phone || '+994 (12) 490 88 00';
@@ -18,7 +18,7 @@ export default function Footer() {
           <div className="lg:col-span-5 space-y-4">
             <a
               className="inline-block cursor-pointer"
-              href="#"
+              href={getPageUrl ? getPageUrl('home') : '/'}
               onClick={(e) => {
                 e.preventDefault();
                 navigateTo('home');
@@ -47,7 +47,7 @@ export default function Footer() {
               <li>
                 <a
                   className="hover:text-on-primary transition-colors text-secondary-fixed font-medium cursor-pointer"
-                  href="#akademiya"
+                  href={getPageUrl ? getPageUrl('akademiya') : '/akademiya'}
                   onClick={(e) => { e.preventDefault(); navigateTo('akademiya'); }}
                 >
                   {t('nav_academy')}
@@ -56,7 +56,7 @@ export default function Footer() {
               <li>
                 <a
                   className="text-on-primary-container hover:text-on-primary transition-colors cursor-pointer"
-                  href="#koucinq"
+                  href={getPageUrl ? getPageUrl('koucinq') : '/koucinq'}
                   onClick={(e) => { e.preventDefault(); navigateTo('koucinq'); }}
                 >
                   {t('nav_coaching')}
@@ -65,7 +65,7 @@ export default function Footer() {
               <li>
                 <a
                   className="text-on-primary-container hover:text-on-primary transition-colors cursor-pointer"
-                  href="#club"
+                  href={getPageUrl ? getPageUrl('club') : '/club'}
                   onClick={(e) => { e.preventDefault(); navigateTo('club'); }}
                 >
                   {t('nav_club')}
@@ -74,7 +74,7 @@ export default function Footer() {
               <li>
                 <a
                   className="text-on-primary-container hover:text-on-primary transition-colors cursor-pointer"
-                  href="#tedbirler"
+                  href={getPageUrl ? getPageUrl('tedbirler') : '/tedbirler'}
                   onClick={(e) => { e.preventDefault(); navigateTo('tedbirler'); }}
                 >
                   {t('nav_events')}
@@ -83,7 +83,7 @@ export default function Footer() {
               <li>
                 <a
                   className="text-on-primary-container hover:text-on-primary transition-colors cursor-pointer"
-                  href="#icma"
+                  href={getPageUrl ? getPageUrl('icma') : '/icma'}
                   onClick={(e) => { e.preventDefault(); navigateTo('icma'); }}
                 >
                   {t('nav_community')}
@@ -92,7 +92,7 @@ export default function Footer() {
               <li>
                 <a
                   className="text-on-primary-container hover:text-on-primary transition-colors cursor-pointer"
-                  href="#haqqimizda"
+                  href={getPageUrl ? getPageUrl('haqqimizda') : '/haqqimizda'}
                   onClick={(e) => { e.preventDefault(); navigateTo('haqqimizda'); }}
                 >
                   {t('nav_about')}

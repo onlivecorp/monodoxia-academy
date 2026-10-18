@@ -162,6 +162,42 @@ export default function AdminSettingsTab({ setActiveTab }) {
           />
         </div>
 
+        {/* Quick link to Page Slugs / URLs */}
+        {setActiveTab && (
+          <div className="admin-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fcfdfa', border: '1px solid #e2e8f0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{
+                width: '34px',
+                height: '34px',
+                borderRadius: '8px',
+                background: 'rgba(197,160,89,0.12)',
+                border: '1px solid rgba(197,160,89,0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#c5a059'
+              }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>link</span>
+              </div>
+              <div>
+                <div style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>Səhifələrin Fərdi URL Linkləri (Routinq)</div>
+                <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
+                  Hər bir səhifə üçün xüsusi URL linkini (məs: /kurslar, /about, /klub) Səhifələr İdarəetməsi tabından tənzimləyin.
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setActiveTab('pages')}
+              className="admin-btn-secondary"
+              style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '15px', color: '#c5a059' }}>auto_stories</span>
+              <span>Linkləri Ayarla</span>
+            </button>
+          </div>
+        )}
+
         {/* Quick link to Maintenance Mode */}
         {setActiveTab && (
           <div className="admin-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fdfcf7', border: '1px solid #f1ece1' }}>

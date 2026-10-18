@@ -17,7 +17,8 @@ export default function Header() {
     homeContent,
     canAccessAdmin,
     currentPage,
-    navigateTo
+    navigateTo,
+    getPageUrl
   } = useApp();
 
   const logoUrl = homeContent?.navbar?.logoUrl;
@@ -25,12 +26,12 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
-    { id: 'akademiya', href: '#akademiya', label: t('nav_academy') },
-    { id: 'koucinq', href: '#koucinq', label: t('nav_coaching') },
-    { id: 'club', href: '#club', label: t('nav_club') },
-    { id: 'tedbirler', href: '#tedbirler', label: t('nav_events') },
-    { id: 'icma', href: '#icma', label: t('nav_community') },
-    { id: 'haqqimizda', href: '#haqqimizda', label: t('nav_about') },
+    { id: 'akademiya', href: getPageUrl ? getPageUrl('akademiya') : '/akademiya', label: t('nav_academy') },
+    { id: 'koucinq', href: getPageUrl ? getPageUrl('koucinq') : '/koucinq', label: t('nav_coaching') },
+    { id: 'club', href: getPageUrl ? getPageUrl('club') : '/club', label: t('nav_club') },
+    { id: 'tedbirler', href: getPageUrl ? getPageUrl('tedbirler') : '/tedbirler', label: t('nav_events') },
+    { id: 'icma', href: getPageUrl ? getPageUrl('icma') : '/icma', label: t('nav_community') },
+    { id: 'haqqimizda', href: getPageUrl ? getPageUrl('haqqimizda') : '/haqqimizda', label: t('nav_about') },
   ];
 
   return (
@@ -39,7 +40,7 @@ export default function Header() {
         
         {/* BRAND LOGO */}
         <a
-          href="#"
+          href={getPageUrl ? getPageUrl('home') : '/'}
           onClick={(e) => {
             e.preventDefault();
             navigateTo('home');

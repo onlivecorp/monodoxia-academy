@@ -21,6 +21,15 @@ import {
   ALL_PERMISSION_KEYS,
   INITIAL_ROLES
 } from '../data/rbacData';
+import {
+  DEFAULT_PAGE_SLUGS,
+  PAGE_DEFINITIONS,
+  VALID_PAGE_IDS,
+  resolvePageSlug,
+  resolvePageUrl,
+  resolvePageFromLocation,
+  sanitizeSlug
+} from '../utils/pageRouter';
 
 const INITIAL_USERS = [
   { id: 'u7', name: 'Admin Baş Koordinator', email: 'admin@monodoxia.academy', role: 'Admin', tier: 'VIP', status: 'Aktiv', joinedDate: '2025-01-01' }
@@ -37,6 +46,7 @@ const INITIAL_SETTINGS = {
   safetyText: "Monodoxia Academy təhsil, fərdi inkişaf və kouçinq platformasıdır. Təqdim edilən proqramlar və materiallar tibbi, psixiatrik və ya kliniki diaqnostika və müalicəni əvəz etmir.",
   maintenanceMode: false,
   allowRegistrations: true,
+  pageSlugs: { ...DEFAULT_PAGE_SLUGS },
   maintenanceTitle: "Planlaşdırılmış Texniki Təkmilləşdirmə",
   maintenanceDesc: "Hörmətli ziyarətçi, Monodoxia Academy platformasında təhsil, analitika və təhlükəsizlik sistemlərini yeniləmək məqsədilə planlaşdırılmış texniki təkmilləşdirmə işləri aparılır. Sistem ən qısa zamanda yenidən tam fəaliyyətini bərpa edəcəkdir.",
   maintenanceNotice: "Tezliklə Aktiv",
@@ -446,36 +456,96 @@ export function AppProvider({ children }) {
   const [applicationModalOpen, setApplicationModalOpen] = useState(false);
   const [activeApplicationTarget, setActiveApplicationTarget] = useState(null);
 
-  // Page Routing (Separate pages for each section)
-  const validPages = ['home', 'akademiya', 'koucinq', 'club', 'tedbirler', 'icma', 'haqqimizda'];
-  const getPageFromHash = () => {
-    const raw = (window.location.hash || '').replace('#', '').trim().toLowerCase();
-    return validPages.includes(raw) ? raw : 'home';
+  // Page Routing (Separate pages with customizable URL slugs)
+  const validPages = VALID_PAGE_IDS;
+
+  const [currentPage, setCurrentPage] = useState(() => {
+    let initialSlugs = DEFAULT_PAGE_SLUGS;
+    try {
+      const saved = localStorage.getItem('monodoxia_admin_settings');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.pageSlugs || parsed.page_slugs) {
+          initialSlugs = { ...DEFAULT_PAGE_SLUGS, ...(parsed.pageSlugs || parsed.page_slugs) };
+        }
+      }
+    } catch (e) {}
+    return resolvePageFromLocation(initialSlugs);
+  });
+
+  const getPageSlug = (pageId) => {
+    return resolvePageSlug(pageId, platformSettings?.pageSlugs || platformSettings?.page_slugs);
   };
 
-  const [currentPage, setCurrentPage] = useState(getPageFromHash);
+  const getPageUrl = (pageId) => {
+    return resolvePageUrl(pageId, platformSettings?.pageSlugs || platformSettings?.page_slugs);
+  };
 
+  // Sync current page with browser back/forward and hash changes
   useEffect(() => {
-    const handleHash = () => {
-      const page = getPageFromHash();
+    const handleLocationChange = () => {
+      const page = resolvePageFromLocation(platformSettings?.pageSlugs || platformSettings?.page_slugs);
       setCurrentPage(page);
     };
-    window.addEventListener('hashchange', handleHash);
-    return () => window.removeEventListener('hashchange', handleHash);
-  }, []);
+    window.addEventListener('popstate', handleLocationChange);
+    window.addEventListener('hashchange', handleLocationChange);
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+      window.removeEventListener('hashchange', handleLocationChange);
+    };
+  }, [platformSettings?.pageSlugs, platformSettings?.page_slugs]);
+
+  // Synchronize on mount if settings change
+  useEffect(() => {
+    const targetPage = resolvePageFromLocation(platformSettings?.pageSlugs || platformSettings?.page_slugs);
+    if (targetPage && targetPage !== currentPage) {
+      setCurrentPage(targetPage);
+    }
+  }, [platformSettings?.pageSlugs, platformSettings?.page_slugs]);
 
   const navigateTo = (page) => {
     const target = validPages.includes(page) ? page : 'home';
-    if (target === 'home') {
-      if (window.location.hash) {
-        history.pushState(null, '', window.location.pathname + window.location.search);
+    const targetUrl = resolvePageUrl(target, platformSettings?.pageSlugs || platformSettings?.page_slugs);
+
+    try {
+      if (window.location.pathname !== targetUrl || window.location.hash) {
+        window.history.pushState({ page: target }, '', targetUrl);
       }
-      setCurrentPage('home');
-    } else {
-      window.location.hash = target;
-      setCurrentPage(target);
+    } catch (e) {
+      const slug = getPageSlug(target);
+      window.location.hash = slug || target;
     }
+
+    setCurrentPage(target);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const updatePageSlugs = (newSlugs) => {
+    const current = platformSettings?.pageSlugs || platformSettings?.page_slugs || DEFAULT_PAGE_SLUGS;
+    const merged = { ...current };
+
+    Object.entries(newSlugs || {}).forEach(([k, v]) => {
+      if (validPages.includes(k)) {
+        if (k === 'home') {
+          merged[k] = sanitizeSlug(v);
+        } else {
+          merged[k] = sanitizeSlug(v) || DEFAULT_PAGE_SLUGS[k];
+        }
+      }
+    });
+
+    updatePlatformSettings({
+      pageSlugs: merged,
+      page_slugs: merged
+    });
+
+    // Also update browser URL if the current page's slug was modified
+    const newTargetUrl = resolvePageUrl(currentPage, merged);
+    try {
+      window.history.replaceState({ page: currentPage }, '', newTargetUrl);
+    } catch (e) {}
+
+    showToast('Səhifə linkləri (URL) uğurla yeniləndi və yadda saxlanıldı', 'success');
   };
 
   // Toasts
@@ -865,6 +935,14 @@ export function AppProvider({ children }) {
               const b = Boolean(mappedSettings.maintenance_mode === '1' || mappedSettings.maintenance_mode === 1 || mappedSettings.maintenance_mode === true || mappedSettings.maintenance_mode === 'true');
               mappedSettings.maintenanceMode = b;
               mappedSettings.maintenance_mode = b ? '1' : '0';
+            }
+            if (mappedSettings.page_slugs && !mappedSettings.pageSlugs) {
+              mappedSettings.pageSlugs = mappedSettings.page_slugs;
+            } else if (mappedSettings.pageSlugs && !mappedSettings.page_slugs) {
+              mappedSettings.page_slugs = mappedSettings.pageSlugs;
+            }
+            if (mappedSettings.pageSlugs) {
+              mappedSettings.pageSlugs = { ...DEFAULT_PAGE_SLUGS, ...mappedSettings.pageSlugs };
             }
             setPlatformSettings(prev => ({ ...prev, ...mappedSettings }));
           }
@@ -2622,6 +2700,12 @@ export function AppProvider({ children }) {
       if (newSettings.maintenance_mode !== undefined) {
         merged.maintenanceMode = Boolean(newSettings.maintenance_mode === '1' || newSettings.maintenance_mode === 1 || newSettings.maintenance_mode === true);
       }
+      if (newSettings.pageSlugs !== undefined) {
+        merged.page_slugs = newSettings.pageSlugs;
+      }
+      if (newSettings.page_slugs !== undefined) {
+        merged.pageSlugs = newSettings.page_slugs;
+      }
       try {
         localStorage.setItem('monodoxia_admin_settings', JSON.stringify(merged));
       } catch (e) {}
@@ -3033,10 +3117,15 @@ export function AppProvider({ children }) {
       addFaq,
       updateFaq,
       deleteFaq,
-      // Page Routing
+      // Page Routing & Slug Settings
       currentPage,
       setCurrentPage,
-      navigateTo
+      navigateTo,
+      getPageSlug,
+      getPageUrl,
+      updatePageSlugs,
+      PAGE_DEFINITIONS,
+      DEFAULT_PAGE_SLUGS
     }}>
       {children}
     </AppContext.Provider>

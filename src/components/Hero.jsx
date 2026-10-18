@@ -6,7 +6,7 @@ import { getHeroMediaStyles, parseVideoUrl } from '../utils/heroMediaHelper';
 
 export default function Hero() {
   const { t, currentLang, defaultLang } = useLanguage();
-  const { homeContent, navigateTo } = useApp();
+  const { homeContent, navigateTo, getPageUrl } = useApp();
   const hero = homeContent?.hero || {};
 
   const mediaStyles = getHeroMediaStyles(hero);
@@ -36,7 +36,7 @@ export default function Hero() {
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
               <a
                 className="bg-primary-container text-on-primary hover:bg-[#112240] px-8 py-3.5 rounded text-label-lg font-label-lg tracking-wider text-center transition-all duration-200 border border-secondary/40 shadow-sm flex items-center justify-center gap-2 cursor-pointer"
-                href="#akademiya"
+                href={getPageUrl ? getPageUrl('akademiya') : '/akademiya'}
                 onClick={(e) => {
                   e.preventDefault();
                   navigateTo('akademiya');
@@ -47,7 +47,7 @@ export default function Hero() {
               </a>
               <a
                 className="bg-transparent hover:bg-secondary/5 text-primary border border-secondary px-7 py-3.5 rounded text-label-lg font-label-lg text-center transition-colors duration-200 cursor-pointer"
-                href="#club"
+                href={getPageUrl ? getPageUrl('club') : '/club'}
                 onClick={(e) => {
                   e.preventDefault();
                   navigateTo('club');

@@ -98,6 +98,19 @@ function AppContent() {
     );
   }
 
+  useEffect(() => {
+    const titles = {
+      home: platformSettings?.siteTitle ? `${platformSettings.siteTitle} — ${platformSettings.subtitle || 'Fərdi İnkişaf və Psixologiya Mərkəzi'}` : 'Monodoxia Academy',
+      akademiya: 'Akademiya və Kurslar | Monodoxia Academy',
+      koucinq: 'Fərdi Kouçinq | Monodoxia Academy',
+      club: 'Coaching Club | Monodoxia Academy',
+      tedbirler: 'Tədbirlər və Masterklaslar | Monodoxia Academy',
+      icma: 'İcma və Forum | Monodoxia Academy',
+      haqqimizda: 'Haqqımızda | Monodoxia Academy'
+    };
+    document.title = titles[currentPage] || platformSettings?.siteTitle || 'Monodoxia Academy';
+  }, [currentPage, platformSettings?.siteTitle, platformSettings?.subtitle]);
+
   const renderCurrentPage = () => {
     switch (currentPage) {
       case 'akademiya':

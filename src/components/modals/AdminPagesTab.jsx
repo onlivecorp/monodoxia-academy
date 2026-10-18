@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext, createContext } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { getHeroMediaStyles, getAboutMediaStyles, parseVideoUrl } from '../../utils/heroMediaHelper';
+import { DEFAULT_PAGE_SLUGS, sanitizeSlug, resolvePageSlug, resolvePageUrl } from '../../utils/pageRouter';
 
 const PagesFieldContext = createContext({
   pageLang: 'az',
@@ -358,6 +359,128 @@ function PageImageField({ label, value, onChange }) {
   );
 }
 
+function PageUrlInlineBar({
+  pageId,
+  slugsForm,
+  setSlugsForm,
+  onSaveSlug,
+  onLivePreview,
+  showToast
+}) {
+  const currentVal = slugsForm[pageId] !== undefined ? slugsForm[pageId] : (DEFAULT_PAGE_SLUGS[pageId] || '');
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://monodoxia.academy';
+  const effectivePath = pageId === 'home'
+    ? (currentVal ? `/${currentVal}` : '/')
+    : `/${currentVal || DEFAULT_PAGE_SLUGS[pageId] || pageId}`;
+  const effectiveUrl = `${baseUrl}${effectivePath}`;
+
+  const isCustom = currentVal !== (DEFAULT_PAGE_SLUGS[pageId] || '');
+
+  const handleCopy = () => {
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(effectiveUrl);
+      if (showToast) showToast(`Link kopyalandı: ${effectiveUrl}`, 'success');
+    }
+  };
+
+  return (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: '12px',
+      padding: '10px 14px',
+      background: 'linear-gradient(135deg, #fffdf8 0%, #fefcf3 100%)',
+      border: '1px solid rgba(197, 160, 89, 0.4)',
+      borderRadius: '8px',
+      flexWrap: 'wrap'
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '220px' }}>
+        <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#c5a059' }}>link</span>
+        <div>
+          <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span>Bu Səhifənin URL Linki</span>
+            <span style={{
+              fontSize: '9px',
+              fontWeight: 700,
+              padding: '1px 5px',
+              borderRadius: '4px',
+              background: isCustom ? '#fef3c7' : '#f1f5f9',
+              color: isCustom ? '#b45309' : '#64748b'
+            }}>
+              {isCustom ? 'XÜSUSİ LİNK' : 'STANDART'}
+            </span>
+          </span>
+          <span style={{ fontSize: '11px', color: '#64748b', wordBreak: 'break-all', fontFamily: 'monospace' }}>
+            {effectiveUrl}
+          </span>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '6px', overflow: 'hidden' }}>
+          <span style={{ fontSize: '11px', color: '#64748b', padding: '0 8px', background: '#f8fafc', height: '32px', display: 'flex', alignItems: 'center', borderRight: '1px solid #e2e8f0', fontWeight: 600 }}>
+            /
+          </span>
+          <input
+            type="text"
+            value={slugsForm[pageId] ?? ''}
+            onChange={e => {
+              const val = sanitizeSlug(e.target.value);
+              setSlugsForm(prev => ({ ...prev, [pageId]: val }));
+            }}
+            placeholder={DEFAULT_PAGE_SLUGS[pageId] || (pageId === 'home' ? '(ana səhifə /)' : pageId)}
+            style={{
+              padding: '6px 10px',
+              fontSize: '12px',
+              border: 'none',
+              outline: 'none',
+              width: '140px',
+              background: 'transparent',
+              fontFamily: 'monospace',
+              color: '#0f172a',
+              fontWeight: 600
+            }}
+          />
+        </div>
+
+        <button
+          type="button"
+          onClick={() => onSaveSlug(pageId)}
+          className="admin-btn-primary"
+          style={{ padding: '6px 12px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}
+          title="Bu səhifənin yeni linkini yadda saxla"
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>save</span>
+          <span>Linki Saxla</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={handleCopy}
+          className="admin-btn-secondary"
+          style={{ padding: '6px 10px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}
+          title="Linki Kopyala"
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>content_copy</span>
+          <span>Kopyala</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onLivePreview(pageId)}
+          className="admin-btn-secondary"
+          style={{ padding: '6px 10px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}
+          title="Bu səhifəni saytda aç"
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>open_in_new</span>
+          <span>Aç</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminPagesTab() {
   const {
     homeContent = {},
@@ -368,7 +491,11 @@ export default function AdminPagesTab() {
     updateAllPillars,
     areasList = [],
     updateAllAreas,
-    showToast
+    showToast,
+    platformSettings,
+    updatePageSlugs,
+    getPageSlug,
+    getPageUrl
   } = useApp();
 
   const { supportedLangs = [] } = useLanguage();
@@ -393,6 +520,42 @@ export default function AdminPagesTab() {
   const [selectedPage, setSelectedPage] = useState('akademiya');
   const [pageLang, setPageLang] = useState('az');
   const [showAllLangs, setShowAllLangs] = useState(false);
+
+  // URL Slugs Form state
+  const [slugsForm, setSlugsForm] = useState(() => ({
+    ...DEFAULT_PAGE_SLUGS,
+    ...(platformSettings?.pageSlugs || platformSettings?.page_slugs || {})
+  }));
+  const [slugsPanelOpen, setSlugsPanelOpen] = useState(false);
+
+  useEffect(() => {
+    if (platformSettings?.pageSlugs || platformSettings?.page_slugs) {
+      setSlugsForm({
+        ...DEFAULT_PAGE_SLUGS,
+        ...(platformSettings.pageSlugs || platformSettings.page_slugs)
+      });
+    }
+  }, [platformSettings?.pageSlugs, platformSettings?.page_slugs]);
+
+  const handleSaveAllSlugs = () => {
+    if (updatePageSlugs) {
+      updatePageSlugs(slugsForm);
+    }
+  };
+
+  const handleSaveSingleSlug = (pageId) => {
+    if (updatePageSlugs) {
+      updatePageSlugs(slugsForm);
+    }
+  };
+
+  const handleResetSlugs = () => {
+    setSlugsForm({ ...DEFAULT_PAGE_SLUGS });
+    if (updatePageSlugs) {
+      updatePageSlugs(DEFAULT_PAGE_SLUGS);
+    }
+    showToast('Bütün səhifə linkləri standart vəziyyətə qaytarıldı!', 'info');
+  };
 
   // Per-page block states
   const [academyData, setAcademyData] = useState(() => ({ ...(homeContent?.academy || {}) }));
@@ -520,12 +683,215 @@ export default function AdminPagesTab() {
                     <span style={{ fontSize: '12px', fontWeight: isSelected ? 700 : 600, display: 'block', lineHeight: 1.2 }}>
                       {page.label}
                     </span>
-                    <span style={{ fontSize: '9px', color: '#94a3b8' }}>#{page.route}</span>
+                    <span style={{ fontSize: '9px', color: '#c5a059', fontWeight: 600 }}>
+                      {page.id === 'home' ? '/' : `/${slugsForm[page.id] || (getPageSlug ? getPageSlug(page.id) : page.route)}`}
+                    </span>
                   </div>
                 </button>
               );
             })}
           </div>
+        </div>
+
+        {/* SƏHİFƏ LİNKİ VƏ URL ROUTİNQ İDARƏETMƏSİ PANELİ */}
+        <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px', border: '1.5px solid #e2e8f0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '8px',
+                background: 'rgba(197,160,89,0.12)',
+                border: '1px solid rgba(197,160,89,0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#c5a059'
+              }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>link</span>
+              </div>
+              <div>
+                <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                  Səhifə Linkləri və URL Routinq İdarəetməsi
+                </h4>
+                <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0' }}>
+                  Saytın hər bir səhifəsi üçün xüsusi URL linki (slug) təyin edin. Dəyişikliklər dərhal menyuda və linklərdə tətbiq olunur.
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <button
+                type="button"
+                onClick={() => setSlugsPanelOpen(!slugsPanelOpen)}
+                className="admin-btn-secondary"
+                style={{ padding: '5px 10px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>
+                  {slugsPanelOpen ? 'expand_less' : 'tune'}
+                </span>
+                <span>{slugsPanelOpen ? 'Paneli Yığ' : 'Bütün Linkləri Tənzimlə'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveAllSlugs}
+                className="admin-btn-primary"
+                style={{ padding: '5px 12px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>save</span>
+                <span>Bütün Linkləri Saxla</span>
+              </button>
+            </div>
+          </div>
+
+          {slugsPanelOpen && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', paddingTop: '10px', borderTop: '1px solid #e2e8f0' }}>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                gap: '10px'
+              }}>
+                {PAGES_CONFIG.map(page => {
+                  const currentVal = slugsForm[page.id] !== undefined ? slugsForm[page.id] : (DEFAULT_PAGE_SLUGS[page.id] || '');
+                  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://monodoxia.academy';
+                  const effectivePath = page.id === 'home'
+                    ? (currentVal ? `/${currentVal}` : '/')
+                    : `/${currentVal || DEFAULT_PAGE_SLUGS[page.id] || page.id}`;
+                  const effectiveUrl = `${baseUrl}${effectivePath}`;
+                  const isCustom = currentVal !== (DEFAULT_PAGE_SLUGS[page.id] || '');
+
+                  return (
+                    <div
+                      key={page.id}
+                      style={{
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                        background: '#fafaf9',
+                        border: selectedPage === page.id ? '1.5px solid #c5a059' : '1px solid #e2e8f0',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '8px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#c5a059' }}>
+                            {page.icon}
+                          </span>
+                          <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>
+                            {page.label}
+                          </span>
+                        </div>
+                        <span style={{
+                          fontSize: '9px',
+                          fontWeight: 700,
+                          padding: '1px 5px',
+                          borderRadius: '4px',
+                          background: isCustom ? '#fef3c7' : '#f1f5f9',
+                          color: isCustom ? '#b45309' : '#64748b'
+                        }}>
+                          {isCustom ? 'XÜSUSİ LİNK' : 'STANDART'}
+                        </span>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '6px', overflow: 'hidden' }}>
+                        <span style={{ fontSize: '11px', color: '#64748b', padding: '0 8px', background: '#f8fafc', height: '30px', display: 'flex', alignItems: 'center', borderRight: '1px solid #e2e8f0', fontWeight: 600 }}>
+                          /
+                        </span>
+                        <input
+                          type="text"
+                          value={slugsForm[page.id] ?? ''}
+                          onChange={e => {
+                            const val = sanitizeSlug(e.target.value);
+                            setSlugsForm(prev => ({ ...prev, [page.id]: val }));
+                          }}
+                          placeholder={DEFAULT_PAGE_SLUGS[page.id] || (page.id === 'home' ? '(ana səhifə /)' : page.id)}
+                          style={{
+                            flex: 1,
+                            padding: '4px 8px',
+                            fontSize: '11px',
+                            border: 'none',
+                            outline: 'none',
+                            background: 'transparent',
+                            fontFamily: 'monospace',
+                            fontWeight: 600,
+                            color: '#0f172a'
+                          }}
+                        />
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                        <span style={{ fontSize: '10px', color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '170px', fontFamily: 'monospace' }} title={effectiveUrl}>
+                          {effectivePath}
+                        </span>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (navigator?.clipboard?.writeText) {
+                                navigator.clipboard.writeText(effectiveUrl);
+                                showToast(`Link kopyalandı: ${effectiveUrl}`, 'success');
+                              }
+                            }}
+                            className="admin-btn-secondary"
+                            style={{ padding: '2px 6px', fontSize: '10px' }}
+                            title="Tam URL linkini kopyala"
+                          >
+                            <span className="material-symbols-outlined" style={{ fontSize: '12px' }}>content_copy</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleLivePreview(page.id)}
+                            className="admin-btn-secondary"
+                            style={{ padding: '2px 6px', fontSize: '10px' }}
+                            title="Bu səhifəyə keç"
+                          >
+                            <span className="material-symbols-outlined" style={{ fontSize: '12px' }}>open_in_new</span>
+                          </button>
+                          {isCustom && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSlugsForm(prev => ({ ...prev, [page.id]: DEFAULT_PAGE_SLUGS[page.id] || '' }));
+                              }}
+                              className="admin-btn-secondary"
+                              style={{ padding: '2px 6px', fontSize: '10px', color: '#dc2626' }}
+                              title="Standart linkə sıfırla"
+                            >
+                              <span className="material-symbols-outlined" style={{ fontSize: '12px' }}>undo</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '8px', borderTop: '1px solid #f1f5f9', flexWrap: 'wrap', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={handleResetSlugs}
+                  className="admin-btn-secondary"
+                  style={{ fontSize: '11px', color: '#dc2626' }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>restart_alt</span>
+                  <span>Bütün Linkləri Standarta Sıfırla</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleSaveAllSlugs}
+                  className="admin-btn-primary"
+                  style={{ fontSize: '11px', padding: '6px 14px' }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>save</span>
+                  <span>Bütün Dəyişiklikləri Yadda Saxla</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* 1. AKADEMİYA SƏHİFƏSİ REDAKTƏ PANELİ */}
@@ -550,6 +916,15 @@ export default function AdminPagesTab() {
                 <span>Saytda Bu Səhifəyə Bax</span>
               </button>
             </div>
+
+            <PageUrlInlineBar
+              pageId="akademiya"
+              slugsForm={slugsForm}
+              setSlugsForm={setSlugsForm}
+              onSaveSlug={handleSaveSingleSlug}
+              onLivePreview={handleLivePreview}
+              showToast={showToast}
+            />
 
             <PageField label="Səhifə Üst Etiketi (Badge)" block={academyData} setBlock={setAcademyData} fieldKey="badge" placeholder="Məs: Akademik Tədris" />
             <PageField label="Səhifə Əsas Başlığı (Title)" block={academyData} setBlock={setAcademyData} fieldKey="title" placeholder="Məs: Kurslar və Sertifikasiya Proqramları" />
@@ -593,6 +968,15 @@ export default function AdminPagesTab() {
               </button>
             </div>
 
+            <PageUrlInlineBar
+              pageId="koucinq"
+              slugsForm={slugsForm}
+              setSlugsForm={setSlugsForm}
+              onSaveSlug={handleSaveSingleSlug}
+              onLivePreview={handleLivePreview}
+              showToast={showToast}
+            />
+
             <PageField label="Səhifə Üst Etiketi (Badge)" block={coachesData} setBlock={setCoachesData} fieldKey="badge" placeholder="Məs: Ekspert Heyəti" />
             <PageField label="Səhifə Əsas Başlığı (Title)" block={coachesData} setBlock={setCoachesData} fieldKey="title" placeholder="Məs: Beynəlxalq Sertifikatlı Mentorlarımız" />
             <PageField label="Səhifə Təsviri (Desc)" block={coachesData} setBlock={setCoachesData} fieldKey="desc" multiline rows={3} placeholder="Mentorların təcrübəsi və kouçinq prosesi haqqında..." />
@@ -634,6 +1018,15 @@ export default function AdminPagesTab() {
                   <span>Saytda Bu Səhifəyə Bax</span>
                 </button>
               </div>
+
+              <PageUrlInlineBar
+                pageId="club"
+                slugsForm={slugsForm}
+                setSlugsForm={setSlugsForm}
+                onSaveSlug={handleSaveSingleSlug}
+                onLivePreview={handleLivePreview}
+                showToast={showToast}
+              />
 
               <PageField label="Üst Etiket (Badge)" block={clubData} setBlock={setClubData} fieldKey="badge" placeholder="Məs: QAPALI İCMA ÜZVLÜYÜ" />
               <PageField label="Klub Başlığı (Title)" block={clubData} setBlock={setClubData} fieldKey="title" placeholder="Məs: Monodoxia Coaching Club — Həmfikirlərin Seçilmiş Məkanı" />
@@ -725,6 +1118,15 @@ export default function AdminPagesTab() {
               </button>
             </div>
 
+            <PageUrlInlineBar
+              pageId="tedbirler"
+              slugsForm={slugsForm}
+              setSlugsForm={setSlugsForm}
+              onSaveSlug={handleSaveSingleSlug}
+              onLivePreview={handleLivePreview}
+              showToast={showToast}
+            />
+
             <PageField label="Səhifə Üst Etiketi (Badge)" block={eventsData} setBlock={setEventsData} fieldKey="badge" placeholder="Məs: Canlı Təqvim" />
             <PageField label="Səhifə Əsas Başlığı (Title)" block={eventsData} setBlock={setEventsData} fieldKey="title" placeholder="Məs: Yaxınlaşan Tədbirlər və Masterklaslar" />
             <PageField label="Səhifə Təsviri (Desc)" block={eventsData} setBlock={setEventsData} fieldKey="desc" multiline rows={3} placeholder="Canlı interaktiv vebinarlar..." />
@@ -766,6 +1168,15 @@ export default function AdminPagesTab() {
                 <span>Saytda Bu Səhifəyə Bax</span>
               </button>
             </div>
+
+            <PageUrlInlineBar
+              pageId="icma"
+              slugsForm={slugsForm}
+              setSlugsForm={setSlugsForm}
+              onSaveSlug={handleSaveSingleSlug}
+              onLivePreview={handleLivePreview}
+              showToast={showToast}
+            />
 
             <PageField label="Səhifə Üst Etiketi (Badge)" block={communityData} setBlock={setCommunityData} fieldKey="badge" placeholder="Məs: İntellektual Şəbəkə" />
             <PageField label="Səhifə Əsas Başlığı (Title)" block={communityData} setBlock={setCommunityData} fieldKey="title" placeholder="Məs: Düşüncə və Təcrübə Mübadiləsi" />
@@ -819,6 +1230,15 @@ export default function AdminPagesTab() {
                   <span>Saytda Bu Səhifəyə Bax</span>
                 </button>
               </div>
+
+              <PageUrlInlineBar
+                pageId="haqqimizda"
+                slugsForm={slugsForm}
+                setSlugsForm={setSlugsForm}
+                onSaveSlug={handleSaveSingleSlug}
+                onLivePreview={handleLivePreview}
+                showToast={showToast}
+              />
 
               <PageField label="Səhifə Üst Etiketi (Badge)" block={aboutData} setBlock={setAboutData} fieldKey="badge" placeholder="Məs: Akademiyanın Məramı" />
               <PageField label="Səhifə Əsas Başlığı (Title)" block={aboutData} setBlock={setAboutData} fieldKey="title" placeholder="Məs: Daxili ahəngdarlıq və şüurlu həyat üçün..." />
@@ -929,6 +1349,15 @@ export default function AdminPagesTab() {
                 <span>Saytda Ana Səhifəyə Bax</span>
               </button>
             </div>
+
+            <PageUrlInlineBar
+              pageId="home"
+              slugsForm={slugsForm}
+              setSlugsForm={setSlugsForm}
+              onSaveSlug={handleSaveSingleSlug}
+              onLivePreview={handleLivePreview}
+              showToast={showToast}
+            />
 
             <PageField label="Hero Üst Etiketi (Badge)" block={heroData} setBlock={setHeroData} fieldKey="badge" placeholder="FƏRDİ İNKİŞAF VƏ PSİXOLOGİYA MƏRKƏZİ" />
 
