@@ -46,7 +46,7 @@ export default function MaintenanceScreen({ onAdminLogin, onClosePreview }) {
       {/* Top Bar Branding & Language Switcher */}
       <header className="relative z-10 w-full max-w-4xl flex items-center justify-between border-b border-[#e2d9c8] pb-5">
         <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="Monodoxia Academy" className="h-12 w-auto object-contain" />
+          <img src="/header_logo.svg" alt="Monodoxia Academy" className="h-10 md:h-12 w-auto object-contain" />
         </div>
 
         <div className="flex items-center gap-3">

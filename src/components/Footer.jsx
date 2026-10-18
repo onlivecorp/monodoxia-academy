@@ -17,7 +17,7 @@ export default function Footer() {
           {/* BRAND */}
           <div className="lg:col-span-5 space-y-4">
             <a
-              className="inline-flex items-center p-2.5 bg-white/95 backdrop-blur-sm rounded-xl shadow-md border border-white/20 transition-transform hover:scale-105 cursor-pointer"
+              className="inline-block transition-transform hover:scale-105 cursor-pointer"
               href={getPageUrl ? getPageUrl('home') : '/'}
               onClick={(e) => {
                 e.preventDefault();
@@ -27,10 +27,10 @@ export default function Footer() {
               <img
                 alt="Monodoxia Academy"
                 className="h-10 md:h-12 w-auto object-contain"
-                src={footer.logoUrl || "/logo.png"}
+                src={footer.logoUrl || "/footer_logo.svg"}
                 onError={(e) => {
-                  if (e.currentTarget.src !== window.location.origin + '/logo.png') {
-                    e.currentTarget.src = '/logo.png';
+                  if (e.currentTarget.src !== window.location.origin + '/footer_logo.svg') {
+                    e.currentTarget.src = '/footer_logo.svg';
                   }
                 }}
               />

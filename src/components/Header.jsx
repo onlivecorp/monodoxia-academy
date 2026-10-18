@@ -21,7 +21,7 @@ export default function Header() {
     getPageUrl
   } = useApp();
 
-  const logoUrl = homeContent?.navbar?.logoUrl || '/logo.png';
+  const logoUrl = homeContent?.navbar?.logoUrl || '/header_logo.svg';
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -50,10 +50,10 @@ export default function Header() {
           <img
             src={logoUrl}
             alt="Monodoxia Academy"
-            className="h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+            className="h-10 md:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
             onError={(e) => {
-              if (e.currentTarget.src !== window.location.origin + '/logo.png') {
-                e.currentTarget.src = '/logo.png';
+              if (e.currentTarget.src !== window.location.origin + '/header_logo.svg') {
+                e.currentTarget.src = '/header_logo.svg';
               }
             }}
           />

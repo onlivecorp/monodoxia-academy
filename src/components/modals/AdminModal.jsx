@@ -155,7 +155,7 @@ export default function AdminModal() {
 
             {/* Logo Mark */}
             <div className="flex items-center justify-center p-1 bg-white rounded-lg border border-slate-200 shadow-xs h-9 w-9">
-              <img src="/logo.png" alt="Logo" className="h-7 w-auto object-contain" />
+              <img src="/favicon.svg" alt="Logo" className="h-7 w-7 object-contain" />
             </div>
 
             <div>

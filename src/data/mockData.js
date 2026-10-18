@@ -770,7 +770,7 @@ export const INITIAL_FAQS = [
 
 export const INITIAL_HOME_CONTENT = {
   navbar: {
-    logoUrl: "/logo.png"
+    logoUrl: "/header_logo.svg"
   },
   hero: {
     badge: "FƏRDİ İNKİŞAF VƏ PSİXOLOGİYA MƏRKƏZİ",
@@ -1201,7 +1201,7 @@ export const INITIAL_HOME_CONTENT = {
     }
   },
   footer: {
-    logoUrl: "/logo.png",
+    logoUrl: "/footer_logo.svg",
     desc: "Fərdi İnkişaf və Psixologiya Mərkəzi. İnsanın daxili azadlığı, şüur transformasiyası və ahəngdar varlığı üçün etibarlı akademik platforma.",
     address: "Nizami küçəsi 142, İntellektual İnkişaf Mərkəzi, Bakı, Azərbaycan",
     email: "contact@monodoxia.academy",

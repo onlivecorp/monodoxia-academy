@@ -45,7 +45,7 @@ export default function AuthModal() {
         </button>
 
         <div className="pt-6 pb-1 px-6 flex items-center justify-center">
-          <img src="/logo.png" alt="Monodoxia Academy" className="h-12 w-auto object-contain" />
+          <img src="/header_logo.svg" alt="Monodoxia Academy" className="h-10 w-auto object-contain" />
         </div>
 
         <div className="flex border-b border-outline-variant/60 pt-3 px-6 gap-6">
