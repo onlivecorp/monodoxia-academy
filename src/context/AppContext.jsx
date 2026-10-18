@@ -1550,6 +1550,81 @@ export function AppProvider({ children }) {
     return { success: true, application: newApp };
   };
 
+  const submitTopicApplication = (title, content, badge = "İcma Müzakirəsi") => {
+    if (!currentUser) {
+      setAuthModalTab('login');
+      setAuthModalOpen(true);
+      showToast('Mövzu başlatmaq üçün daxil olun', 'warning');
+      return null;
+    }
+
+    const topicId = 'topic-' + Date.now();
+    const newApp = {
+      id: 'APP-' + Math.floor(1000 + Math.random() * 9000),
+      userId: currentUser.id,
+      userName: `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim() || currentUser.name || 'Rezident',
+      userEmail: currentUser.email || '',
+      userPhone: currentUser.phone || '',
+      targetType: 'community',
+      targetId: topicId,
+      targetTitle: title,
+      price: 'Pulsuz',
+      status: 'Yeni',
+      paymentStatus: 'Tələb olunmur',
+      attendanceStatus: 'Tələb olunmur',
+      appliedAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
+      updatedAt: null,
+      adminNote: '',
+      userNote: content,
+      formResponses: {
+        fld_topic_title: title,
+        fld_topic_content: content,
+        fld_badge: badge
+      },
+      archived: false
+    };
+
+    setApplicationsList(prev => [newApp, ...prev]);
+
+    // Send internal notification to the user
+    const newNotif = {
+      id: 'notif-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+      userId: currentUser.id,
+      title: 'Mövzu Müraciətiniz Qəbul Edildi',
+      message: `"${title}" adlı yeni icma mövzusu üzrə müraciətiniz qeydə alındı və moderator baxışına göndərildi. Administrator təsdiqindən sonra saytda dərc ediləcək.`,
+      type: 'info',
+      isRead: false,
+      createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16)
+    };
+
+    setUserNotifications(prev => {
+      const next = [newNotif, ...prev];
+      safeSetLocalStorage('monodoxia_notifications', next);
+      return next;
+    });
+
+    setNewTopicModalOpen(false);
+    showToast('Mövzu müraciətiniz administratora göndərildi. Təsdiqdən sonra saytda görünəcək.', 'success');
+
+    // Sync application to backend
+    apiCall('submit_application', {
+      id: newApp.id,
+      user_id: newApp.userId,
+      user_name: newApp.userName,
+      user_email: newApp.userEmail,
+      user_phone: newApp.userPhone,
+      target_type: newApp.targetType,
+      target_id: newApp.targetId,
+      target_title: newApp.targetTitle,
+      price: newApp.price,
+      form_responses: newApp.formResponses,
+      user_note: newApp.userNote,
+      notification_id: newNotif.id
+    }).catch(() => {});
+
+    return newApp;
+  };
+
   const updateApplicationStatus = (
     appId,
     newStatus,
@@ -1618,7 +1693,14 @@ export function AppProvider({ children }) {
     if (resolvedAdminNote) details.push(`Qeyd: ${resolvedAdminNote}`);
     const detailsSuffix = details.length > 0 ? ` (${details.join(' | ')})` : '';
 
-    const notifMsg = `"${updatedApp.targetTitle}" müraciətinizin statusu yeniləndi: ${resolvedStatus}.${detailsSuffix}`;
+    let notifMsg = `"${updatedApp.targetTitle}" müraciətinizin statusu yeniləndi: ${resolvedStatus}.${detailsSuffix}`;
+    if (updatedApp.targetType === 'community' || updatedApp.targetType === 'forum') {
+      if (resolvedStatus === 'Təsdiqləndi') {
+        notifMsg = `Təbriklər! "${updatedApp.targetTitle}" adlı icma mövzunuz administrator tərəfindən təsdiqləndi və saytda dərc edildi.${detailsSuffix}`;
+      } else if (resolvedStatus === 'Rədd edildi' || resolvedStatus === 'Ləğv edildi') {
+        notifMsg = `Təəssüf ki, "${updatedApp.targetTitle}" adlı icma mövzusu üzrə müraciətiniz qəbul edilmədi.${detailsSuffix}`;
+      }
+    }
 
     const newNotif = {
       id: 'notif-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
@@ -1636,7 +1718,7 @@ export function AppProvider({ children }) {
       return nextNotifs;
     });
 
-    // If approved, update live event/course occupancy
+    // If approved, update live event/course occupancy / community topics
     if (resolvedStatus === 'Təsdiqləndi') {
       if (updatedApp.targetType === 'event' || updatedApp.targetType === 'webinar') {
         setEventsList(prev => prev.map(e => e.id === updatedApp.targetId ? { ...e, registered: Math.min(e.capacity, (e.registered || 0) + 1) } : e));
@@ -1660,6 +1742,51 @@ export function AppProvider({ children }) {
         // If the approved application belongs to current user, update currentUser.tier
         if (currentUser && currentUser.id === updatedApp.userId) {
           updateCurrentUser({ tier: approvedTier });
+        }
+      } else if (updatedApp.targetType === 'community' || updatedApp.targetType === 'forum') {
+        const topicId = updatedApp.targetId || ('topic-' + Date.now());
+        const topicTitle = updatedApp.targetTitle || updatedApp.formResponses?.fld_topic_title || 'İcma Müzakirəsi';
+        const topicContent = updatedApp.userNote || updatedApp.formResponses?.fld_topic_content || '';
+        const topicBadge = updatedApp.formResponses?.fld_badge || 'İcma Müzakirəsi';
+        const topicAuthor = updatedApp.userName || 'Rezident';
+
+        const approvedTopic = {
+          id: topicId,
+          badge: topicBadge,
+          badgeClass: 'text-secondary font-semibold',
+          time: 'İndicə',
+          title: topicTitle,
+          snippet: topicContent,
+          content: topicContent,
+          desc: topicContent,
+          author: topicAuthor,
+          authorRole: 'Rezident',
+          likes: 1,
+          repliesCount: 0,
+          pinned: false,
+          translations: {}
+        };
+
+        setCommunityTopics(prev => {
+          if (prev.some(t => t.id === topicId)) {
+            return prev.map(t => t.id === topicId ? { ...t, ...approvedTopic } : t);
+          }
+          const next = [approvedTopic, ...prev];
+          safeSetLocalStorage('monodoxia_admin_topics', next);
+          return next;
+        });
+
+        apiCall('save_community_post', approvedTopic).catch(() => {});
+      }
+    } else if (resolvedStatus === 'Rədd edildi' || resolvedStatus === 'Ləğv edildi') {
+      if (updatedApp.targetType === 'community' || updatedApp.targetType === 'forum') {
+        if (updatedApp.targetId) {
+          setCommunityTopics(prev => {
+            const next = prev.filter(t => t.id !== updatedApp.targetId);
+            safeSetLocalStorage('monodoxia_admin_topics', next);
+            return next;
+          });
+          apiCall('delete_community_post', { id: updatedApp.targetId }).catch(() => {});
         }
       }
     }
@@ -2814,6 +2941,7 @@ export function AppProvider({ children }) {
       userNotifications, setUserNotifications,
       openApplication,
       submitApplication,
+      submitTopicApplication,
       updateApplicationStatus,
       cancelApplication,
       deleteApplication,

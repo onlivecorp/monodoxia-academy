@@ -1229,6 +1229,13 @@ if ($action === 'update_application_status' && $_SERVER['REQUEST_METHOD'] === 'P
             $detailsText = !empty($details) ? ' (' . implode(' | ', $details) . ')' : '';
 
             $notifMsg = "Sizin \"{$app['target_title']}\" müraciətinizin statusu yeniləndi: {$new_status}.{$detailsText}";
+            if ($app['target_type'] === 'community' || $app['target_type'] === 'forum') {
+                if ($new_status === 'Təsdiqləndi') {
+                    $notifMsg = "Təbriklər! \"{$app['target_title']}\" adlı icma mövzunuz administrator tərəfindən təsdiqləndi və saytda dərc edildi.{$detailsText}";
+                } elseif ($new_status === 'Rədd edildi' || $new_status === 'Ləğv edildi') {
+                    $notifMsg = "Təəssüf ki, \"{$app['target_title']}\" adlı icma mövzusu üzrə müraciətiniz qəbul edilmədi.{$detailsText}";
+                }
+            }
 
             $notif_id = !empty($input['notification_id']) ? trim($input['notification_id']) : ('NOTIF-' . uniqid());
             $notifStmt = $pdo->prepare("
@@ -1243,6 +1250,38 @@ if ($action === 'update_application_status' && $_SERVER['REQUEST_METHOD'] === 'P
                 $notifMsg,
                 $notifType
             ]);
+
+            // If community topic approved, publish post into mdx_community_posts
+            if ($new_status === 'Təsdiqləndi' && ($app['target_type'] === 'community' || $app['target_type'] === 'forum')) {
+                $topicId = $app['target_id'] ?: ('topic-' . time());
+                $formResp = json_decode($app['form_responses'] ?? '{}', true) ?: [];
+                $topicTitle = $app['target_title'] ?: ($formResp['fld_topic_title'] ?? 'İcma Müzakirəsi');
+                $topicContent = $app['user_note'] ?: ($formResp['fld_topic_content'] ?? '');
+                $topicBadge = $formResp['fld_badge'] ?? 'İcma Müzakirəsi';
+                $topicAuthor = $app['user_name'] ?: 'Rezident';
+
+                $cpStmt = $pdo->prepare("
+                    INSERT INTO mdx_community_posts (id, badge, title, snippet, content, author, author_role, author_avatar, time_ago, likes, replies, pinned, category, translations_json)
+                    VALUES (?, ?, ?, ?, ?, ?, 'Rezident', '', 'İndicə', 1, 0, 0, 'general', '{}')
+                    ON DUPLICATE KEY UPDATE
+                        badge = VALUES(badge),
+                        title = VALUES(title),
+                        snippet = VALUES(snippet),
+                        content = VALUES(content),
+                        author = VALUES(author)
+                ");
+                $cpStmt->execute([
+                    $topicId,
+                    $topicBadge,
+                    $topicTitle,
+                    $topicContent,
+                    $topicContent,
+                    $topicAuthor
+                ]);
+            } elseif (($new_status === 'Rədd edildi' || $new_status === 'Ləğv edildi') && ($app['target_type'] === 'community' || $app['target_type'] === 'forum') && !empty($app['target_id'])) {
+                $delStmt = $pdo->prepare("DELETE FROM mdx_community_posts WHERE id = ?");
+                $delStmt->execute([$app['target_id']]);
+            }
 
             // If club membership approved, elevate user tier in database
             if ($new_status === 'Təsdiqləndi' && $app['target_type'] === 'club') {
