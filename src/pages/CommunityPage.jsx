@@ -59,6 +59,11 @@ export default function CommunityPage() {
       author.toLowerCase().includes(searchQuery.toLowerCase());
 
     return matchesTag && matchesSearch;
+  }).sort((a, b) => {
+    const aPin = Boolean(a.pinned || (typeof a.badge === 'string' && a.badge.includes('📌')));
+    const bPin = Boolean(b.pinned || (typeof b.badge === 'string' && b.badge.includes('📌')));
+    if (aPin === bPin) return 0;
+    return aPin ? -1 : 1;
   });
 
   const handleCreateTopic = () => {
@@ -196,11 +201,19 @@ export default function CommunityPage() {
                           </div>
                         </div>
 
-                        {badge && (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-secondary/10 text-secondary uppercase tracking-wider">
-                            #{badge.replace('📌 ', '')}
-                          </span>
-                        )}
+                        <div className="flex items-center gap-1.5">
+                          {topic.pinned && (
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-600 flex items-center gap-1 uppercase tracking-wider">
+                              <span className="material-symbols-outlined text-[13px]">push_pin</span>
+                              <span>Sabitlənib</span>
+                            </span>
+                          )}
+                          {badge && (
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-secondary/10 text-secondary uppercase tracking-wider">
+                              #{badge.replace('📌 ', '')}
+                            </span>
+                          )}
+                        </div>
                       </div>
 
                       {/* Title & Desc */}
@@ -224,13 +237,20 @@ export default function CommunityPage() {
                           </span>
                         </div>
 
-                        <button
-                          onClick={handleCreateTopic}
-                          className="text-secondary hover:underline text-xs font-semibold flex items-center gap-1 cursor-pointer"
-                        >
-                          <span>Cavab yaz</span>
-                          <span className="material-symbols-outlined text-[14px]">reply</span>
-                        </button>
+                        {topic.allowComments === false ? (
+                          <span className="text-outline text-xs italic flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[14px]">lock</span>
+                            <span>Rəylərə bağlıdır</span>
+                          </span>
+                        ) : (
+                          <button
+                            onClick={handleCreateTopic}
+                            className="text-secondary hover:underline text-xs font-semibold flex items-center gap-1 cursor-pointer"
+                          >
+                            <span>Cavab yaz</span>
+                            <span className="material-symbols-outlined text-[14px]">reply</span>
+                          </button>
+                        )}
                       </div>
                     </div>
                   );

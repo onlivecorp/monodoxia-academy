@@ -1259,16 +1259,20 @@ if ($action === 'update_application_status' && $_SERVER['REQUEST_METHOD'] === 'P
                 $topicContent = $app['user_note'] ?: ($formResp['fld_topic_content'] ?? '');
                 $topicBadge = $formResp['fld_badge'] ?? 'İcma Müzakirəsi';
                 $topicAuthor = $app['user_name'] ?: 'Rezident';
+                $isPinned = !empty($input['is_pinned']) ? 1 : 0;
+                $allowComments = isset($input['allow_comments']) ? intval($input['allow_comments']) : 1;
 
                 $cpStmt = $pdo->prepare("
-                    INSERT INTO mdx_community_posts (id, badge, title, snippet, content, author, author_role, author_avatar, time_ago, likes, replies, pinned, category, translations_json)
-                    VALUES (?, ?, ?, ?, ?, ?, 'Rezident', '', 'İndicə', 1, 0, 0, 'general', '{}')
+                    INSERT INTO mdx_community_posts (id, badge, title, snippet, content, author, author_role, author_avatar, time_ago, likes, replies, pinned, allow_comments, category, translations_json)
+                    VALUES (?, ?, ?, ?, ?, ?, 'Rezident', '', 'İndicə', 1, 0, ?, ?, 'general', '{}')
                     ON DUPLICATE KEY UPDATE
                         badge = VALUES(badge),
                         title = VALUES(title),
                         snippet = VALUES(snippet),
                         content = VALUES(content),
-                        author = VALUES(author)
+                        author = VALUES(author),
+                        pinned = VALUES(pinned),
+                        allow_comments = VALUES(allow_comments)
                 ");
                 $cpStmt->execute([
                     $topicId,
@@ -1276,7 +1280,9 @@ if ($action === 'update_application_status' && $_SERVER['REQUEST_METHOD'] === 'P
                     $topicTitle,
                     $topicContent,
                     $topicContent,
-                    $topicAuthor
+                    $topicAuthor,
+                    $isPinned,
+                    $allowComments
                 ]);
             } elseif (($new_status === 'Rədd edildi' || $new_status === 'Ləğv edildi') && ($app['target_type'] === 'community' || $app['target_type'] === 'forum') && !empty($app['target_id'])) {
                 $delStmt = $pdo->prepare("DELETE FROM mdx_community_posts WHERE id = ?");
@@ -1807,6 +1813,7 @@ if ($action === 'save_community_post' && $_SERVER['REQUEST_METHOD'] === 'POST') 
     $author = trim($input['author'] ?? ($authUser ? $authUser['name'] : 'Monodoxia Rezident'));
     $time_ago = trim($input['time'] ?? ($input['time_ago'] ?? 'İndicə'));
     $pinned = !empty($input['pinned']) ? 1 : 0;
+    $allow_comments = isset($input['allowComments']) ? ($input['allowComments'] ? 1 : 0) : (isset($input['allow_comments']) ? intval($input['allow_comments']) : 1);
     $likes = intval($input['likes'] ?? 0);
     $replies = intval($input['repliesCount'] ?? ($input['replies'] ?? 0));
     $author_role = trim($input['authorRole'] ?? ($input['author_role'] ?? ($authUser ? $authUser['role'] : 'Rezident')));
@@ -1823,8 +1830,8 @@ if ($action === 'save_community_post' && $_SERVER['REQUEST_METHOD'] === 'POST') 
     }
 
     $stmt = $pdo->prepare("
-        INSERT INTO mdx_community_posts (id, badge, title, snippet, content, author, author_role, author_avatar, time_ago, likes, replies, pinned, category, translations_json)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO mdx_community_posts (id, badge, title, snippet, content, author, author_role, author_avatar, time_ago, likes, replies, pinned, allow_comments, category, translations_json)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE
             badge = VALUES(badge),
             title = VALUES(title),
@@ -1837,12 +1844,13 @@ if ($action === 'save_community_post' && $_SERVER['REQUEST_METHOD'] === 'POST') 
             likes = VALUES(likes),
             replies = VALUES(replies),
             pinned = VALUES(pinned),
+            allow_comments = VALUES(allow_comments),
             category = VALUES(category),
             translations_json = VALUES(translations_json)
     ");
     $stmt->execute([
         $id, $badge, $title, $snippet, $content, $author, $author_role,
-        $author_avatar, $time_ago, $likes, $replies, $pinned, $category,
+        $author_avatar, $time_ago, $likes, $replies, $pinned, $allow_comments, $category,
         $translations_json
     ]);
 
@@ -2584,6 +2592,7 @@ if ($action === 'migrate' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         "ALTER TABLE mdx_community_posts ADD COLUMN author_avatar VARCHAR(255) DEFAULT NULL",
         "ALTER TABLE mdx_community_posts ADD COLUMN category VARCHAR(50) DEFAULT NULL",
         "ALTER TABLE mdx_community_posts ADD COLUMN translations_json LONGTEXT DEFAULT NULL",
+        "ALTER TABLE mdx_community_posts ADD COLUMN allow_comments TINYINT(1) DEFAULT 1",
         "ALTER TABLE mdx_categories ADD COLUMN translations_json LONGTEXT DEFAULT NULL",
         "ALTER TABLE mdx_club_tiers ADD COLUMN translations LONGTEXT DEFAULT NULL",
         "ALTER TABLE mdx_application_form_fields ADD COLUMN translations_json LONGTEXT DEFAULT NULL"

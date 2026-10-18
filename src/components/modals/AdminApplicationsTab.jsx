@@ -52,6 +52,8 @@ export default function AdminApplicationsTab() {
   const [attendanceInput, setAttendanceInput] = useState('');
   const [phoneInput, setPhoneInput] = useState('');
   const [userNoteInput, setUserNoteInput] = useState('');
+  const [pinnedInput, setPinnedInput] = useState(false);
+  const [allowCommentsInput, setAllowCommentsInput] = useState(true);
 
   // Form Field Builder State
   const [showAddFieldModal, setShowAddFieldModal] = useState(false);
@@ -103,29 +105,38 @@ export default function AdminApplicationsTab() {
     setAttendanceInput(app.attendanceStatus || 'Gözlənilir');
     setPhoneInput(app.userPhone || '');
     setUserNoteInput(app.userNote || '');
+    setPinnedInput(Boolean(app.isPinned ?? app.pinned ?? false));
+    setAllowCommentsInput(app.allowComments !== undefined ? Boolean(app.allowComments) : true);
   };
 
   const handleSaveAppDetails = () => {
     if (!selectedApp) return;
+    const isTopic = selectedApp.targetType === 'community' || selectedApp.targetType === 'forum';
     updateApplicationStatus(
       selectedApp.id,
       statusInput,
       adminNoteInput.trim(),
-      paymentInput,
-      attendanceInput,
+      isTopic ? 'Tələb olunmur' : paymentInput,
+      isTopic ? 'Tələb olunmur' : attendanceInput,
       {
         userPhone: phoneInput.trim(),
-        userNote: userNoteInput.trim()
+        userNote: userNoteInput.trim(),
+        isPinned: pinnedInput,
+        pinned: pinnedInput,
+        allowComments: allowCommentsInput
       }
     );
     setSelectedApp(prev => ({
       ...prev,
       status: statusInput,
       adminNote: adminNoteInput.trim(),
-      paymentStatus: paymentInput,
-      attendanceStatus: attendanceInput,
+      paymentStatus: isTopic ? 'Tələb olunmur' : paymentInput,
+      attendanceStatus: isTopic ? 'Tələb olunmur' : attendanceInput,
       userPhone: phoneInput.trim(),
-      userNote: userNoteInput.trim()
+      userNote: userNoteInput.trim(),
+      isPinned: pinnedInput,
+      pinned: pinnedInput,
+      allowComments: allowCommentsInput
     }));
   };
 
@@ -372,7 +383,7 @@ export default function AdminApplicationsTab() {
                     <th className="py-3 px-4">Proqram / Məzmun</th>
                     <th className="py-3 px-4">Məbləğ</th>
                     <th className="py-3 px-4">Status</th>
-                    <th className="py-3 px-4">Ödəniş / İştirak</th>
+                    <th className="py-3 px-4">Ödəniş / İştirak / Parametrlər</th>
                     <th className="py-3 px-4 text-right">Əməliyyatlar</th>
                   </tr>
                 </thead>
@@ -443,48 +454,96 @@ export default function AdminApplicationsTab() {
                           </td>
 
                           <td className="py-3.5 px-4 text-[11px]">
-                            <div className="flex items-center gap-1.5 mb-1">
-                              <span className="text-outline text-[10px]">Ödəniş:</span>
-                              <select
-                                value={app.paymentStatus || 'Gözlənilir'}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  updateApplicationStatus(app.id, app.status, app.adminNote, val, app.attendanceStatus);
-                                }}
-                                className={`text-[11px] font-bold px-2 py-0.5 rounded border border-outline-variant/60 bg-surface-bright focus:outline-none focus:border-secondary cursor-pointer ${
-                                  ['Ödənildi', 'Ödənilib'].includes(app.paymentStatus)
-                                    ? 'text-emerald-700 bg-emerald-50 dark:bg-emerald-950/30'
-                                    : (['Qaytarıldı', 'İmtina edildi'].includes(app.paymentStatus)
-                                        ? 'text-rose-700 bg-rose-50 dark:bg-rose-950/30'
-                                        : 'text-amber-700 bg-amber-50 dark:bg-amber-950/30')
-                                }`}
-                              >
-                                {PAYMENT_STATUSES.map(p => (
-                                  <option key={p} value={p}>{p}</option>
-                                ))}
-                              </select>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-outline text-[10px]">İştirak:</span>
-                              <select
-                                value={app.attendanceStatus || 'Gözlənilir'}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  updateApplicationStatus(app.id, app.status, app.adminNote, app.paymentStatus, val);
-                                }}
-                                className={`text-[11px] font-bold px-2 py-0.5 rounded border border-outline-variant/60 bg-surface-bright focus:outline-none focus:border-secondary cursor-pointer ${
-                                  ['İştirak edəcək', 'İştirak etdi'].includes(app.attendanceStatus)
-                                    ? 'text-emerald-700 bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300'
-                                    : (['İştirak etməyəcək', 'İştirak etmədi'].includes(app.attendanceStatus)
-                                        ? 'text-rose-700 bg-rose-50 dark:bg-rose-950/30 border-rose-300'
-                                        : 'text-amber-700 bg-amber-50 dark:bg-amber-950/30 border-amber-300')
-                                }`}
-                              >
-                                {ATTENDANCE_STATUSES.map(a => (
-                                  <option key={a} value={a}>{a}</option>
-                                ))}
-                              </select>
-                            </div>
+                            {app.targetType === 'community' || app.targetType === 'forum' ? (
+                              <div className="flex flex-col gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const nextPin = !(app.isPinned ?? app.pinned ?? false);
+                                    updateApplicationStatus(app.id, app.status, app.adminNote, 'Tələb olunmur', 'Tələb olunmur', {
+                                      isPinned: nextPin,
+                                      pinned: nextPin
+                                    });
+                                  }}
+                                  className={`inline-flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-semibold border transition-colors cursor-pointer w-fit ${
+                                    (app.isPinned ?? app.pinned)
+                                      ? 'bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950/40 dark:text-amber-200'
+                                      : 'bg-surface-container text-on-surface-variant border-outline-variant/60 hover:text-primary'
+                                  }`}
+                                >
+                                  <span className="material-symbols-outlined text-[13px]">
+                                    {(app.isPinned ?? app.pinned) ? 'push_pin' : 'keep_public'}
+                                  </span>
+                                  <span>{(app.isPinned ?? app.pinned) ? 'Önə Çıxarılıb' : 'Önə Çıxar'}</span>
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const currentComments = app.allowComments !== undefined ? Boolean(app.allowComments) : true;
+                                    const nextComments = !currentComments;
+                                    updateApplicationStatus(app.id, app.status, app.adminNote, 'Tələb olunmur', 'Tələb olunmur', {
+                                      allowComments: nextComments
+                                    });
+                                  }}
+                                  className={`inline-flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-semibold border transition-colors cursor-pointer w-fit ${
+                                    app.allowComments === false
+                                      ? 'bg-rose-100 text-rose-800 border-rose-300 dark:bg-rose-950/40 dark:text-rose-200'
+                                      : 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-200'
+                                  }`}
+                                >
+                                  <span className="material-symbols-outlined text-[13px]">
+                                    {app.allowComments === false ? 'comments_disabled' : 'chat'}
+                                  </span>
+                                  <span>{app.allowComments === false ? 'Rəylər Bağlı' : 'Rəylərə Açıq'}</span>
+                                </button>
+                              </div>
+                            ) : (
+                              <>
+                                <div className="flex items-center gap-1.5 mb-1">
+                                  <span className="text-outline text-[10px]">Ödəniş:</span>
+                                  <select
+                                    value={app.paymentStatus || 'Gözlənilir'}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      updateApplicationStatus(app.id, app.status, app.adminNote, val, app.attendanceStatus);
+                                    }}
+                                    className={`text-[11px] font-bold px-2 py-0.5 rounded border border-outline-variant/60 bg-surface-bright focus:outline-none focus:border-secondary cursor-pointer ${
+                                      ['Ödənildi', 'Ödənilib'].includes(app.paymentStatus)
+                                        ? 'text-emerald-700 bg-emerald-50 dark:bg-emerald-950/30'
+                                        : (['Qaytarıldı', 'İmtina edildi'].includes(app.paymentStatus)
+                                            ? 'text-rose-700 bg-rose-50 dark:bg-rose-950/30'
+                                            : 'text-amber-700 bg-amber-50 dark:bg-amber-950/30')
+                                    }`}
+                                  >
+                                    {PAYMENT_STATUSES.map(p => (
+                                      <option key={p} value={p}>{p}</option>
+                                    ))}
+                                  </select>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-outline text-[10px]">İştirak:</span>
+                                  <select
+                                    value={app.attendanceStatus || 'Gözlənilir'}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      updateApplicationStatus(app.id, app.status, app.adminNote, app.paymentStatus, val);
+                                    }}
+                                    className={`text-[11px] font-bold px-2 py-0.5 rounded border border-outline-variant/60 bg-surface-bright focus:outline-none focus:border-secondary cursor-pointer ${
+                                      ['İştirak edəcək', 'İştirak etdi'].includes(app.attendanceStatus)
+                                        ? 'text-emerald-700 bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300'
+                                        : (['İştirak etməyəcək', 'İştirak etmədi'].includes(app.attendanceStatus)
+                                            ? 'text-rose-700 bg-rose-50 dark:bg-rose-950/30 border-rose-300'
+                                            : 'text-amber-700 bg-amber-50 dark:bg-amber-950/30 border-amber-300')
+                                    }`}
+                                  >
+                                    {ATTENDANCE_STATUSES.map(a => (
+                                      <option key={a} value={a}>{a}</option>
+                                    ))}
+                                  </select>
+                                </div>
+                              </>
+                            )}
                           </td>
 
                           <td className="py-3.5 px-4 text-right">
@@ -492,7 +551,16 @@ export default function AdminApplicationsTab() {
                               {/* Quick Approve button */}
                               {app.status !== 'Təsdiqləndi' && (
                                 <button
-                                  onClick={() => updateApplicationStatus(app.id, 'Təsdiqləndi', 'Admin paneldən təsdiqləndi.', 'Ödənildi', 'İştirak edəcək')}
+                                  onClick={() => {
+                                    const isTopic = app.targetType === 'community' || app.targetType === 'forum';
+                                    updateApplicationStatus(
+                                      app.id,
+                                      'Təsdiqləndi',
+                                      'Admin paneldən təsdiqləndi.',
+                                      isTopic ? 'Tələb olunmur' : 'Ödənildi',
+                                      isTopic ? 'Tələb olunmur' : 'İştirak edəcək'
+                                    );
+                                  }}
                                   title="Təsdiqlə"
                                   className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 hover:bg-emerald-200 flex items-center justify-center transition-colors"
                                 >
@@ -756,31 +824,73 @@ export default function AdminApplicationsTab() {
                     </select>
                   </div>
 
-                  <div>
-                    <label className="block text-[11px] font-bold text-primary mb-1">Ödəniş Statusu</label>
-                    <select
-                      value={paymentInput}
-                      onChange={(e) => setPaymentInput(e.target.value)}
-                      className="w-full px-2.5 py-1.5 rounded border border-outline-variant bg-surface-bright text-xs font-semibold focus:outline-none focus:border-secondary"
-                    >
-                      {PAYMENT_STATUSES.map(p => (
-                        <option key={p} value={p}>{p}</option>
-                      ))}
-                    </select>
-                  </div>
+                  {selectedApp && (selectedApp.targetType === 'community' || selectedApp.targetType === 'forum') ? (
+                    <>
+                      <div>
+                        <label className="block text-[11px] font-bold text-primary mb-1">Önə Çıxarılma (Pin)</label>
+                        <button
+                          type="button"
+                          onClick={() => setPinnedInput(!pinnedInput)}
+                          className={`w-full px-2.5 py-1.5 rounded border text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+                            pinnedInput
+                              ? 'bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950/40 dark:text-amber-200'
+                              : 'bg-surface-bright text-on-surface-variant border-outline-variant hover:text-primary'
+                          }`}
+                        >
+                          <span className="material-symbols-outlined text-[15px]">
+                            {pinnedInput ? 'push_pin' : 'keep_public'}
+                          </span>
+                          <span>{pinnedInput ? '📌 Önə Çıxarılıb' : 'Önə Çıxarılmayıb'}</span>
+                        </button>
+                      </div>
 
-                  <div>
-                    <label className="block text-[11px] font-bold text-primary mb-1">İştirak Statusu</label>
-                    <select
-                      value={attendanceInput}
-                      onChange={(e) => setAttendanceInput(e.target.value)}
-                      className="w-full px-2.5 py-1.5 rounded border border-outline-variant bg-surface-bright text-xs font-semibold focus:outline-none focus:border-secondary"
-                    >
-                      {ATTENDANCE_STATUSES.map(a => (
-                        <option key={a} value={a}>{a}</option>
-                      ))}
-                    </select>
-                  </div>
+                      <div>
+                        <label className="block text-[11px] font-bold text-primary mb-1">Rəy / Komment İcazəsi</label>
+                        <button
+                          type="button"
+                          onClick={() => setAllowCommentsInput(!allowCommentsInput)}
+                          className={`w-full px-2.5 py-1.5 rounded border text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+                            !allowCommentsInput
+                              ? 'bg-rose-100 text-rose-800 border-rose-300 dark:bg-rose-950/40 dark:text-rose-200'
+                              : 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-200'
+                          }`}
+                        >
+                          <span className="material-symbols-outlined text-[15px]">
+                            {!allowCommentsInput ? 'comments_disabled' : 'chat'}
+                          </span>
+                          <span>{!allowCommentsInput ? '🚫 Şərhlər Bağlıdır' : '💬 Şərhlərə Açıqdır'}</span>
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div>
+                        <label className="block text-[11px] font-bold text-primary mb-1">Ödəniş Statusu</label>
+                        <select
+                          value={paymentInput}
+                          onChange={(e) => setPaymentInput(e.target.value)}
+                          className="w-full px-2.5 py-1.5 rounded border border-outline-variant bg-surface-bright text-xs font-semibold focus:outline-none focus:border-secondary"
+                        >
+                          {PAYMENT_STATUSES.map(p => (
+                            <option key={p} value={p}>{p}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-bold text-primary mb-1">İştirak Statusu</label>
+                        <select
+                          value={attendanceInput}
+                          onChange={(e) => setAttendanceInput(e.target.value)}
+                          className="w-full px-2.5 py-1.5 rounded border border-outline-variant bg-surface-bright text-xs font-semibold focus:outline-none focus:border-secondary"
+                        >
+                          {ATTENDANCE_STATUSES.map(a => (
+                            <option key={a} value={a}>{a}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 {/* Admin Note */}

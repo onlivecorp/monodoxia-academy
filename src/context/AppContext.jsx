@@ -653,6 +653,7 @@ export function AppProvider({ children }) {
               likes: Number(p.likes) || 0,
               repliesCount: Number(p.replies) || 0,
               pinned: Boolean(Number(p.pinned)),
+              allowComments: p.allow_comments !== undefined && p.allow_comments !== null ? Boolean(Number(p.allow_comments)) : (p.allowComments !== undefined ? Boolean(p.allowComments) : true),
               translations: typeof p.translations_json === 'string' ? JSON.parse(p.translations_json || '{}') : (p.translations_json || {})
             }));
             setCommunityTopics(mappedCommunity);
@@ -1749,6 +1750,8 @@ export function AppProvider({ children }) {
         const topicContent = updatedApp.userNote || updatedApp.formResponses?.fld_topic_content || '';
         const topicBadge = updatedApp.formResponses?.fld_badge || 'İcma Müzakirəsi';
         const topicAuthor = updatedApp.userName || 'Rezident';
+        const isPinned = Boolean(updatedApp.isPinned ?? updatedApp.pinned ?? false);
+        const allowComments = updatedApp.allowComments !== undefined ? Boolean(updatedApp.allowComments) : true;
 
         const approvedTopic = {
           id: topicId,
@@ -1763,13 +1766,16 @@ export function AppProvider({ children }) {
           authorRole: 'Rezident',
           likes: 1,
           repliesCount: 0,
-          pinned: false,
+          pinned: isPinned,
+          allowComments: allowComments,
           translations: {}
         };
 
         setCommunityTopics(prev => {
           if (prev.some(t => t.id === topicId)) {
-            return prev.map(t => t.id === topicId ? { ...t, ...approvedTopic } : t);
+            const next = prev.map(t => t.id === topicId ? { ...t, ...approvedTopic, pinned: isPinned, allowComments: allowComments } : t);
+            safeSetLocalStorage('monodoxia_admin_topics', next);
+            return next;
           }
           const next = [approvedTopic, ...prev];
           safeSetLocalStorage('monodoxia_admin_topics', next);
@@ -1809,6 +1815,8 @@ export function AppProvider({ children }) {
       user_name: updatedApp.userName,
       user_note: updatedApp.userNote,
       form_responses: updatedApp.formResponses,
+      is_pinned: updatedApp.isPinned ?? updatedApp.pinned ? 1 : 0,
+      allow_comments: updatedApp.allowComments !== false ? 1 : 0,
       notification_id: newNotif.id
     }).catch(err => {
       console.warn('API update_application_status sync failed:', err);

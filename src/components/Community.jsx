@@ -81,15 +81,28 @@ export default function Community() {
 
           {/* TOPICS LIST */}
           <div className="lg:col-span-7 space-y-4">
-            {communityTopics.map(topic => (
+            {[...communityTopics].sort((a, b) => {
+              const aPin = Boolean(a.pinned || (typeof a.badge === 'string' && a.badge.includes('📌')));
+              const bPin = Boolean(b.pinned || (typeof b.badge === 'string' && b.badge.includes('📌')));
+              if (aPin === bPin) return 0;
+              return aPin ? -1 : 1;
+            }).map(topic => (
               <div
                 key={topic.id}
                 className="bg-surface-container-lowest p-5 rounded border border-outline-variant/60 shadow-sm hover:border-secondary/50 transition-colors"
               >
                 <div className="flex items-center justify-between text-xs text-outline mb-2">
-                  <span className={topic.badgeClass || 'text-secondary font-semibold'}>
-                    {getLocalized(topic, 'badge', currentLang, defaultLang) || topic.badge || 'İcma Müzakirəsi'}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    {topic.pinned && (
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-600 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[12px]">push_pin</span>
+                        <span>Sabit</span>
+                      </span>
+                    )}
+                    <span className={topic.badgeClass || 'text-secondary font-semibold'}>
+                      {getLocalized(topic, 'badge', currentLang, defaultLang) || topic.badge || 'İcma Müzakirəsi'}
+                    </span>
+                  </div>
                   <span>{topic.time || topic.time_ago || 'İndicə'}</span>
                 </div>
                 <h4 className="font-headline-sm text-headline-sm text-primary mb-1">
