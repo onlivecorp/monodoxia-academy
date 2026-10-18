@@ -82,6 +82,8 @@ export default function AdminCommunityTab() {
       badge: editingTopic.badge,
       author: editingTopic.author,
       snippet: editingTopic.snippet,
+      content: editingTopic.snippet,
+      desc: editingTopic.snippet,
       translations: editingTopic.translations || {}
     });
     setEditingTopic(null);
@@ -154,6 +156,11 @@ export default function AdminCommunityTab() {
                   onChange={(e) => setEditingTopic({ ...editingTopic, badge: e.target.value })}
                   className="admin-select"
                 >
+                  {communityCategories.map(cat => (
+                    <option key={cat.key} value={cat.name}>
+                      {cat.name}
+                    </option>
+                  ))}
                   <option value="İcma Müzakirəsi">İcma Müzakirəsi</option>
                   <option value="Sual-Cavab">Sual-Cavab</option>
                   <option value="Təcrübə Bölüşümü">Təcrübə Bölüşümü</option>
@@ -415,7 +422,7 @@ export default function AdminCommunityTab() {
                   style={{ padding: '7px 11px', fontSize: '11px', color: '#c5a059' }}
                   title="Sabitlə və ya Sabitlənməni Qaldır"
                 >
-                  📌 Sabitlə
+                  {t.pinned || t.badge?.includes('Sabitlənmiş') ? '📌 Sabitləndi' : '📌 Sabitlə'}
                 </button>
                 <button
                   type="button"

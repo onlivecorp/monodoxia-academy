@@ -639,13 +639,14 @@ export function AppProvider({ children }) {
             safeSetLocalStorage('monodoxia_admin_events', mappedEvents);
           }
           if (data.community && data.community.length > 0) {
-            setCommunityTopics(data.community.map(p => ({
+            const mappedCommunity = data.community.map(p => ({
               id: p.id,
               badge: p.badge,
               badgeClass: p.badge_class || 'text-secondary font-semibold',
               title: p.title,
-              snippet: p.snippet || p.content,
-              content: p.content || p.snippet,
+              snippet: p.snippet || p.content || '',
+              content: p.content || p.snippet || '',
+              desc: p.snippet || p.content || '',
               author: p.author,
               authorRole: p.author_role || 'Rezident',
               time: p.time_ago || 'İndicə',
@@ -653,7 +654,9 @@ export function AppProvider({ children }) {
               repliesCount: Number(p.replies) || 0,
               pinned: Boolean(Number(p.pinned)),
               translations: typeof p.translations_json === 'string' ? JSON.parse(p.translations_json || '{}') : (p.translations_json || {})
-            })));
+            }));
+            setCommunityTopics(mappedCommunity);
+            safeSetLocalStorage('monodoxia_admin_topics', mappedCommunity);
           }
           if (Array.isArray(data.club_tiers)) {
             const mappedTiers = data.club_tiers.map(t => {
@@ -1361,30 +1364,56 @@ export function AppProvider({ children }) {
       title,
       snippet: content,
       content,
+      desc: content,
       author: author || (currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : "Rezident"),
       likes: 1,
       repliesCount: 0,
       translations: translations || {}
     };
-    setCommunityTopics(prev => [newT, ...prev]);
+    setCommunityTopics(prev => {
+      const next = [newT, ...prev];
+      safeSetLocalStorage('monodoxia_admin_topics', next);
+      return next;
+    });
     setNewTopicModalOpen(false);
     apiCall('save_community_post', newT);
     showToast('Mövzu uğurla dərc edildi.', 'success');
   };
 
   const deleteTopic = (topicId) => {
-    setCommunityTopics(prev => prev.filter(t => t.id !== topicId));
+    setCommunityTopics(prev => {
+      const next = prev.filter(t => t.id !== topicId);
+      safeSetLocalStorage('monodoxia_admin_topics', next);
+      return next;
+    });
     apiCall('delete_community_post', { id: topicId });
     showToast('Mövzu uğurla silindi', 'info');
   };
 
   const pinTopic = (topicId) => {
-    setCommunityTopics(prev => prev.map(t => {
-      if (t.id === topicId) {
-        return { ...t, badge: "📌 Sabitlənmiş Müzakirə" };
-      }
-      return t;
-    }));
+    let updatedItem = null;
+    setCommunityTopics(prev => {
+      const next = prev.map(t => {
+        if (t.id === topicId) {
+          const isCurrentlyPinned = Boolean(t.pinned || t.badge?.includes('Sabitlənmiş'));
+          const nextPinned = !isCurrentlyPinned;
+          let nextBadge = t.badge || 'İcma Müzakirəsi';
+          if (nextPinned) {
+            if (!nextBadge.includes('Sabitlənmiş')) nextBadge = '📌 Sabitlənmiş Müzakirə';
+          } else {
+            nextBadge = nextBadge.replace('📌 Sabitlənmiş Müzakirə', 'İcma Müzakirəsi').trim() || 'İcma Müzakirəsi';
+          }
+          updatedItem = { ...t, pinned: nextPinned, badge: nextBadge };
+          return updatedItem;
+        }
+        return t;
+      });
+      safeSetLocalStorage('monodoxia_admin_topics', next);
+      return next;
+    });
+    if (updatedItem) {
+      apiCall('save_community_post', updatedItem);
+    }
     showToast('Mövzu başlığa sabitləndi', 'success');
   };
 
@@ -2375,7 +2404,27 @@ export function AppProvider({ children }) {
   };
 
   const updateTopic = (id, updates) => {
-    setCommunityTopics(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
+    let updatedItem = null;
+    setCommunityTopics(prev => {
+      const next = prev.map(t => {
+        if (t.id === id) {
+          updatedItem = {
+            ...t,
+            ...updates,
+            snippet: updates.snippet ?? t.snippet ?? updates.content,
+            content: updates.content ?? updates.snippet ?? t.content,
+            desc: updates.snippet ?? updates.content ?? t.desc
+          };
+          return updatedItem;
+        }
+        return t;
+      });
+      safeSetLocalStorage('monodoxia_admin_topics', next);
+      return next;
+    });
+    if (updatedItem) {
+      apiCall('save_community_post', updatedItem);
+    }
     showToast('İcma mövzusu yeniləndi', 'success');
   };
 

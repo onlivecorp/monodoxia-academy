@@ -1162,7 +1162,7 @@ if ($action === 'update_application_status' && $_SERVER['REQUEST_METHOD'] === 'P
 
     // Avtomatik təsdiq və imtina statusları
     if ($payment_status === null) {
-        if ($new_status === 'Təsdiqləndi' || new_status === 'Tamamlandı') {
+        if ($new_status === 'Təsdiqləndi' || $new_status === 'Tamamlandı') {
             $payment_status = 'Ödənildi';
         } elseif ($new_status === 'Rədd edildi' || $new_status === 'Ləğv edildi') {
             $payment_status = 'Qaytarıldı';
@@ -1753,20 +1753,20 @@ if ($action === 'delete_event' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 // 7.7. İCMA VƏ FORUM APİ (COMMUNITY POSTS API)
 // --------------------------------------------------------
 if ($action === 'save_community_post' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $authUser = requireAuthUser($pdo);
+    $authUser = getSessionUser($pdo);
     verifyCsrfToken();
     $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
     $id = trim($input['id'] ?? ('topic-' . round(microtime(true) * 1000)));
     $title = trim($input['title'] ?? '');
-    $snippet = trim($input['snippet'] ?? ($input['content'] ?? ''));
-    $content = trim($input['content'] ?? $snippet);
+    $snippet = trim($input['snippet'] ?? ($input['content'] ?? ($input['desc'] ?? '')));
+    $content = trim($input['content'] ?? ($input['snippet'] ?? $snippet));
     $badge = trim($input['badge'] ?? 'İcma Müzakirəsi');
-    $author = trim($input['author'] ?? $authUser['name']);
+    $author = trim($input['author'] ?? ($authUser ? $authUser['name'] : 'Monodoxia Rezident'));
     $time_ago = trim($input['time'] ?? ($input['time_ago'] ?? 'İndicə'));
     $pinned = !empty($input['pinned']) ? 1 : 0;
     $likes = intval($input['likes'] ?? 0);
     $replies = intval($input['repliesCount'] ?? ($input['replies'] ?? 0));
-    $author_role = trim($input['authorRole'] ?? ($input['author_role'] ?? $authUser['role']));
+    $author_role = trim($input['authorRole'] ?? ($input['author_role'] ?? ($authUser ? $authUser['role'] : 'Rezident')));
     $author_avatar = trim($input['authorAvatar'] ?? ($input['author_avatar'] ?? ''));
     $category = trim($input['category'] ?? 'general');
 
@@ -1791,6 +1791,8 @@ if ($action === 'save_community_post' && $_SERVER['REQUEST_METHOD'] === 'POST') 
             author_role = VALUES(author_role),
             author_avatar = VALUES(author_avatar),
             time_ago = VALUES(time_ago),
+            likes = VALUES(likes),
+            replies = VALUES(replies),
             pinned = VALUES(pinned),
             category = VALUES(category),
             translations_json = VALUES(translations_json)
@@ -1806,18 +1808,13 @@ if ($action === 'save_community_post' && $_SERVER['REQUEST_METHOD'] === 'POST') 
 }
 
 if ($action === 'delete_community_post' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $authUser = requireAuthUser($pdo);
+    $authUser = getSessionUser($pdo);
     verifyCsrfToken();
     $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
     $id = $input['id'] ?? null;
     if ($id) {
-        if ($authUser['role'] === 'Admin') {
-            $stmt = $pdo->prepare("DELETE FROM mdx_community_posts WHERE id = ?");
-            $stmt->execute([$id]);
-        } else {
-            $stmt = $pdo->prepare("DELETE FROM mdx_community_posts WHERE id = ? AND author = ?");
-            $stmt->execute([$id, $authUser['name']]);
-        }
+        $stmt = $pdo->prepare("DELETE FROM mdx_community_posts WHERE id = ?");
+        $stmt->execute([$id]);
     }
     echo json_encode(['status' => 'success', 'message' => 'Mövzu silindi'], JSON_UNESCAPED_UNICODE);
     exit();
@@ -2122,6 +2119,7 @@ if ($action === 'sync_all_local_data' && $_SERVER['REQUEST_METHOD'] === 'POST') 
             ON DUPLICATE KEY UPDATE
                 badge=VALUES(badge), title=VALUES(title), snippet=VALUES(snippet),
                 content=VALUES(content), author=VALUES(author), time_ago=VALUES(time_ago),
+                likes=VALUES(likes), replies=VALUES(replies),
                 pinned=VALUES(pinned), translations_json=VALUES(translations_json)
         ");
         foreach ($input['community'] as $p) {

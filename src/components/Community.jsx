@@ -87,16 +87,16 @@ export default function Community() {
                 className="bg-surface-container-lowest p-5 rounded border border-outline-variant/60 shadow-sm hover:border-secondary/50 transition-colors"
               >
                 <div className="flex items-center justify-between text-xs text-outline mb-2">
-                  <span className={topic.badgeClass}>
-                    {getLocalized(topic, 'badge', currentLang, defaultLang)}
+                  <span className={topic.badgeClass || 'text-secondary font-semibold'}>
+                    {getLocalized(topic, 'badge', currentLang, defaultLang) || topic.badge || 'İcma Müzakirəsi'}
                   </span>
-                  <span>{topic.time}</span>
+                  <span>{topic.time || topic.time_ago || 'İndicə'}</span>
                 </div>
                 <h4 className="font-headline-sm text-headline-sm text-primary mb-1">
-                  "{getLocalized(topic, 'title', currentLang, defaultLang)}"
+                  "{getLocalized(topic, 'title', currentLang, defaultLang) || topic.title}"
                 </h4>
                 <p className="font-body-sm text-body-sm text-on-surface-variant mb-3">
-                  {getLocalized(topic, 'snippet', currentLang, defaultLang)}
+                  {getLocalized(topic, 'snippet', currentLang, defaultLang) || getLocalized(topic, 'desc', currentLang, defaultLang) || topic.snippet || topic.desc || topic.content}
                 </p>
                 <div className="flex items-center justify-between pt-2 border-t border-outline-variant/20 text-xs">
                   <span className="text-on-surface-variant font-medium">Müəllif: {topic.author}</span>

@@ -22,31 +22,40 @@ export default function CommunityPage() {
 
   const safeTopics = Array.isArray(communityTopics) ? communityTopics : [];
 
-  // Extract tags from topics
+  // Extract tags from topics (supports badges, categories, and tags)
   const allTags = Array.from(
     new Set(
       safeTopics.flatMap(t => {
         if (!t) return [];
-        if (Array.isArray(t.tags)) return t.tags;
-        if (typeof t.tag === 'string') return [t.tag];
-        return [];
+        const result = [];
+        if (Array.isArray(t.tags)) result.push(...t.tags);
+        if (typeof t.tag === 'string') result.push(t.tag);
+        if (typeof t.badge === 'string') result.push(t.badge.replace('📌 ', '').trim());
+        if (typeof t.category === 'string') result.push(t.category);
+        return result;
       }).filter(Boolean)
     )
   );
 
   const filteredTopics = safeTopics.filter(t => {
     if (!t) return false;
+    const cleanBadge = (t.badge || '').replace('📌 ', '').trim();
     const matchesTag = filterTag === 'all' ||
+      cleanBadge === filterTag ||
+      t.badge === filterTag ||
+      t.category === filterTag ||
       (Array.isArray(t.tags) && t.tags.includes(filterTag)) ||
       t.tag === filterTag;
 
     const title = getLocalized(t, 'title', currentLang, defaultLang) || t.title || '';
-    const desc = getLocalized(t, 'desc', currentLang, defaultLang) || t.desc || '';
+    const desc = getLocalized(t, 'snippet', currentLang, defaultLang) || getLocalized(t, 'desc', currentLang, defaultLang) || t.snippet || t.desc || t.content || '';
     const author = t.author || '';
+    const badge = t.badge || '';
 
     const matchesSearch = !searchQuery.trim() ||
       title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       desc.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      badge.toLowerCase().includes(searchQuery.toLowerCase()) ||
       author.toLowerCase().includes(searchQuery.toLowerCase());
 
     return matchesTag && matchesSearch;
@@ -167,7 +176,8 @@ export default function CommunityPage() {
               ) : (
                 filteredTopics.map((topic) => {
                   const title = getLocalized(topic, 'title', currentLang, defaultLang) || topic.title;
-                  const desc = getLocalized(topic, 'desc', currentLang, defaultLang) || topic.desc;
+                  const desc = getLocalized(topic, 'snippet', currentLang, defaultLang) || getLocalized(topic, 'desc', currentLang, defaultLang) || topic.snippet || topic.desc || topic.content || '';
+                  const badge = getLocalized(topic, 'badge', currentLang, defaultLang) || topic.badge || topic.category || topic.tag;
 
                   return (
                     <div
@@ -181,14 +191,14 @@ export default function CommunityPage() {
                             {topic.author?.charAt(0) || 'U'}
                           </div>
                           <div>
-                            <span className="font-bold text-xs text-primary block leading-tight">{topic.author}</span>
-                            <span className="text-[10px] text-outline block">{topic.date || 'Son zamanlar'}</span>
+                            <span className="font-bold text-xs text-primary block leading-tight">{topic.author || 'Rezident'}</span>
+                            <span className="text-[10px] text-outline block">{topic.time || topic.time_ago || topic.date || 'İndicə'}</span>
                           </div>
                         </div>
 
-                        {topic.tag && (
+                        {badge && (
                           <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-secondary/10 text-secondary uppercase tracking-wider">
-                            #{topic.tag}
+                            #{badge.replace('📌 ', '')}
                           </span>
                         )}
                       </div>
@@ -206,11 +216,11 @@ export default function CommunityPage() {
                         <div className="flex items-center gap-4">
                           <span className="flex items-center gap-1">
                             <span className="material-symbols-outlined text-[15px] text-secondary">forum</span>
-                            <span>{topic.commentsCount || 0} şərh</span>
+                            <span>{topic.repliesCount || topic.replies || topic.commentsCount || 0} şərh</span>
                           </span>
                           <span className="flex items-center gap-1">
-                            <span className="material-symbols-outlined text-[15px] text-outline">visibility</span>
-                            <span>{topic.views || 120} baxış</span>
+                            <span className="material-symbols-outlined text-[15px] text-outline">favorite</span>
+                            <span>{topic.likes || 0} bəyənmə</span>
                           </span>
                         </div>
 
