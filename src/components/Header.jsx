@@ -150,7 +150,7 @@ export default function Header() {
               </div>
               {/* Notifications Bell */}
               {(() => {
-                const unreadNotifs = (userNotifications || []).filter(n => n.userId === currentUser.id && !n.isRead).length;
+                const unreadNotifs = (userNotifications || []).filter(n => String(n.userId) === String(currentUser.id) && !n.isRead).length;
                 return (
                   <button
                     onClick={() => {

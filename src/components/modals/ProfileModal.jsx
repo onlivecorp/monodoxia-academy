@@ -22,6 +22,7 @@ export default function ProfileModal() {
     userNotifications,
     markNotificationRead,
     clearNotifications,
+    deleteNotification,
     updateCurrentUser,
     activeProfileTab,
     setActiveProfileTab,
@@ -73,8 +74,8 @@ export default function ProfileModal() {
 
   if (!profileModalOpen || !currentUser) return null;
 
-  const myApplications = (applicationsList || []).filter(a => a.userId === currentUser.id && !a.archived);
-  const myNotifications = (userNotifications || []).filter(n => n.userId === currentUser.id);
+  const myApplications = (applicationsList || []).filter(a => String(a.userId) === String(currentUser?.id) && !a.archived);
+  const myNotifications = (userNotifications || []).filter(n => String(n.userId) === String(currentUser?.id));
   const unreadCount = myNotifications.filter(n => !n.isRead).length;
 
   const fallbackFieldDict = {
@@ -898,21 +899,37 @@ export default function ProfileModal() {
                     return (
                       <div
                         key={notif.id}
+                        onClick={() => {
+                          if (!notif.isRead && markNotificationRead) markNotificationRead(notif.id);
+                        }}
                         className={`p-3.5 rounded-xl border text-xs flex items-start gap-3 transition-colors ${
                           notif.isRead
                             ? 'bg-surface-bright border-outline-variant/30 text-on-surface-variant'
-                            : 'bg-secondary/5 border-secondary/30 text-primary font-medium shadow-sm'
+                            : 'bg-secondary/5 border-secondary/30 text-primary font-medium shadow-sm cursor-pointer'
                         }`}
                       >
                         <span className={`material-symbols-outlined text-[20px] ${iconColor} mt-0.5 shrink-0`}>
                           {icon}
                         </span>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="font-bold text-primary">{notif.title}</span>
-                            <span className="text-[10px] text-outline">{notif.createdAt}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1 gap-2">
+                            <span className="font-bold text-primary truncate">{notif.title}</span>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className="text-[10px] text-outline">{notif.createdAt}</span>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (deleteNotification) deleteNotification(notif.id);
+                                  else clearNotifications(notif.id);
+                                }}
+                                className="text-outline hover:text-rose-600 transition-colors p-0.5 rounded hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                                title="Bildirişi sil"
+                              >
+                                <span className="material-symbols-outlined text-[14px]">close</span>
+                              </button>
+                            </div>
                           </div>
-                          <p className="text-xs text-on-surface-variant leading-relaxed">
+                          <p className="text-xs text-on-surface-variant leading-relaxed break-words">
                             {notif.message}
                           </p>
                         </div>

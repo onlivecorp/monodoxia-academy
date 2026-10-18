@@ -1118,12 +1118,13 @@ if ($action === 'submit_application' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Send initial notification
     try {
+        $notif_id = !empty($input['notification_id']) ? trim($input['notification_id']) : ('NOTIF-' . uniqid());
         $notifStmt = $pdo->prepare("
             INSERT INTO mdx_notifications (id, user_id, title, message, type, is_read, created_at)
             VALUES (?, ?, ?, ?, 'info', 0, NOW())
         ");
         $notifStmt->execute([
-            'NOTIF-' . uniqid(),
+            $notif_id,
             $user_id,
             'Müraciətiniz Qəbul Edildi',
             "\"{$target_title}\" üzrə müraciətiniz qeydə alındı. Administrator tərəfindən baxılır."
@@ -1229,12 +1230,14 @@ if ($action === 'update_application_status' && $_SERVER['REQUEST_METHOD'] === 'P
 
             $notifMsg = "Sizin \"{$app['target_title']}\" müraciətinizin statusu yeniləndi: {$new_status}.{$detailsText}";
 
+            $notif_id = !empty($input['notification_id']) ? trim($input['notification_id']) : ('NOTIF-' . uniqid());
             $notifStmt = $pdo->prepare("
                 INSERT INTO mdx_notifications (id, user_id, title, message, type, is_read, created_at)
                 VALUES (?, ?, ?, ?, ?, 0, NOW())
+                ON DUPLICATE KEY UPDATE title = VALUES(title), message = VALUES(message), type = VALUES(type)
             ");
             $notifStmt->execute([
-                'NOTIF-' . uniqid(),
+                $notif_id,
                 $app['user_id'],
                 "Müraciət Statusu: {$new_status}",
                 $notifMsg,
@@ -1421,6 +1424,34 @@ if ($action === 'mark_notification_read' && $_SERVER['REQUEST_METHOD'] === 'POST
     }
 
     echo json_encode(['status' => 'success', 'message' => 'Bildiriş oxunmuş kimi qeyd edildi'], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+if ($action === 'clear_notifications' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+    $user_id = trim($input['user_id'] ?? ($_SESSION['user_id'] ?? ''));
+    $id = trim($input['id'] ?? '');
+
+    if ($id && $id !== 'all') {
+        $stmt = $pdo->prepare("DELETE FROM mdx_notifications WHERE id = ?");
+        $stmt->execute([$id]);
+    } else if ($user_id) {
+        $stmt = $pdo->prepare("DELETE FROM mdx_notifications WHERE user_id = ?");
+        $stmt->execute([$user_id]);
+    }
+
+    echo json_encode(['status' => 'success', 'message' => 'Bildirişlər bazadan təmizləndi'], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+if ($action === 'delete_notification' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+    $id = trim($input['id'] ?? '');
+    if ($id) {
+        $stmt = $pdo->prepare("DELETE FROM mdx_notifications WHERE id = ?");
+        $stmt->execute([$id]);
+    }
+    echo json_encode(['status' => 'success', 'message' => 'Bildiriş silindi'], JSON_UNESCAPED_UNICODE);
     exit();
 }
 

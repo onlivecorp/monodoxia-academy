@@ -780,23 +780,18 @@ export function AppProvider({ children }) {
             setApplicationsList(mappedApps);
             safeSetLocalStorage('monodoxia_applications', mappedApps);
           }
-          if (Array.isArray(data.notifications) && data.notifications.length > 0) {
+          if (Array.isArray(data.notifications)) {
             const mappedNotifs = data.notifications.map(n => ({
-              id: n.id,
-              userId: n.user_id,
+              id: String(n.id),
+              userId: String(n.user_id),
               title: n.title,
               message: n.message,
               type: n.type || 'info',
               isRead: Boolean(Number(n.is_read)),
               createdAt: n.created_at ? n.created_at.replace('T', ' ').substring(0, 16) : ''
             }));
-            setUserNotifications(prev => {
-              const remoteIds = new Set(mappedNotifs.map(x => x.id));
-              const localUnsynced = prev.filter(x => !remoteIds.has(x.id));
-              const merged = [...mappedNotifs, ...localUnsynced];
-              safeSetLocalStorage('monodoxia_notifications', merged);
-              return merged;
-            });
+            setUserNotifications(mappedNotifs);
+            safeSetLocalStorage('monodoxia_notifications', mappedNotifs);
           }
           if (data.form_fields && data.form_fields.length > 0) {
             setFormFieldsList(data.form_fields.map(f => {
@@ -1052,10 +1047,10 @@ export function AppProvider({ children }) {
           });
         }
 
-        if (Array.isArray(data.notifications) && data.notifications.length > 0) {
+        if (Array.isArray(data.notifications)) {
           const remoteNotifs = data.notifications.map(n => ({
-            id: n.id,
-            userId: n.user_id,
+            id: String(n.id),
+            userId: String(n.user_id),
             title: n.title,
             message: n.message,
             type: n.type || 'info',
@@ -1063,13 +1058,8 @@ export function AppProvider({ children }) {
             createdAt: n.created_at ? n.created_at.replace('T', ' ').substring(0, 16) : ''
           }));
 
-          setUserNotifications(prev => {
-            const remoteIds = new Set(remoteNotifs.map(x => x.id));
-            const localOnly = prev.filter(x => !remoteIds.has(x.id));
-            const merged = [...remoteNotifs, ...localOnly];
-            safeSetLocalStorage('monodoxia_notifications', merged);
-            return merged;
-          });
+          setUserNotifications(remoteNotifs);
+          safeSetLocalStorage('monodoxia_notifications', remoteNotifs);
         }
       } catch (err) {}
     };
@@ -1501,7 +1491,11 @@ export function AppProvider({ children }) {
       isRead: false,
       createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16)
     };
-    setUserNotifications(prev => [newNotif, ...prev]);
+    setUserNotifications(prev => {
+      const next = [newNotif, ...prev];
+      safeSetLocalStorage('monodoxia_notifications', next);
+      return next;
+    });
 
     setApplicationModalOpen(false);
     showToast(`Müraciətiniz uğurla göndərildi: ${formData.targetTitle}`, 'success');
@@ -1519,7 +1513,8 @@ export function AppProvider({ children }) {
         target_title: newApp.targetTitle,
         price: newApp.price,
         form_responses: newApp.formResponses,
-        user_note: newApp.userNote
+        user_note: newApp.userNote,
+        notification_id: newNotif.id
       }).catch(() => {});
     } catch (e) {}
 
@@ -1657,7 +1652,8 @@ export function AppProvider({ children }) {
       user_phone: updatedApp.userPhone,
       user_name: updatedApp.userName,
       user_note: updatedApp.userNote,
-      form_responses: updatedApp.formResponses
+      form_responses: updatedApp.formResponses,
+      notification_id: newNotif.id
     }).catch(err => {
       console.warn('API update_application_status sync failed:', err);
     });
@@ -1753,16 +1749,41 @@ export function AppProvider({ children }) {
 
   // Notifications
   const markNotificationRead = (notifId) => {
+    setUserNotifications(prev => {
+      const updated = notifId === 'all'
+        ? prev.map(n => currentUser ? (String(n.userId) === String(currentUser.id) ? { ...n, isRead: true } : n) : { ...n, isRead: true })
+        : prev.map(n => String(n.id) === String(notifId) ? { ...n, isRead: true } : n);
+      safeSetLocalStorage('monodoxia_notifications', updated);
+      return updated;
+    });
+    apiCall('mark_notification_read', { id: notifId, user_id: currentUser?.id }).catch(() => {});
+  };
+
+  const clearNotifications = (notifId = 'all') => {
+    const userId = currentUser?.id;
     if (notifId === 'all') {
-      setUserNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+      setUserNotifications(prev => {
+        const remaining = userId ? prev.filter(n => String(n.userId) !== String(userId)) : [];
+        safeSetLocalStorage('monodoxia_notifications', remaining);
+        return remaining;
+      });
+      if (userId) {
+        apiCall('clear_notifications', { user_id: userId }).catch(() => {});
+      }
+      showToast('Bildirişlər təmizləndi', 'info');
     } else {
-      setUserNotifications(prev => prev.map(n => n.id === notifId ? { ...n, isRead: true } : n));
+      setUserNotifications(prev => {
+        const remaining = prev.filter(n => String(n.id) !== String(notifId));
+        safeSetLocalStorage('monodoxia_notifications', remaining);
+        return remaining;
+      });
+      apiCall('delete_notification', { id: notifId, user_id: userId }).catch(() => {});
+      showToast('Bildiriş silindi', 'info');
     }
   };
 
-  const clearNotifications = () => {
-    setUserNotifications(prev => prev.filter(n => n.userId !== currentUser?.id));
-    showToast('Bildirişlər təmizləndi', 'info');
+  const deleteNotification = (notifId) => {
+    clearNotifications(notifId);
   };
 
   const updateCurrentUser = (updates) => {
@@ -2737,6 +2758,7 @@ export function AppProvider({ children }) {
       deleteFormField,
       markNotificationRead,
       clearNotifications,
+      deleteNotification,
       updateCurrentUser,
       // Admin Operations
       updateUser, addUser, deleteUser,
