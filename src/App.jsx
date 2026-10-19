@@ -44,6 +44,20 @@ function AppContent() {
   // When maintenance is active, show MaintenanceScreen unless an admin explicitly bypassed
   const isMaintenance = isMaintenanceModeActive && (!isAdminUser || !adminBypass);
 
+  // Ensure all hooks run unconditionally before any conditional return
+  useEffect(() => {
+    const titles = {
+      home: platformSettings?.siteTitle ? `${platformSettings.siteTitle} — ${platformSettings.subtitle || 'Fərdi İnkişaf və Psixologiya Mərkəzi'}` : 'Monodoxia Academy',
+      akademiya: 'Akademiya və Kurslar | Monodoxia Academy',
+      koucinq: 'Fərdi Kouçinq | Monodoxia Academy',
+      club: 'Coaching Club | Monodoxia Academy',
+      tedbirler: 'Tədbirlər və Masterklaslar | Monodoxia Academy',
+      icma: 'İcma və Forum | Monodoxia Academy',
+      haqqimizda: 'Haqqımızda | Monodoxia Academy'
+    };
+    document.title = titles[currentPage] || platformSettings?.siteTitle || 'Monodoxia Academy';
+  }, [currentPage, platformSettings?.siteTitle, platformSettings?.subtitle]);
+
   if (isMaintenance) {
     return (
       <div className="bg-[#fbf9f5] text-[#1e293b] min-h-screen flex flex-col justify-between">
@@ -97,19 +111,6 @@ function AppContent() {
       </div>
     );
   }
-
-  useEffect(() => {
-    const titles = {
-      home: platformSettings?.siteTitle ? `${platformSettings.siteTitle} — ${platformSettings.subtitle || 'Fərdi İnkişaf və Psixologiya Mərkəzi'}` : 'Monodoxia Academy',
-      akademiya: 'Akademiya və Kurslar | Monodoxia Academy',
-      koucinq: 'Fərdi Kouçinq | Monodoxia Academy',
-      club: 'Coaching Club | Monodoxia Academy',
-      tedbirler: 'Tədbirlər və Masterklaslar | Monodoxia Academy',
-      icma: 'İcma və Forum | Monodoxia Academy',
-      haqqimizda: 'Haqqımızda | Monodoxia Academy'
-    };
-    document.title = titles[currentPage] || platformSettings?.siteTitle || 'Monodoxia Academy';
-  }, [currentPage, platformSettings?.siteTitle, platformSettings?.subtitle]);
 
   const renderCurrentPage = () => {
     switch (currentPage) {

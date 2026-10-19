@@ -28,23 +28,24 @@ export default function Hero() {
 
   // Dynamic rotating titles for high-end kinetic headline
   const rotatingTitles = useMemo(() => {
+    const defaultTitle = typeof title3 === 'string' && title3.trim() ? title3 : 'Həyatını dəyiş.';
     const listByLang = {
       az: [
-        title3,
+        defaultTitle,
         'Potensialını kəşf et.',
         'Daxili gücünü tap.',
         'Şüurlu gələcək qur.',
         'Öz zirvənə çat.'
       ],
       en: [
-        title3,
+        defaultTitle,
         'Unlock your potential.',
         'Awaken inner clarity.',
         'Architect your future.',
         'Master your mind.'
       ],
       ru: [
-        title3,
+        defaultTitle,
         'Раскрой свой потенциал.',
         'Обрети внутреннюю силу.',
         'Строй осознанное будущее.',
@@ -54,7 +55,7 @@ export default function Hero() {
     const langKey = currentLang && listByLang[currentLang] ? currentLang : 'az';
     // Remove duplicates if title3 matches any preset
     const unique = Array.from(new Set(listByLang[langKey].filter(Boolean)));
-    return unique.length > 0 ? unique : [title3];
+    return unique.length > 0 ? unique : [defaultTitle];
   }, [title3, currentLang]);
 
   const [activeTitleIdx, setActiveTitleIdx] = useState(0);
@@ -123,7 +124,12 @@ export default function Hero() {
     }
   };
 
-  const title1Words = useMemo(() => (title1 ? title1.split(' ') : []), [title1]);
+  const title1Words = useMemo(() => {
+    if (typeof title1 === 'string' && title1.trim()) {
+      return title1.split(' ').filter(Boolean);
+    }
+    return ['Özünü', 'tanı.'];
+  }, [title1]);
 
   return (
     <section className="relative overflow-hidden pt-12 pb-20 md:pt-16 md:pb-28 border-b border-[#e2d9c8]/70 bg-[#fbf9f5]">
