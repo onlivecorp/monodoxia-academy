@@ -42,54 +42,40 @@ export default function AcademyPage() {
     return matchesFilter && matchesSearch;
   });
 
-  const badgeText = getLocalized(academy, 'badge', currentLang, defaultLang) || '';
-  const titleText = getLocalized(academy, 'title', currentLang, defaultLang) || '';
-  const descText = getLocalized(academy, 'desc', currentLang, defaultLang) || '';
-
   return (
     <div className="min-h-screen bg-[#faf8f5] text-[#071326]">
       {/* Editorial Luxury Page Hero */}
-      {(titleText || badgeText) && (
-        <PageHero
-          badge={badgeText}
-          title={titleText}
-          description={descText}
-          breadcrumbs={[{ label: 'Akademiya' }]}
-          adminCmsBlock="academy"
-        >
-          {/* Quick Academy Badges */}
-          {(academy.heroBadge1Text || academy.heroBadge2Text || academy.heroBadge3Text) && (
-            <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-8 pt-6 border-t border-[#c5a059]/20">
-              {academy.heroBadge1Text && (
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
-                  <span className="material-symbols-outlined text-[#775a19] text-[18px]">
-                    {academy.heroBadge1Icon || 'verified'}
-                  </span>
-                  <span className="font-medium">{getLocalized(academy, 'heroBadge1Text', currentLang, defaultLang)}</span>
-                </div>
-              )}
+      <PageHero
+        badge={getLocalized(academy, 'badge', currentLang, defaultLang) || 'Akademik Tədris'}
+        title={getLocalized(academy, 'title', currentLang, defaultLang) || 'Kurslar və Sertifikasiya Proqramları'}
+        description={getLocalized(academy, 'desc', currentLang, defaultLang) || 'Akademik psixologiya, nevrobiologiya və fərdi inkişaf metodologiyaları əsasında hazırlanmış lisenziyalı proqramlar.'}
+        breadcrumbs={[{ label: 'Akademiya' }]}
+        adminCmsBlock="academy"
+      >
+        {/* Quick Academy Badges */}
+        <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-8 pt-6 border-t border-[#c5a059]/20">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
+            <span className="material-symbols-outlined text-[#775a19] text-[18px]">
+              {academy.heroBadge1Icon || 'verified'}
+            </span>
+            <span className="font-medium">{getLocalized(academy, 'heroBadge1Text', currentLang, defaultLang) || 'Beynəlxalq QR Sertifikat'}</span>
+          </div>
 
-              {academy.heroBadge2Text && (
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
-                  <span className="material-symbols-outlined text-[#775a19] text-[18px]">
-                    {academy.heroBadge2Icon || 'psychology'}
-                  </span>
-                  <span className="font-medium">{getLocalized(academy, 'heroBadge2Text', currentLang, defaultLang)}</span>
-                </div>
-              )}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
+            <span className="material-symbols-outlined text-[#775a19] text-[18px]">
+              {academy.heroBadge2Icon || 'psychology'}
+            </span>
+            <span className="font-medium">{getLocalized(academy, 'heroBadge2Text', currentLang, defaultLang) || 'ICF & PhD Mentorlar'}</span>
+          </div>
 
-              {academy.heroBadge3Text && (
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
-                  <span className="material-symbols-outlined text-[#775a19] text-[18px]">
-                    {academy.heroBadge3Icon || 'laptop_chromebook'}
-                  </span>
-                  <span className="font-medium">{getLocalized(academy, 'heroBadge3Text', currentLang, defaultLang)}</span>
-                </div>
-              )}
-            </div>
-          )}
-        </PageHero>
-      )}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
+            <span className="material-symbols-outlined text-[#775a19] text-[18px]">
+              {academy.heroBadge3Icon || 'laptop_chromebook'}
+            </span>
+            <span className="font-medium">{getLocalized(academy, 'heroBadge3Text', currentLang, defaultLang) || 'Ömürlük Giriş və LMS Arxiv'}</span>
+          </div>
+        </div>
+      </PageHero>
 
       {/* Main Content Area */}
       <section className="py-14 sm:py-20 relative overflow-hidden">

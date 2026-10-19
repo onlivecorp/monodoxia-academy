@@ -19,53 +19,39 @@ export default function ClubPage() {
   const club = homeContent?.club || {};
   const [billingCycle, setBillingCycle] = useState('monthly'); // 'monthly' | 'annual'
 
-  const badgeText = getLocalized(club, 'badge', currentLang, defaultLang) || '';
-  const titleText = getLocalized(club, 'title', currentLang, defaultLang) || '';
-  const descText = getLocalized(club, 'desc', currentLang, defaultLang) || '';
-
   return (
     <div className="min-h-screen bg-[#faf8f5] text-[#071326]">
       {/* Editorial Page Hero */}
-      {(titleText || badgeText) && (
-        <PageHero
-          badge={badgeText}
-          title={titleText}
-          description={descText}
-          breadcrumbs={[{ label: 'Coaching Club' }]}
-          adminCmsBlock="club"
-        >
-          {(club.heroBadge1Text || club.heroBadge2Text || club.heroBadge3Text) && (
-            <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-8 pt-6 border-t border-[#c5a059]/20">
-              {club.heroBadge1Text && (
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
-                  <span className="material-symbols-outlined text-[#775a19] text-[18px]">
-                    {club.heroBadge1Icon || 'verified'}
-                  </span>
-                  <span className="font-medium">{getLocalized(club, 'heroBadge1Text', currentLang, defaultLang)}</span>
-                </div>
-              )}
+      <PageHero
+        badge={getLocalized(club, 'badge', currentLang, defaultLang) || 'Qapalı İcma Üzvliyi'}
+        title={getLocalized(club, 'title', currentLang, defaultLang) || 'Monodoxia Coaching Club'}
+        description={getLocalized(club, 'desc', currentLang, defaultLang) || 'Davamlı inkişaf fərdi bir hadisə deyil, doğru mühitin bəhrəsidir. Dərin suallar verən seçkin şəxslərin qapalı ekosistemi.'}
+        breadcrumbs={[{ label: 'Coaching Club' }]}
+        adminCmsBlock="club"
+      >
+        <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-8 pt-6 border-t border-[#c5a059]/20">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
+            <span className="material-symbols-outlined text-[#775a19] text-[18px]">
+              {club.heroBadge1Icon || 'verified'}
+            </span>
+            <span className="font-medium">{getLocalized(club, 'heroBadge1Text', currentLang, defaultLang) || 'Məhdud Sayda Üzvlük'}</span>
+          </div>
 
-              {club.heroBadge2Text && (
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
-                  <span className="material-symbols-outlined text-[#775a19] text-[18px]">
-                    {club.heroBadge2Icon || 'groups'}
-                  </span>
-                  <span className="font-medium">{getLocalized(club, 'heroBadge2Text', currentLang, defaultLang)}</span>
-                </div>
-              )}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
+            <span className="material-symbols-outlined text-[#775a19] text-[18px]">
+              {club.heroBadge2Icon || 'groups'}
+            </span>
+            <span className="font-medium">{getLocalized(club, 'heroBadge2Text', currentLang, defaultLang) || 'Həftəlik Mastermind'}</span>
+          </div>
 
-              {club.heroBadge3Text && (
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
-                  <span className="material-symbols-outlined text-[#775a19] text-[18px]">
-                    {club.heroBadge3Icon || 'spa'}
-                  </span>
-                  <span className="font-medium">{getLocalized(club, 'heroBadge3Text', currentLang, defaultLang)}</span>
-                </div>
-              )}
-            </div>
-          )}
-        </PageHero>
-      )}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
+            <span className="material-symbols-outlined text-[#775a19] text-[18px]">
+              {club.heroBadge3Icon || 'spa'}
+            </span>
+            <span className="font-medium">{getLocalized(club, 'heroBadge3Text', currentLang, defaultLang) || '100+ Saatlıq Meditasiya Arxivi'}</span>
+          </div>
+        </div>
+      </PageHero>
 
       {/* Main Section */}
       <section className="py-14 sm:py-20 relative overflow-hidden">

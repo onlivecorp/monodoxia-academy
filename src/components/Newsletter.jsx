@@ -10,14 +10,6 @@ export default function Newsletter() {
   const [email, setEmail] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
 
-  const badgeText = getLocalized(newsletter, 'badge', currentLang, defaultLang) || '';
-  const titleText = getLocalized(newsletter, 'title', currentLang, defaultLang) || '';
-  const descText = getLocalized(newsletter, 'desc', currentLang, defaultLang) || '';
-
-  if (!titleText && !descText) {
-    return null;
-  }
-
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!email) return;
@@ -61,28 +53,40 @@ export default function Newsletter() {
           <div className="relative z-10 max-w-2xl mx-auto text-center space-y-6">
             
             {/* Pill Badge */}
-            {badgeText && (
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#c5a059]/15 border border-[#c5a059]/40 backdrop-blur-md anim-badge">
-                <span className="material-symbols-outlined text-[15px] text-[#e5c57d]">auto_awesome</span>
-                <span className="text-[11px] sm:text-xs font-semibold tracking-[0.25em] text-[#e5c57d] uppercase">
-                  {badgeText}
-                </span>
-              </div>
-            )}
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#c5a059]/15 border border-[#c5a059]/40 backdrop-blur-md anim-badge">
+              <span className="material-symbols-outlined text-[15px] text-[#e5c57d]">auto_awesome</span>
+              <span className="text-[11px] sm:text-xs font-semibold tracking-[0.25em] text-[#e5c57d] uppercase">
+                {getLocalized(newsletter, 'badge', currentLang, defaultLang) || t('newsletter_badge')}
+              </span>
+            </div>
 
             {/* Prominent Serif Headline */}
-            {titleText && (
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[2.65rem] font-serif font-medium text-white tracking-tight leading-[1.2] anim-newsletter-title">
-                {titleText}
-              </h2>
-            )}
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[2.65rem] font-serif font-medium text-white tracking-tight leading-[1.2] anim-newsletter-title">
+              {getLocalized(newsletter, 'title', currentLang, defaultLang) || t('newsletter_title')}
+            </h2>
 
             {/* Description */}
-            {descText && (
-              <p className="text-sm sm:text-base md:text-lg text-[#cbd5e1] font-light leading-relaxed max-w-xl mx-auto anim-subtext">
-                {descText}
-              </p>
-            )}
+            <p className="text-sm sm:text-base md:text-lg text-[#cbd5e1] font-light leading-relaxed max-w-xl mx-auto anim-subtext">
+              {getLocalized(newsletter, 'desc', currentLang, defaultLang) || t('newsletter_desc')}
+            </p>
+
+            {/* Quick Benefits / Value Props */}
+            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 pt-2 text-xs sm:text-sm text-[#94a3b8]">
+              <div className="flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[16px] text-[#c5a059]">verified</span>
+                <span>Hər bazar günü</span>
+              </div>
+              <div className="w-1 h-1 rounded-full bg-white/20 hidden sm:block" />
+              <div className="flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[16px] text-[#c5a059]">psychology</span>
+                <span>Elmi & fəlsəfi qeydlər</span>
+              </div>
+              <div className="w-1 h-1 rounded-full bg-white/20 hidden sm:block" />
+              <div className="flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[16px] text-[#c5a059]">lock</span>
+                <span>Spam yoxdur</span>
+              </div>
+            </div>
 
             {/* Form */}
             {isSubscribed ? (
@@ -102,7 +106,7 @@ export default function Newsletter() {
                     <span className="material-symbols-outlined text-[20px] text-[#c5a059]/70 mr-3 shrink-0">mail</span>
                     <input
                       className="w-full bg-transparent text-white placeholder-white/45 text-sm sm:text-base outline-none focus:outline-none"
-                      placeholder={getLocalized(newsletter, 'placeholder', currentLang, defaultLang) || 'Email ünvanınız...'}
+                      placeholder={getLocalized(newsletter, 'placeholder', currentLang, defaultLang) || t('newsletter_placeholder')}
                       required
                       type="email"
                       value={email}
@@ -113,7 +117,7 @@ export default function Newsletter() {
                     className="bg-gradient-to-r from-[#c5a059] via-[#e5c57d] to-[#b38f46] text-[#071326] font-semibold text-xs sm:text-sm tracking-wider uppercase px-7 py-3.5 rounded-xl shadow-lg shadow-[#c5a059]/20 hover:shadow-xl hover:shadow-[#c5a059]/35 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 group shrink-0"
                     type="submit"
                   >
-                    <span>{getLocalized(newsletter, 'btnText', currentLang, defaultLang) || 'Abunə Ol'}</span>
+                    <span>{getLocalized(newsletter, 'btnText', currentLang, defaultLang) || t('newsletter_btn')}</span>
                     <span className="material-symbols-outlined text-[17px] group-hover:translate-x-0.5 transition-transform">send</span>
                   </button>
                 </div>
@@ -121,12 +125,10 @@ export default function Newsletter() {
             )}
 
             {/* Privacy Disclaimer */}
-            {getLocalized(newsletter, 'disclaimer', currentLang, defaultLang) && (
-              <div className="flex items-center justify-center gap-1.5 text-xs text-[#94a3b8] pt-1">
-                <span className="material-symbols-outlined text-[14px] text-[#c5a059]/60">shield</span>
-                <span>{getLocalized(newsletter, 'disclaimer', currentLang, defaultLang)}</span>
-              </div>
-            )}
+            <div className="flex items-center justify-center gap-1.5 text-xs text-[#94a3b8] pt-1">
+              <span className="material-symbols-outlined text-[14px] text-[#c5a059]/60">shield</span>
+              <span>{getLocalized(newsletter, 'disclaimer', currentLang, defaultLang) || 'Heç bir spam yoxdur. İstənilən vaxt abunəlikdən çıxa bilərsiniz.'}</span>
+            </div>
 
           </div>
         </div>
@@ -134,3 +136,6 @@ export default function Newsletter() {
     </section>
   );
 }
+
+
+

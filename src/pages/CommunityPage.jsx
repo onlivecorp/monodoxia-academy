@@ -74,52 +74,42 @@ export default function CommunityPage() {
     }
   };
 
-  const badgeText = getLocalized(community, 'badge', currentLang, defaultLang) || '';
-  const titleText = getLocalized(community, 'title', currentLang, defaultLang) || '';
-  const descText = getLocalized(community, 'desc', currentLang, defaultLang) || '';
-
   return (
     <div className="min-h-screen bg-[#faf8f5] text-[#071326]">
       {/* Editorial Page Hero */}
-      {(titleText || badgeText) && (
-        <PageHero
-          badge={badgeText}
-          title={titleText}
-          description={descText}
-          breadcrumbs={[{ label: 'İcma' }]}
-          adminCmsBlock="community"
-        >
-          <div className="flex flex-wrap items-center justify-between gap-4 mt-8 pt-6 border-t border-[#c5a059]/20">
-            <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-              {community.heroBadge1Text && (
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
-                  <span className="material-symbols-outlined text-[#775a19] text-[18px]">
-                    {community.heroBadge1Icon || 'verified_user'}
-                  </span>
-                  <span className="font-medium">{getLocalized(community, 'heroBadge1Text', currentLang, defaultLang)}</span>
-                </div>
-              )}
-
-              {community.heroBadge2Text && (
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
-                  <span className="material-symbols-outlined text-[#775a19] text-[18px]">
-                    {community.heroBadge2Icon || 'psychology'}
-                  </span>
-                  <span className="font-medium">{getLocalized(community, 'heroBadge2Text', currentLang, defaultLang)}</span>
-                </div>
-              )}
+      <PageHero
+        badge={getLocalized(community, 'badge', currentLang, defaultLang) || 'İntellektual Şəbəkə'}
+        title={getLocalized(community, 'title', currentLang, defaultLang) || 'Düşüncə və Təcrübə Mübadiləsi'}
+        description={getLocalized(community, 'desc', currentLang, defaultLang) || 'Akademiyamızın tələbələri və klub rezidentləri üçün gündəlik fəlsəfi dialoq, dərin suallar və daxili kəşflər sahəsi.'}
+        breadcrumbs={[{ label: 'İcma' }]}
+        adminCmsBlock="community"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-4 mt-8 pt-6 border-t border-[#c5a059]/20">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
+              <span className="material-symbols-outlined text-[#775a19] text-[18px]">
+                {community.heroBadge1Icon || 'verified_user'}
+              </span>
+              <span className="font-medium">{getLocalized(community, 'heroBadge1Text', currentLang, defaultLang) || 'Konfidensiallıq və Qarşılıqlı Hörmət'}</span>
             </div>
 
-            <button
-              onClick={handleCreateTopic}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#071326] to-[#0c2242] text-white hover:text-[#e5c57d] font-semibold text-xs tracking-wider uppercase transition-all flex items-center gap-2 cursor-pointer shadow-md hover:shadow-lg group/btn"
-            >
-              <span className="material-symbols-outlined text-[17px] text-[#e5c57d] group-hover/btn:scale-110 transition-transform">add_circle</span>
-              <span>{getLocalized(community, 'newTopicBtnText', currentLang, defaultLang) || 'Yeni Mövzu'}</span>
-            </button>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
+              <span className="material-symbols-outlined text-[#775a19] text-[18px]">
+                {community.heroBadge2Icon || 'psychology'}
+              </span>
+              <span className="font-medium">{getLocalized(community, 'heroBadge2Text', currentLang, defaultLang) || 'Moderasiya Olunan Dərin Dialoq'}</span>
+            </div>
           </div>
-        </PageHero>
-      )}
+
+          <button
+            onClick={handleCreateTopic}
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#071326] to-[#0c2242] text-white hover:text-[#e5c57d] font-semibold text-xs tracking-wider uppercase transition-all flex items-center gap-2 cursor-pointer shadow-md hover:shadow-lg group/btn"
+          >
+            <span className="material-symbols-outlined text-[17px] text-[#e5c57d] group-hover/btn:scale-110 transition-transform">add_circle</span>
+            <span>{getLocalized(community, 'newTopicBtnText', currentLang, defaultLang) || 'Yeni Mövzu Başlat'}</span>
+          </button>
+        </div>
+      </PageHero>
 
       {/* Main Section */}
       <section className="py-14 sm:py-20 relative overflow-hidden">
@@ -291,77 +281,63 @@ export default function CommunityPage() {
             <div className="space-y-8">
               
               {/* Community Rules Card */}
-              {community.rulesTitle && (
-                <div className="bg-white rounded-3xl border border-[#c5a059]/30 p-7 sm:p-8 shadow-[0_10px_30px_-10px_rgba(7,19,38,0.05)]">
-                  <div className="flex items-center gap-2.5 mb-5 text-[#071326]">
-                    <span className="material-symbols-outlined text-[#775a19] text-2xl">
-                      {community.rulesIcon || 'shield'}
+              <div className="bg-white rounded-3xl border border-[#c5a059]/30 p-7 sm:p-8 shadow-[0_10px_30px_-10px_rgba(7,19,38,0.05)]">
+                <div className="flex items-center gap-2.5 mb-5 text-[#071326]">
+                  <span className="material-symbols-outlined text-[#775a19] text-2xl">
+                    {community.rulesIcon || 'shield'}
+                  </span>
+                  <h4 className="font-serif text-lg font-medium">
+                    {getLocalized(community, 'rulesTitle', currentLang, defaultLang) || 'İcma Etikası və Qaydaları'}
+                  </h4>
+                </div>
+                <div className="space-y-4 text-xs sm:text-sm text-[#475569] leading-relaxed font-light">
+                  <div className="flex items-start gap-2.5">
+                    <span className="material-symbols-outlined text-[#775a19] text-[18px] shrink-0 mt-0.5">check_circle</span>
+                    <span>
+                      <strong className="text-[#071326] font-semibold">{getLocalized(community, 'rule1Title', currentLang, defaultLang) || 'Məxfilik prinsipi:'} </strong>
+                      {getLocalized(community, 'rule1Desc', currentLang, defaultLang) || 'Müzakirə olunan şəxsi təcrübələr və etiraflar icmadan kənara çıxarılmır.'}
                     </span>
-                    <h4 className="font-serif text-lg font-medium">
-                      {getLocalized(community, 'rulesTitle', currentLang, defaultLang)}
-                    </h4>
                   </div>
-                  <div className="space-y-4 text-xs sm:text-sm text-[#475569] leading-relaxed font-light">
-                    {community.rule1Title && (
-                      <div className="flex items-start gap-2.5">
-                        <span className="material-symbols-outlined text-[#775a19] text-[18px] shrink-0 mt-0.5">check_circle</span>
-                        <span>
-                          <strong className="text-[#071326] font-semibold">{getLocalized(community, 'rule1Title', currentLang, defaultLang)}: </strong>
-                          {getLocalized(community, 'rule1Desc', currentLang, defaultLang)}
-                        </span>
-                      </div>
-                    )}
-                    {community.rule2Title && (
-                      <div className="flex items-start gap-2.5">
-                        <span className="material-symbols-outlined text-[#775a19] text-[18px] shrink-0 mt-0.5">check_circle</span>
-                        <span>
-                          <strong className="text-[#071326] font-semibold">{getLocalized(community, 'rule2Title', currentLang, defaultLang)}: </strong>
-                          {getLocalized(community, 'rule2Desc', currentLang, defaultLang)}
-                        </span>
-                      </div>
-                    )}
-                    {community.rule3Title && (
-                      <div className="flex items-start gap-2.5">
-                        <span className="material-symbols-outlined text-[#775a19] text-[18px] shrink-0 mt-0.5">check_circle</span>
-                        <span>
-                          <strong className="text-[#071326] font-semibold">{getLocalized(community, 'rule3Title', currentLang, defaultLang)}: </strong>
-                          {getLocalized(community, 'rule3Desc', currentLang, defaultLang)}
-                        </span>
-                      </div>
-                    )}
+                  <div className="flex items-start gap-2.5">
+                    <span className="material-symbols-outlined text-[#775a19] text-[18px] shrink-0 mt-0.5">check_circle</span>
+                    <span>
+                      <strong className="text-[#071326] font-semibold">{getLocalized(community, 'rule2Title', currentLang, defaultLang) || 'Konstruktiv yanaşma:'} </strong>
+                      {getLocalized(community, 'rule2Desc', currentLang, defaultLang) || 'Qınaq və mühakimə yoxdur; hər fikir təkamül nöqteyi-nəzərindən dinlənilir.'}
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <span className="material-symbols-outlined text-[#775a19] text-[18px] shrink-0 mt-0.5">check_circle</span>
+                    <span>
+                      <strong className="text-[#071326] font-semibold">{getLocalized(community, 'rule3Title', currentLang, defaultLang) || 'Səthilikdən uzaq:'} </strong>
+                      {getLocalized(community, 'rule3Desc', currentLang, defaultLang) || 'Siyasi, polemik və ya kommersiya xarakterli paylaşımlar qadağandır.'}
+                    </span>
                   </div>
                 </div>
-              )}
+              </div>
 
               {/* Weekly Discussion Theme in Velvet Obsidian */}
-              {community.weeklyTitle && (
-                <div className="rounded-3xl bg-gradient-to-br from-[#071326] via-[#0a1932] to-[#040e1c] border border-[#c5a059]/30 p-7 sm:p-8 text-white shadow-xl relative overflow-hidden">
-                  <div className="absolute -top-20 -left-20 w-52 h-52 bg-[#c5a059]/15 rounded-full blur-3xl pointer-events-none" />
+              <div className="rounded-3xl bg-gradient-to-br from-[#071326] via-[#0a1932] to-[#040e1c] border border-[#c5a059]/30 p-7 sm:p-8 text-white shadow-xl relative overflow-hidden">
+                <div className="absolute -top-20 -left-20 w-52 h-52 bg-[#c5a059]/15 rounded-full blur-3xl pointer-events-none" />
 
-                  <div className="relative z-10">
-                    {community.weeklyBadge && (
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#c5a059]/20 border border-[#c5a059]/40 text-[#e5c57d] text-[10px] font-bold tracking-widest uppercase mb-3">
-                        <span className="material-symbols-outlined text-[13px]">psychology</span>
-                        <span>{getLocalized(community, 'weeklyBadge', currentLang, defaultLang)}</span>
-                      </div>
-                    )}
-                    <h4 className="font-serif text-lg sm:text-xl font-medium text-white mb-2 leading-snug">
-                      {getLocalized(community, 'weeklyTitle', currentLang, defaultLang)}
-                    </h4>
-                    {community.weeklyDesc && (
-                      <p className="text-xs sm:text-sm text-[#cbd5e1] font-light leading-relaxed mb-6">
-                        {getLocalized(community, 'weeklyDesc', currentLang, defaultLang)}
-                      </p>
-                    )}
-                    <button
-                      onClick={handleCreateTopic}
-                      className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#c5a059] via-[#e5c57d] to-[#b38f46] text-[#071326] font-semibold text-xs tracking-wider uppercase shadow-lg shadow-[#c5a059]/20 hover:shadow-xl hover:shadow-[#c5a059]/35 hover:scale-[1.02] active:scale-[0.98] transition-all text-center cursor-pointer"
-                    >
-                      <span>{getLocalized(community, 'weeklyBtnText', currentLang, defaultLang) || 'Müzakirəyə Qoşul'}</span>
-                    </button>
+                <div className="relative z-10">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#c5a059]/20 border border-[#c5a059]/40 text-[#e5c57d] text-[10px] font-bold tracking-widest uppercase mb-3">
+                    <span className="material-symbols-outlined text-[13px]">psychology</span>
+                    <span>{getLocalized(community, 'weeklyBadge', currentLang, defaultLang) || 'Həftənin Fəlsəfi Mövzusu'}</span>
                   </div>
+                  <h4 className="font-serif text-lg sm:text-xl font-medium text-white mb-2 leading-snug">
+                    {getLocalized(community, 'weeklyTitle', currentLang, defaultLang) || '"Daxili təzyiq qarşısında şüurlu müşahidəçi qalmaq necə mümkündür?"'}
+                  </h4>
+                  <p className="text-xs sm:text-sm text-[#cbd5e1] font-light leading-relaxed mb-6">
+                    {getLocalized(community, 'weeklyDesc', currentLang, defaultLang) || 'Bu həftə mentorlarımızın fasilitasiyası ilə emosional reaktivliyi idarə etməyin nevrobioloji yollarını müzakirə edirik.'}
+                  </p>
+                  <button
+                    onClick={handleCreateTopic}
+                    className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#c5a059] via-[#e5c57d] to-[#b38f46] text-[#071326] font-semibold text-xs tracking-wider uppercase shadow-lg shadow-[#c5a059]/20 hover:shadow-xl hover:shadow-[#c5a059]/35 hover:scale-[1.02] active:scale-[0.98] transition-all text-center cursor-pointer"
+                  >
+                    {getLocalized(community, 'weeklyBtnText', currentLang, defaultLang) || 'Müzakirəyə Qoşul'}
+                  </button>
                 </div>
-              )}
+              </div>
 
             </div>
 
