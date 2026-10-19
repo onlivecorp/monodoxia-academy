@@ -96,7 +96,7 @@ export default function Hero() {
             </p>
 
             {/* CTA BUTTONS */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2 animate-text-reveal-soft animate-delay-400">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2 anim-hero-cta">
               <a
                 className="group relative inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-lg bg-[#070f1e] hover:bg-[#0d1c32] text-white text-sm font-semibold tracking-wide border border-[#c5a059]/40 shadow-lg shadow-[#070f1e]/15 hover:shadow-xl hover:shadow-[#c5a059]/20 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer overflow-hidden"
                 href={primaryLink}
@@ -122,7 +122,7 @@ export default function Hero() {
             </div>
 
             {/* STATS STRIP */}
-            <div className="pt-8 border-t border-[#e2d9c8]/70 grid grid-cols-3 gap-4 sm:gap-6 max-w-xl animate-text-reveal-soft animate-delay-500">
+            <div className="pt-8 border-t border-[#e2d9c8]/70 grid grid-cols-3 gap-4 sm:gap-6 max-w-xl anim-hero-stats">
               <div className="space-y-1">
                 <div className="text-2xl sm:text-3xl font-serif font-bold text-[#070f1e] tracking-tight">
                   {hero.stat1Num || '12,000+'}
@@ -151,7 +151,7 @@ export default function Hero() {
           </div>
 
           {/* RIGHT MEDIA */}
-          <div className="lg:col-span-5 relative flex justify-center">
+          <div className="lg:col-span-5 relative flex justify-center anim-hero-media">
             <div className="relative w-full" style={{ maxWidth: mediaStyles.maxWidth }}>
               {hero.showGlow !== false && (
                 <div className="absolute -inset-6 bg-gradient-to-tr from-[#c5a059]/20 via-[#c5a059]/10 to-transparent rounded-full blur-3xl pointer-events-none" />
@@ -221,7 +221,7 @@ export default function Hero() {
 
                 {/* QUOTE OVERLAY */}
                 {hero.showQuote !== false && (
-                  <div className="absolute bottom-6 left-6 right-6 bg-white/90 backdrop-blur-xl p-4 sm:p-5 rounded-xl border border-[#c5a059]/35 text-center shadow-xl pointer-events-auto">
+                  <div className="absolute bottom-6 left-6 right-6 bg-white/90 backdrop-blur-xl p-4 sm:p-5 rounded-xl border border-[#c5a059]/35 text-center shadow-xl pointer-events-auto anim-hero-quote">
                     <div className="flex items-center justify-center gap-1 mb-1 text-[#c5a059]">
                       <span className="material-symbols-outlined text-[18px]">format_quote</span>
                     </div>
