@@ -8,11 +8,15 @@ export default function FAQ() {
   const { faqsList, homeContent, navigateTo } = useApp();
   const faq = homeContent?.faq || {};
 
-  const badgeText = getLocalized(faq, 'badge', currentLang, defaultLang) || t('faq_badge');
-  const titleText = getLocalized(faq, 'title', currentLang, defaultLang) || t('faq_title');
-  const descText = getLocalized(faq, 'desc', currentLang, defaultLang);
+  const badgeText = getLocalized(faq, 'badge', currentLang, defaultLang) || '';
+  const titleText = getLocalized(faq, 'title', currentLang, defaultLang) || '';
+  const descText = getLocalized(faq, 'desc', currentLang, defaultLang) || '';
 
   const list = faqsList || [];
+
+  if (!titleText && list.length === 0) {
+    return null;
+  }
 
   return (
     <section className="relative overflow-hidden py-16 md:py-24 bg-[#fbf9f5] border-b border-[#e2d9c8]/70" id="faq">
@@ -30,27 +34,33 @@ export default function FAQ() {
 
       <div className="relative max-w-4xl mx-auto px-6 md:px-12">
         {/* HEADER */}
-        <div className="text-center space-y-4 mb-14">
-          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#c5a059]/40 bg-white/70 backdrop-blur-md shadow-sm anim-badge">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#9e782f]"></span>
-            <span className="text-[11px] sm:text-xs font-semibold text-[#775a19] tracking-[0.2em] uppercase font-sans">
-              {badgeText}
-            </span>
+        {(titleText || badgeText) && (
+          <div className="text-center space-y-4 mb-14">
+            {badgeText && (
+              <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#c5a059]/40 bg-white/70 backdrop-blur-md shadow-sm anim-badge">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#9e782f]"></span>
+                <span className="text-[11px] sm:text-xs font-semibold text-[#775a19] tracking-[0.2em] uppercase font-sans">
+                  {badgeText}
+                </span>
+              </div>
+            )}
+
+            {titleText && (
+              <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] text-[#070f1e] font-serif font-medium tracking-tight leading-[1.2] anim-faq-title">
+                {titleText}
+              </h2>
+            )}
+
+            {descText && (
+              <p className="text-base sm:text-lg text-slate-600 max-w-xl mx-auto leading-relaxed font-normal anim-subtext">
+                {descText}
+              </p>
+            )}
           </div>
-
-          <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] text-[#070f1e] font-serif font-medium tracking-tight leading-[1.2] anim-faq-title">
-            {titleText}
-          </h2>
-
-          {descText && (
-            <p className="text-base sm:text-lg text-slate-600 max-w-xl mx-auto leading-relaxed font-normal anim-subtext">
-              {descText}
-            </p>
-          )}
-        </div>
+        )}
 
         {/* ACCORDION LIST */}
-        {list.length > 0 ? (
+        {list.length > 0 && (
           <div className="space-y-4">
             {list.map((item, idx) => (
               <details
@@ -63,7 +73,7 @@ export default function FAQ() {
 
                 <summary className="flex items-center justify-between cursor-pointer list-none select-none">
                   <span className="font-serif text-lg sm:text-xl font-semibold text-[#070f1e] group-hover:text-[#775a19] group-open:text-[#775a19] transition-colors pr-4 leading-snug">
-                    {getLocalized(item, 'question', currentLang, defaultLang)}
+                    {getLocalized(item, 'question', currentLang, defaultLang) || item.question}
                   </span>
                   
                   <div className="w-9 h-9 rounded-full bg-[#fbf9f5] group-hover:bg-[#070f1e] group-open:bg-[#070f1e] border border-[#c5a059]/35 group-hover:border-[#070f1e] group-open:border-[#070f1e] text-[#8a6a1f] group-hover:text-[#c5a059] group-open:text-[#c5a059] flex items-center justify-center shrink-0 transition-all duration-300 shadow-sm">
@@ -74,42 +84,12 @@ export default function FAQ() {
                 </summary>
 
                 <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal pt-4 mt-4 border-t border-[#e2d9c8]/50">
-                  {getLocalized(item, 'answer', currentLang, defaultLang)}
+                  {getLocalized(item, 'answer', currentLang, defaultLang) || item.answer}
                 </p>
               </details>
             ))}
           </div>
-        ) : (
-          <div className="text-center py-12 px-8 rounded-2xl border border-[#e2d9c8]/80 bg-white/85 backdrop-blur-md max-w-xl mx-auto space-y-4 shadow-xl">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#fbf9f5] to-[#f5f0e6] border border-[#c5a059]/35 text-[#8a6a1f] mx-auto flex items-center justify-center shadow-sm">
-              <span className="material-symbols-outlined text-[32px]">help</span>
-            </div>
-            <div>
-              <span className="inline-block px-3 py-1 rounded-full bg-[#c5a059]/15 text-[#775a19] text-[10px] font-semibold tracking-widest uppercase mb-3">
-                Məlumat Mərkəzi
-              </span>
-              <h3 className="font-serif text-2xl font-bold text-[#070f1e]">Suallar Tezliklə Əlavə Olunacaq</h3>
-              <p className="text-sm text-slate-600 mt-2 max-w-md mx-auto leading-relaxed font-normal">
-                Suallarınız üçün birbaşa komandamız ilə əlaqə saxlaya bilərsiniz.
-              </p>
-            </div>
-          </div>
         )}
-
-        {/* BOTTOM HELP STRIP */}
-        <div className="mt-12 text-center p-6 rounded-2xl bg-white/60 border border-[#e2d9c8]/60 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-left">
-            <h4 className="font-serif text-base font-semibold text-[#070f1e]">Başqa bir sualınız var?</h4>
-            <p className="text-xs text-slate-500 mt-0.5">Akademiya və fərdi kouçinq koordinatorlarımız sizə kömək etməkdən məmnun olar.</p>
-          </div>
-          <button
-            onClick={() => navigateTo ? navigateTo('coaching') : null}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#070f1e] hover:bg-[#112240] text-white text-xs font-semibold tracking-wide border border-[#c5a059]/40 shadow-sm hover:shadow-md transition-all cursor-pointer whitespace-nowrap"
-          >
-            <span>Fərdi Məsləhət Al</span>
-            <span className="material-symbols-outlined text-[16px] text-[#c5a059]">arrow_forward</span>
-          </button>
-        </div>
       </div>
     </section>
   );

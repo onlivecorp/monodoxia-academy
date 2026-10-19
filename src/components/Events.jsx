@@ -8,11 +8,15 @@ export default function Events() {
   const { eventsList, openApplication, currentUser, applicationsList, homeContent, navigateTo } = useApp();
   const events = homeContent?.events || {};
 
-  const badgeText = getLocalized(events, 'badge', currentLang, defaultLang) || t('events_badge');
-  const titleText = getLocalized(events, 'title', currentLang, defaultLang) || t('events_title');
-  const calendarBtnText = getLocalized(events, 'calendarBtnText', currentLang, defaultLang) || t('events_calendar_btn');
+  const badgeText = getLocalized(events, 'badge', currentLang, defaultLang) || '';
+  const titleText = getLocalized(events, 'title', currentLang, defaultLang) || '';
+  const calendarBtnText = getLocalized(events, 'calendarBtnText', currentLang, defaultLang) || '';
 
   const list = eventsList || [];
+
+  if (!titleText && list.length === 0) {
+    return null;
+  }
 
   return (
     <section className="relative overflow-hidden py-16 md:py-24 bg-[#fbf9f5] border-b border-[#e2d9c8]/70" id="tedbirler">
@@ -30,30 +34,38 @@ export default function Events() {
 
       <div className="relative max-w-7xl mx-auto px-6 md:px-12">
         {/* HEADER */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
-          <div>
-            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#c5a059]/40 bg-white/70 backdrop-blur-md shadow-sm mb-2 anim-badge">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#9e782f]"></span>
-              <span className="text-[11px] sm:text-xs font-semibold text-[#775a19] tracking-[0.2em] uppercase font-sans">
-                {badgeText}
-              </span>
+        {(titleText || badgeText) && (
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
+            <div>
+              {badgeText && (
+                <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#c5a059]/40 bg-white/70 backdrop-blur-md shadow-sm mb-2 anim-badge">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#9e782f]"></span>
+                  <span className="text-[11px] sm:text-xs font-semibold text-[#775a19] tracking-[0.2em] uppercase font-sans">
+                    {badgeText}
+                  </span>
+                </div>
+              )}
+              {titleText && (
+                <h2 className="text-3xl sm:text-4xl lg:text-[2.65rem] text-[#070f1e] font-serif font-medium tracking-tight leading-[1.2] anim-events-title">
+                  {titleText}
+                </h2>
+              )}
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-[2.65rem] text-[#070f1e] font-serif font-medium tracking-tight leading-[1.2] anim-events-title">
-              {titleText}
-            </h2>
-          </div>
 
-          <button
-            onClick={() => navigateTo ? navigateTo('events') : null}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/75 hover:bg-white border border-[#e2d9c8]/80 hover:border-[#c5a059] shadow-sm text-xs font-semibold text-[#070f1e] hover:text-[#775a19] tracking-wider uppercase transition-all duration-200 cursor-pointer self-start md:self-auto"
-          >
-            <span>{calendarBtnText}</span>
-            <span className="material-symbols-outlined text-[16px] text-[#c5a059]">calendar_month</span>
-          </button>
-        </div>
+            {calendarBtnText && (
+              <button
+                onClick={() => navigateTo ? navigateTo('events') : null}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/75 hover:bg-white border border-[#e2d9c8]/80 hover:border-[#c5a059] shadow-sm text-xs font-semibold text-[#070f1e] hover:text-[#775a19] tracking-wider uppercase transition-all duration-200 cursor-pointer self-start md:self-auto"
+              >
+                <span>{calendarBtnText}</span>
+                <span className="material-symbols-outlined text-[16px] text-[#c5a059]">calendar_month</span>
+              </button>
+            )}
+          </div>
+        )}
 
         {/* EVENTS GRID */}
-        {list.length > 0 ? (
+        {list.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-7">
             {list.map(e => {
               const userApp = currentUser
@@ -84,9 +96,11 @@ export default function Events() {
                     {/* Top Meta Strip */}
                     <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className={`px-2.5 py-1 rounded-full ${e.badgeClass || 'bg-[#c5a059]/15 text-[#775a19] border border-[#c5a059]/30'} text-[10px] font-semibold tracking-wider uppercase font-sans`}>
-                          {getLocalized(e, 'typeBadge', currentLang, defaultLang)}
-                        </span>
+                        {getLocalized(e, 'typeBadge', currentLang, defaultLang) && (
+                          <span className={`px-2.5 py-1 rounded-full ${e.badgeClass || 'bg-[#c5a059]/15 text-[#775a19] border border-[#c5a059]/30'} text-[10px] font-semibold tracking-wider uppercase font-sans`}>
+                            {getLocalized(e, 'typeBadge', currentLang, defaultLang)}
+                          </span>
+                        )}
                         <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
                           isFree
                             ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
@@ -95,29 +109,35 @@ export default function Events() {
                           {isFree ? 'Ödənişsiz' : e.price}
                         </span>
                       </div>
-                      <span className="text-xs font-mono text-slate-500 font-medium flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[13px] text-[#c5a059]">schedule</span>
-                        <span>{e.datetime}</span>
-                      </span>
+                      {e.datetime && (
+                        <span className="text-xs font-mono text-slate-500 font-medium flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[13px] text-[#c5a059]">schedule</span>
+                          <span>{e.datetime}</span>
+                        </span>
+                      )}
                     </div>
 
                     {/* Title */}
                     <h3 className="font-serif text-2xl font-semibold text-[#070f1e] group-hover:text-[#775a19] transition-colors leading-snug my-2.5">
-                      "{getLocalized(e, 'title', currentLang, defaultLang)}"
+                      "{getLocalized(e, 'title', currentLang, defaultLang) || e.title}"
                     </h3>
 
                     {/* Desc */}
-                    <p className="text-sm text-slate-600 leading-relaxed font-normal mb-6 flex-1">
-                      {getLocalized(e, 'desc', currentLang, defaultLang)}
-                    </p>
+                    {getLocalized(e, 'desc', currentLang, defaultLang) && (
+                      <p className="text-sm text-slate-600 leading-relaxed font-normal mb-6 flex-1">
+                        {getLocalized(e, 'desc', currentLang, defaultLang)}
+                      </p>
+                    )}
                   </div>
 
                   {/* Footer & Registration */}
                   <div className="pt-4 border-t border-[#e2d9c8]/50 flex items-center justify-between gap-3 flex-wrap">
-                    <span className="text-xs text-slate-600 font-medium flex items-center gap-1">
-                      <span className="material-symbols-outlined text-[15px] text-[#c5a059]">person</span>
-                      <span>Spiker: <strong className="text-[#070f1e] font-semibold">{e.speaker}</strong></span>
-                    </span>
+                    {e.speaker && (
+                      <span className="text-xs text-slate-600 font-medium flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[15px] text-[#c5a059]">person</span>
+                        <span>Spiker: <strong className="text-[#070f1e] font-semibold">{e.speaker}</strong></span>
+                      </span>
+                    )}
 
                     {userApp ? (
                       userApp.status === 'Təsdiqləndi' ? (
@@ -125,64 +145,24 @@ export default function Events() {
                           <span className="material-symbols-outlined text-[14px]">check_circle</span>
                           <span>Təsdiqləndi</span>
                         </span>
-                      ) : ['Yeni', 'Baxılır', 'Gözləmədə'].includes(userApp.status) ? (
-                        <button
-                          onClick={() => openApplication(e, targetType)}
-                          className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100 transition-colors flex items-center gap-1 cursor-pointer"
-                        >
-                          <span className="material-symbols-outlined text-[14px] text-amber-600">hourglass_top</span>
-                          <span>Baxılır ({userApp.status})</span>
-                        </button>
-                      ) : ['Rədd edildi', 'İmtina edildi', 'Ləğv edildi'].includes(userApp.status) ? (
-                        <button
-                          onClick={() => openApplication(e, targetType)}
-                          className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-50 text-rose-800 border border-rose-200 hover:bg-rose-100 transition-colors flex items-center gap-1 cursor-pointer"
-                        >
-                          <span className="material-symbols-outlined text-[14px]">refresh</span>
-                          <span>Yenidən Qeydiyyat</span>
-                        </button>
                       ) : (
                         <span className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#fbf9f5] text-[#070f1e] border border-[#e2d9c8]">
                           {userApp.status}
                         </span>
                       )
-                    ) : e.status === 'Tamamlandı' ? (
-                      <span className="text-xs text-slate-400 font-semibold">Tədbir Başa Çatıb</span>
-                    ) : e.status === 'Bağlıdır' ? (
-                      <span className="text-xs text-slate-400 font-semibold">Qeydiyyat Bağlıdır</span>
                     ) : (
                       <button
                         onClick={() => openApplication(e, targetType)}
                         className="px-4 py-2 rounded-lg bg-[#070f1e] hover:bg-[#112240] text-white text-xs font-semibold tracking-wide border border-[#c5a059]/40 shadow-sm hover:shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
                       >
                         <span className="material-symbols-outlined text-[15px] text-[#c5a059]">how_to_reg</span>
-                        <span>{t('event_register')} ({e.registered}/{e.capacity})</span>
+                        <span>Qeydiyyat</span>
                       </button>
                     )}
                   </div>
                 </div>
               );
             })}
-          </div>
-        ) : (
-          <div className="relative overflow-hidden p-12 sm:p-14 rounded-2xl bg-white/85 backdrop-blur-md border border-[#e2d9c8]/80 shadow-xl text-center max-w-xl mx-auto">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#fbf9f5] to-[#f5f0e6] border border-[#c5a059]/35 text-[#8a6a1f] flex items-center justify-center mx-auto mb-4 shadow-sm">
-              <span className="material-symbols-outlined text-[32px]">event_upcoming</span>
-            </div>
-            <span className="inline-block px-3 py-1 rounded-full bg-[#c5a059]/15 text-[#775a19] text-[10px] font-semibold tracking-widest uppercase mb-3">
-              Canlı Proqramlar
-            </span>
-            <h4 className="font-serif text-2xl font-bold text-[#070f1e] mb-2">Tezliklə Yeni Vebinar və Tədbirlər</h4>
-            <p className="text-sm text-slate-600 max-w-md mx-auto leading-relaxed mb-6 font-normal">
-              Yaxın günlərdə yeni canlı ustad dərsləri, interaktiv sual-cavab vebinarları və ekspert seminarları elan olunacaqdır.
-            </p>
-            <button
-              onClick={() => navigateTo ? navigateTo('club') : null}
-              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-[#070f1e] text-white text-xs font-semibold tracking-wide shadow-md hover:bg-[#112240] transition-colors"
-            >
-              <span>Coaching Club İcmasına Qoşul</span>
-              <span className="material-symbols-outlined text-[16px] text-[#c5a059]">arrow_forward</span>
-            </button>
           </div>
         )}
       </div>

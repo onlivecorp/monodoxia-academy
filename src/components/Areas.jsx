@@ -4,16 +4,20 @@ import { getLocalized } from '../i18n/localize';
 import { useApp } from '../context/AppContext';
 
 export default function Areas() {
-  const { t, currentLang, defaultLang } = useLanguage();
+  const { currentLang, defaultLang } = useLanguage();
   const { homeContent, areasList, navigateTo } = useApp();
   const areas = homeContent?.areas || {};
   const activeAreas = (areas?.items && Array.isArray(areas.items) && areas.items.length > 0)
     ? areas.items
     : (areasList && areasList.length > 0 ? areasList : []);
 
-  const badgeText = getLocalized(areas, 'badge', currentLang, defaultLang) || t('areas_badge');
-  const titleText = getLocalized(areas, 'title', currentLang, defaultLang) || t('areas_title');
-  const descText = getLocalized(areas, 'desc', currentLang, defaultLang) || t('areas_desc');
+  const badgeText = getLocalized(areas, 'badge', currentLang, defaultLang) || '';
+  const titleText = getLocalized(areas, 'title', currentLang, defaultLang) || '';
+  const descText = getLocalized(areas, 'desc', currentLang, defaultLang) || '';
+
+  if (!badgeText && !titleText && !descText && activeAreas.length === 0) {
+    return null;
+  }
 
   const handleLinkClick = (e, targetLink) => {
     if (!targetLink) return;
@@ -52,78 +56,91 @@ export default function Areas() {
 
       <div className="relative max-w-7xl mx-auto px-6 md:px-12">
         {/* HEADER */}
-        <div className="text-center max-w-2xl mx-auto space-y-4 mb-16">
-          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#c5a059]/40 bg-white/70 backdrop-blur-md shadow-sm anim-badge">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#9e782f]"></span>
-            <span className="text-[11px] sm:text-xs font-semibold text-[#775a19] tracking-[0.2em] uppercase font-sans">
-              {badgeText}
-            </span>
+        {(badgeText || titleText || descText) && (
+          <div className="text-center max-w-2xl mx-auto space-y-4 mb-16">
+            {badgeText && (
+              <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#c5a059]/40 bg-white/70 backdrop-blur-md shadow-sm anim-badge">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#9e782f]"></span>
+                <span className="text-[11px] sm:text-xs font-semibold text-[#775a19] tracking-[0.2em] uppercase font-sans">
+                  {badgeText}
+                </span>
+              </div>
+            )}
+            {titleText && (
+              <h2 className="text-3xl sm:text-4xl lg:text-[2.65rem] text-[#070f1e] font-serif font-medium tracking-tight leading-[1.2] anim-areas-title">
+                {titleText}
+              </h2>
+            )}
+            {descText && (
+              <p className="text-base sm:text-lg text-slate-600 leading-relaxed font-normal anim-subtext">
+                {descText}
+              </p>
+            )}
           </div>
+        )}
 
-          <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] text-[#070f1e] font-serif font-medium tracking-tight leading-[1.2] anim-areas-title">
-            {titleText}
-          </h2>
+        {/* 8-GRID EDITORIAL CARDS */}
+        {activeAreas.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {activeAreas.map((a, idx) => {
+              const cardTitle = getLocalized(a, 'title', currentLang, defaultLang);
+              const cardDesc = getLocalized(a, 'desc', currentLang, defaultLang);
+              const cardNum = getLocalized(a, 'number', currentLang, defaultLang);
+              const cardLink = a.link || '#akademiya';
+              const btnLabel = getLocalized(a, 'btnText', currentLang, defaultLang) || 'Kəşf et';
 
-          <p className="text-base sm:text-lg text-slate-600 leading-relaxed font-normal anim-subtext">
-            {descText}
-          </p>
-        </div>
+              if (!cardTitle && !cardDesc) return null;
 
-        {/* DYNAMIC AREAS GRID */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {activeAreas.map((a, idx) => {
-            const cardLink = a.link || areas.link || areas.exploreLink || '#akademiya';
-            const btnLabel = getLocalized(a, 'btnText', currentLang, defaultLang) ||
-                             getLocalized(areas, 'btnText', currentLang, defaultLang) ||
-                             t('area_explore');
+              return (
+                <div
+                  key={a.id || idx}
+                  className="group relative bg-white/75 hover:bg-white p-7 rounded-2xl border border-[#e2d9c8]/75 hover:border-[#c5a059]/70 shadow-sm hover:shadow-2xl hover:shadow-[#c5a059]/12 transition-all duration-300 hover:-translate-y-1.5 flex flex-col justify-between overflow-hidden"
+                >
+                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#c5a059] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-            return (
-              <div
-                key={a.id || idx}
-                className="group relative bg-white/75 hover:bg-white p-7 rounded-2xl border border-[#e2d9c8]/75 hover:border-[#c5a059]/70 shadow-sm hover:shadow-2xl hover:shadow-[#c5a059]/12 transition-all duration-300 hover:-translate-y-1.5 flex flex-col justify-between overflow-hidden"
-              >
-                {/* Subtle Top Accent Shimmer on Hover */}
-                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#c5a059] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div>
+                    {a.icon && (
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#fbf9f5] to-[#f5f0e6] group-hover:bg-gradient-to-br group-hover:from-[#070f1e] group-hover:to-[#112240] border border-[#c5a059]/30 group-hover:border-[#070f1e] text-[#8a6a1f] group-hover:text-[#c5a059] flex items-center justify-center transition-all duration-300 shadow-sm mb-5">
+                        <span className="material-symbols-outlined text-[24px] transition-transform duration-300 group-hover:scale-110">
+                          {a.icon}
+                        </span>
+                      </div>
+                    )}
 
-                <div>
-                  {/* ICON */}
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#fbf9f5] to-[#f5f0e6] group-hover:bg-gradient-to-br group-hover:from-[#070f1e] group-hover:to-[#112240] border border-[#c5a059]/30 group-hover:border-[#070f1e] text-[#8a6a1f] group-hover:text-[#c5a059] flex items-center justify-center transition-all duration-300 shadow-sm mb-5">
-                    <span className="material-symbols-outlined text-[24px] transition-transform duration-300 group-hover:scale-110">
-                      {a.icon || 'psychology'}
-                    </span>
+                    {cardNum && (
+                      <span className="block text-[11px] font-semibold tracking-[0.16em] uppercase text-[#775a19] mb-1.5 font-sans">
+                        {cardNum}
+                      </span>
+                    )}
+
+                    {cardTitle && (
+                      <h3 className="font-serif text-xl font-semibold text-[#070f1e] group-hover:text-[#775a19] transition-colors mb-3 leading-snug">
+                        {cardTitle}
+                      </h3>
+                    )}
+
+                    {cardDesc && (
+                      <p className="text-sm text-slate-600 leading-relaxed font-normal mb-6">
+                        {cardDesc}
+                      </p>
+                    )}
                   </div>
 
-                  {/* NUMBER / CATEGORY */}
-                  <span className="block text-[11px] font-semibold tracking-[0.16em] uppercase text-[#775a19] mb-1.5 font-sans">
-                    {getLocalized(a, 'number', currentLang, defaultLang)}
-                  </span>
-
-                  {/* TITLE */}
-                  <h3 className="font-serif text-xl font-semibold text-[#070f1e] group-hover:text-[#775a19] transition-colors mb-3 leading-snug">
-                    {getLocalized(a, 'title', currentLang, defaultLang)}
-                  </h3>
-
-                  {/* DESC */}
-                  <p className="text-sm text-slate-600 leading-relaxed font-normal mb-6">
-                    {getLocalized(a, 'desc', currentLang, defaultLang)}
-                  </p>
+                  <a
+                    className="inline-flex items-center justify-between text-xs font-semibold tracking-wider text-[#070f1e] group-hover:text-[#775a19] uppercase pt-4 border-t border-[#e2d9c8]/50 group-hover:border-[#c5a059]/50 transition-all duration-300 cursor-pointer"
+                    href={cardLink}
+                    onClick={(e) => handleLinkClick(e, cardLink)}
+                  >
+                    <span>{btnLabel}</span>
+                    <span className="material-symbols-outlined text-[16px] text-[#c5a059] transition-transform duration-300 group-hover:translate-x-1">
+                      arrow_forward
+                    </span>
+                  </a>
                 </div>
-
-                {/* ACTION LINK */}
-                <a
-                  className="inline-flex items-center justify-between text-xs font-semibold tracking-wider text-[#070f1e] group-hover:text-[#775a19] uppercase pt-4 border-t border-[#e2d9c8]/50 group-hover:border-[#c5a059]/50 transition-all duration-300 cursor-pointer"
-                  href={cardLink}
-                  onClick={(e) => handleLinkClick(e, cardLink)}
-                >
-                  <span>{btnLabel}</span>
-                  <span className="material-symbols-outlined text-[16px] text-[#c5a059] transition-transform duration-300 group-hover:translate-x-1">
-                    arrow_forward
-                  </span>
-                </a>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </section>
   );

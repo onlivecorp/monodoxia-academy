@@ -38,39 +38,53 @@ export default function EventsPage() {
     return badge.includes(filter) || filter.includes(badge);
   });
 
+  const badgeText = getLocalized(events, 'badge', currentLang, defaultLang) || '';
+  const titleText = getLocalized(events, 'title', currentLang, defaultLang) || '';
+  const descText = getLocalized(events, 'desc', currentLang, defaultLang) || '';
+
   return (
     <div className="min-h-screen bg-[#faf8f5] text-[#071326]">
       {/* Editorial Page Hero */}
-      <PageHero
-        badge={getLocalized(events, 'badge', currentLang, defaultLang) || 'Canlı Təqvim'}
-        title={getLocalized(events, 'title', currentLang, defaultLang) || 'Yaxınlaşan Tədbirlər və Masterklaslar'}
-        description={getLocalized(events, 'desc', currentLang, defaultLang) || 'Canlı interaktiv vebinarlar, psixoloji emalatxanalar və aparıcı mentorlarla açıq müzakirələr.'}
-        breadcrumbs={[{ label: 'Tədbirlər' }]}
-        adminCmsBlock="events"
-      >
-        <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-8 pt-6 border-t border-[#c5a059]/20">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
-            <span className="material-symbols-outlined text-[#775a19] text-[18px]">
-              {events.heroBadge1Icon || 'calendar_month'}
-            </span>
-            <span className="font-medium">{getLocalized(events, 'heroBadge1Text', currentLang, defaultLang) || 'Canlı Təqvim Qrafiki'}</span>
-          </div>
+      {(titleText || badgeText) && (
+        <PageHero
+          badge={badgeText}
+          title={titleText}
+          description={descText}
+          breadcrumbs={[{ label: 'Tədbirlər' }]}
+          adminCmsBlock="events"
+        >
+          {(events.heroBadge1Text || events.heroBadge2Text || events.heroBadge3Text) && (
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-8 pt-6 border-t border-[#c5a059]/20">
+              {events.heroBadge1Text && (
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
+                  <span className="material-symbols-outlined text-[#775a19] text-[18px]">
+                    {events.heroBadge1Icon || 'calendar_month'}
+                  </span>
+                  <span className="font-medium">{getLocalized(events, 'heroBadge1Text', currentLang, defaultLang)}</span>
+                </div>
+              )}
 
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
-            <span className="material-symbols-outlined text-[#775a19] text-[18px]">
-              {events.heroBadge2Icon || 'co_present'}
-            </span>
-            <span className="font-medium">{getLocalized(events, 'heroBadge2Text', currentLang, defaultLang) || 'İnteraktiv Q&A Sessiyaları'}</span>
-          </div>
+              {events.heroBadge2Text && (
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
+                  <span className="material-symbols-outlined text-[#775a19] text-[18px]">
+                    {events.heroBadge2Icon || 'co_present'}
+                  </span>
+                  <span className="font-medium">{getLocalized(events, 'heroBadge2Text', currentLang, defaultLang)}</span>
+                </div>
+              )}
 
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
-            <span className="material-symbols-outlined text-[#775a19] text-[18px]">
-              {events.heroBadge3Icon || 'mic'}
-            </span>
-            <span className="font-medium">{getLocalized(events, 'heroBadge3Text', currentLang, defaultLang) || 'Spikerlik İmkanı'}</span>
-          </div>
-        </div>
-      </PageHero>
+              {events.heroBadge3Text && (
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
+                  <span className="material-symbols-outlined text-[#775a19] text-[18px]">
+                    {events.heroBadge3Icon || 'mic'}
+                  </span>
+                  <span className="font-medium">{getLocalized(events, 'heroBadge3Text', currentLang, defaultLang)}</span>
+                </div>
+              )}
+            </div>
+          )}
+        </PageHero>
+      )}
 
       {/* Main Section */}
       <section className="py-14 sm:py-20 relative overflow-hidden">
@@ -299,29 +313,35 @@ export default function EventsPage() {
           )}
 
           {/* Interactive Speaker & Partnership Capsule Banner */}
-          <div className="rounded-3xl bg-gradient-to-br from-[#071326] via-[#0a1932] to-[#040e1c] border border-[#c5a059]/30 p-8 sm:p-12 shadow-2xl relative overflow-hidden text-white flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="absolute -top-24 -left-24 w-72 h-72 bg-[#c5a059]/15 rounded-full blur-3xl pointer-events-none" />
+          {events.speakerTitle && (
+            <div className="rounded-3xl bg-gradient-to-br from-[#071326] via-[#0a1932] to-[#040e1c] border border-[#c5a059]/30 p-8 sm:p-12 shadow-2xl relative overflow-hidden text-white flex flex-col md:flex-row items-center justify-between gap-8">
+              <div className="absolute -top-24 -left-24 w-72 h-72 bg-[#c5a059]/15 rounded-full blur-3xl pointer-events-none" />
 
-            <div className="relative z-10 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#c5a059]/20 border border-[#c5a059]/40 text-[#e5c57d] text-xs font-semibold tracking-widest uppercase mb-3">
-                <span className="material-symbols-outlined text-[15px]">campaign</span>
-                <span>{getLocalized(events, 'speakerBadge', currentLang, defaultLang) || 'Spikerlik & Əməkdaşlıq'}</span>
+              <div className="relative z-10 max-w-2xl">
+                {events.speakerBadge && (
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#c5a059]/20 border border-[#c5a059]/40 text-[#e5c57d] text-xs font-semibold tracking-widest uppercase mb-3">
+                    <span className="material-symbols-outlined text-[15px]">campaign</span>
+                    <span>{getLocalized(events, 'speakerBadge', currentLang, defaultLang)}</span>
+                  </div>
+                )}
+                <h3 className="font-serif text-2xl sm:text-3xl font-medium text-white mb-2 leading-tight">
+                  {getLocalized(events, 'speakerTitle', currentLang, defaultLang)}
+                </h3>
+                {events.speakerDesc && (
+                  <p className="text-xs sm:text-sm text-[#cbd5e1] font-light leading-relaxed">
+                    {getLocalized(events, 'speakerDesc', currentLang, defaultLang)}
+                  </p>
+                )}
               </div>
-              <h3 className="font-serif text-2xl sm:text-3xl font-medium text-white mb-2 leading-tight">
-                {getLocalized(events, 'speakerTitle', currentLang, defaultLang) || 'Monodoxia Platformasında Öz Vebinarını və ya Tədbirini Təşkil Et'}
-              </h3>
-              <p className="text-xs sm:text-sm text-[#cbd5e1] font-light leading-relaxed">
-                {getLocalized(events, 'speakerDesc', currentLang, defaultLang) || 'Psixologiya, nevrobiologiya, kouçinq və fərdi inkişaf sahəsində təcrübənizi 12,000+ nəfərlik auditoriyamızla bölüşmək üçün spiker kimi müraciət edin.'}
-              </p>
-            </div>
 
-            <button
-              onClick={() => openApplication({ id: 'speaker-app', title: 'Spikerlik və Əməkdaşlıq Müraciəti' }, 'event')}
-              className="relative z-10 px-8 py-4 rounded-xl bg-gradient-to-r from-[#c5a059] via-[#e5c57d] to-[#b38f46] text-[#071326] font-semibold text-xs sm:text-sm tracking-wider uppercase shadow-lg shadow-[#c5a059]/20 hover:shadow-xl hover:shadow-[#c5a059]/35 hover:scale-[1.02] active:scale-[0.98] transition-all shrink-0 cursor-pointer"
-            >
-              {getLocalized(events, 'speakerBtnText', currentLang, defaultLang) || 'Spiker kimi Müraciət Et'}
-            </button>
-          </div>
+              <button
+                onClick={() => openApplication({ id: 'speaker-app', title: 'Spikerlik və Əməkdaşlıq Müraciəti' }, 'event')}
+                className="relative z-10 px-8 py-4 rounded-xl bg-gradient-to-r from-[#c5a059] via-[#e5c57d] to-[#b38f46] text-[#071326] font-semibold text-xs sm:text-sm tracking-wider uppercase shadow-lg shadow-[#c5a059]/20 hover:shadow-xl hover:shadow-[#c5a059]/35 hover:scale-[1.02] active:scale-[0.98] transition-all shrink-0 cursor-pointer"
+              >
+                {getLocalized(events, 'speakerBtnText', currentLang, defaultLang) || 'Müraciət Et'}
+              </button>
+            </div>
+          )}
 
         </div>
       </section>

@@ -35,9 +35,11 @@ export default function Footer() {
                 }}
               />
             </a>
-            <p className="font-body-md text-body-md text-on-primary-container max-w-sm leading-relaxed">
-              {getLocalized(footer, 'desc', currentLang, defaultLang) || 'Fərdi İnkişaf və Psixologiya Mərkəzi. İnsanın daxili azadlığı, şüur transformasiyası və ahəngdar varlığı üçün etibarlı akademik platforma.'}
-            </p>
+            {getLocalized(footer, 'desc', currentLang, defaultLang) && (
+              <p className="font-body-md text-body-md text-on-primary-container max-w-sm leading-relaxed">
+                {getLocalized(footer, 'desc', currentLang, defaultLang)}
+              </p>
+            )}
             <div className="flex items-center space-x-4 pt-2">
               <span className="material-symbols-outlined text-[20px] text-secondary cursor-pointer">psychology</span>
               <span className="material-symbols-outlined text-[20px] text-secondary cursor-pointer">public</span>
@@ -110,24 +112,30 @@ export default function Footer() {
           <div className="lg:col-span-4 space-y-3.5">
             <div className="font-label-sm text-label-sm text-secondary-fixed tracking-widest uppercase">ƏLAQƏ VƏ ÜNVAN</div>
             <ul className="space-y-3 font-body-md text-body-md text-on-primary-container">
-              <li className="flex items-start gap-2.5">
-                <span className="material-symbols-outlined text-[19px] text-secondary shrink-0 mt-0.5">location_on</span>
-                <span className="leading-snug">
-                  {getLocalized(footer, 'address', currentLang, defaultLang) || 'Nizami küçəsi 142, İntellektual İnkişaf Mərkəzi, Bakı, Azərbaycan'}
-                </span>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <span className="material-symbols-outlined text-[19px] text-secondary shrink-0">mail</span>
-                <span>
-                  Əlaqə: <a href={`mailto:${contactEmail}`} className="hover:text-secondary-fixed transition-colors underline underline-offset-2 break-all">{contactEmail}</a>
-                </span>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <span className="material-symbols-outlined text-[19px] text-secondary shrink-0">call</span>
-                <span>
-                  Tel: <a href={`tel:${contactPhone.replace(/\s+/g, '')}`} className="hover:text-secondary-fixed transition-colors font-medium">{contactPhone}</a>
-                </span>
-              </li>
+              {getLocalized(footer, 'address', currentLang, defaultLang) && (
+                <li className="flex items-start gap-2.5">
+                  <span className="material-symbols-outlined text-[19px] text-secondary shrink-0 mt-0.5">location_on</span>
+                  <span className="leading-snug">
+                    {getLocalized(footer, 'address', currentLang, defaultLang)}
+                  </span>
+                </li>
+              )}
+              {contactEmail && (
+                <li className="flex items-center gap-2.5">
+                  <span className="material-symbols-outlined text-[19px] text-secondary shrink-0">mail</span>
+                  <span>
+                    Əlaqə: <a href={`mailto:${contactEmail}`} className="hover:text-secondary-fixed transition-colors underline underline-offset-2 break-all">{contactEmail}</a>
+                  </span>
+                </li>
+              )}
+              {contactPhone && (
+                <li className="flex items-center gap-2.5">
+                  <span className="material-symbols-outlined text-[19px] text-secondary shrink-0">call</span>
+                  <span>
+                    Tel: <a href={`tel:${contactPhone.replace(/\s+/g, '')}`} className="hover:text-secondary-fixed transition-colors font-medium">{contactPhone}</a>
+                  </span>
+                </li>
+              )}
             </ul>
           </div>
         </div>
@@ -135,7 +143,7 @@ export default function Footer() {
         {/* BOTTOM BAR */}
         <div className="border-t border-outline/30 pt-6 flex flex-col md:flex-row items-center justify-between text-xs text-on-primary-container gap-4">
           <div>
-            {getLocalized(footer, 'copyright', currentLang, defaultLang) || '© 2025 Monodoxia Academy. Fərdi İnkişaf və Psixologiya Mərkəzi. Bütün hüquqlar qorunur.'}
+            {getLocalized(footer, 'copyright', currentLang, defaultLang) || ''}
           </div>
           <div className="flex items-center space-x-3">
             {(supportedLangs || []).filter(l => l.active !== false && l.enabled !== false).map(lang => (

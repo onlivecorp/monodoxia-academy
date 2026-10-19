@@ -8,9 +8,13 @@ export default function Coaches() {
   const { openBooking, coachesList, homeContent } = useApp();
   const coaches = homeContent?.coaches || {};
 
-  const badgeText = getLocalized(coaches, 'badge', currentLang, defaultLang) || t('experts_badge');
-  const titleText = getLocalized(coaches, 'title', currentLang, defaultLang) || t('experts_title');
-  const descText = getLocalized(coaches, 'desc', currentLang, defaultLang) || t('experts_desc');
+  const badgeText = getLocalized(coaches, 'badge', currentLang, defaultLang) || '';
+  const titleText = getLocalized(coaches, 'title', currentLang, defaultLang) || '';
+  const descText = getLocalized(coaches, 'desc', currentLang, defaultLang) || '';
+
+  if (!titleText && (!coachesList || coachesList.length === 0)) {
+    return null;
+  }
 
   return (
     <section className="relative overflow-hidden py-16 md:py-24 bg-[#fbf9f5] border-b border-[#e2d9c8]/70" id="koucinq">
@@ -28,29 +32,37 @@ export default function Coaches() {
 
       <div className="relative max-w-7xl mx-auto px-6 md:px-12">
         {/* HEADER */}
-        <div className="text-center max-w-2xl mx-auto space-y-4 mb-16">
-          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#c5a059]/40 bg-white/70 backdrop-blur-md shadow-sm anim-badge">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#9e782f]"></span>
-            <span className="text-[11px] sm:text-xs font-semibold text-[#775a19] tracking-[0.2em] uppercase font-sans">
-              {badgeText}
-            </span>
+        {(titleText || badgeText) && (
+          <div className="text-center max-w-2xl mx-auto space-y-4 mb-16">
+            {badgeText && (
+              <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#c5a059]/40 bg-white/70 backdrop-blur-md shadow-sm anim-badge">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#9e782f]"></span>
+                <span className="text-[11px] sm:text-xs font-semibold text-[#775a19] tracking-[0.2em] uppercase font-sans">
+                  {badgeText}
+                </span>
+              </div>
+            )}
+
+            {titleText && (
+              <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] text-[#070f1e] font-serif font-medium tracking-tight leading-[1.2] anim-coaches-title">
+                {titleText}
+              </h2>
+            )}
+
+            {descText && (
+              <p className="text-base sm:text-lg text-slate-600 leading-relaxed font-normal anim-subtext">
+                {descText}
+              </p>
+            )}
           </div>
-
-          <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] text-[#070f1e] font-serif font-medium tracking-tight leading-[1.2] anim-coaches-title">
-            {titleText}
-          </h2>
-
-          <p className="text-base sm:text-lg text-slate-600 leading-relaxed font-normal anim-subtext">
-            {descText}
-          </p>
-        </div>
+        )}
 
         {/* COACHES GRID */}
-        {coachesList && coachesList.length > 0 ? (
+        {coachesList && coachesList.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {coachesList.map(c => {
-              const coachTitle = getLocalized(c, 'title', currentLang, defaultLang);
-              const coachBio = getLocalized(c, 'bio', currentLang, defaultLang);
+              const coachTitle = getLocalized(c, 'title', currentLang, defaultLang) || c.title || '';
+              const coachBio = getLocalized(c, 'bio', currentLang, defaultLang) || c.bio || '';
               const specialties = getLocalizedArray(c, 'specialties', currentLang, defaultLang);
 
               return (
@@ -75,36 +87,36 @@ export default function Coaches() {
                           <span className="material-symbols-outlined text-[64px] text-[#c5a059]/40">person</span>
                         </div>
                       )}
-
-                      {/* Floating Verification Tag */}
-                      <div className="absolute top-3.5 right-3.5 px-3 py-1 rounded-full bg-[#070f1e]/85 backdrop-blur-md border border-[#c5a059]/40 text-white text-[10px] font-semibold tracking-wider uppercase flex items-center gap-1 shadow-md">
-                        <span className="material-symbols-outlined text-[#c5a059] text-[13px]">verified</span>
-                        <span>ICF & PhD</span>
-                      </div>
                     </div>
 
                     {/* CONTENT INFO */}
                     <div className="p-7">
-                      <div className="text-[11px] font-semibold text-[#775a19] tracking-[0.16em] uppercase font-sans mb-1.5">
-                        {coachTitle}
-                      </div>
+                      {coachTitle && (
+                        <div className="text-[11px] font-semibold text-[#775a19] tracking-[0.16em] uppercase font-sans mb-1.5">
+                          {coachTitle}
+                        </div>
+                      )}
 
                       <h3 className="font-serif text-2xl font-bold text-[#070f1e] group-hover:text-[#775a19] transition-colors leading-snug">
                         {c.name}
                       </h3>
 
-                      <p className="text-sm text-slate-600 line-clamp-3 leading-relaxed font-normal mt-2.5 mb-5">
-                        {coachBio}
-                      </p>
+                      {coachBio && (
+                        <p className="text-sm text-slate-600 line-clamp-3 leading-relaxed font-normal mt-2.5 mb-5">
+                          {coachBio}
+                        </p>
+                      )}
 
                       {/* SPECIALTIES */}
-                      <div className="flex flex-wrap gap-1.5 mb-2">
-                        {specialties.map(s => (
-                          <span key={s} className="px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wide bg-[#fbf9f5] text-[#775a19] border border-[#c5a059]/30">
-                            {s}
-                          </span>
-                        ))}
-                      </div>
+                      {specialties.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mb-2">
+                          {specialties.map(s => (
+                            <span key={s} className="px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wide bg-[#fbf9f5] text-[#775a19] border border-[#c5a059]/30">
+                              {s}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -114,28 +126,13 @@ export default function Coaches() {
                       onClick={() => openBooking(c.id)}
                       className="w-full py-3.5 rounded-xl bg-[#070f1e] hover:bg-[#112240] text-white text-xs font-semibold uppercase tracking-[0.16em] border border-[#c5a059]/40 shadow-md hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
                     >
-                      <span>{t('expert_book_btn')}</span>
+                      <span>{t('expert_book_btn') || 'Seans Təyin Et'}</span>
                       <span className="material-symbols-outlined text-[16px] text-[#c5a059]">calendar_month</span>
                     </button>
                   </div>
                 </div>
               );
             })}
-          </div>
-        ) : (
-          <div className="text-center py-16 px-8 rounded-2xl border border-[#e2d9c8]/80 bg-white/80 backdrop-blur-md max-w-xl mx-auto space-y-4 shadow-xl">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#fbf9f5] to-[#f5f0e6] border border-[#c5a059]/35 text-[#8a6a1f] mx-auto flex items-center justify-center shadow-sm">
-              <span className="material-symbols-outlined text-[32px]">workspace_premium</span>
-            </div>
-            <div>
-              <span className="inline-block px-3 py-1 rounded-full bg-[#c5a059]/15 text-[#775a19] text-[10px] font-semibold tracking-widest uppercase mb-3">
-                Akademik Akkreditasiya
-              </span>
-              <h3 className="font-serif text-2xl font-bold text-[#070f1e]">Ekspert Heyəti Formalaşdırılır</h3>
-              <p className="text-sm text-slate-600 mt-2 max-w-md mx-auto leading-relaxed font-normal">
-                Monodoxia Academy ekspert heyəti qeydiyyatdan keçmiş və beynəlxalq sertifikatlaşdırılmış mütəxəssis üzvlər arasından təyin olunur. Tezliklə təsdiqlənmiş kouçlarımız burada təqdim olunacaqdır.
-              </p>
-            </div>
           </div>
         )}
       </div>
