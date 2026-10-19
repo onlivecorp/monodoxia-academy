@@ -23,6 +23,10 @@ export default class ErrorBoundary extends React.Component {
   handleCleanReset = () => {
     try {
       localStorage.removeItem('monodoxia_admin_events');
+      localStorage.removeItem('monodoxia_admin_courses');
+      localStorage.removeItem('monodoxia_admin_categories');
+      localStorage.removeItem('monodoxia_admin_home_content');
+      localStorage.removeItem('monodoxia_admin_roles');
     } catch (e) {}
     this.setState({ hasError: false, error: null });
     window.location.hash = '';
@@ -31,6 +35,8 @@ export default class ErrorBoundary extends React.Component {
 
   render() {
     if (this.state.hasError) {
+      const errorMsg = this.state.error?.message || String(this.state.error || '');
+      const errorStack = this.state.error?.stack || '';
       return (
         <div className="min-h-[50vh] flex items-center justify-center p-6">
           <div className="max-w-md w-full bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-8 text-center shadow-lg">
@@ -43,9 +49,10 @@ export default class ErrorBoundary extends React.Component {
             <p className="text-xs text-on-surface-variant leading-relaxed mb-4">
               Məlumatların göstərilməsi zamanı gözlənilməz texniki xəta qeydə alındı. Ana səhifəyə qayıtmaqla və ya səhifəni yeniləməklə davam edə bilərsiniz.
             </p>
-            {this.state.error?.message && (
-              <div className="mb-5 p-2.5 rounded bg-rose-50 text-rose-700 text-[11px] font-mono text-left max-h-24 overflow-auto border border-rose-200">
-                {this.state.error.message}
+            {errorMsg && (
+              <div className="mb-5 p-2.5 rounded bg-rose-50 text-rose-700 text-[11px] font-mono text-left max-h-36 overflow-auto border border-rose-200">
+                <div className="font-bold mb-1">{errorMsg}</div>
+                {errorStack && <div className="text-[10px] opacity-75 whitespace-pre-wrap">{errorStack}</div>}
               </div>
             )}
             <div className="flex items-center justify-center gap-2 flex-wrap">
@@ -62,8 +69,11 @@ export default class ErrorBoundary extends React.Component {
                 Keşi Təmizlə & Yenilə
               </button>
               <a
-                href="#"
-                onClick={() => { window.location.hash = ''; window.location.reload(); }}
+                href="/"
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.location.href = '/';
+                }}
                 className="px-4 py-2 rounded-lg border border-outline-variant text-on-surface font-semibold text-xs hover:bg-surface-container transition-all"
               >
                 Ana Səhifə

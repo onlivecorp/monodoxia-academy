@@ -25,7 +25,12 @@ export default function AcademyPage() {
 
   const courseCategories = (categoriesList || []).filter(c => c.type === 'course' || c.type === 'all');
 
-  const filteredCourses = coursesList.filter(c => {
+  const safeCourses = Array.isArray(coursesList) ? coursesList : [];
+  const safeApplications = Array.isArray(applicationsList) ? applicationsList : [];
+  const safeProgress = progress && typeof progress === 'object' ? progress : {};
+
+  const filteredCourses = safeCourses.filter(c => {
+    if (!c) return false;
     const matchesFilter = filter === 'all' || c.category === filter;
     const title = getLocalized(c, 'title', currentLang, defaultLang) || '';
     const desc = getLocalized(c, 'description', currentLang, defaultLang) || '';
@@ -174,15 +179,15 @@ export default function AcademyPage() {
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {filteredCourses.map(c => {
-                const prog = progress[c.id] ? progress[c.id].percent : 0;
+                const prog = safeProgress[c.id] ? safeProgress[c.id].percent : 0;
                 const courseTitle = getLocalized(c, 'title', currentLang, defaultLang);
                 const courseDesc = getLocalized(c, 'description', currentLang, defaultLang);
                 const courseBadge = getLocalized(c, 'badge', currentLang, defaultLang);
                 const courseDuration = getLocalized(c, 'duration', currentLang, defaultLang) || c.duration;
-                const courseCategory = getCategoryLabel(c.category, currentLang);
+                const courseCategory = getCategoryLabel ? getCategoryLabel(c.category, currentLang) : (c.category || '');
 
                 const userApp = currentUser
-                  ? applicationsList.find(a => a.userId === currentUser.id && a.targetId === c.id && !a.archived)
+                  ? safeApplications.find(a => a && a.userId === currentUser.id && a.targetId === c.id && !a.archived)
                   : null;
 
                 return (
