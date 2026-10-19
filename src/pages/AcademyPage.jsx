@@ -38,7 +38,8 @@ export default function AcademyPage() {
   });
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#faf8f5] text-[#071326]">
+      {/* Editorial Luxury Page Hero */}
       <PageHero
         badge={getLocalized(academy, 'badge', currentLang, defaultLang) || 'Akademik Tədris'}
         title={getLocalized(academy, 'title', currentLang, defaultLang) || 'Kurslar və Sertifikasiya Proqramları'}
@@ -47,100 +48,116 @@ export default function AcademyPage() {
         adminCmsBlock="academy"
       >
         {/* Quick Academy Badges */}
-        <div className="flex flex-wrap items-center gap-4 mt-6 pt-6 border-t border-outline-variant/40 text-xs text-on-surface-variant">
-          <div className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-secondary text-[18px]">
+        <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-8 pt-6 border-t border-[#c5a059]/20">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
+            <span className="material-symbols-outlined text-[#775a19] text-[18px]">
               {academy.heroBadge1Icon || 'verified'}
             </span>
-            <span>{getLocalized(academy, 'heroBadge1Text', currentLang, defaultLang) || 'Beynəlxalq QR Sertifikat'}</span>
+            <span className="font-medium">{getLocalized(academy, 'heroBadge1Text', currentLang, defaultLang) || 'Beynəlxalq QR Sertifikat'}</span>
           </div>
-          <div className="w-1 h-1 rounded-full bg-outline-variant" />
-          <div className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-secondary text-[18px]">
+
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
+            <span className="material-symbols-outlined text-[#775a19] text-[18px]">
               {academy.heroBadge2Icon || 'psychology'}
             </span>
-            <span>{getLocalized(academy, 'heroBadge2Text', currentLang, defaultLang) || 'ICF & PhD Mentorlar'}</span>
+            <span className="font-medium">{getLocalized(academy, 'heroBadge2Text', currentLang, defaultLang) || 'ICF & PhD Mentorlar'}</span>
           </div>
-          <div className="w-1 h-1 rounded-full bg-outline-variant" />
-          <div className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-secondary text-[18px]">
+
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
+            <span className="material-symbols-outlined text-[#775a19] text-[18px]">
               {academy.heroBadge3Icon || 'laptop_chromebook'}
             </span>
-            <span>{getLocalized(academy, 'heroBadge3Text', currentLang, defaultLang) || 'Ömürlük Giriş və LMS Arxiv'}</span>
+            <span className="font-medium">{getLocalized(academy, 'heroBadge3Text', currentLang, defaultLang) || 'Ömürlük Giriş və LMS Arxiv'}</span>
           </div>
         </div>
       </PageHero>
 
       {/* Main Content Area */}
-      <section className="py-12 sm:py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-14 sm:py-20 relative overflow-hidden">
+        {/* Subtle Ambient Radial Glow */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[900px] h-[600px] bg-gradient-to-b from-[#c5a059]/6 via-transparent to-transparent rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           
           {/* Search & Filter Toolbar */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10 pb-6 border-b border-outline-variant/50">
+          <div className="bg-white/80 backdrop-blur-md border border-[#c5a059]/25 rounded-2xl p-4 sm:p-5 shadow-[0_10px_30px_-10px_rgba(7,19,38,0.05)] mb-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            
             {/* Search Input */}
-            <div className="relative w-full md:w-80">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">search</span>
+            <div className="relative w-full md:w-84">
+              <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[19px] text-[#775a19]">search</span>
               <input
                 type="text"
                 placeholder={getLocalized(academy, 'searchPlaceholder', currentLang, defaultLang) || 'Kurs və ya kouç axtar...'}
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 text-sm rounded bg-surface border border-outline-variant focus:border-secondary focus:outline-none transition-colors"
+                className="w-full pl-10 pr-9 py-2.5 text-sm rounded-xl bg-[#faf8f5] border border-[#c5a059]/30 focus:border-[#775a19] focus:bg-white focus:ring-2 focus:ring-[#c5a059]/20 outline-none transition-all placeholder-[#94a3b8] text-[#071326]"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-outline hover:text-primary text-xs"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94a3b8] hover:text-[#071326] transition-colors p-1"
                 >
-                  ✕
+                  <span className="material-symbols-outlined text-[16px]">close</span>
                 </button>
               )}
             </div>
 
             {/* Category Filter Tabs */}
-            <div className="flex flex-wrap items-center gap-1.5">
+            <div className="flex flex-wrap items-center gap-2">
               {[
                 { id: 'all', label: t('filter_all') || 'Bütün Kurslar' },
                 ...courseCategories.map(cat => ({
                   id: cat.key,
                   label: getCategoryLabel(cat.key, currentLang)
                 }))
-              ].map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setFilter(tab.id)}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
-                    filter === tab.id
-                      ? 'bg-secondary text-on-secondary shadow-sm'
-                      : 'bg-surface-container-low text-on-surface-variant hover:text-primary hover:bg-surface-container'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
+              ].map(tab => {
+                const isActive = filter === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setFilter(tab.id)}
+                    className={`px-4 py-2 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer ${
+                      isActive
+                        ? 'bg-gradient-to-r from-[#071326] to-[#0c2242] text-[#e5c57d] shadow-md border border-[#c5a059]/40'
+                        : 'bg-[#faf8f5] text-[#475569] hover:text-[#071326] hover:bg-white border border-[#e2e8f0]'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Results Count */}
-          <div className="flex items-center justify-between mb-6 text-xs text-on-surface-variant">
-            <span>Tapılan kurslar: <strong className="text-primary font-semibold">{filteredCourses.length}</strong></span>
-            {filter !== 'all' && (
-              <button onClick={() => setFilter('all')} className="text-secondary hover:underline cursor-pointer">
-                {getLocalized(academy, 'resetFilterBtnText', currentLang, defaultLang) || 'Filteri sıfırla'}
+          {/* Results Summary Bar */}
+          <div className="flex items-center justify-between mb-8 px-1 text-xs text-[#64748b]">
+            <span className="flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-[16px] text-[#775a19]">school</span>
+              <span>Tapılan proqramlar: <strong className="text-[#071326] font-semibold text-sm">{filteredCourses.length}</strong></span>
+            </span>
+            {(filter !== 'all' || searchQuery) && (
+              <button 
+                onClick={() => { setFilter('all'); setSearchQuery(''); }} 
+                className="text-[#775a19] hover:text-[#071326] font-medium flex items-center gap-1 hover:underline cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[14px]">refresh</span>
+                <span>{getLocalized(academy, 'resetFilterBtnText', currentLang, defaultLang) || 'Filteri sıfırla'}</span>
               </button>
             )}
           </div>
 
           {/* Course Grid */}
           {filteredCourses.length === 0 ? (
-            <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-xl p-12 text-center max-w-md mx-auto shadow-sm">
-              <span className="material-symbols-outlined text-4xl text-outline mb-2">school</span>
-              <h3 className="font-serif text-lg font-bold text-primary mb-1">
+            <div className="bg-white rounded-3xl border border-[#c5a059]/30 p-12 sm:p-16 text-center max-w-lg mx-auto shadow-[0_15px_40px_-15px_rgba(7,19,38,0.07)]">
+              <div className="w-16 h-16 rounded-2xl bg-[#c5a059]/15 text-[#775a19] flex items-center justify-center mx-auto mb-4">
+                <span className="material-symbols-outlined text-3xl">school</span>
+              </div>
+              <h3 className="font-serif text-xl font-medium text-[#071326] mb-2">
                 {coursesList.length === 0
                   ? (getLocalized(academy, 'emptyTitle', currentLang, defaultLang) || 'Hal-hazırda aktiv kurs mövcud deyil')
                   : (getLocalized(academy, 'notFoundTitle', currentLang, defaultLang) || 'Axtarışa uyğun kurs tapılmadı')}
               </h3>
-              <p className="text-xs text-on-surface-variant mb-4">
+              <p className="text-sm text-[#64748b] mb-6 max-w-sm mx-auto leading-relaxed">
                 {coursesList.length === 0
                   ? (getLocalized(academy, 'emptyDesc', currentLang, defaultLang) || 'Yeni proqramlar və qeydiyyat tarixləri tezliklə elan olunacaqdır.')
                   : (getLocalized(academy, 'notFoundDesc', currentLang, defaultLang) || 'Axtarış sözünü dəyişdirin və ya bütün kurslar bölməsinə keçin.')}
@@ -148,21 +165,21 @@ export default function AcademyPage() {
               {coursesList.length > 0 && (
                 <button
                   onClick={() => { setFilter('all'); setSearchQuery(''); }}
-                  className="px-4 py-2 rounded bg-secondary text-on-secondary text-xs font-semibold cursor-pointer"
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#071326] to-[#0c2242] text-[#e5c57d] text-xs font-semibold tracking-wider uppercase shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
                 >
                   {getLocalized(academy, 'showAllBtnText', currentLang, defaultLang) || 'Bütün Kursları Göstər'}
                 </button>
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {filteredCourses.map(c => {
                 const prog = progress[c.id] ? progress[c.id].percent : 0;
                 const courseTitle = getLocalized(c, 'title', currentLang, defaultLang);
                 const courseDesc = getLocalized(c, 'description', currentLang, defaultLang);
                 const courseBadge = getLocalized(c, 'badge', currentLang, defaultLang);
-                const courseStatus = getLocalized(c, 'status', currentLang, defaultLang);
                 const courseDuration = getLocalized(c, 'duration', currentLang, defaultLang) || c.duration;
+                const courseCategory = getCategoryLabel(c.category, currentLang);
 
                 const userApp = currentUser
                   ? applicationsList.find(a => a.userId === currentUser.id && a.targetId === c.id && !a.archived)
@@ -171,105 +188,147 @@ export default function AcademyPage() {
                 return (
                   <div
                     key={c.id}
-                    className={`bg-surface-container-lowest rounded-xl ${
-                      c.featured ? 'border-t-4 border-t-secondary ring-1 ring-secondary/20' : ''
-                    } border border-outline-variant/60 p-7 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between`}
+                    className="group relative bg-white rounded-3xl border border-[#c5a059]/25 hover:border-[#c5a059]/60 shadow-[0_8px_30px_-8px_rgba(7,19,38,0.06)] hover:shadow-[0_20px_45px_-12px_rgba(7,19,38,0.14)] hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden"
                   >
-                    <div>
-                      {/* Top Badges */}
-                      <div className="flex items-center justify-between mb-4">
+                    {/* Top Gold Gradient Stripe on Featured or Hover */}
+                    <div className={`h-1.5 w-full bg-gradient-to-r from-[#c5a059] via-[#e5c57d] to-[#775a19] ${c.featured ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-300`} />
+
+                    <div className="p-7 sm:p-9">
+                      {/* Top Badges & Duration */}
+                      <div className="flex items-center justify-between gap-3 mb-5">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className={`px-2.5 py-1 rounded ${c.badgeClass || 'bg-secondary/10 text-secondary'} font-label-sm text-[11px] font-bold tracking-wider uppercase`}>
-                            {courseBadge}
-                          </span>
-                          {c.category && (
-                            <span className="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-sm text-[11px] font-medium tracking-wide">
-                              {getCategoryLabel(c.category, currentLang)}
+                          {courseBadge && (
+                            <span className="px-3 py-1 rounded-full bg-[#c5a059]/15 border border-[#c5a059]/35 text-[#775a19] text-[11px] font-bold tracking-wider uppercase">
+                              {courseBadge}
+                            </span>
+                          )}
+                          {courseCategory && (
+                            <span className="px-2.5 py-1 rounded-full bg-[#f1f5f9] text-[#475569] text-[11px] font-medium tracking-wide">
+                              {courseCategory}
+                            </span>
+                          )}
+                          {c.featured && (
+                            <span className="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-700 border border-amber-500/30 text-[11px] font-semibold flex items-center gap-1">
+                              <span className="material-symbols-outlined text-[13px]">star</span>
+                              <span>Seçilmiş</span>
                             </span>
                           )}
                         </div>
-                        <span className="font-label-sm text-xs text-outline">{courseDuration}</span>
+
+                        {courseDuration && (
+                          <div className="flex items-center gap-1.5 text-xs text-[#64748b] font-medium shrink-0">
+                            <span className="material-symbols-outlined text-[16px] text-[#775a19]">schedule</span>
+                            <span>{courseDuration}</span>
+                          </div>
+                        )}
                       </div>
 
                       {/* Course Title */}
-                      <h3 className="font-headline-md text-xl md:text-2xl text-primary font-serif mb-3 leading-snug">
+                      <h3 className="font-serif text-2xl sm:text-[1.65rem] text-[#071326] group-hover:text-[#775a19] transition-colors leading-[1.3] mb-3 font-medium">
                         {courseTitle}
                       </h3>
 
                       {/* Description */}
-                      <p className="font-body-md text-sm text-on-surface-variant mb-6 leading-relaxed">
+                      <p className="text-sm text-[#475569] leading-relaxed mb-6 font-light line-clamp-3">
                         {courseDesc}
                       </p>
 
                       {/* Syllabus Module Pills */}
                       {c.modules && c.modules.length > 0 && (
-                        <div className="mb-6 p-3 rounded bg-surface-container-low border border-outline-variant/40">
-                          <div className="flex items-center justify-between text-[11px] text-on-surface-variant font-semibold mb-2">
-                            <span>Tədris Proqramı:</span>
-                            <span className="text-secondary">{c.modules.length} Modul</span>
+                        <div className="mb-6 p-4 rounded-2xl bg-[#faf8f5] border border-[#c5a059]/20">
+                          <div className="flex items-center justify-between text-xs font-semibold text-[#071326] mb-2.5">
+                            <span className="flex items-center gap-1.5">
+                              <span className="material-symbols-outlined text-[15px] text-[#775a19]">menu_book</span>
+                              <span>Tədris Proqramı</span>
+                            </span>
+                            <span className="px-2 py-0.5 rounded-full bg-[#c5a059]/15 text-[#775a19] text-[11px]">
+                              {c.modules.length} Modul
+                            </span>
                           </div>
-                          <div className="flex flex-col gap-1 text-xs text-on-surface">
+                          
+                          <div className="flex flex-col gap-1.5">
                             {c.modules.slice(0, 2).map((m, mIdx) => (
-                              <div key={m.id || mIdx} className="flex items-center gap-1.5 text-on-surface-variant truncate">
-                                <span className="material-symbols-outlined text-[14px] text-secondary">check</span>
+                              <div key={m.id || mIdx} className="flex items-center gap-2 text-xs text-[#475569] truncate">
+                                <span className="material-symbols-outlined text-[14px] text-[#775a19] shrink-0">check_circle</span>
                                 <span className="truncate">{getLocalized(m, 'title', currentLang, defaultLang)}</span>
                               </div>
                             ))}
                             {c.modules.length > 2 && (
-                              <span className="text-[10px] text-outline italic">+ daha {c.modules.length - 2} modul</span>
+                              <div className="text-[11px] text-[#775a19] italic pt-0.5">
+                                + daha {c.modules.length - 2} modul və praktiki tapşırıqlar
+                              </div>
                             )}
                           </div>
                         </div>
                       )}
                     </div>
 
-                    {/* Bottom Info & Action Buttons */}
-                    <div className="space-y-4 pt-4 border-t border-outline-variant/30">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-on-surface-variant">
-                          Aparıcı Kouç: <strong className="text-primary font-semibold">{c.instructor}</strong>
-                        </span>
-                        <span className="text-secondary font-bold">{c.price || 'Ödənişli'}</span>
+                    {/* Bottom Info & CTAs */}
+                    <div className="p-7 sm:p-9 pt-0">
+                      {/* Coach & Price Row */}
+                      <div className="flex items-center justify-between gap-4 py-4 border-t border-[#e2e8f0] mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#071326] to-[#0c2242] text-[#e5c57d] font-serif font-bold text-sm flex items-center justify-center shadow-sm shrink-0">
+                            {(c.instructor || 'M')[0]}
+                          </div>
+                          <div>
+                            <div className="text-xs text-[#64748b]">Aparıcı Kouç</div>
+                            <div className="text-sm font-semibold text-[#071326] leading-tight">{c.instructor}</div>
+                            {c.instructorRole && (
+                              <div className="text-[11px] text-[#775a19] font-medium">{c.instructorRole}</div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="text-right">
+                          <div className="text-xs text-[#64748b]">İnvestisiya</div>
+                          <div className="text-xl sm:text-2xl font-serif font-bold text-[#071326]">
+                            {c.price || 'Ödənişli'}
+                          </div>
+                        </div>
                       </div>
 
                       {/* Progress Bar if started */}
                       {prog > 0 && (
-                        <div>
-                          <div className="flex justify-between text-[11px] text-outline mb-1">
-                            <span>Tərəqqiniz</span>
-                            <span>{prog}%</span>
+                        <div className="mb-4">
+                          <div className="flex justify-between text-xs text-[#64748b] mb-1.5">
+                            <span>Tədris Tərəqqisi</span>
+                            <span className="font-semibold text-[#775a19]">{prog}%</span>
                           </div>
-                          <div className="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
-                            <div className="bg-secondary h-full rounded-full transition-all duration-300" style={{ width: `${prog}%` }} />
+                          <div className="w-full bg-[#e2e8f0] h-2 rounded-full overflow-hidden">
+                            <div 
+                              className="bg-gradient-to-r from-[#c5a059] to-[#775a19] h-full rounded-full transition-all duration-500" 
+                              style={{ width: `${prog}%` }} 
+                            />
                           </div>
                         </div>
                       )}
 
-                      {/* CTAs */}
-                      <div className="flex items-center gap-3 pt-2">
+                      {/* CTA Buttons */}
+                      <div className="flex items-center gap-3 pt-1">
                         <button
                           onClick={() => openPlayer(c)}
-                          className="flex-1 py-2.5 px-4 rounded bg-primary text-on-primary font-label-md text-xs font-semibold hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                          className="flex-1 py-3 px-5 rounded-xl bg-gradient-to-r from-[#071326] to-[#0c2242] text-white hover:text-[#e5c57d] text-xs font-semibold tracking-wider uppercase shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer group/btn"
                         >
-                          <span className="material-symbols-outlined text-[16px]">play_circle</span>
+                          <span className="material-symbols-outlined text-[18px] text-[#e5c57d] group-hover/btn:scale-110 transition-transform">play_circle</span>
                           <span>{prog > 0 ? 'Davam et' : 'Dərslərə Bax'}</span>
                         </button>
 
                         {userApp ? (
                           <button
                             onClick={() => openApplication(c, 'course')}
-                            className="py-2.5 px-3 rounded text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200 hover:bg-emerald-200 transition-colors flex items-center gap-1 cursor-pointer"
+                            className="py-3 px-4 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100 transition-colors flex items-center gap-1.5 cursor-pointer"
                           >
-                            <span className="material-symbols-outlined text-[14px]">check_circle</span>
+                            <span className="material-symbols-outlined text-[16px] text-emerald-600">check_circle</span>
                             <span>{userApp.status}</span>
                           </button>
                         ) : (
                           <button
                             onClick={() => openApplication(c, 'course')}
-                            className="py-2.5 px-4 rounded border border-secondary text-secondary font-label-md text-xs font-semibold hover:bg-secondary/10 transition-colors flex items-center gap-1.5 cursor-pointer"
+                            className="py-3 px-5 rounded-xl border border-[#c5a059] text-[#775a19] hover:bg-[#c5a059]/10 text-xs font-semibold tracking-wider uppercase transition-all flex items-center gap-1.5 cursor-pointer"
                           >
-                            <span className="material-symbols-outlined text-[15px]">how_to_reg</span>
-                            <span>Qeydiyyatdan Keç</span>
+                            <span className="material-symbols-outlined text-[16px]">how_to_reg</span>
+                            <span>Qeydiyyat</span>
                           </button>
                         )}
                       </div>
@@ -280,56 +339,65 @@ export default function AcademyPage() {
             </div>
           )}
 
-          {/* Educational Guarantee Section */}
-          <div className="mt-16 bg-surface-container-low border border-outline-variant/60 rounded-2xl p-8 sm:p-10">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Educational Guarantee Banner */}
+          <div className="mt-20 rounded-3xl bg-gradient-to-br from-[#071326] via-[#0a1b36] to-[#040e1c] border border-[#c5a059]/30 p-8 sm:p-12 shadow-[0_25px_60px_-15px_rgba(7,19,38,0.3)] relative overflow-hidden text-white">
+            {/* Background Ambient Glows */}
+            <div className="absolute -top-24 -left-24 w-80 h-80 bg-[#c5a059]/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-[#c5a059]/10 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-10">
+              
+              {/* Guarantee 1 */}
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
+                <div className="w-13 h-13 rounded-2xl bg-[#c5a059]/20 border border-[#c5a059]/40 text-[#e5c57d] flex items-center justify-center shrink-0">
                   <span className="material-symbols-outlined text-2xl">
                     {academy.guarantee1Icon || 'verified'}
                   </span>
                 </div>
                 <div>
-                  <h4 className="font-serif text-base font-bold text-primary mb-1">
+                  <h4 className="font-serif text-lg font-medium text-white mb-1.5">
                     {getLocalized(academy, 'guarantee1Title', currentLang, defaultLang) || 'Rəsmi QR Sertifikat'}
                   </h4>
-                  <p className="text-xs text-on-surface-variant leading-relaxed">
+                  <p className="text-xs sm:text-sm text-[#cbd5e1] leading-relaxed font-light">
                     {getLocalized(academy, 'guarantee1Desc', currentLang, defaultLang) || 'İmtahanı uğurla başa vuran məzunlarımıza qlobal səviyyədə onlayn təsdiqlənən rəsmi QR kodlu sertifikat verilir.'}
                   </p>
                 </div>
               </div>
 
+              {/* Guarantee 2 */}
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
+                <div className="w-13 h-13 rounded-2xl bg-[#c5a059]/20 border border-[#c5a059]/40 text-[#e5c57d] flex items-center justify-center shrink-0">
                   <span className="material-symbols-outlined text-2xl">
                     {academy.guarantee2Icon || 'co_present'}
                   </span>
                 </div>
                 <div>
-                  <h4 className="font-serif text-base font-bold text-primary mb-1">
+                  <h4 className="font-serif text-lg font-medium text-white mb-1.5">
                     {getLocalized(academy, 'guarantee2Title', currentLang, defaultLang) || 'Fərdi Mentor Əlaqəsi'}
                   </h4>
-                  <p className="text-xs text-on-surface-variant leading-relaxed">
+                  <p className="text-xs sm:text-sm text-[#cbd5e1] leading-relaxed font-light">
                     {getLocalized(academy, 'guarantee2Desc', currentLang, defaultLang) || 'Hər bir kurs çərçivəsində tələbələrə ev tapşırıqlarının auditində fərdi mentor rəyi və istiqamətləndirmə təmin edilir.'}
                   </p>
                 </div>
               </div>
 
+              {/* Guarantee 3 */}
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
+                <div className="w-13 h-13 rounded-2xl bg-[#c5a059]/20 border border-[#c5a059]/40 text-[#e5c57d] flex items-center justify-center shrink-0">
                   <span className="material-symbols-outlined text-2xl">
                     {academy.guarantee3Icon || 'all_inclusive'}
                   </span>
                 </div>
                 <div>
-                  <h4 className="font-serif text-base font-bold text-primary mb-1">
+                  <h4 className="font-serif text-lg font-medium text-white mb-1.5">
                     {getLocalized(academy, 'guarantee3Title', currentLang, defaultLang) || 'Daimi Material Girişi'}
                   </h4>
-                  <p className="text-xs text-on-surface-variant leading-relaxed">
+                  <p className="text-xs sm:text-sm text-[#cbd5e1] leading-relaxed font-light">
                     {getLocalized(academy, 'guarantee3Desc', currentLang, defaultLang) || 'Kursu bitirdikdən sonra da bütün video dərslər, audio meditasiyalar və iş dəftərləri şəxsi kabinetinizdə qalır.'}
                   </p>
                 </div>
               </div>
+
             </div>
           </div>
 
@@ -338,3 +406,4 @@ export default function AcademyPage() {
     </div>
   );
 }
+
