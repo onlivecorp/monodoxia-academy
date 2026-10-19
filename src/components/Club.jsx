@@ -5,7 +5,7 @@ import { useApp } from '../context/AppContext';
 
 export default function Club() {
   const { t, currentLang, defaultLang } = useLanguage();
-  const { joinClubTier, clubTiersList, homeContent, openApplication, currentUser, applicationsList, userTier } = useApp();
+  const { clubTiersList, homeContent, openApplication, currentUser, applicationsList, userTier } = useApp();
   const club = homeContent?.club || {};
 
   const premiumTier = clubTiersList.find(t => t.id === 'premium') || clubTiersList[2];
@@ -33,81 +33,136 @@ export default function Club() {
     : (premiumTier ? getLocalizedArray(premiumTier, 'features', currentLang, defaultLang) : []);
   const tierCtaText = getLocalized(club, 'tierCtaText', currentLang, defaultLang) || t('club_tier_cta');
 
+  const badgeText = getLocalized(club, 'badge', currentLang, defaultLang) || t('club_badge');
+  const titleText = getLocalized(club, 'title', currentLang, defaultLang) || t('club_title');
+  const descText = getLocalized(club, 'desc', currentLang, defaultLang) || t('club_desc');
+
   return (
-    <section className="py-space-2xl md:py-space-3xl bg-primary-container text-on-primary relative overflow-hidden" id="club">
-      <div className="absolute -right-32 -bottom-32 w-96 h-96 rounded-full bg-secondary/10 blur-3xl pointer-events-none"></div>
-      <div className="max-w-7xl mx-auto px-gutter md:px-margin relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-7 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-secondary-fixed/40 bg-secondary-fixed/10">
-              <span className="w-1.5 h-1.5 rounded-full bg-secondary-fixed"></span>
-              <span className="font-label-sm text-label-sm text-secondary-fixed tracking-widest uppercase">
-                {getLocalized(club, 'badge', currentLang, defaultLang) || t('club_badge')}
+    <section className="relative overflow-hidden py-20 md:py-28 bg-gradient-to-br from-[#051124] via-[#091b36] to-[#040e1c] text-white border-b border-[#0a192f]" id="club">
+      {/* AMBIENT LUXURY GLOW & GEOMETRIC ACCENTS */}
+      <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
+        <div className="absolute top-1/4 -right-32 w-[34rem] h-[34rem] rounded-full bg-gradient-to-bl from-[#c5a059]/15 via-[#c5a059]/5 to-transparent blur-3xl" />
+        <div className="absolute -bottom-32 -left-32 w-[34rem] h-[34rem] rounded-full bg-gradient-to-tr from-[#c5a059]/10 via-[#0a192f]/20 to-transparent blur-3xl" />
+        <div 
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: `radial-gradient(circle at 1px 1px, #ffffff 1px, transparent 0)`,
+            backgroundSize: '36px 36px'
+          }}
+        />
+      </div>
+
+      <div className="relative max-w-7xl mx-auto px-6 md:px-12 z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14 items-center">
+          {/* LEFT CONTENT */}
+          <div className="lg:col-span-7 space-y-6 md:space-y-8">
+            {/* BADGE */}
+            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#c5a059]/40 bg-[#c5a059]/10 backdrop-blur-md shadow-sm">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#c5a059] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#e9c176]"></span>
+              </span>
+              <span className="text-[11px] sm:text-xs font-semibold text-[#e9c176] tracking-[0.2em] uppercase font-sans">
+                {badgeText}
               </span>
             </div>
-            <h2 className="font-headline-xl text-headline-xl-mobile md:text-headline-xl font-serif text-surface-bright">
-              {getLocalized(club, 'title', currentLang, defaultLang) || t('club_title')}
+
+            {/* HEADLINE */}
+            <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-serif font-medium text-white tracking-tight leading-[1.2]">
+              {titleText}
             </h2>
-            <p className="font-body-lg text-body-lg text-on-primary-container leading-relaxed">
-              {getLocalized(club, 'desc', currentLang, defaultLang) || t('club_desc')}
+
+            {/* DESCRIPTION */}
+            <p className="text-base sm:text-lg text-slate-300 leading-relaxed font-normal max-w-2xl">
+              {descText}
             </p>
+
+            {/* PRIVILEGES LIST */}
             <ul className="space-y-4 pt-2">
               {perks.map((perk, idx) => (
-                <li key={idx} className="flex items-start gap-3">
-                  <span className="material-symbols-outlined text-secondary-fixed text-[20px] mt-0.5">verified</span>
-                  <span className="font-body-md text-body-md text-surface-bright">
+                <li key={idx} className="flex items-start gap-3.5">
+                  <div className="w-6 h-6 rounded-full bg-[#c5a059]/15 border border-[#c5a059]/35 text-[#e9c176] flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+                    <span className="material-symbols-outlined text-[15px]">verified</span>
+                  </div>
+                  <span className="text-sm sm:text-base text-slate-200 leading-relaxed font-normal">
                     {perk}
                   </span>
                 </li>
               ))}
             </ul>
+
+            {/* ACTION & CAPACITY STATUS */}
             <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
               <button
                 onClick={() => openApplication(premiumTier || { id: 'premium', title: tierName, price: `₼ ${tierPrice}` }, 'club')}
-                className="bg-secondary-fixed text-on-secondary-fixed hover:bg-secondary-container px-8 py-3.5 rounded text-label-lg font-label-lg tracking-wider text-center transition-colors font-semibold flex items-center justify-center gap-2 shadow-md"
+                className="group relative inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-[#d4af37] via-[#e9c176] to-[#c5a059] hover:from-[#c5a059] hover:to-[#b98d2c] text-[#070f1e] font-semibold text-xs tracking-wider uppercase shadow-lg shadow-[#c5a059]/25 hover:shadow-xl hover:shadow-[#c5a059]/35 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer overflow-hidden"
               >
-                <span>{userTier === 'Premium' || userTier === 'VIP' ? 'Rezident Statusunuz Aktivdir' : (userClubApp ? `Müraciət: ${userClubApp.status}` : (getLocalized(club, 'ctaBtnText', currentLang, defaultLang) || t('club_join_btn')))}</span>
+                <span>
+                  {userTier === 'Premium' || userTier === 'VIP' 
+                    ? 'Rezident Statusunuz Aktivdir' 
+                    : (userClubApp ? `Müraciət: ${userClubApp.status}` : (getLocalized(club, 'ctaBtnText', currentLang, defaultLang) || t('club_join_btn')))}
+                </span>
                 <span className="material-symbols-outlined text-[18px]">how_to_reg</span>
               </button>
-              <span className="text-xs text-on-primary-container flex items-center gap-1 justify-center sm:justify-start">
-                <span className="material-symbols-outlined text-[16px]">lock</span>
+
+              <span className="text-xs text-slate-300 flex items-center gap-1.5 justify-center sm:justify-start px-3 py-2 rounded-lg bg-white/5 border border-white/10">
+                <span className="material-symbols-outlined text-[16px] text-[#e9c176]">lock</span>
                 <span>{getLocalized(club, 'limitedText', currentLang, defaultLang) || t('club_limited')}</span>
               </span>
             </div>
           </div>
 
-          {/* Dynamic Membership Tier Card */}
-          <div className="lg:col-span-5">
-            <div className="bg-surface-bright text-on-surface p-8 rounded-lg border border-secondary/40 shadow-2xl relative">
-              <div className="absolute -top-3 right-6 bg-secondary text-surface-bright px-3 py-1 rounded text-label-sm font-label-sm uppercase tracking-widest">
-                {tierBadge}
+          {/* RIGHT TIER CARD */}
+          <div className="lg:col-span-5 relative">
+            {/* Ambient Halo behind card */}
+            <div className="absolute -inset-4 bg-gradient-to-tr from-[#c5a059]/20 via-[#c5a059]/10 to-transparent rounded-3xl blur-2xl pointer-events-none" />
+
+            <div className="relative bg-white/95 backdrop-blur-xl text-[#070f1e] p-8 sm:p-9 rounded-2xl border border-[#c5a059]/50 shadow-[0_25px_60px_rgba(0,0,0,0.4)]">
+              {/* Floating Pill Badge */}
+              <div className="absolute -top-3.5 right-6 bg-gradient-to-r from-[#9e782f] via-[#c5a059] to-[#8a6a1f] text-white px-4 py-1.5 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase shadow-md flex items-center gap-1">
+                <span className="material-symbols-outlined text-[13px]">stars</span>
+                <span>{tierBadge}</span>
               </div>
-              <h3 className="font-headline-md text-headline-md font-serif text-primary">
+
+              {/* Title & Subtitle */}
+              <h3 className="font-serif text-2xl font-bold text-[#070f1e]">
                 {tierName}
               </h3>
-              <p className="font-body-sm text-body-sm text-on-surface-variant mt-1 mb-6">
+              <p className="text-xs text-slate-500 mt-1 mb-6 font-normal">
                 {tierSubtitle}
               </p>
-              <div className="py-4 border-y border-outline-variant/40 mb-6">
-                <span className="font-display-lg text-display-lg text-primary font-serif">
-                  ₼ {tierPrice}
-                </span>
-                <span className="font-body-md text-body-md text-on-surface-variant">
-                  {' '}{tierPeriod}
-                </span>
-                <div className="text-xs text-secondary mt-1">{tierOffer}</div>
+
+              {/* Price Block */}
+              <div className="py-4 border-y border-[#e2d9c8]/70 mb-6">
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-3xl sm:text-4xl font-serif font-bold text-[#070f1e]">
+                    ₼ {tierPrice}
+                  </span>
+                  <span className="text-xs text-slate-500 font-medium">
+                    {tierPeriod}
+                  </span>
+                </div>
+                {tierOffer && (
+                  <div className="inline-block px-2.5 py-0.5 rounded-full bg-[#c5a059]/15 text-[#775a19] text-xs font-semibold mt-2 border border-[#c5a059]/30">
+                    {tierOffer}
+                  </div>
+                )}
               </div>
+
+              {/* Feature Checklist */}
               <div className="space-y-3 mb-8">
                 {tierFeatures.map((feat, idx) => (
-                  <div key={idx} className="flex items-center gap-2 text-sm text-on-surface-variant">
-                    <span className="material-symbols-outlined text-secondary text-[18px]">check_circle</span>
+                  <div key={idx} className="flex items-center gap-2.5 text-xs sm:text-sm text-slate-700">
+                    <span className="material-symbols-outlined text-[#775a19] text-[18px] shrink-0">check_circle</span>
                     <span>{feat}</span>
                   </div>
                 ))}
               </div>
+
+              {/* Card Action Button */}
               <button
                 onClick={() => openApplication(premiumTier || { id: 'premium', title: tierName, price: `₼ ${tierPrice}` }, 'club')}
-                className="block w-full py-3 text-center bg-primary-container text-on-primary hover:bg-[#112240] rounded text-label-md font-label-md uppercase tracking-wider transition-colors shadow-sm"
+                className="w-full py-4 text-center bg-[#070f1e] hover:bg-[#112240] text-white rounded-xl text-xs font-semibold uppercase tracking-[0.16em] border border-[#c5a059]/40 shadow-lg shadow-[#070f1e]/25 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
               >
                 {userTier === 'Premium' || userTier === 'VIP' ? 'Aktiv Rezident' : (userClubApp ? `Müraciət Statusu: ${userClubApp.status}` : tierCtaText)}
               </button>
