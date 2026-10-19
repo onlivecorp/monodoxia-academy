@@ -107,15 +107,28 @@ export default function Footer() {
           </div>
 
           {/* CONTACT */}
-          <div className="lg:col-span-4 space-y-3">
+          <div className="lg:col-span-4 space-y-3.5">
             <div className="font-label-sm text-label-sm text-secondary-fixed tracking-widest uppercase">ƏLAQƏ VƏ ÜNVAN</div>
-            <p className="font-body-md text-body-md text-on-primary-container">
-              {getLocalized(footer, 'address', currentLang, defaultLang) || 'Nizami küçəsi 142, İntellektual İnkişaf Mərkəzi, Bakı, Azərbaycan'}
-            </p>
-            <p className="font-body-md text-body-md text-on-primary-container">
-              Əlaqə: <a href={`mailto:${contactEmail}`} className="hover:text-secondary-fixed transition-colors underline">{contactEmail}</a><br/>
-              Tel: <a href={`tel:${contactPhone.replace(/\s+/g, '')}`} className="hover:text-secondary-fixed transition-colors">{contactPhone}</a>
-            </p>
+            <ul className="space-y-3 font-body-md text-body-md text-on-primary-container">
+              <li className="flex items-start gap-2.5">
+                <span className="material-symbols-outlined text-[19px] text-secondary shrink-0 mt-0.5">location_on</span>
+                <span className="leading-snug">
+                  {getLocalized(footer, 'address', currentLang, defaultLang) || 'Nizami küçəsi 142, İntellektual İnkişaf Mərkəzi, Bakı, Azərbaycan'}
+                </span>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <span className="material-symbols-outlined text-[19px] text-secondary shrink-0">mail</span>
+                <span>
+                  Əlaqə: <a href={`mailto:${contactEmail}`} className="hover:text-secondary-fixed transition-colors underline underline-offset-2 break-all">{contactEmail}</a>
+                </span>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <span className="material-symbols-outlined text-[19px] text-secondary shrink-0">call</span>
+                <span>
+                  Tel: <a href={`tel:${contactPhone.replace(/\s+/g, '')}`} className="hover:text-secondary-fixed transition-colors font-medium">{contactPhone}</a>
+                </span>
+              </li>
+            </ul>
           </div>
         </div>
 
