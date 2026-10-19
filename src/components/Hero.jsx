@@ -65,7 +65,7 @@ export default function Hero() {
           {/* LEFT CONTENT */}
           <div className="lg:col-span-7 space-y-6 md:space-y-8">
             {/* BADGE */}
-            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#c5a059]/40 bg-white/75 backdrop-blur-md shadow-sm animate-text-reveal">
+            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#c5a059]/40 bg-white/75 backdrop-blur-md shadow-sm anim-hero-badge">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#c5a059] opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-[#9e782f]"></span>
@@ -77,15 +77,21 @@ export default function Hero() {
 
             {/* HEADLINE */}
             <h1 className="text-4xl sm:text-5xl lg:text-[3.65rem] xl:text-[4.15rem] text-[#070f1e] font-serif font-medium tracking-tight leading-[1.12]">
-              <span className="block anim-hero-title">{title1}</span>
-              <span className="block italic font-normal gold-shimmer-text anim-hero-title [animation-delay:180ms]">
-                {title2}
-              </span>
-              <span className="block anim-hero-title [animation-delay:360ms]">{title3}</span>
+              <div className="hero-text-mask">
+                <span className="block anim-hero-line-1">{title1}</span>
+              </div>
+              <div className="hero-text-mask">
+                <span className="block italic font-normal gold-shimmer-text anim-hero-line-2">
+                  {title2}
+                </span>
+              </div>
+              <div className="hero-text-mask">
+                <span className="block anim-hero-line-3">{title3}</span>
+              </div>
             </h1>
 
             {/* DESCRIPTION */}
-            <p className="text-base sm:text-lg text-slate-600 max-w-xl leading-relaxed font-normal anim-hero-title [animation-delay:480ms]">
+            <p className="text-base sm:text-lg text-slate-600 max-w-xl leading-relaxed font-normal anim-hero-desc">
               {descText}
             </p>
 
