@@ -57,7 +57,7 @@ export default function Club() {
           {/* LEFT CONTENT */}
           <div className="lg:col-span-7 space-y-6 md:space-y-8">
             {/* BADGE */}
-            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#c5a059]/40 bg-[#c5a059]/10 backdrop-blur-md shadow-sm animate-text-reveal">
+            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#c5a059]/40 bg-[#c5a059]/10 backdrop-blur-md shadow-sm anim-badge">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#c5a059] opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-[#e9c176]"></span>
@@ -68,12 +68,12 @@ export default function Club() {
             </div>
 
             {/* HEADLINE */}
-            <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-serif font-medium text-white tracking-tight leading-[1.2] animate-text-reveal animate-delay-100">
+            <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-serif font-medium text-white tracking-tight leading-[1.2] anim-club-title">
               <span className="block">{titleText}</span>
             </h2>
 
             {/* DESCRIPTION */}
-            <p className="text-base sm:text-lg text-slate-300 leading-relaxed font-normal max-w-2xl animate-text-reveal-soft animate-delay-200">
+            <p className="text-base sm:text-lg text-slate-300 leading-relaxed font-normal max-w-2xl anim-subtext">
               {descText}
             </p>
 

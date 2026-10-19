@@ -77,15 +77,15 @@ export default function Hero() {
 
             {/* HEADLINE */}
             <h1 className="text-4xl sm:text-5xl lg:text-[3.65rem] xl:text-[4.15rem] text-[#070f1e] font-serif font-medium tracking-tight leading-[1.12]">
-              <span className="block animate-text-reveal animate-delay-100">{title1}</span>
-              <span className="block italic font-normal gold-shimmer-text animate-text-reveal animate-delay-200">
+              <span className="block anim-hero-title">{title1}</span>
+              <span className="block italic font-normal gold-shimmer-text anim-hero-title [animation-delay:180ms]">
                 {title2}
               </span>
-              <span className="block animate-text-reveal animate-delay-300">{title3}</span>
+              <span className="block anim-hero-title [animation-delay:360ms]">{title3}</span>
             </h1>
 
             {/* DESCRIPTION */}
-            <p className="text-base sm:text-lg text-slate-600 max-w-xl leading-relaxed font-normal animate-text-reveal-soft animate-delay-300">
+            <p className="text-base sm:text-lg text-slate-600 max-w-xl leading-relaxed font-normal anim-hero-title [animation-delay:480ms]">
               {descText}
             </p>
 

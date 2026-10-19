@@ -13,18 +13,6 @@ import Newsletter from '../components/Newsletter';
 
 export default function HomePage() {
   useEffect(() => {
-    // Select all section headings, subheadings, paragraphs, badges and card grids on homepage
-    const targetElements = document.querySelectorAll(
-      'section h1, section h2, section h3, section p, section .rounded-full > span, section .reveal-on-scroll'
-    );
-
-    targetElements.forEach((el) => {
-      // Avoid overriding hero items that already have immediate entrance animations
-      if (!el.closest('#hero') && !el.classList.contains('reveal-on-scroll')) {
-        el.classList.add('reveal-on-scroll');
-      }
-    });
-
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -40,7 +28,9 @@ export default function HomePage() {
       }
     );
 
-    const elementsToObserve = document.querySelectorAll('.reveal-on-scroll');
+    const elementsToObserve = document.querySelectorAll(
+      '.anim-badge, .anim-subtext, [class*="anim-"][class*="-title"]'
+    );
     elementsToObserve.forEach((el) => observer.observe(el));
 
     return () => {
