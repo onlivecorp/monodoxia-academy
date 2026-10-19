@@ -427,7 +427,159 @@ export default function AdminCmsTab() {
   const [cmsLang, setCmsLang] = useState('az');
   const [cmsShowAllLangs, setCmsShowAllLangs] = useState(false);
 
-  const mergeClubWithDefaults = (src) => (src ? { ...src } : {});
+  const defaultClubData = {
+    badge: "QAPALI İCMA ÜZVLÜYÜ",
+    title: "Monodoxia Coaching Club — Həmfikirlərin Seçilmiş Məkanı",
+    desc: "Davamlı inkişaf fərdi bir hadisə deyil, doğru mühitin bəhrəsidir. Coaching Club — dərin suallar verən, səthilikdən uzaq, bir-birinin təkamülünə töhfə verən seçkin şəxslərin qapalı ekosistemidir.",
+    perks: [
+      "Həftəlik canlı mentorluq və mastermind sessiyaları: Təcrübəli mentorlarla birbaşa dialoq.",
+      "Özəl meditasiya və təcrübə arxivi: 100+ saatlıq audio və video bələdçilər.",
+      "Qapalı intellektual icma müzakirələri: Konfidensial təhlükəsiz platforma.",
+      "Oflayn tədbirlərə və retreat-lərə VIP giriş: Qapalı illik düşərgələr."
+    ],
+    ctaBtnText: "Kluba qoşul",
+    limitedText: "Məhdud sayda yer: Aylıq qəbul",
+    tierBadge: "PREMIUM REZİDENT",
+    tierTitle: "Premium Rezident",
+    tierSubtitle: "Aylıq və ya illik daxil olma paketi",
+    tierPrice: "95",
+    tierPeriod: "/ aylıq",
+    tierOffer: "İllik ödənişdə 2 ay hədiyyə",
+    tierFeatures: [
+      "Bütün canlı klub tədbirləri və masterklaslar",
+      "Telegram VIP məxfi müzakirə otağı",
+      "Kurslara 25% fərdi endirim",
+      "Aylıq 1 fərdi diaqnostik orientasiya",
+      "Tam 100+ saatlıq meditasiya və video arxivi"
+    ],
+    tierCtaText: "REZİDENT OL",
+    translations: {
+      az: {
+        badge: "QAPALI İCMA ÜZVLÜYÜ",
+        title: "Monodoxia Coaching Club — Həmfikirlərin Seçilmiş Məkanı",
+        desc: "Davamlı inkişaf fərdi bir hadisə deyil, doğru mühitin bəhrəsidir. Coaching Club — dərin suallar verən, səthilikdən uzaq, bir-birinin təkamülünə töhfə verən seçkin şəxslərin qapalı ekosistemidir.",
+        perks: [
+          "Həftəlik canlı mentorluq və mastermind sessiyaları: Təcrübəli mentorlarla birbaşa dialoq.",
+          "Özəl meditasiya və təcrübə arxivi: 100+ saatlıq audio və video bələdçilər.",
+          "Qapalı intellektual icma müzakirələri: Konfidensial təhlükəsiz platforma.",
+          "Oflayn tədbirlərə və retreat-lərə VIP giriş: Qapalı illik düşərgələr."
+        ],
+        ctaBtnText: "Kluba qoşul",
+        limitedText: "Məhdud sayda yer: Aylıq qəbul",
+        tierBadge: "PREMIUM REZİDENT",
+        tierTitle: "Premium Rezident",
+        tierSubtitle: "Aylıq və ya illik daxil olma paketi",
+        tierPrice: "95",
+        tierPeriod: "/ aylıq",
+        tierOffer: "İllik ödənişdə 2 ay hədiyyə",
+        tierFeatures: [
+          "Bütün canlı klub tədbirləri və masterklaslar",
+          "Telegram VIP məxfi müzakirə otağı",
+          "Kurslara 25% fərdi endirim",
+          "Aylıq 1 fərdi diaqnostik orientasiya",
+          "Tam 100+ saatlıq meditasiya və video arxivi"
+        ],
+        tierCtaText: "REZİDENT OL"
+      },
+      en: {
+        badge: "EXCLUSIVE RESIDENCY",
+        title: "Monodoxia Coaching Club — Sanctuary for Like Minds",
+        desc: "Sustainable development is the fruit of the right ecosystem. Coaching Club is an exclusive sanctuary for individuals who value intellectual depth and mutual evolution.",
+        perks: [
+          "Weekly live mentoring and mastermind sessions: Direct dialogue with experienced mentors.",
+          "Exclusive meditation and practice archive: 100+ hours of audio and video guides.",
+          "Private intellectual community discussions: Confidential secure platform.",
+          "VIP access to offline events and retreats: Exclusive annual camps."
+        ],
+        ctaBtnText: "Join the Club",
+        limitedText: "Limited availability: Monthly cohorts",
+        tierBadge: "PREMIUM RESIDENT",
+        tierTitle: "Premium Resident",
+        tierSubtitle: "Monthly or annual access plan",
+        tierPrice: "95",
+        tierPeriod: "/ monthly",
+        tierOffer: "2 months free with annual billing",
+        tierFeatures: [
+          "All live club events and masterclasses",
+          "Telegram VIP private discussion group",
+          "25% personal discount on courses",
+          "1 monthly individual diagnostic orientation",
+          "Full 100+ hours meditation and video archive"
+        ],
+        tierCtaText: "BECOME A RESIDENT"
+      },
+      tr: {
+        badge: "ÖZEL ÜYELİK",
+        title: "Monodoxia Coaching Club — Ortak Zihinlerin Buluşma Noktası",
+        desc: "Sürdürülebilir gelişim doğru çevrenin eseridir. Coaching Club, derin sorular soran ve birbirinin gelişimine katkı sağlayan seçkin bireylerin kapalı alanıdır.",
+        perks: [
+          "Haftalık canlı mentorluk ve mastermind oturumları: Deneyimli mentorlarla doğrudan diyalog.",
+          "Özel meditasyon ve pratik arşivi: 100+ saatlik sesli ve görüntülü rehberler.",
+          "Kapalı entelektüel topluluk tartışmaları: Gizli ve güvenli platform.",
+          "Çevrimdışı etkinliklere ve kamplara VIP giriş: Kapalı yıllık kamplar."
+        ],
+        ctaBtnText: "Kulübe Katıl",
+        limitedText: "Kontenjan sınırlı: Aylık kabul",
+        tierBadge: "PREMİUM REZİDANS",
+        tierTitle: "Premium Üye",
+        tierSubtitle: "Aylık veya yıllık erişim paketi",
+        tierPrice: "95",
+        tierPeriod: "/ aylık",
+        tierOffer: "Yıllık ödemede 2 ay hediye",
+        tierFeatures: [
+          "Tüm canlı kulüp etkinlikleri ve masterclasslar",
+          "Telegram VIP gizli tartışma odası",
+          "Kurslarda %25 kişisel indirim",
+          "Ayda 1 bireysel diagnostik oryantasyon",
+          "Tam 100+ saatlik meditasyon ve video arşivi"
+        ],
+        tierCtaText: "REZİDENT OL"
+      },
+      ru: {
+        badge: "ЗАКРЫТОЕ ЧЛЕНСТВО",
+        title: "Monodoxia Coaching Club — Пространство Единомышленников",
+        desc: "Устойчивое развитие — результат правильного окружения. Закрытый клуб для глубоких личностей, ориентированных на рост.",
+        perks: [
+          "Еженедельные живые сессии менторства и мастермайнды: Прямой диалог с опытными наставниками.",
+          "Эксклюзивный архив медитаций и практик: 100+ часов аудио- и видеоматериалов.",
+          "Закрытые интеллектуальные дискуссии сообщества: Конфиденциальная безопасная платформа.",
+          "VIP-доступ к офлайн-мероприятиям и ретритам: Закрытые ежегодные кемпы."
+        ],
+        ctaBtnText: "Вступить в клуб",
+        limitedText: "Ограниченное количество мест: Ежемесячный набор",
+        tierBadge: "ПРЕМИУМ РЕЗИДЕНТ",
+        tierTitle: "Премиум резидент",
+        tierSubtitle: "Ежемесячный или годовой план",
+        tierPrice: "95",
+        tierPeriod: "/ месяц",
+        tierOffer: "При годовой оплате — 2 месяца в подарок",
+        tierFeatures: [
+          "Все живые клубные мероприятия и мастер-классы",
+          "Закрытая VIP группа в Telegram",
+          "Персональная скидка 25% на курсы",
+          "1 индивидуальная диагностическая ориентация в месяц",
+          "Полный архив 100+ часов медитаций и видео"
+        ],
+        tierCtaText: "СТАТЬ РЕЗИДЕНТОМ"
+      }
+    }
+  };
+
+  const mergeClubWithDefaults = (src) => {
+    const raw = src || {};
+    return {
+      ...defaultClubData,
+      ...raw,
+      perks: (Array.isArray(raw.perks) && raw.perks.length > 0) ? raw.perks : defaultClubData.perks,
+      tierFeatures: (Array.isArray(raw.tierFeatures) && raw.tierFeatures.length > 0) ? raw.tierFeatures : defaultClubData.tierFeatures,
+      translations: {
+        az: { ...defaultClubData.translations.az, ...(raw.translations?.az || {}) },
+        en: { ...defaultClubData.translations.en, ...(raw.translations?.en || {}) },
+        tr: { ...defaultClubData.translations.tr, ...(raw.translations?.tr || {}) },
+        ru: { ...defaultClubData.translations.ru, ...(raw.translations?.ru || {}) },
+      }
+    };
+  };
 
   // Content block states
   const [cmsNavbar, setCmsNavbar] = useState(() => ({ ...(homeContent?.navbar || {}) }));

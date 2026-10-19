@@ -18,8 +18,8 @@ export default function Academy() {
   const badgeText = getLocalized(academy, 'badge', currentLang, defaultLang) || '';
   const titleText = getLocalized(academy, 'title', currentLang, defaultLang) || '';
 
-  // If no courses configured by admin, do not render empty section on home page
-  if (!coursesList || coursesList.length === 0) {
+  // If no courses and no title set by admin, component can stay hidden or show empty state if title exists
+  if (!badgeText && !titleText && coursesList.length === 0) {
     return null;
   }
 

@@ -270,9 +270,6 @@ if ($action === 'get_all') {
 
     $users = $safeQuery("SELECT id, name, email, role, tier, status, joined_date FROM mdx_users");
     $courses = $safeQuery("SELECT * FROM mdx_courses");
-    try {
-        $pdo->exec("DELETE FROM mdx_club_tiers WHERE features_json LIKE '%Coaching Club standart%'");
-    } catch (PDOException $e) {}
     $tiers = $safeQuery("SELECT * FROM mdx_club_tiers");
     $events = $safeQuery("SELECT * FROM mdx_events");
     foreach ($events as &$ev) {

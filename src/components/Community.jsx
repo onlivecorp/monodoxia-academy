@@ -42,7 +42,7 @@ export default function Community() {
 
   const topicsList = communityTopics || [];
 
-  if (topicsList.length === 0) {
+  if (!titleText && topicsList.length === 0) {
     return null;
   }
 

@@ -66,16 +66,6 @@ export default function AboutPage() {
       {/* 8 Fundamental Sahə */}
       <Areas />
 
-      {!titleText && !badgeText && !descText && !about.image && (!about.pillars || about.pillars.length === 0) && !about.manifestoTitle && (
-        <div className="py-24 text-center max-w-md mx-auto px-4">
-          <div className="w-16 h-16 rounded-2xl bg-[#c5a059]/15 text-[#775a19] flex items-center justify-center mx-auto mb-4">
-            <span className="material-symbols-outlined text-3xl">auto_stories</span>
-          </div>
-          <h2 className="font-serif text-2xl font-medium text-[#071326] mb-2">Haqqımızda məzmunu hazırlanır</h2>
-          <p className="text-sm text-[#64748b]">Bu səhifə üçün məlumatlar admin panelindən tənzimlənir və tezliklə təqdim olunacaqdır.</p>
-        </div>
-      )}
-
       {/* Velvet Obsidian Manifesto Centerpiece Section */}
       {about.manifestoTitle && (
         <section className="py-20 lg:py-28 bg-[#faf8f5] relative overflow-hidden">

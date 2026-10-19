@@ -12,7 +12,7 @@ export default function Coaches() {
   const titleText = getLocalized(coaches, 'title', currentLang, defaultLang) || '';
   const descText = getLocalized(coaches, 'desc', currentLang, defaultLang) || '';
 
-  if (!coachesList || coachesList.length === 0) {
+  if (!titleText && (!coachesList || coachesList.length === 0)) {
     return null;
   }
 

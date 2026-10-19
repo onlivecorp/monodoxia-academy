@@ -6,9 +6,11 @@ import { getAboutMediaStyles, parseVideoUrl } from '../utils/heroMediaHelper';
 
 export default function About() {
   const { currentLang, defaultLang } = useLanguage();
-  const { homeContent } = useApp();
+  const { homeContent, pillarsList } = useApp();
   const about = homeContent?.about || {};
-  const activePillars = (about?.pillars && Array.isArray(about.pillars)) ? about.pillars : [];
+  const activePillars = (about?.pillars && Array.isArray(about.pillars) && about.pillars.length > 0)
+    ? about.pillars
+    : (pillarsList || []);
 
   const mediaStyles = getAboutMediaStyles(about);
   const parsedVideo = parseVideoUrl(about.videoUrl);
