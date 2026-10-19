@@ -29,7 +29,7 @@ export default function HomePage() {
     );
 
     const elementsToObserve = document.querySelectorAll(
-      '.anim-badge, .anim-subtext, [class*="anim-"][class*="-title"]'
+      '.anim-badge, .anim-about-badge, .anim-subtext, [class*="anim-"][class*="-title"]'
     );
     elementsToObserve.forEach((el) => observer.observe(el));
 

@@ -118,8 +118,8 @@ export default function About() {
           {/* CONTENT BLOCK */}
           <div className="lg:col-span-7 space-y-6">
             {/* BADGE */}
-            <div className="inline-flex items-center gap-3 anim-badge">
-              <span className="w-8 h-[2px] bg-gradient-to-r from-[#8a6a1f] to-[#c5a059] rounded-full"></span>
+            <div className="inline-flex items-center gap-3 anim-about-badge">
+              <span className="h-[2px] bg-gradient-to-r from-[#8a6a1f] to-[#c5a059] rounded-full anim-about-line"></span>
               <span className="text-xs font-semibold text-[#775a19] tracking-[0.22em] uppercase font-sans">
                 {badgeText}
               </span>

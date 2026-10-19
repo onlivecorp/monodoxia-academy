@@ -212,22 +212,66 @@
   animation: heroLetterUnveil 1.1s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* 2. ABOUT - Editorial Focus & Line Slide In */
+/* 2. ABOUT - Editorial Focus & Line Slide In (Triggered on Scroll) */
 @keyframes aboutEditorialReveal {
   0% {
     opacity: 0;
-    transform: translateX(-24px);
+    transform: translateX(-35px) translateY(12px);
+    filter: blur(6px);
     letter-spacing: -0.04em;
+  }
+  60% {
+    filter: blur(0px);
   }
   100% {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateX(0) translateY(0);
     letter-spacing: -0.015em;
   }
 }
 
+@keyframes aboutBadgeSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-25px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes aboutLineExpand {
+  0% {
+    width: 0px;
+    opacity: 0;
+  }
+  100% {
+    width: 32px;
+    opacity: 1;
+  }
+}
+
+.anim-about-badge {
+  opacity: 0;
+  transform: translateX(-25px);
+}
+
+.anim-about-badge.is-visible {
+  animation: aboutBadgeSlideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.anim-about-badge.is-visible .anim-about-line {
+  animation: aboutLineExpand 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+}
+
 .anim-about-title {
-  animation: aboutEditorialReveal 0.95s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  opacity: 0;
+  transform: translateX(-35px) translateY(12px);
+}
+
+.anim-about-title.is-visible {
+  animation: aboutEditorialReveal 1.05s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
 }
 
 /* 3. AREAS - Perspective Flip-Up */
@@ -243,7 +287,11 @@
 }
 
 .anim-areas-title {
-  animation: areasPerspectiveUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+  opacity: 0;
+  transform: perspective(600px) rotateX(25deg) translateY(24px);
+}
+.anim-areas-title.is-visible {
+  animation: areasPerspectiveUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* 4. ACADEMY - Clean Slide Up & Letter Spread */
@@ -261,7 +309,11 @@
 }
 
 .anim-academy-title {
-  animation: academyTitleReveal 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+  opacity: 0;
+  transform: translateY(22px);
+}
+.anim-academy-title.is-visible {
+  animation: academyTitleReveal 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* 5. CLUB - Royal Glowing Gold Surge */
@@ -282,7 +334,11 @@
 }
 
 .anim-club-title {
-  animation: clubRoyalSurge 1.05s cubic-bezier(0.16, 1, 0.3, 1) both;
+  opacity: 0;
+  transform: translateY(20px) scale(0.97);
+}
+.anim-club-title.is-visible {
+  animation: clubRoyalSurge 1.05s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* 6. COACHES - Prestige Zoom-In Reveal */
@@ -300,7 +356,11 @@
 }
 
 .anim-coaches-title {
-  animation: coachesPrestige 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+  opacity: 0;
+  transform: scale(0.94) translateY(18px);
+}
+.anim-coaches-title.is-visible {
+  animation: coachesPrestige 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* 7. COMMUNITY - Warm Gentle Rising */
@@ -316,7 +376,11 @@
 }
 
 .anim-community-title {
-  animation: communityWarmRise 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+  opacity: 0;
+  transform: translateY(24px);
+}
+.anim-community-title.is-visible {
+  animation: communityWarmRise 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* 8. EVENTS - Calendar Kinetic Tick In */
@@ -332,7 +396,11 @@
 }
 
 .anim-events-title {
-  animation: eventsKinetic 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+  opacity: 0;
+  transform: translateX(20px);
+}
+.anim-events-title.is-visible {
+  animation: eventsKinetic 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* 9. TESTIMONIALS - Quote Serif Bloom */
@@ -349,7 +417,11 @@
 }
 
 .anim-testimonials-title {
-  animation: testimonialBloom 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+  opacity: 0;
+  transform: translateY(16px) scale(0.98);
+}
+.anim-testimonials-title.is-visible {
+  animation: testimonialBloom 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* 10. FAQ - Accordion Subtle Float */
@@ -365,7 +437,11 @@
 }
 
 .anim-faq-title {
-  animation: faqFloatIn 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+  opacity: 0;
+  transform: translateY(18px);
+}
+.anim-faq-title.is-visible {
+  animation: faqFloatIn 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* 11. NEWSLETTER - Holographic Star Pulse */
@@ -386,7 +462,11 @@
 }
 
 .anim-newsletter-title {
-  animation: newsletterStarPulse 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+  opacity: 0;
+  transform: translateY(22px) scale(0.97);
+}
+.anim-newsletter-title.is-visible {
+  animation: newsletterStarPulse 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Section Subtitle / Paragraph Fade Up */
