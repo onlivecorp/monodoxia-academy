@@ -14,7 +14,7 @@ export default function Events() {
 
   const list = eventsList || [];
 
-  if (!titleText && list.length === 0) {
+  if (list.length === 0) {
     return null;
   }
 

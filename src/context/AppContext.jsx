@@ -74,129 +74,7 @@ const INITIAL_SETTINGS = {
   }
 };
 
-const INITIAL_CLUB_TIERS = [
-  {
-    id: "free",
-    name: "Giriş (Free)",
-    price: "0",
-    period: "Ömürlük",
-    features: ["Açıq bloq yazılarına və ictimai müzakirələrə giriş", "Aylıq ümumi vebinarlara dinləyici qismində qatılmaq", "Bülleten və psixoloji bələdçi bildirişləri"],
-    active: true,
-    translations: {
-      az: {
-        name: "Giriş (Free)",
-        period: "Ömürlük",
-        features: ["Açıq bloq yazılarına və ictimai müzakirələrə giriş", "Aylıq ümumi vebinarlara dinləyici qismində qatılmaq", "Bülleten və psixoloji bələdçi bildirişləri"]
-      },
-      en: {
-        name: "Intro (Free)",
-        period: "Lifetime",
-        features: ["Access to public blog posts and community discussions", "Attend monthly general webinars as a listener", "Newsletter and psychological guide updates"]
-      },
-      tr: {
-        name: "Giriş (Ücretsiz)",
-        period: "Ömür boyu",
-        features: ["Açık blog yazılarına ve topluluk tartışmalarına erişim", "Aylık genel webinarlara dinleyici olarak katılma", "Bülten ve psikolojik rehber bildirimleri"]
-      },
-      ru: {
-        name: "Вводный (Free)",
-        period: "Бессрочно",
-        features: ["Доступ к открытым статьям блога и обсуждениям", "Участие в ежемесячных вебинарах в качестве слушателя", "Рассылка и уведомления психологических гидов"]
-      }
-    }
-  },
-  {
-    id: "basic",
-    name: "Basic Rezident",
-    price: "45",
-    period: "/ aylıq",
-    features: ["Coaching Club standart müzakirə platforması", "20+ saatlıq səsli meditasiya kitabxanası", "Kurslara 10% daimi tələbə endirimi", "Ayda 1 canlı sual-cavab sessiyası"],
-    active: true,
-    translations: {
-      az: {
-        name: "Basic Rezident",
-        period: "/ aylıq",
-        features: ["Coaching Club standart müzakirə platforması", "20+ saatlıq səsli meditasiya kitabxanası", "Kurslara 10% daimi tələbə endirimi", "Ayda 1 canlı sual-cavab sessiyası"]
-      },
-      en: {
-        name: "Basic Resident",
-        period: "/ monthly",
-        features: ["Coaching Club standard discussion platform", "20+ hours of audio meditation library", "10% permanent student discount on courses", "1 live Q&A session per month"]
-      },
-      tr: {
-        name: "Basic Üye",
-        period: "/ aylık",
-        features: ["Coaching Club standart tartışma platformu", "20+ saatlik sesli meditasyon kütüphanesi", "Kurslarda %10 sürekli öğrenci indirimi", "Ayda 1 canlı soru-cevap oturumu"]
-      },
-      ru: {
-        name: "Базовый резидент",
-        period: "/ месяц",
-        features: ["Стандартная дискуссионная платформа Coaching Club", "20+ часов аудиомедитаций в библиотеке", "Постоянная скидка 10% на курсы", "1 живая сессия вопросов и ответов в месяц"]
-      }
-    }
-  },
-  {
-    id: "premium",
-    name: "Premium Rezident",
-    price: "95",
-    period: "/ aylıq",
-    popular: true,
-    features: ["Bütün canlı klub tədbirləri və masterklaslar", "Telegram VIP məxfi müzakirə otağı", "Kurslara 25% fərdi endirim", "Aylıq 1 fərdi diaqnostik orientasiya", "Tam 100+ saatlıq meditasiya və video arxivi"],
-    active: true,
-    translations: {
-      az: {
-        name: "Premium Rezident",
-        period: "/ aylıq",
-        features: ["Bütün canlı klub tədbirləri və masterklaslar", "Telegram VIP məxfi müzakirə otağı", "Kurslara 25% fərdi endirim", "Aylıq 1 fərdi diaqnostik orientasiya", "Tam 100+ saatlıq meditasiya və video arxivi"]
-      },
-      en: {
-        name: "Premium Resident",
-        period: "/ monthly",
-        features: ["All live club events and masterclasses", "Telegram VIP private discussion group", "25% personal discount on courses", "1 monthly individual diagnostic orientation", "Full 100+ hours meditation and video archive"]
-      },
-      tr: {
-        name: "Premium Üye",
-        period: "/ aylık",
-        features: ["Tüm canlı kulüp etkinlikleri ve masterclasslar", "Telegram VIP gizli tartışma odası", "Kurslarda %25 kişisel indirim", "Ayda 1 bireysel diagnostik oryantasyon", "Tam 100+ saatlik meditasyon ve video arşivi"]
-      },
-      ru: {
-        name: "Премиум резидент",
-        period: "/ месяц",
-        features: ["Все живые клубные мероприятия и мастер-классы", "Закрытая VIP группа в Telegram", "Персональная скидка 25% на курсы", "1 индивидуальная диагностическая ориентация в месяц", "Полный архив 100+ часов медитаций и видео"]
-      }
-    }
-  },
-  {
-    id: "vip",
-    name: "VIP Salon",
-    price: "250",
-    period: "/ aylıq",
-    features: ["Bütün Premium imtiyazlar daxil", "Hər ay 2 fərdi ICF kouçinq sessiyası", "Oflayn illik retreat və düşərgələrə prioritet giriş", "Şəxsi inkişaf mentoru və 24/7 dəstək xətti"],
-    active: true,
-    translations: {
-      az: {
-        name: "VIP Salon",
-        period: "/ aylıq",
-        features: ["Bütün Premium imtiyazlar daxil", "Hər ay 2 fərdi ICF kouçinq sessiyası", "Oflayn illik retreat və düşərgələrə prioritet giriş", "Şəxsi inkişaf mentoru və 24/7 dəstək xətti"]
-      },
-      en: {
-        name: "VIP Lounge",
-        period: "/ monthly",
-        features: ["All Premium benefits included", "2 personal ICF coaching sessions each month", "Priority access to annual offline retreats and camps", "Personal development mentor and 24/7 support line"]
-      },
-      tr: {
-        name: "VIP Salon",
-        period: "/ aylık",
-        features: ["Tüm Premium ayrıcalıklar dahil", "Her ay 2 bireysel ICF koçluk seansı", "Yıllık inziva ve kamplara öncelikli erişim", "Kişisel gelişim mentoru ve 7/24 destek hattı"]
-      },
-      ru: {
-        name: "VIP Салон",
-        period: "/ месяц",
-        features: ["Все привилегии Premium включены", "2 индивидуальные сессии ICF-коучинга каждый месяц", "Приоритетный доступ к ежегодным выездным ретритам", "Персональный ментор развития и поддержка 24/7"]
-      }
-    }
-  }
-];
+const INITIAL_CLUB_TIERS = [];
 
 const INITIAL_SQL_CONFIG = {
   engine: "MySQL / MariaDB (cPanel / DirectAdmin / Plesk)",
@@ -319,16 +197,7 @@ export function AppProvider({ children }) {
     return INITIAL_ROLES;
   });
 
-  const [coursesList, setCoursesList] = useState(() => {
-    const saved = localStorage.getItem('monodoxia_admin_courses');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch (e) {}
-    }
-    return (COURSES && Array.isArray(COURSES) && COURSES.length > 0) ? COURSES : [];
-  });
+  const [coursesList, setCoursesList] = useState([]);
 
   // Centralized Taxonomy & Categories
   const [categoriesList, setCategoriesList] = useState(() => {
@@ -336,90 +205,30 @@ export function AppProvider({ children }) {
     return saved ? JSON.parse(saved) : INITIAL_CATEGORIES;
   });
 
-  const [clubTiersList, setClubTiersList] = useState(() => {
-    const saved = localStorage.getItem('monodoxia_admin_tiers');
-    return saved ? JSON.parse(saved) : INITIAL_CLUB_TIERS;
-  });
-
-  const [eventsList, setEventsList] = useState(() => {
-    try {
-      const saved = localStorage.getItem('monodoxia_admin_events');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch (e) {
-      console.warn('Error reading monodoxia_admin_events from localStorage:', e);
-    }
-    return (EVENTS && Array.isArray(EVENTS) && EVENTS.length > 0) ? EVENTS : [];
-  });
-
-  const [communityTopics, setCommunityTopics] = useState(() => {
-    const saved = localStorage.getItem('monodoxia_admin_topics');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch (e) {}
-    }
-    return (COMMUNITY_TOPICS && Array.isArray(COMMUNITY_TOPICS) && COMMUNITY_TOPICS.length > 0) ? COMMUNITY_TOPICS : [];
-  });
+  const [clubTiersList, setClubTiersList] = useState([]);
+  const [eventsList, setEventsList] = useState([]);
+  const [communityTopics, setCommunityTopics] = useState([]);
 
   const [platformSettings, setPlatformSettings] = useState(() => {
     const saved = localStorage.getItem('monodoxia_admin_settings');
     return saved ? JSON.parse(saved) : INITIAL_SETTINGS;
   });
 
-  // Home Page Dynamic Content & Blocks (CMS)
+  // Home Page Dynamic Content & Blocks (CMS) - Only admin configured blocks
   const [homeContent, setHomeContent] = useState(() => {
-    const saved = localStorage.getItem('monodoxia_home_content');
-    return saved ? JSON.parse(saved) : INITIAL_HOME_CONTENT;
-  });
-
-  const [pillarsList, setPillarsList] = useState(() => {
-    const saved = localStorage.getItem('monodoxia_pillars');
-    return saved ? JSON.parse(saved) : INITIAL_PILLARS;
-  });
-
-  const [areasList, setAreasList] = useState(() => {
-    const saved = localStorage.getItem('monodoxia_areas');
-    return saved ? JSON.parse(saved) : AREAS;
-  });
-
-  const [coachesList, setCoachesList] = useState(() => {
-    const saved = localStorage.getItem('monodoxia_coaches');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch (e) {
-        // fallback
-      }
+    try {
+      const saved = localStorage.getItem('monodoxia_cms_blocks');
+      return saved ? JSON.parse(saved) : {};
+    } catch (e) {
+      return {};
     }
-    return COACHES;
   });
 
-  const [testimonialsList, setTestimonialsList] = useState(() => {
-    const saved = localStorage.getItem('monodoxia_testimonials');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch (e) {}
-    }
-    return (INITIAL_TESTIMONIALS && Array.isArray(INITIAL_TESTIMONIALS) && INITIAL_TESTIMONIALS.length > 0) ? INITIAL_TESTIMONIALS : [];
-  });
-
-  const [faqsList, setFaqsList] = useState(() => {
-    const saved = localStorage.getItem('monodoxia_faqs');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch (e) {}
-    }
-    return (INITIAL_FAQS && Array.isArray(INITIAL_FAQS) && INITIAL_FAQS.length > 0) ? INITIAL_FAQS : [];
-  });
+  const [pillarsList, setPillarsList] = useState([]);
+  const [areasList, setAreasList] = useState([]);
+  const [coachesList, setCoachesList] = useState([]);
+  const [testimonialsList, setTestimonialsList] = useState([]);
+  const [faqsList, setFaqsList] = useState([]);
 
   // Applications, Dynamic Form Fields & Registrations
   const [applicationsList, setApplicationsList] = useState(() => {
@@ -726,7 +535,7 @@ export function AppProvider({ children }) {
             setEventsList(mappedEvents);
             safeSetLocalStorage('monodoxia_admin_events', mappedEvents);
           }
-          if (data.community && data.community.length > 0) {
+          if (Array.isArray(data.community)) {
             const mappedCommunity = data.community.map(p => ({
               id: p.id,
               badge: p.badge,
@@ -778,12 +587,10 @@ export function AppProvider({ children }) {
                 translations: parsedTranslations
               };
             });
-            if (mappedTiers.length > 0) {
-              setClubTiersList(mappedTiers);
-              localStorage.setItem('monodoxia_admin_tiers', JSON.stringify(mappedTiers));
-            }
+            setClubTiersList(mappedTiers);
+            safeSetLocalStorage('monodoxia_admin_tiers', mappedTiers);
           }
-          if (data.categories && data.categories.length > 0) {
+          if (Array.isArray(data.categories)) {
             setCategoriesList(data.categories.map(cat => ({
               id: cat.id,
               key: cat.slug || cat.id,
@@ -793,8 +600,8 @@ export function AppProvider({ children }) {
               translations: typeof cat.translations_json === 'string' ? JSON.parse(cat.translations_json || '{}') : (cat.translations_json || {})
             })));
           }
-          if (data.coaches && data.coaches.length > 0) {
-            setCoachesList(data.coaches.map(c => ({
+          if (Array.isArray(data.coaches)) {
+            const mappedCoaches = data.coaches.map(c => ({
               id: c.id,
               name: c.name,
               title: c.title,
@@ -809,16 +616,31 @@ export function AppProvider({ children }) {
               languages: typeof c.languages_json === 'string' ? JSON.parse(c.languages_json || '[]') : (c.languages_json || []),
               availableSlots: typeof c.available_slots_json === 'string' ? JSON.parse(c.available_slots_json || '[]') : (c.available_slots_json || []),
               translations: typeof c.translations_json === 'string' ? JSON.parse(c.translations_json || '{}') : (c.translations_json || {})
-            })));
+            }));
+            setCoachesList(mappedCoaches);
+            safeSetLocalStorage('monodoxia_coaches', mappedCoaches);
           }
-          if (data.cms_blocks && data.cms_blocks.length > 0) {
+          if (Array.isArray(data.cms_blocks)) {
             const blockMap = {};
             data.cms_blocks.forEach(b => {
               try {
                 blockMap[b.block_key] = typeof b.content_json === 'string' ? JSON.parse(b.content_json) : b.content_json;
               } catch (e) {}
             });
-            setHomeContent(prev => ({ ...prev, ...blockMap }));
+            setHomeContent(blockMap);
+            safeSetLocalStorage('monodoxia_cms_blocks', blockMap);
+            if (Array.isArray(blockMap.about?.pillars)) {
+              setPillarsList(blockMap.about.pillars);
+            }
+            if (Array.isArray(blockMap.areas?.items)) {
+              setAreasList(blockMap.areas.items);
+            }
+            if (Array.isArray(blockMap.testimonials?.items)) {
+              setTestimonialsList(blockMap.testimonials.items);
+            }
+            if (Array.isArray(blockMap.faq?.items)) {
+              setFaqsList(blockMap.faq.items);
+            }
           }
           if (data.student_progress && data.student_progress.length > 0) {
             const progMap = {};
@@ -1047,7 +869,21 @@ export function AppProvider({ children }) {
   }, [sqlConfig]);
 
   useEffect(() => {
-    localStorage.setItem('monodoxia_home_content', JSON.stringify(homeContent));
+    // Purge legacy mock cache keys from visitor's browser
+    const legacyKeys = [
+      'monodoxia_home_content',
+      'monodoxia_pillars',
+      'monodoxia_areas',
+      'monodoxia_testimonials',
+      'monodoxia_faqs'
+    ];
+    legacyKeys.forEach(k => {
+      try { localStorage.removeItem(k); } catch (e) {}
+    });
+  }, []);
+
+  useEffect(() => {
+    safeSetLocalStorage('monodoxia_cms_blocks', homeContent);
   }, [homeContent]);
 
   useEffect(() => {

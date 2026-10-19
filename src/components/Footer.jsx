@@ -7,8 +7,8 @@ export default function Footer() {
   const { currentLang, defaultLang, changeLang, supportedLangs, t } = useLanguage();
   const { homeContent, platformSettings, navigateTo, getPageUrl } = useApp();
   const footer = homeContent?.footer || {};
-  const contactEmail = platformSettings?.contactEmail || footer.email || 'contact@monodoxia.academy';
-  const contactPhone = platformSettings?.contactPhone || footer.phone || '+994 (12) 490 88 00';
+  const contactEmail = platformSettings?.contactEmail || platformSettings?.contact_email || footer.email || '';
+  const contactPhone = platformSettings?.contactPhone || platformSettings?.contact_phone || footer.phone || '';
 
   return (
     <footer className="bg-primary-container text-on-primary-container border-t border-outline">

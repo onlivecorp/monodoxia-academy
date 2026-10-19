@@ -15,23 +15,23 @@ export default function Club() {
   const perks = clubPerks && clubPerks.length > 0 ? clubPerks : (club.perks && club.perks.length > 0 ? club.perks : []);
 
   const tierBadge = getLocalized(club, 'tierBadge', currentLang, defaultLang) || '';
-  const tierName = getLocalized(club, 'tierTitle', currentLang, defaultLang) || (premiumTier ? getLocalized(premiumTier, 'name', currentLang, defaultLang) : '');
+  const tierName = getLocalized(club, 'tierTitle', currentLang, defaultLang) || (club.tierTitle ? (premiumTier ? getLocalized(premiumTier, 'name', currentLang, defaultLang) : '') : '');
   const tierSubtitle = getLocalized(club, 'tierSubtitle', currentLang, defaultLang) || '';
-  const tierPrice = (club.tierPrice !== undefined && club.tierPrice !== null && String(club.tierPrice).trim() !== '') ? club.tierPrice : (premiumTier ? premiumTier.price : '');
-  const tierPeriod = getLocalized(club, 'tierPeriod', currentLang, defaultLang) || (premiumTier ? getLocalized(premiumTier, 'period', currentLang, defaultLang) : '');
+  const tierPrice = (club.tierPrice !== undefined && club.tierPrice !== null && String(club.tierPrice).trim() !== '') ? club.tierPrice : (club.tierTitle && premiumTier ? premiumTier.price : '');
+  const tierPeriod = getLocalized(club, 'tierPeriod', currentLang, defaultLang) || (club.tierTitle && premiumTier ? getLocalized(premiumTier, 'period', currentLang, defaultLang) : '');
   const tierOffer = getLocalized(club, 'tierOffer', currentLang, defaultLang) || '';
   
   const clubFeatures = getLocalizedArray(club, 'tierFeatures', currentLang, defaultLang);
   const tierFeatures = clubFeatures && clubFeatures.length > 0
     ? clubFeatures
-    : (premiumTier ? getLocalizedArray(premiumTier, 'features', currentLang, defaultLang) : []);
+    : (club.tierTitle && premiumTier ? getLocalizedArray(premiumTier, 'features', currentLang, defaultLang) : []);
   const tierCtaText = getLocalized(club, 'tierCtaText', currentLang, defaultLang) || '';
 
   const badgeText = getLocalized(club, 'badge', currentLang, defaultLang) || '';
   const titleText = getLocalized(club, 'title', currentLang, defaultLang) || '';
   const descText = getLocalized(club, 'desc', currentLang, defaultLang) || '';
 
-  if (!titleText && perks.length === 0 && !tierName) {
+  if (!titleText && !badgeText && !descText && perks.length === 0 && !tierName) {
     return null;
   }
 

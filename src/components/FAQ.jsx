@@ -14,7 +14,7 @@ export default function FAQ() {
 
   const list = faqsList || [];
 
-  if (!titleText && list.length === 0) {
+  if (list.length === 0) {
     return null;
   }
 

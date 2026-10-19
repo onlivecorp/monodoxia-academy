@@ -14,7 +14,7 @@ export default function Testimonials() {
 
   const list = testimonialsList || [];
 
-  if (!titleText && list.length === 0) {
+  if (list.length === 0) {
     return null;
   }
 

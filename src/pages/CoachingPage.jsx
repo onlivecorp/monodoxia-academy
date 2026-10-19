@@ -126,7 +126,16 @@ export default function CoachingPage() {
           )}
 
           {/* Coaches Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
+          {filteredCoaches.length === 0 ? (
+            <div className="bg-white rounded-3xl border border-[#c5a059]/30 p-12 text-center max-w-lg mx-auto shadow-sm mb-20">
+              <div className="w-16 h-16 rounded-2xl bg-[#c5a059]/15 text-[#775a19] flex items-center justify-center mx-auto mb-4">
+                <span className="material-symbols-outlined text-3xl">psychology</span>
+              </div>
+              <h3 className="font-serif text-xl font-medium text-[#071326] mb-2">Hal-hazırda aktiv kouç qeydiyyatı yoxdur</h3>
+              <p className="text-sm text-[#64748b]">Kouçlar admin paneldən əlavə edildikdə burada görünəcəkdir.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
             {filteredCoaches.map((c) => {
               const coachTitle = getLocalized(c, 'title', currentLang, defaultLang) || c.title;
               const coachBio = getLocalized(c, 'bio', currentLang, defaultLang) || c.bio;
@@ -216,6 +225,7 @@ export default function CoachingPage() {
               );
             })}
           </div>
+          )}
 
           {/* Coaching Standards & Methodology Section */}
           {coachesCms.standardsTitle && (

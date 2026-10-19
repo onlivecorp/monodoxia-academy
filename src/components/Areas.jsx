@@ -5,11 +5,9 @@ import { useApp } from '../context/AppContext';
 
 export default function Areas() {
   const { currentLang, defaultLang } = useLanguage();
-  const { homeContent, areasList, navigateTo } = useApp();
+  const { homeContent, navigateTo } = useApp();
   const areas = homeContent?.areas || {};
-  const activeAreas = (areas?.items && Array.isArray(areas.items) && areas.items.length > 0)
-    ? areas.items
-    : (areasList && areasList.length > 0 ? areasList : []);
+  const activeAreas = (areas?.items && Array.isArray(areas.items)) ? areas.items : [];
 
   const badgeText = getLocalized(areas, 'badge', currentLang, defaultLang) || '';
   const titleText = getLocalized(areas, 'title', currentLang, defaultLang) || '';
