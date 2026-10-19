@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { getLocalized } from '../i18n/localize';
 import { useApp } from '../context/AppContext';
@@ -26,6 +26,84 @@ export default function Hero() {
   const quoteText = getLocalized(hero, 'quote', currentLang, defaultLang) || t('hero_quote');
   const quoteSubText = getLocalized(hero, 'quoteSub', currentLang, defaultLang) || t('hero_philosophy');
 
+  // Dynamic rotating titles for high-end kinetic headline
+  const rotatingTitles = useMemo(() => {
+    const listByLang = {
+      az: [
+        title3,
+        'Potensialını kəşf et.',
+        'Daxili gücünü tap.',
+        'Şüurlu gələcək qur.',
+        'Öz zirvənə çat.'
+      ],
+      en: [
+        title3,
+        'Unlock your potential.',
+        'Awaken inner clarity.',
+        'Architect your future.',
+        'Master your mind.'
+      ],
+      ru: [
+        title3,
+        'Раскрой свой потенциал.',
+        'Обрети внутреннюю силу.',
+        'Строй осознанное будущее.',
+        'Достигни своих вершин.'
+      ]
+    };
+    const langKey = currentLang && listByLang[currentLang] ? currentLang : 'az';
+    // Remove duplicates if title3 matches any preset
+    const unique = Array.from(new Set(listByLang[langKey].filter(Boolean)));
+    return unique.length > 0 ? unique : [title3];
+  }, [title3, currentLang]);
+
+  const [activeTitleIdx, setActiveTitleIdx] = useState(0);
+  const [isTitleExiting, setIsTitleExiting] = useState(false);
+  const [isTitlePaused, setIsTitlePaused] = useState(false);
+  const transitionTimerRef = useRef(null);
+
+  // Cycle rotating title automatically every 3.8s
+  useEffect(() => {
+    if (rotatingTitles.length <= 1 || isTitlePaused) return;
+
+    const interval = setInterval(() => {
+      setIsTitleExiting(true);
+      transitionTimerRef.current = setTimeout(() => {
+        setActiveTitleIdx((prev) => (prev + 1) % rotatingTitles.length);
+        setIsTitleExiting(false);
+      }, 380);
+    }, 3800);
+
+    return () => {
+      clearInterval(interval);
+      if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
+    };
+  }, [rotatingTitles.length, isTitlePaused]);
+
+  // Reset index if language changes
+  useEffect(() => {
+    setActiveTitleIdx(0);
+    setIsTitleExiting(false);
+  }, [currentLang]);
+
+  const handleNextTitle = () => {
+    if (rotatingTitles.length <= 1 || isTitleExiting) return;
+    setIsTitleExiting(true);
+    setTimeout(() => {
+      setActiveTitleIdx((prev) => (prev + 1) % rotatingTitles.length);
+      setIsTitleExiting(false);
+    }, 320);
+  };
+
+  const handleSelectTitleIdx = (idx) => {
+    if (idx === activeTitleIdx || isTitleExiting) return;
+    setIsTitleExiting(true);
+    setTimeout(() => {
+      setActiveTitleIdx(idx);
+      setIsTitleExiting(false);
+    }, 320);
+  };
+
   const primaryLink = hero.btnPrimaryLink || (getPageUrl ? getPageUrl('akademiya') : '/akademiya');
   const secondaryLink = hero.btnSecondaryLink || (getPageUrl ? getPageUrl('club') : '/club');
 
@@ -45,6 +123,8 @@ export default function Hero() {
     }
   };
 
+  const title1Words = useMemo(() => (title1 ? title1.split(' ') : []), [title1]);
+
   return (
     <section className="relative overflow-hidden pt-12 pb-20 md:pt-16 md:pb-28 border-b border-[#e2d9c8]/70 bg-[#fbf9f5]">
       {/* AMBIENT LUXURY GLOW & GEOMETRIC ACCENTS */}
@@ -63,32 +143,101 @@ export default function Hero() {
       <div className="relative max-w-7xl mx-auto px-6 md:px-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-12 items-center">
           {/* LEFT CONTENT */}
-          <div className="lg:col-span-7 space-y-6 md:space-y-8">
-            {/* BADGE */}
-            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#c5a059]/40 bg-white/75 backdrop-blur-md shadow-sm anim-hero-badge">
+          <div className="lg:col-span-7 space-y-6 md:space-y-8 relative">
+            {/* AMBIENT GOLD HALO FOR HERO TYPOGRAPHY */}
+            <div className="hero-title-halo" />
+
+            {/* BADGE WITH SHIMMER AND PULSING BEACON */}
+            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#c5a059]/40 bg-white/80 hover:bg-white backdrop-blur-md shadow-sm anim-hero-badge relative group transition-all duration-300">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#c5a059] opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-[#9e782f]"></span>
               </span>
-              <span className="text-[11px] sm:text-xs font-semibold text-[#775a19] tracking-[0.18em] uppercase">
+              <span className="text-[11px] sm:text-xs font-semibold text-[#775a19] tracking-[0.18em] uppercase select-none">
                 {badgeText}
+              </span>
+              <span className="material-symbols-outlined text-[13px] text-[#c5a059] opacity-70 group-hover:rotate-45 transition-transform duration-500">
+                sparkles
               </span>
             </div>
 
-            {/* HEADLINE */}
-            <h1 className="text-4xl sm:text-5xl lg:text-[3.65rem] xl:text-[4.15rem] text-[#070f1e] font-serif font-medium tracking-tight leading-[1.12]">
-              <div className="hero-text-mask">
-                <span className="block anim-hero-line-1">{title1}</span>
-              </div>
-              <div className="hero-text-mask">
-                <span className="block italic font-normal gold-shimmer-text anim-hero-line-2">
-                  {title2}
-                </span>
-              </div>
-              <div className="hero-text-mask">
-                <span className="block anim-hero-line-3">{title3}</span>
-              </div>
-            </h1>
+            {/* HEADLINE WITH KINETIC REVEAL & DYNAMIC ROTATING TITLE */}
+            <div 
+              className="relative z-10"
+              onMouseEnter={() => setIsTitlePaused(true)}
+              onMouseLeave={() => setIsTitlePaused(false)}
+            >
+              <h1 className="text-4xl sm:text-5xl lg:text-[3.65rem] xl:text-[4.15rem] text-[#070f1e] font-serif font-medium tracking-tight leading-[1.14]">
+                {/* LINE 1: WORD-BY-WORD STAGGERED REVEAL */}
+                <div className="hero-text-mask flex flex-wrap items-baseline">
+                  {title1Words.map((word, idx) => (
+                    <span 
+                      key={idx} 
+                      className="hero-hover-word mr-[0.28em] inline-block cursor-default"
+                      style={{
+                        animation: 'heroWordReveal 1s cubic-bezier(0.16, 1, 0.3, 1) both',
+                        animationDelay: `${0.12 + idx * 0.08}s`
+                      }}
+                    >
+                      {word}
+                    </span>
+                  ))}
+                </div>
+
+                {/* LINE 2: LIQUID GOLD SHIMMER & LUXURY ITALIC FOCUS */}
+                <div className="hero-text-mask mt-0.5">
+                  <span className="block italic font-normal gold-shimmer-text anim-hero-line-2 cursor-default select-none hover:brightness-110 transition-all">
+                    {title2}
+                  </span>
+                </div>
+
+                {/* LINE 3: DYNAMIC 3D KINETIC TITLE SWITCHER */}
+                <div className="hero-text-mask relative mt-1 min-h-[1.25em] flex items-baseline">
+                  <div
+                    onClick={handleNextTitle}
+                    title="Növbəti hədəf (dəyişmək üçün klikləyin)"
+                    className={`inline-flex items-center gap-3 cursor-pointer select-none group/dyn transition-all ${
+                      isTitleExiting ? 'anim-hero-dynamic-exit' : 'anim-hero-dynamic-enter'
+                    }`}
+                  >
+                    <span className="block font-medium tracking-tight text-[#070f1e] group-hover/dyn:text-[#775a19] transition-colors duration-300">
+                      {rotatingTitles[activeTitleIdx] || title3}
+                    </span>
+                    <span 
+                      className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#c5a059]/15 text-[#775a19] opacity-70 group-hover/dyn:opacity-100 group-hover/dyn:bg-[#c5a059]/25 transition-all duration-300 transform group-hover/dyn:rotate-180"
+                      title="Dəyişdir"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">sync</span>
+                    </span>
+                  </div>
+                </div>
+              </h1>
+
+              {/* DYNAMIC TITLE INDICATOR PILLS */}
+              {rotatingTitles.length > 1 && (
+                <div className="flex items-center gap-2 pt-3 anim-hero-desc">
+                  <div className="h-[2px] w-8 bg-gradient-to-r from-[#c5a059] to-transparent rounded-full" />
+                  <div className="flex items-center gap-1.5">
+                    {rotatingTitles.map((_, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => handleSelectTitleIdx(i)}
+                        className={`h-1.5 rounded-full transition-all duration-500 cursor-pointer ${
+                          i === activeTitleIdx
+                            ? 'w-6 bg-[#c5a059] shadow-[0_0_8px_rgba(197,160,89,0.7)]'
+                            : 'w-1.5 bg-[#e2d9c8] hover:bg-[#c5a059]/60'
+                        }`}
+                        aria-label={`Title ${i + 1}`}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-[#775a19]/75 select-none hidden sm:inline">
+                    {currentLang === 'az' ? 'Daimi İnkişaf' : currentLang === 'ru' ? 'Трансформация' : 'Lifelong Evolution'}
+                  </span>
+                </div>
+              )}
+            </div>
 
             {/* DESCRIPTION */}
             <p className="text-base sm:text-lg text-slate-600 max-w-xl leading-relaxed font-normal anim-hero-desc">
