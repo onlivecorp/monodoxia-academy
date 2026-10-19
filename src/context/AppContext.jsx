@@ -401,7 +401,13 @@ export function AppProvider({ children }) {
 
   const [testimonialsList, setTestimonialsList] = useState(() => {
     const saved = localStorage.getItem('monodoxia_testimonials');
-    return saved ? JSON.parse(saved) : INITIAL_TESTIMONIALS;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {}
+    }
+    return (INITIAL_TESTIMONIALS && Array.isArray(INITIAL_TESTIMONIALS) && INITIAL_TESTIMONIALS.length > 0) ? INITIAL_TESTIMONIALS : [];
   });
 
   const [faqsList, setFaqsList] = useState(() => {
