@@ -103,7 +103,7 @@ export default function AuthModal() {
                 Giriş Et
               </button>
               <div className="pt-2 text-center text-xs text-outline">
-                Tez sınaq üçün: <span className="text-secondary font-mono">admin@monodoxia.academy</span>
+                Admin: <span className="text-secondary font-mono">admin@monodoxia.academy</span> / <span className="text-secondary font-mono">admin123</span>
               </div>
             </form>
           ) : (
