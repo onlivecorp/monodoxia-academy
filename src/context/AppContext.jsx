@@ -346,12 +346,12 @@ export function AppProvider({ children }) {
       const saved = localStorage.getItem('monodoxia_admin_events');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
     } catch (e) {
       console.warn('Error reading monodoxia_admin_events from localStorage:', e);
     }
-    return EVENTS;
+    return (EVENTS && Array.isArray(EVENTS) && EVENTS.length > 0) ? EVENTS : [];
   });
 
   const [communityTopics, setCommunityTopics] = useState(() => {
