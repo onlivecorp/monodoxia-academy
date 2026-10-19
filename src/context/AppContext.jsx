@@ -412,7 +412,13 @@ export function AppProvider({ children }) {
 
   const [faqsList, setFaqsList] = useState(() => {
     const saved = localStorage.getItem('monodoxia_faqs');
-    return saved ? JSON.parse(saved) : INITIAL_FAQS;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {}
+    }
+    return (INITIAL_FAQS && Array.isArray(INITIAL_FAQS) && INITIAL_FAQS.length > 0) ? INITIAL_FAQS : [];
   });
 
   // Applications, Dynamic Form Fields & Registrations
