@@ -191,10 +191,13 @@
   display: inline-block;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   SCROLL REVEAL & ALL-TEXT TYPOGRAPHY ANIMATIONS
+═══════════════════════════════════════════════════════════════ */
 @keyframes textRevealUp {
   0% {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(22px);
   }
   100% {
     opacity: 1;
@@ -205,7 +208,7 @@
 @keyframes textRevealSoft {
   0% {
     opacity: 0;
-    transform: translateY(10px) scale(0.99);
+    transform: translateY(14px) scale(0.99);
   }
   100% {
     opacity: 1;
@@ -213,12 +216,25 @@
   }
 }
 
+@keyframes textFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 .animate-text-reveal {
-  animation: textRevealUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: textRevealUp 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .animate-text-reveal-soft {
   animation: textRevealSoft 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-text-fade {
+  animation: textFadeIn 0.8s ease-out both;
 }
 
 .animate-delay-100 { animation-delay: 100ms; }
@@ -227,6 +243,39 @@
 .animate-delay-300 { animation-delay: 300ms; }
 .animate-delay-400 { animation-delay: 400ms; }
 .animate-delay-500 { animation-delay: 500ms; }
+.animate-delay-600 { animation-delay: 600ms; }
+
+/* Scroll-triggered reveal state */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-child-stagger > * {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-child-stagger.is-visible > * {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-child-stagger.is-visible > *:nth-child(1) { transition-delay: 0.05s; }
+.reveal-child-stagger.is-visible > *:nth-child(2) { transition-delay: 0.15s; }
+.reveal-child-stagger.is-visible > *:nth-child(3) { transition-delay: 0.25s; }
+.reveal-child-stagger.is-visible > *:nth-child(4) { transition-delay: 0.35s; }
+.reveal-child-stagger.is-visible > *:nth-child(5) { transition-delay: 0.45s; }
+.reveal-child-stagger.is-visible > *:nth-child(6) { transition-delay: 0.55s; }
+
 
 
 /* ═══════════════════════════════════════════════════════════════
