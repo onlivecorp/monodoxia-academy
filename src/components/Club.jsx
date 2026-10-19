@@ -57,7 +57,7 @@ export default function Club() {
           {/* LEFT CONTENT */}
           <div className="lg:col-span-7 space-y-6 md:space-y-8">
             {/* BADGE */}
-            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#c5a059]/40 bg-[#c5a059]/10 backdrop-blur-md shadow-sm">
+            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#c5a059]/40 bg-[#c5a059]/10 backdrop-blur-md shadow-sm animate-text-reveal">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#c5a059] opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-[#e9c176]"></span>
@@ -68,12 +68,12 @@ export default function Club() {
             </div>
 
             {/* HEADLINE */}
-            <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-serif font-medium text-white tracking-tight leading-[1.2]">
-              {titleText}
+            <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-serif font-medium text-white tracking-tight leading-[1.2] animate-text-reveal animate-delay-100">
+              <span className="block">{titleText}</span>
             </h2>
 
             {/* DESCRIPTION */}
-            <p className="text-base sm:text-lg text-slate-300 leading-relaxed font-normal max-w-2xl">
+            <p className="text-base sm:text-lg text-slate-300 leading-relaxed font-normal max-w-2xl animate-text-reveal-soft animate-delay-200">
               {descText}
             </p>
 
@@ -135,7 +135,7 @@ export default function Club() {
               {/* Price Block */}
               <div className="py-4 border-y border-[#e2d9c8]/70 mb-6">
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-3xl sm:text-4xl font-serif font-bold text-[#070f1e]">
+                  <span className="text-3xl sm:text-4xl font-serif font-bold gold-shimmer-text">
                     ₼ {tierPrice}
                   </span>
                   <span className="text-xs text-slate-500 font-medium">

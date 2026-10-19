@@ -31,19 +31,19 @@ export default function FAQ() {
       <div className="relative max-w-4xl mx-auto px-6 md:px-12">
         {/* HEADER */}
         <div className="text-center space-y-4 mb-14">
-          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#c5a059]/40 bg-white/70 backdrop-blur-md shadow-sm">
+          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#c5a059]/40 bg-white/70 backdrop-blur-md shadow-sm animate-text-reveal">
             <span className="w-1.5 h-1.5 rounded-full bg-[#9e782f]"></span>
             <span className="text-[11px] sm:text-xs font-semibold text-[#775a19] tracking-[0.2em] uppercase font-sans">
               {badgeText}
             </span>
           </div>
 
-          <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] text-[#070f1e] font-serif font-medium tracking-tight leading-[1.2]">
+          <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] text-[#070f1e] font-serif font-medium tracking-tight leading-[1.2] animate-text-reveal animate-delay-100">
             {titleText}
           </h2>
 
           {descText && (
-            <p className="text-base sm:text-lg text-slate-600 max-w-xl mx-auto leading-relaxed font-normal">
+            <p className="text-base sm:text-lg text-slate-600 max-w-xl mx-auto leading-relaxed font-normal animate-text-reveal-soft animate-delay-200">
               {descText}
             </p>
           )}

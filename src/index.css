@@ -125,6 +125,111 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   ANIMATIONS — MOVING GOLD SHIMMER & LUXURY ENTRANCE REVEAL
+═══════════════════════════════════════════════════════════════ */
+@keyframes goldShimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes goldRadiance {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.gold-shimmer-text {
+  background: linear-gradient(
+    110deg,
+    #7a5914 0%,
+    #a88432 20%,
+    #d4af37 40%,
+    #fff4cc 50%,
+    #d4af37 60%,
+    #a88432 80%,
+    #7a5914 100%
+  );
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  animation: goldRadiance 5s ease-in-out infinite;
+  display: inline-block;
+  text-shadow: 0 0 20px rgba(212, 175, 55, 0.15);
+}
+
+.gold-shimmer-fast {
+  animation: goldRadiance 3.5s ease-in-out infinite;
+}
+
+.gold-shimmer-subtle {
+  background: linear-gradient(
+    110deg,
+    #9e782f 0%,
+    #c5a059 25%,
+    #ffe8a3 50%,
+    #c5a059 75%,
+    #9e782f 100%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  animation: goldRadiance 6s ease-in-out infinite;
+  display: inline-block;
+}
+
+@keyframes textRevealUp {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes textRevealSoft {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.99);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-text-reveal {
+  animation: textRevealUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-text-reveal-soft {
+  animation: textRevealSoft 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-delay-100 { animation-delay: 100ms; }
+.animate-delay-150 { animation-delay: 150ms; }
+.animate-delay-200 { animation-delay: 200ms; }
+.animate-delay-300 { animation-delay: 300ms; }
+.animate-delay-400 { animation-delay: 400ms; }
+.animate-delay-500 { animation-delay: 500ms; }
+
+
+/* ═══════════════════════════════════════════════════════════════
    ADMIN PANEL — PREMIUM DARK ENTERPRISE UI
 ═══════════════════════════════════════════════════════════════ */
 .admin-backdrop{position:fixed;inset:0;background:rgba(15,23,42,0.45);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:9999;}

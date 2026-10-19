@@ -118,7 +118,7 @@ export default function About() {
           {/* CONTENT BLOCK */}
           <div className="lg:col-span-7 space-y-6">
             {/* BADGE */}
-            <div className="inline-flex items-center gap-3">
+            <div className="inline-flex items-center gap-3 animate-text-reveal">
               <span className="w-8 h-[2px] bg-gradient-to-r from-[#8a6a1f] to-[#c5a059] rounded-full"></span>
               <span className="text-xs font-semibold text-[#775a19] tracking-[0.22em] uppercase font-sans">
                 {badgeText}
@@ -126,12 +126,12 @@ export default function About() {
             </div>
 
             {/* HEADLINE */}
-            <h2 className="text-2xl sm:text-3xl lg:text-[2.6rem] text-[#070f1e] font-serif font-medium tracking-tight leading-[1.22]">
+            <h2 className="text-2xl sm:text-3xl lg:text-[2.6rem] text-[#070f1e] font-serif font-medium tracking-tight leading-[1.22] animate-text-reveal animate-delay-100">
               {titleText}
             </h2>
 
             {/* DESCRIPTION */}
-            <p className="text-base sm:text-lg text-slate-600 leading-relaxed font-normal max-w-2xl">
+            <p className="text-base sm:text-lg text-slate-600 leading-relaxed font-normal max-w-2xl animate-text-reveal-soft animate-delay-200">
               {descText}
             </p>
 

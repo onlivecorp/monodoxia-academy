@@ -36,13 +36,13 @@ export default function Academy() {
         {/* HEADER & FILTER TABS */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div>
-            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#c5a059]/40 bg-white/70 backdrop-blur-md shadow-sm mb-2">
+            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#c5a059]/40 bg-white/70 backdrop-blur-md shadow-sm mb-2 animate-text-reveal">
               <span className="w-1.5 h-1.5 rounded-full bg-[#9e782f]"></span>
               <span className="text-[11px] sm:text-xs font-semibold text-[#775a19] tracking-[0.2em] uppercase font-sans">
                 {badgeText}
               </span>
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-[2.65rem] text-[#070f1e] font-serif font-medium tracking-tight leading-[1.2]">
+            <h2 className="text-3xl sm:text-4xl lg:text-[2.65rem] text-[#070f1e] font-serif font-medium tracking-tight leading-[1.2] animate-text-reveal animate-delay-100">
               {titleText}
             </h2>
           </div>

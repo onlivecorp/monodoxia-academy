@@ -65,7 +65,7 @@ export default function Hero() {
           {/* LEFT CONTENT */}
           <div className="lg:col-span-7 space-y-6 md:space-y-8">
             {/* BADGE */}
-            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#c5a059]/40 bg-white/75 backdrop-blur-md shadow-sm">
+            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#c5a059]/40 bg-white/75 backdrop-blur-md shadow-sm animate-text-reveal">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#c5a059] opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-[#9e782f]"></span>
@@ -77,20 +77,20 @@ export default function Hero() {
 
             {/* HEADLINE */}
             <h1 className="text-4xl sm:text-5xl lg:text-[3.65rem] xl:text-[4.15rem] text-[#070f1e] font-serif font-medium tracking-tight leading-[1.12]">
-              <span className="block">{title1}</span>
-              <span className="block italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-[#8a6a1f] via-[#c5a059] to-[#9e782f]">
+              <span className="block animate-text-reveal animate-delay-100">{title1}</span>
+              <span className="block italic font-normal gold-shimmer-text animate-text-reveal animate-delay-200">
                 {title2}
               </span>
-              <span className="block">{title3}</span>
+              <span className="block animate-text-reveal animate-delay-300">{title3}</span>
             </h1>
 
             {/* DESCRIPTION */}
-            <p className="text-base sm:text-lg text-slate-600 max-w-xl leading-relaxed font-normal">
+            <p className="text-base sm:text-lg text-slate-600 max-w-xl leading-relaxed font-normal animate-text-reveal-soft animate-delay-300">
               {descText}
             </p>
 
             {/* CTA BUTTONS */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2 animate-text-reveal-soft animate-delay-400">
               <a
                 className="group relative inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-lg bg-[#070f1e] hover:bg-[#0d1c32] text-white text-sm font-semibold tracking-wide border border-[#c5a059]/40 shadow-lg shadow-[#070f1e]/15 hover:shadow-xl hover:shadow-[#c5a059]/20 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer overflow-hidden"
                 href={primaryLink}
@@ -116,7 +116,7 @@ export default function Hero() {
             </div>
 
             {/* STATS STRIP */}
-            <div className="pt-8 border-t border-[#e2d9c8]/70 grid grid-cols-3 gap-4 sm:gap-6 max-w-xl">
+            <div className="pt-8 border-t border-[#e2d9c8]/70 grid grid-cols-3 gap-4 sm:gap-6 max-w-xl animate-text-reveal-soft animate-delay-500">
               <div className="space-y-1">
                 <div className="text-2xl sm:text-3xl font-serif font-bold text-[#070f1e] tracking-tight">
                   {hero.stat1Num || '12,000+'}
@@ -127,7 +127,7 @@ export default function Hero() {
               </div>
               <div className="border-l border-[#e2d9c8]/80 pl-4 sm:pl-6 space-y-1">
                 <div className="text-2xl sm:text-3xl font-serif font-bold text-[#775a19] tracking-tight">
-                  {hero.stat2Num || '98%'}
+                  <span className="gold-shimmer-text">{hero.stat2Num || '98%'}</span>
                 </div>
                 <div className="text-[10px] sm:text-[11px] font-semibold text-slate-500 tracking-[0.14em] uppercase">
                   {stat2Label}
