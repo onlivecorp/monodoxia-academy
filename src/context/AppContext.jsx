@@ -356,7 +356,13 @@ export function AppProvider({ children }) {
 
   const [communityTopics, setCommunityTopics] = useState(() => {
     const saved = localStorage.getItem('monodoxia_admin_topics');
-    return saved ? JSON.parse(saved) : COMMUNITY_TOPICS;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {}
+    }
+    return (COMMUNITY_TOPICS && Array.isArray(COMMUNITY_TOPICS) && COMMUNITY_TOPICS.length > 0) ? COMMUNITY_TOPICS : [];
   });
 
   const [platformSettings, setPlatformSettings] = useState(() => {

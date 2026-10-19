@@ -39,96 +39,159 @@ export default function Community() {
   ];
   const bullets = community.bullets && community.bullets.length > 0 ? community.bullets : defaultBullets;
 
+  const badgeText = getLocalized(community, 'badge', currentLang, defaultLang) || t('community_badge');
+  const titleText = getLocalized(community, 'title', currentLang, defaultLang) || t('community_title');
+  const descText = getLocalized(community, 'desc', currentLang, defaultLang) || t('community_desc');
+
+  const topicsList = communityTopics || [];
+
   return (
-    <section className="py-space-2xl md:py-space-3xl bg-surface-container-low border-b border-outline-variant/40" id="icma">
-      <div className="max-w-7xl mx-auto px-gutter md:px-margin">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+    <section className="relative overflow-hidden py-16 md:py-24 bg-[#fbf9f5] border-b border-[#e2d9c8]/70" id="icma">
+      {/* AMBIENT BACKGROUND GLOW */}
+      <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
+        <div className="absolute top-1/2 -right-32 w-[38rem] h-[38rem] rounded-full bg-gradient-to-bl from-[#c5a059]/10 via-[#c5a059]/5 to-transparent blur-3xl" />
+        <div className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-gradient-to-tr from-[#0a192f]/5 via-[#c5a059]/5 to-transparent blur-3xl" />
+        <div 
+          className="absolute inset-0 opacity-[0.025]"
+          style={{
+            backgroundImage: `radial-gradient(circle at 1px 1px, #070f1e 1px, transparent 0)`,
+            backgroundSize: '36px 36px'
+          }}
+        />
+      </div>
+
+      <div className="relative max-w-7xl mx-auto px-6 md:px-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14 items-center">
+          {/* LEFT CONTENT */}
           <div className="lg:col-span-5 space-y-6">
-            <span className="font-label-md text-label-md text-secondary tracking-widest uppercase">
-              {getLocalized(community, 'badge', currentLang, defaultLang) || t('community_badge')}
-            </span>
-            <h2 className="font-headline-xl text-headline-xl-mobile md:text-headline-xl text-primary font-serif">
-              {getLocalized(community, 'title', currentLang, defaultLang) || t('community_title')}
+            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#c5a059]/40 bg-white/70 backdrop-blur-md shadow-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#9e782f]"></span>
+              <span className="text-[11px] sm:text-xs font-semibold text-[#775a19] tracking-[0.2em] uppercase font-sans">
+                {badgeText}
+              </span>
+            </div>
+
+            <h2 className="text-3xl sm:text-4xl lg:text-[2.65rem] text-[#070f1e] font-serif font-medium tracking-tight leading-[1.2]">
+              {titleText}
             </h2>
-            <p className="font-body-lg text-body-lg text-on-surface-variant">
-              {getLocalized(community, 'desc', currentLang, defaultLang) || t('community_desc')}
+
+            <p className="text-base sm:text-lg text-slate-600 leading-relaxed font-normal">
+              {descText}
             </p>
-            <div className="space-y-3 pt-2">
+
+            <div className="space-y-3.5 pt-2">
               {bullets.map((b, i) => (
-                <div key={i} className="flex items-center gap-3 text-sm text-on-surface">
-                  <span className="material-symbols-outlined text-secondary">{i === 0 ? 'verified_user' : 'forum'}</span>
-                  <span>{b}</span>
+                <div key={i} className="flex items-center gap-3 text-sm text-slate-700">
+                  <div className="w-7 h-7 rounded-full bg-[#c5a059]/15 border border-[#c5a059]/35 text-[#775a19] flex items-center justify-center shrink-0 shadow-sm">
+                    <span className="material-symbols-outlined text-[15px]">{i === 0 ? 'verified_user' : 'forum'}</span>
+                  </div>
+                  <span className="font-medium">{b}</span>
                 </div>
               ))}
             </div>
-            <div className="flex flex-wrap items-center gap-3 pt-2">
+
+            <div className="flex flex-wrap items-center gap-3.5 pt-3">
               <button
                 onClick={handleOpenNewTopic}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded bg-primary-container text-on-primary hover:bg-[#112240] text-label-md font-label-md transition-colors shadow-sm"
+                className="group relative inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-[#070f1e] hover:bg-[#112240] text-white text-xs font-semibold uppercase tracking-[0.16em] border border-[#c5a059]/40 shadow-lg shadow-[#070f1e]/20 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
               >
                 <span>{getLocalized(community, 'newTopicBtnText', currentLang, defaultLang) || t('community_new_topic')}</span>
-                <span className="material-symbols-outlined text-[16px]">edit_note</span>
+                <span className="material-symbols-outlined text-[16px] text-[#c5a059]">edit_note</span>
               </button>
+
               <button
                 onClick={() => openApplication({ id: 'forum-vip', title: 'VIP İntellektual Dialoq Qrupu', price: 'Pulsuz' }, 'community')}
-                className="inline-flex items-center gap-2 px-5 py-3 rounded border border-secondary text-primary hover:bg-secondary/10 text-label-md font-label-md transition-colors"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white/70 hover:bg-[#c5a059]/10 text-[#070f1e] hover:text-[#775a19] text-xs font-semibold uppercase tracking-wider border border-[#c5a059]/60 hover:border-[#c5a059] shadow-sm backdrop-blur-sm hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
               >
-                <span className="material-symbols-outlined text-[16px] text-secondary">group_add</span>
+                <span className="material-symbols-outlined text-[16px] text-[#775a19]">group_add</span>
                 <span>{userCommunityApp ? `İcma Statusu: ${userCommunityApp.status}` : 'İcmaya Müraciət Et'}</span>
               </button>
             </div>
           </div>
 
-          {/* TOPICS LIST */}
+          {/* RIGHT TOPICS LIST */}
           <div className="lg:col-span-7 space-y-4">
-            {[...communityTopics].sort((a, b) => {
-              const aPin = Boolean(a.pinned || (typeof a.badge === 'string' && a.badge.includes('📌')));
-              const bPin = Boolean(b.pinned || (typeof b.badge === 'string' && b.badge.includes('📌')));
-              if (aPin === bPin) return 0;
-              return aPin ? -1 : 1;
-            }).map(topic => (
-              <div
-                key={topic.id}
-                className="bg-surface-container-lowest p-5 rounded border border-outline-variant/60 shadow-sm hover:border-secondary/50 transition-colors"
-              >
-                <div className="flex items-center justify-between text-xs text-outline mb-2">
-                  <div className="flex items-center gap-1.5">
-                    {topic.pinned && (
-                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-600 flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[12px]">push_pin</span>
-                        <span>Sabit</span>
+            {topicsList.length > 0 ? (
+              [...topicsList].sort((a, b) => {
+                const aPin = Boolean(a.pinned || (typeof a.badge === 'string' && a.badge.includes('📌')));
+                const bPin = Boolean(b.pinned || (typeof b.badge === 'string' && b.badge.includes('📌')));
+                if (aPin === bPin) return 0;
+                return aPin ? -1 : 1;
+              }).map(topic => (
+                <div
+                  key={topic.id}
+                  className="group relative bg-white/85 hover:bg-white p-6 sm:p-7 rounded-2xl border border-[#e2d9c8]/75 hover:border-[#c5a059]/70 shadow-sm hover:shadow-2xl hover:shadow-[#c5a059]/12 transition-all duration-300 hover:-translate-y-1 overflow-hidden"
+                >
+                  {/* Top Ambient Shimmer */}
+                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#c5a059] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                  <div className="flex items-center justify-between text-xs text-slate-500 mb-2.5 flex-wrap gap-2">
+                    <div className="flex items-center gap-2">
+                      {topic.pinned && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-800 border border-amber-300/40 flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[12px]">push_pin</span>
+                          <span>Sabit</span>
+                        </span>
+                      )}
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-[#c5a059]/15 text-[#775a19] border border-[#c5a059]/30">
+                        {getLocalized(topic, 'badge', currentLang, defaultLang) || topic.badge || 'İcma Müzakirəsi'}
                       </span>
-                    )}
-                    <span className={topic.badgeClass || 'text-secondary font-semibold'}>
-                      {getLocalized(topic, 'badge', currentLang, defaultLang) || topic.badge || 'İcma Müzakirəsi'}
-                    </span>
+                    </div>
+                    <span className="text-xs font-mono text-slate-400">{topic.time || topic.time_ago || 'İndicə'}</span>
                   </div>
-                  <span>{topic.time || topic.time_ago || 'İndicə'}</span>
+
+                  <h4 className="font-serif text-xl sm:text-[1.3rem] font-semibold text-[#070f1e] group-hover:text-[#775a19] transition-colors leading-snug my-2.5">
+                    "{getLocalized(topic, 'title', currentLang, defaultLang) || topic.title}"
+                  </h4>
+
+                  <p className="text-sm text-slate-600 line-clamp-2 leading-relaxed font-normal mb-4">
+                    {getLocalized(topic, 'snippet', currentLang, defaultLang) || getLocalized(topic, 'desc', currentLang, defaultLang) || topic.snippet || topic.desc || topic.content}
+                  </p>
+
+                  <div className="flex items-center justify-between pt-3 border-t border-[#e2d9c8]/50 text-xs">
+                    <span className="text-slate-500 font-medium flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[15px] text-[#c5a059]">person</span>
+                      <span>Müəllif: <strong className="text-[#070f1e] font-semibold">{topic.author}</strong></span>
+                    </span>
+
+                    <div className="flex items-center gap-4 text-slate-500">
+                      <button
+                        onClick={() => likeTopic(topic.id)}
+                        className="flex items-center gap-1 hover:text-red-500 transition-colors cursor-pointer"
+                        title="Bəyən"
+                      >
+                        <span className="material-symbols-outlined text-[16px] text-red-500/80">favorite</span>
+                        <span className="font-semibold text-slate-700">{topic.likes}</span>
+                      </button>
+                      <span className="flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[16px] text-[#c5a059]">chat_bubble</span>
+                        <span className="font-semibold text-slate-700">{topic.repliesCount}</span>
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <h4 className="font-headline-sm text-headline-sm text-primary mb-1">
-                  "{getLocalized(topic, 'title', currentLang, defaultLang) || topic.title}"
-                </h4>
-                <p className="font-body-sm text-body-sm text-on-surface-variant mb-3">
-                  {getLocalized(topic, 'snippet', currentLang, defaultLang) || getLocalized(topic, 'desc', currentLang, defaultLang) || topic.snippet || topic.desc || topic.content}
+              ))
+            ) : (
+              <div className="relative overflow-hidden p-10 sm:p-12 rounded-2xl bg-white/85 backdrop-blur-md border border-[#e2d9c8]/80 shadow-xl text-center">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#fbf9f5] to-[#f5f0e6] border border-[#c5a059]/35 text-[#8a6a1f] flex items-center justify-center mx-auto mb-4 shadow-sm">
+                  <span className="material-symbols-outlined text-[32px]">forum</span>
+                </div>
+                <span className="inline-block px-3 py-1 rounded-full bg-[#c5a059]/15 text-[#775a19] text-[10px] font-semibold tracking-widest uppercase mb-3">
+                  Dialoq Məkanı
+                </span>
+                <h4 className="font-serif text-2xl font-bold text-[#070f1e] mb-2">Həftənin Mövzusu Hazırlanır</h4>
+                <p className="text-sm text-slate-600 max-w-md mx-auto leading-relaxed mb-6 font-normal">
+                  Akademiya və klub üzvləri üçün yeni fəlsəfi müzakirə mövzusu tezliklə təqdim olunacaqdır. İlk mövzunu siz başlada bilərsiniz.
                 </p>
-                <div className="flex items-center justify-between pt-2 border-t border-outline-variant/20 text-xs">
-                  <span className="text-on-surface-variant font-medium">Müəllif: {topic.author}</span>
-                  <div className="flex items-center gap-4 text-outline">
-                    <button
-                      onClick={() => likeTopic(topic.id)}
-                      className="flex items-center gap-1 hover:text-secondary transition-colors"
-                    >
-                      <span className="material-symbols-outlined text-[16px]">favorite</span>
-                      <span>{topic.likes}</span>
-                    </button>
-                    <span className="flex items-center gap-1">
-                      <span className="material-symbols-outlined text-[16px]">chat_bubble</span>
-                      <span>{topic.repliesCount}</span>
-                    </span>
-                  </div>
-                </div>
+                <button
+                  onClick={handleOpenNewTopic}
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-[#070f1e] text-white text-xs font-semibold tracking-wide shadow-md hover:bg-[#112240] transition-colors"
+                >
+                  <span>Mövzu Başlat</span>
+                  <span className="material-symbols-outlined text-[16px] text-[#c5a059]">edit_note</span>
+                </button>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
