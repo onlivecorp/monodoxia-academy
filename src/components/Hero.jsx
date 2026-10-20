@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { getLocalized } from '../i18n/localize';
+import { getLocalized, getLocalizedArray } from '../i18n/localize';
 import { useApp } from '../context/AppContext';
 import { getHeroMediaStyles, parseVideoUrl } from '../utils/heroMediaHelper';
 

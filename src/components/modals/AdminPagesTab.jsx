@@ -1718,7 +1718,93 @@ export default function AdminPagesTab() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
               <PageField label="1-ci Başlıq Sətri" block={heroData} setBlock={setHeroData} fieldKey="title1" placeholder="Özünü tanı." />
               <PageField label="2-ci Başlıq Sətri (Qızılı/Kursiv)" block={heroData} setBlock={setHeroData} fieldKey="title2" placeholder="Özünü inkişaf etdir." />
-              <PageField label="3-cü Başlıq Sətri" block={heroData} setBlock={setHeroData} fieldKey="title3" placeholder="Həyatını dəyiş." />
+              <PageField label="3-cü Başlıq Sətri (Statik)" block={heroData} setBlock={setHeroData} fieldKey="title3" placeholder="Həyatını dəyiş." />
+            </div>
+
+            {/* DYNAMIC ROTATING SLIDES (SLAYD BAŞLIQLARI) */}
+            <div style={{
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: '10px',
+              padding: '14px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#c5a059' }}>view_carousel</span>
+                  <div>
+                    <span style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a', display: 'block' }}>
+                      3-cü Sətir: Dövri Slayd Mətnləri (Fırlanan Başlıqlar)
+                    </span>
+                    <span style={{ fontSize: '11px', color: '#64748b' }}>
+                      Ana səhifədə ardıcıl dəyişən cümlələr (məsələn: Öz zirvənə çat, Potensialını kəşf et, daxili gücünü tap, şüurlu gələcək qur)
+                    </span>
+                  </div>
+                </div>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: 600, color: '#334155' }}>
+                  <input
+                    type="checkbox"
+                    checked={heroData.enableRotatingTitles !== false}
+                    onChange={e => setHeroData(p => ({ ...p, enableRotatingTitles: e.target.checked }))}
+                    style={{ width: '16px', height: '16px', accentColor: '#c5a059' }}
+                  />
+                  <span>Slayd animasiyası aktivdir</span>
+                </label>
+              </div>
+
+              <PageField
+                label="Slayd Mətnləri (Hər sətirdə 1 slayd)"
+                block={heroData}
+                setBlock={setHeroData}
+                fieldKey="rotatingTitles"
+                multiline
+                rows={4}
+                placeholder={"Potensialını kəşf et.\nDaxili gücünü tap.\nŞüurlu gələcək qur.\nÖz zirvənə çat."}
+                helpText="Hər sətirə bir slayd mətni yazın. Saytda növbə ilə görünəcək."
+              />
+
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', paddingTop: '4px' }}>
+                <span style={{ fontSize: '11px', color: '#64748b' }}>
+                  Nümunə: <strong style={{ color: '#0f172a' }}>Potensialını kəşf et. | Daxili gücünü tap. | Şüurlu gələcək qur. | Öz zirvənə çat.</strong>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const defaultSlides = "Potensialını kəşf et.\nDaxili gücünü tap.\nŞüurlu gələcək qur.\nÖz zirvənə çat.";
+                    setHeroData(p => {
+                      const prevTrans = p?.translations || {};
+                      return {
+                        ...p,
+                        rotatingTitles: defaultSlides,
+                        enableRotatingTitles: true,
+                        translations: {
+                          ...prevTrans,
+                          [pageLang]: { ...(prevTrans[pageLang] || {}), rotatingTitles: defaultSlides }
+                        }
+                      };
+                    });
+                    showToast('Standart slayd mətnləri bərpa edildi!', 'info');
+                  }}
+                  style={{
+                    padding: '4px 10px',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    borderRadius: '5px',
+                    border: '1px solid #e2e8f0',
+                    background: '#ffffff',
+                    color: '#475569',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '14px', color: '#c5a059' }}>restart_alt</span>
+                  <span>Standart Slaydları Bərpa Et</span>
+                </button>
+              </div>
             </div>
 
             <PageField label="Hero Geniş Təsviri" block={heroData} setBlock={setHeroData} fieldKey="desc" multiline rows={3} />
