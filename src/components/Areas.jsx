@@ -11,9 +11,9 @@ export default function Areas() {
     ? areas.items
     : (areasList && areasList.length > 0 ? areasList : []);
 
-  const badgeText = getLocalized(areas, 'badge', currentLang, defaultLang) || t('areas_badge');
-  const titleText = getLocalized(areas, 'title', currentLang, defaultLang) || t('areas_title');
-  const descText = getLocalized(areas, 'desc', currentLang, defaultLang) || t('areas_desc');
+  const badgeText = getLocalized(areas, 'badge', currentLang, defaultLang) || (areas.badge !== undefined && areas.badge !== null && String(areas.badge).trim() !== '' ? areas.badge : t('areas_badge'));
+  const titleText = getLocalized(areas, 'title', currentLang, defaultLang) || (areas.title !== undefined && areas.title !== null && String(areas.title).trim() !== '' ? areas.title : t('areas_title'));
+  const descText = getLocalized(areas, 'desc', currentLang, defaultLang) || (areas.desc !== undefined && areas.desc !== null && String(areas.desc).trim() !== '' ? areas.desc : t('areas_desc'));
 
   const handleLinkClick = (e, targetLink) => {
     if (!targetLink) return;

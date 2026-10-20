@@ -8,9 +8,9 @@ export default function FAQ() {
   const { faqsList, homeContent, navigateTo } = useApp();
   const faq = homeContent?.faq || {};
 
-  const badgeText = getLocalized(faq, 'badge', currentLang, defaultLang) || t('faq_badge');
-  const titleText = getLocalized(faq, 'title', currentLang, defaultLang) || t('faq_title');
-  const descText = getLocalized(faq, 'desc', currentLang, defaultLang);
+  const badgeText = getLocalized(faq, 'badge', currentLang, defaultLang) || (faq.badge !== undefined && faq.badge !== null && String(faq.badge).trim() !== '' ? faq.badge : t('faq_badge'));
+  const titleText = getLocalized(faq, 'title', currentLang, defaultLang) || (faq.title !== undefined && faq.title !== null && String(faq.title).trim() !== '' ? faq.title : t('faq_title'));
+  const descText = getLocalized(faq, 'desc', currentLang, defaultLang) || (faq.desc !== undefined && faq.desc !== null && String(faq.desc).trim() !== '' ? faq.desc : '');
 
   const list = faqsList || [];
 

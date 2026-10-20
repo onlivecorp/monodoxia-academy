@@ -15,8 +15,10 @@ export default function Academy() {
 
   const courseCategories = (categoriesList || []).filter(c => c.type === 'course' || c.type === 'all');
 
-  const badgeText = getLocalized(academy, 'badge', currentLang, defaultLang) || t('academy_badge');
-  const titleText = getLocalized(academy, 'title', currentLang, defaultLang) || t('academy_title');
+  const badgeText = getLocalized(academy, 'badge', currentLang, defaultLang) || (academy.badge !== undefined && academy.badge !== null && String(academy.badge).trim() !== '' ? academy.badge : t('academy_badge'));
+  const titleText = getLocalized(academy, 'title', currentLang, defaultLang) || (academy.title !== undefined && academy.title !== null && String(academy.title).trim() !== '' ? academy.title : t('academy_title'));
+  const descText = getLocalized(academy, 'desc', currentLang, defaultLang) || (academy.desc !== undefined && academy.desc !== null && String(academy.desc).trim() !== '' ? academy.desc : '');
+  const ctaText = getLocalized(academy, 'ctaText', currentLang, defaultLang) || (academy.ctaText !== undefined && academy.ctaText !== null && String(academy.ctaText).trim() !== '' ? academy.ctaText : '');
 
   return (
     <section className="relative overflow-hidden py-16 md:py-24 bg-[#fbf9f5] border-b border-[#e2d9c8]/70" id="akademiya">
@@ -45,6 +47,11 @@ export default function Academy() {
             <h2 className="text-3xl sm:text-4xl lg:text-[2.65rem] text-[#070f1e] font-serif font-medium tracking-tight leading-[1.2] anim-academy-title">
               {titleText}
             </h2>
+            {descText && (
+              <p className="mt-3 text-sm sm:text-base text-slate-600 max-w-2xl font-light leading-relaxed">
+                {descText}
+              </p>
+            )}
           </div>
 
           {/* Segmented Filter Tabs */}
@@ -238,7 +245,7 @@ export default function Academy() {
               onClick={() => navigateTo ? navigateTo('akademiya') : null}
               className="inline-flex items-center gap-2 border border-[#c5a059] text-[#070f1e] hover:bg-[#c5a059]/10 px-8 py-3.5 rounded-lg text-xs font-semibold tracking-wider transition-all duration-200 cursor-pointer shadow-sm"
             >
-              <span>Bütün kurslara bax ({coursesList.length} Proqram)</span>
+              <span>{ctaText || `Bütün kurslara bax (${coursesList.length} Proqram)`}</span>
               <span className="material-symbols-outlined text-[16px] text-[#775a19]">arrow_forward</span>
             </button>
           </div>

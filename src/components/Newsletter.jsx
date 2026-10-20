@@ -56,18 +56,18 @@ export default function Newsletter() {
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#c5a059]/15 border border-[#c5a059]/40 backdrop-blur-md anim-badge">
               <span className="material-symbols-outlined text-[15px] text-[#e5c57d]">auto_awesome</span>
               <span className="text-[11px] sm:text-xs font-semibold tracking-[0.25em] text-[#e5c57d] uppercase">
-                {getLocalized(newsletter, 'badge', currentLang, defaultLang) || t('newsletter_badge')}
+                {getLocalized(newsletter, 'badge', currentLang, defaultLang) || (newsletter.badge !== undefined && newsletter.badge !== null && String(newsletter.badge).trim() !== '' ? newsletter.badge : t('newsletter_badge'))}
               </span>
             </div>
 
             {/* Prominent Serif Headline */}
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[2.65rem] font-serif font-medium text-white tracking-tight leading-[1.2] anim-newsletter-title">
-              {getLocalized(newsletter, 'title', currentLang, defaultLang) || t('newsletter_title')}
+              {getLocalized(newsletter, 'title', currentLang, defaultLang) || (newsletter.title !== undefined && newsletter.title !== null && String(newsletter.title).trim() !== '' ? newsletter.title : t('newsletter_title'))}
             </h2>
 
             {/* Description */}
             <p className="text-sm sm:text-base md:text-lg text-[#cbd5e1] font-light leading-relaxed max-w-xl mx-auto anim-subtext">
-              {getLocalized(newsletter, 'desc', currentLang, defaultLang) || t('newsletter_desc')}
+              {getLocalized(newsletter, 'desc', currentLang, defaultLang) || (newsletter.desc !== undefined && newsletter.desc !== null && String(newsletter.desc).trim() !== '' ? newsletter.desc : t('newsletter_desc'))}
             </p>
 
             {/* Quick Benefits / Value Props */}

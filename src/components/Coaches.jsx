@@ -8,9 +8,9 @@ export default function Coaches() {
   const { openBooking, coachesList, homeContent } = useApp();
   const coaches = homeContent?.coaches || {};
 
-  const badgeText = getLocalized(coaches, 'badge', currentLang, defaultLang) || t('experts_badge');
-  const titleText = getLocalized(coaches, 'title', currentLang, defaultLang) || t('experts_title');
-  const descText = getLocalized(coaches, 'desc', currentLang, defaultLang) || t('experts_desc');
+  const badgeText = getLocalized(coaches, 'badge', currentLang, defaultLang) || (coaches.badge !== undefined && coaches.badge !== null && String(coaches.badge).trim() !== '' ? coaches.badge : t('experts_badge'));
+  const titleText = getLocalized(coaches, 'title', currentLang, defaultLang) || (coaches.title !== undefined && coaches.title !== null && String(coaches.title).trim() !== '' ? coaches.title : t('experts_title'));
+  const descText = getLocalized(coaches, 'desc', currentLang, defaultLang) || (coaches.desc !== undefined && coaches.desc !== null && String(coaches.desc).trim() !== '' ? coaches.desc : t('experts_desc'));
 
   return (
     <section className="relative overflow-hidden py-16 md:py-24 bg-[#fbf9f5] border-b border-[#e2d9c8]/70" id="koucinq">

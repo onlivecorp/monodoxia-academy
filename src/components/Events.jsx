@@ -8,9 +8,9 @@ export default function Events() {
   const { eventsList, openApplication, currentUser, applicationsList, homeContent, navigateTo } = useApp();
   const events = homeContent?.events || {};
 
-  const badgeText = getLocalized(events, 'badge', currentLang, defaultLang) || t('events_badge');
-  const titleText = getLocalized(events, 'title', currentLang, defaultLang) || t('events_title');
-  const calendarBtnText = getLocalized(events, 'calendarBtnText', currentLang, defaultLang) || t('events_calendar_btn');
+  const badgeText = getLocalized(events, 'badge', currentLang, defaultLang) || (events.badge !== undefined && events.badge !== null && String(events.badge).trim() !== '' ? events.badge : t('events_badge'));
+  const titleText = getLocalized(events, 'title', currentLang, defaultLang) || (events.title !== undefined && events.title !== null && String(events.title).trim() !== '' ? events.title : t('events_title'));
+  const calendarBtnText = getLocalized(events, 'calendarBtnText', currentLang, defaultLang) || (events.calendarBtnText !== undefined && events.calendarBtnText !== null && String(events.calendarBtnText).trim() !== '' ? events.calendarBtnText : t('events_calendar_btn'));
 
   const list = eventsList || [];
 

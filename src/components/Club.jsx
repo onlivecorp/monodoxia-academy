@@ -33,9 +33,9 @@ export default function Club() {
     : (premiumTier ? getLocalizedArray(premiumTier, 'features', currentLang, defaultLang) : []);
   const tierCtaText = getLocalized(club, 'tierCtaText', currentLang, defaultLang) || t('club_tier_cta');
 
-  const badgeText = getLocalized(club, 'badge', currentLang, defaultLang) || t('club_badge');
-  const titleText = getLocalized(club, 'title', currentLang, defaultLang) || t('club_title');
-  const descText = getLocalized(club, 'desc', currentLang, defaultLang) || t('club_desc');
+  const badgeText = getLocalized(club, 'badge', currentLang, defaultLang) || (club.badge !== undefined && club.badge !== null && String(club.badge).trim() !== '' ? club.badge : t('club_badge'));
+  const titleText = getLocalized(club, 'title', currentLang, defaultLang) || (club.title !== undefined && club.title !== null && String(club.title).trim() !== '' ? club.title : t('club_title'));
+  const descText = getLocalized(club, 'desc', currentLang, defaultLang) || (club.desc !== undefined && club.desc !== null && String(club.desc).trim() !== '' ? club.desc : t('club_desc'));
 
   return (
     <section className="relative overflow-hidden py-20 md:py-28 bg-gradient-to-br from-[#051124] via-[#091b36] to-[#040e1c] text-white border-b border-[#0a192f]" id="club">

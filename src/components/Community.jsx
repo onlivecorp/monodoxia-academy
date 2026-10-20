@@ -39,9 +39,9 @@ export default function Community() {
   ];
   const bullets = community.bullets && community.bullets.length > 0 ? community.bullets : defaultBullets;
 
-  const badgeText = getLocalized(community, 'badge', currentLang, defaultLang) || t('community_badge');
-  const titleText = getLocalized(community, 'title', currentLang, defaultLang) || t('community_title');
-  const descText = getLocalized(community, 'desc', currentLang, defaultLang) || t('community_desc');
+  const badgeText = getLocalized(community, 'badge', currentLang, defaultLang) || (community.badge !== undefined && community.badge !== null && String(community.badge).trim() !== '' ? community.badge : t('community_badge'));
+  const titleText = getLocalized(community, 'title', currentLang, defaultLang) || (community.title !== undefined && community.title !== null && String(community.title).trim() !== '' ? community.title : t('community_title'));
+  const descText = getLocalized(community, 'desc', currentLang, defaultLang) || (community.desc !== undefined && community.desc !== null && String(community.desc).trim() !== '' ? community.desc : t('community_desc'));
 
   const topicsList = communityTopics || [];
 

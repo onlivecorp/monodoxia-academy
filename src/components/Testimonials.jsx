@@ -8,9 +8,9 @@ export default function Testimonials() {
   const { testimonialsList, homeContent } = useApp();
   const testimonials = homeContent?.testimonials || {};
 
-  const badgeText = getLocalized(testimonials, 'badge', currentLang, defaultLang) || t('testimonials_badge');
-  const titleText = getLocalized(testimonials, 'title', currentLang, defaultLang) || t('testimonials_title');
-  const descText = getLocalized(testimonials, 'desc', currentLang, defaultLang);
+  const badgeText = getLocalized(testimonials, 'badge', currentLang, defaultLang) || (testimonials.badge !== undefined && testimonials.badge !== null && String(testimonials.badge).trim() !== '' ? testimonials.badge : t('testimonials_badge'));
+  const titleText = getLocalized(testimonials, 'title', currentLang, defaultLang) || (testimonials.title !== undefined && testimonials.title !== null && String(testimonials.title).trim() !== '' ? testimonials.title : t('testimonials_title'));
+  const descText = getLocalized(testimonials, 'desc', currentLang, defaultLang) || (testimonials.desc !== undefined && testimonials.desc !== null && String(testimonials.desc).trim() !== '' ? testimonials.desc : '');
 
   const list = testimonialsList || [];
 
