@@ -76,41 +76,48 @@ export default function Hero() {
     if (!isRotatingEnabled) {
       return [defaultTitle];
     }
-    const customList = getLocalized(hero, 'rotatingTitles', currentLang, defaultLang) || hero.rotatingTitles;
-    if (customList) {
-      const items = (Array.isArray(customList) ? customList : String(customList).split(/\r?\n|,/))
-        .map(s => s.trim())
+    const customArray = getLocalizedArray(hero, 'rotatingTitles', currentLang, defaultLang);
+    if (Array.isArray(customArray) && customArray.length > 0) {
+      const items = customArray.map(s => String(s).trim()).filter(Boolean);
+      if (items.length > 0) return items;
+    }
+    const rawVal = getLocalized(hero, 'rotatingTitles', currentLang, defaultLang) || hero.rotatingTitles;
+    if (rawVal) {
+      const items = (Array.isArray(rawVal) ? rawVal : String(rawVal).split(/\r?\n|,/))
+        .map(s => String(s).trim())
         .filter(Boolean);
       if (items.length > 0) return items;
     }
     const listByLang = {
       az: [
-        defaultTitle,
         'Potensialını kəşf et.',
         'Daxili gücünü tap.',
         'Şüurlu gələcək qur.',
         'Öz zirvənə çat.'
       ],
       en: [
-        defaultTitle,
         'Unlock your potential.',
         'Awaken inner clarity.',
         'Architect your future.',
         'Master your mind.'
       ],
       ru: [
-        defaultTitle,
         'Раскрой свой потенциал.',
         'Обрети внутреннюю силу.',
         'Строй осознанное будущее.',
         'Достигни своих вершин.'
+      ],
+      tr: [
+        'Potansiyelini keşfet.',
+        'İçsel gücünü bul.',
+        'Bilinçli gelecek kur.',
+        'Kendi zirvene ulaş.'
       ]
     };
     const langKey = currentLang && listByLang[currentLang] ? currentLang : 'az';
-    // Remove duplicates if title3 matches any preset
-    const unique = Array.from(new Set(listByLang[langKey].filter(Boolean)));
-    return unique.length > 0 ? unique : [defaultTitle];
-  }, [title3, currentLang, isRotatingEnabled, hero.rotatingTitles, defaultLang]);
+    const presets = listByLang[langKey] || listByLang.az;
+    return presets.length > 0 ? presets : [defaultTitle];
+  }, [title3, currentLang, isRotatingEnabled, hero.rotatingTitles, hero.translations, defaultLang]);
 
   const [activeTitleIdx, setActiveTitleIdx] = useState(0);
   const [isTitleExiting, setIsTitleExiting] = useState(false);

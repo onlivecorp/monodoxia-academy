@@ -634,6 +634,9 @@ export default function AdminCmsTab() {
   const [newFaq, setNewFaq] = useState(emptyFaq);
   const [editingFaq, setEditingFaq] = useState(null);
 
+  // Hero Preview Active Slide
+  const [heroPreviewSlideIdx, setHeroPreviewSlideIdx] = useState(0);
+
   // Pillar states & direct fields
   const [cmsPillars, setCmsPillars] = useState(() => {
     if (homeContent?.about?.pillars && Array.isArray(homeContent.about.pillars) && homeContent.about.pillars.length > 0) {
@@ -1023,6 +1026,55 @@ export default function AdminCmsTab() {
           reader.readAsDataURL(file);
         };
 
+        const defaultHeroSlides = {
+          az: ['Potensialını kəşf et.', 'Daxili gücünü tap.', 'Şüurlu gələcək qur.', 'Öz zirvənə çat.'],
+          en: ['Unlock your potential.', 'Awaken inner clarity.', 'Architect your future.', 'Master your mind.'],
+          ru: ['Раскрой свой потенциал.', 'Обрети внутреннюю силу.', 'Строй осознанное будущее.', 'Достигни своих вершин.'],
+          tr: ['Potansiyelini keşfet.', 'İçsel gücünü bul.', 'Bilinçli gelecek kur.', 'Kendi zirvene ulaş.']
+        };
+
+        const getHeroSlidesList = (langCode) => {
+          const trans = cmsHero.translations || {};
+          let raw = langCode === 'az'
+            ? (trans.az?.rotatingTitles !== undefined ? trans.az.rotatingTitles : cmsHero.rotatingTitles)
+            : trans[langCode]?.rotatingTitles;
+
+          if (Array.isArray(raw)) {
+            const list = raw.map(s => String(s).trim()).filter(Boolean);
+            if (list.length > 0) return list;
+          } else if (typeof raw === 'string' && raw.trim() !== '') {
+            const list = raw.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+            if (list.length > 0) return list;
+          }
+          return defaultHeroSlides[langCode] || defaultHeroSlides.az;
+        };
+
+        const currentHeroSlides = getHeroSlidesList(cmsLang);
+
+        const updateHeroSlidesList = (langCode, newList) => {
+          const newlineStr = newList.join('\n');
+          setCmsHero(prev => {
+            const prevTrans = prev?.translations || {};
+            if (langCode === 'az') {
+              return {
+                ...prev,
+                rotatingTitles: newlineStr,
+                translations: {
+                  ...prevTrans,
+                  az: { ...(prevTrans.az || {}), rotatingTitles: newlineStr }
+                }
+              };
+            }
+            return {
+              ...prev,
+              translations: {
+                ...prevTrans,
+                [langCode]: { ...(prevTrans[langCode] || {}), rotatingTitles: newlineStr }
+              }
+            };
+          });
+        };
+
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
             {/* YUXARI TEZ YADDA SAXLA VƏ MƏLUMAT ZOLAĞI */}
@@ -1169,15 +1221,22 @@ export default function AdminCmsTab() {
                     alignItems: 'center',
                     gap: '8px'
                   }}>
-                    <span>
+                    <span style={{ transition: 'color 0.2s' }}>
                       {cmsHero.enableRotatingTitles === true || Boolean(cmsHero.rotatingTitles)
-                        ? (String(cmsHero.translations?.[cmsLang]?.rotatingTitles || cmsHero.rotatingTitles || '').split(/\r?\n|,/)[0]?.trim() || cmsHero.translations?.[cmsLang]?.title3 || cmsHero.title3 || 'Şüurlu gələcək qur.')
+                        ? (currentHeroSlides[heroPreviewSlideIdx % Math.max(1, currentHeroSlides.length)] || currentHeroSlides[0] || cmsHero.title3 || 'Şüurlu gələcək qur.')
                         : (cmsHero.translations?.[cmsLang]?.title3 || cmsHero.title3 || 'Şüurlu gələcək qur.')}
                     </span>
                     {(cmsHero.enableRotatingTitles === true || Boolean(cmsHero.rotatingTitles)) && cmsHero.showRotatingSyncIcon !== false && (
-                      <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#c5a059', background: 'rgba(197, 160, 89, 0.15)', borderRadius: '50%', padding: '3px' }}>
-                        sync
-                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setHeroPreviewSlideIdx(prev => (prev + 1) % Math.max(1, currentHeroSlides.length))}
+                        title="Növbəti slaydı önizlə (dəyişmək üçün klikləyin)"
+                        style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: 0 }}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#c5a059', background: 'rgba(197, 160, 89, 0.15)', borderRadius: '50%', padding: '3px' }}>
+                          sync
+                        </span>
+                      </button>
                     )}
                   </div>
 
@@ -1186,9 +1245,24 @@ export default function AdminCmsTab() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingTop: '6px' }}>
                       <div style={{ width: '28px', height: '2px', background: 'linear-gradient(to right, #c5a059, transparent)', borderRadius: '2px' }} />
                       <div style={{ display: 'flex', gap: '4px' }}>
-                        <span style={{ width: '18px', height: '5px', borderRadius: '3px', background: '#c5a059' }} />
-                        <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#e2d9c8' }} />
-                        <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#e2d9c8' }} />
+                        {currentHeroSlides.map((_, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => setHeroPreviewSlideIdx(i)}
+                            style={{
+                              width: (heroPreviewSlideIdx % Math.max(1, currentHeroSlides.length)) === i ? '18px' : '6px',
+                              height: '6px',
+                              borderRadius: '3px',
+                              border: 'none',
+                              padding: 0,
+                              cursor: 'pointer',
+                              background: (heroPreviewSlideIdx % Math.max(1, currentHeroSlides.length)) === i ? '#c5a059' : '#e2d9c8',
+                              transition: 'all 0.2s'
+                            }}
+                            title={`Slayd ${i + 1}`}
+                          />
+                        ))}
                       </div>
                       <span style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '1.5px', textTransform: 'uppercase', color: '#775a19' }}>
                         {cmsHero.translations?.[cmsLang]?.rotatingBadgeText || cmsHero.rotatingBadgeText || 'DAİMİ İNKİŞAF'}
@@ -1476,7 +1550,12 @@ export default function AdminCmsTab() {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0', flexWrap: 'wrap', gap: '8px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span className="material-symbols-outlined" style={{ color: '#c5a059', fontSize: '20px' }}>sync</span>
-                  <h5 style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a', margin: 0 }}>3. Kinetik Fırlanan Başlıq və İndikator Zolağı</h5>
+                  <div>
+                    <h5 style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a', margin: 0 }}>3. Kinetik Slayd Başlıqları (Fırlanan Yazılar)</h5>
+                    <p style={{ margin: '2px 0 0', fontSize: '11px', color: '#64748b' }}>
+                      3-cü sətirdə növbə ilə fırlanan hər bir slayd yazısını aşağıda istədiyiniz kimi redaktə edin və ya yenisini əlavə edin
+                    </p>
+                  </div>
                 </div>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: 700, color: '#1e293b', cursor: 'pointer' }}>
                   <input
@@ -1484,65 +1563,320 @@ export default function AdminCmsTab() {
                     checked={cmsHero.enableRotatingTitles === true || Boolean(cmsHero.rotatingTitles)}
                     onChange={e => setCmsHero(p => ({ ...p, enableRotatingTitles: e.target.checked }))}
                   />
-                  <span>Fırlanan Başlıqları Aktiv Et</span>
+                  <span>Slayd Başlıqlarını Aktiv Et</span>
                 </label>
               </div>
 
               {(cmsHero.enableRotatingTitles === true || Boolean(cmsHero.rotatingTitles)) ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  {/* SLIDES HEADER TOOLBAR */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '8px',
+                    padding: '8px 12px',
+                    background: '#f8fafc',
+                    borderRadius: '8px',
+                    border: '1px solid #e2e8f0'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '12px', fontWeight: 800, color: '#0f172a' }}>
+                        Dövriyyə Slaydları ({currentHeroSlides.length} ədəd)
+                      </span>
+                      <span style={{
+                        fontSize: '10px',
+                        fontWeight: 700,
+                        padding: '2px 7px',
+                        borderRadius: '4px',
+                        background: '#fef3c7',
+                        color: '#92400e',
+                        textTransform: 'uppercase'
+                      }}>
+                        {cmsLang.toUpperCase()} dili üçün
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const defs = defaultHeroSlides[cmsLang] || defaultHeroSlides.az;
+                          updateHeroSlidesList(cmsLang, [...defs]);
+                          showToast('Standart Monodoxia slaydları bərpa edildi', 'info');
+                        }}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          padding: '4px 10px',
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          borderRadius: '5px',
+                          border: '1px solid #cbd5e1',
+                          background: '#ffffff',
+                          color: '#475569',
+                          cursor: 'pointer'
+                        }}
+                        title="Standart slayd mətnlərini bərpa et"
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: '15px', color: '#c5a059' }}>restart_alt</span>
+                        <span>Standart Slaydları Bərpa Et</span>
+                      </button>
+
+                      {cmsLang !== 'az' && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const azSlides = getHeroSlidesList('az');
+                            updateHeroSlidesList(cmsLang, [...azSlides]);
+                            showToast(`AZ slaydları ${cmsLang.toUpperCase()} dilinə kopyalandı`, 'info');
+                          }}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            padding: '4px 10px',
+                            fontSize: '11px',
+                            fontWeight: 600,
+                            borderRadius: '5px',
+                            border: '1px solid #fef3c7',
+                            background: '#fffbeb',
+                            color: '#b45309',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <span>🇦🇿 AZ-dən Kopyala</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* SLIDES INTERACTIVE LIST */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {currentHeroSlides.map((slideText, idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '8px 10px',
+                          borderRadius: '8px',
+                          background: '#ffffff',
+                          border: '1px solid #e2e8f0',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+                        }}
+                      >
+                        {/* INDEX BADGE */}
+                        <span style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '28px',
+                          height: '28px',
+                          borderRadius: '6px',
+                          background: '#070f1e',
+                          color: '#c5a059',
+                          fontSize: '12px',
+                          fontWeight: 800,
+                          flexShrink: 0
+                        }}>
+                          {idx + 1}
+                        </span>
+
+                        {/* INPUT */}
+                        <input
+                          type="text"
+                          value={slideText}
+                          onChange={e => {
+                            const copy = [...currentHeroSlides];
+                            copy[idx] = e.target.value;
+                            updateHeroSlidesList(cmsLang, copy);
+                          }}
+                          className="admin-input"
+                          style={{ flex: 1, padding: '7px 12px', fontSize: '13px', fontWeight: 600 }}
+                          placeholder={`Slayd ${idx + 1} mətni (məsələn: Öz zirvənə çat.)...`}
+                        />
+
+                        {/* PREVIEW BUTTON */}
+                        <button
+                          type="button"
+                          onClick={() => setHeroPreviewSlideIdx(idx)}
+                          style={{
+                            border: '1px solid #e2e8f0',
+                            background: (heroPreviewSlideIdx % Math.max(1, currentHeroSlides.length)) === idx ? '#fffbeb' : '#ffffff',
+                            color: (heroPreviewSlideIdx % Math.max(1, currentHeroSlides.length)) === idx ? '#b45309' : '#64748b',
+                            borderRadius: '5px',
+                            padding: '4px 8px',
+                            fontSize: '11px',
+                            fontWeight: 700,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '3px',
+                            cursor: 'pointer'
+                          }}
+                          title="Bu slaydı canlı önizləmədə göstər"
+                        >
+                          <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>visibility</span>
+                          <span>Bax</span>
+                        </button>
+
+                        {/* MOVE UP */}
+                        <button
+                          type="button"
+                          disabled={idx === 0}
+                          onClick={() => {
+                            if (idx === 0) return;
+                            const copy = [...currentHeroSlides];
+                            const temp = copy[idx];
+                            copy[idx] = copy[idx - 1];
+                            copy[idx - 1] = temp;
+                            updateHeroSlidesList(cmsLang, copy);
+                          }}
+                          style={{
+                            border: '1px solid #e2e8f0',
+                            background: idx === 0 ? '#f8fafc' : '#ffffff',
+                            color: idx === 0 ? '#cbd5e1' : '#475569',
+                            borderRadius: '5px',
+                            width: '28px',
+                            height: '28px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: idx === 0 ? 'not-allowed' : 'pointer'
+                          }}
+                          title="Yuxarı qaldır"
+                        >
+                          <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>arrow_upward</span>
+                        </button>
+
+                        {/* MOVE DOWN */}
+                        <button
+                          type="button"
+                          disabled={idx === currentHeroSlides.length - 1}
+                          onClick={() => {
+                            if (idx === currentHeroSlides.length - 1) return;
+                            const copy = [...currentHeroSlides];
+                            const temp = copy[idx];
+                            copy[idx] = copy[idx + 1];
+                            copy[idx + 1] = temp;
+                            updateHeroSlidesList(cmsLang, copy);
+                          }}
+                          style={{
+                            border: '1px solid #e2e8f0',
+                            background: idx === currentHeroSlides.length - 1 ? '#f8fafc' : '#ffffff',
+                            color: idx === currentHeroSlides.length - 1 ? '#cbd5e1' : '#475569',
+                            borderRadius: '5px',
+                            width: '28px',
+                            height: '28px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: idx === currentHeroSlides.length - 1 ? 'not-allowed' : 'pointer'
+                          }}
+                          title="Aşağı endir"
+                        >
+                          <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>arrow_downward</span>
+                        </button>
+
+                        {/* DELETE */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const copy = currentHeroSlides.filter((_, i) => i !== idx);
+                            updateHeroSlidesList(cmsLang, copy.length > 0 ? copy : ['Şüurlu gələcək qur.']);
+                            showToast('Slayd yazısı çıxarıldı', 'info');
+                          }}
+                          style={{
+                            border: '1px solid #fee2e2',
+                            background: '#fef2f2',
+                            color: '#dc2626',
+                            borderRadius: '5px',
+                            width: '28px',
+                            height: '28px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer'
+                          }}
+                          title="Bu slaydı sil"
+                        >
+                          <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>delete</span>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* ADD NEW SLIDE BUTTON */}
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const copy = [...currentHeroSlides, `Yeni Hədəf ${currentHeroSlides.length + 1}`];
+                        updateHeroSlidesList(cmsLang, copy);
+                        showToast('Yeni slayd yazısı əlavə edildi', 'success');
+                      }}
+                      className="admin-btn-secondary"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '9px 18px',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        color: '#775a19',
+                        borderColor: '#c5a059',
+                        background: '#fdfbf7',
+                        borderRadius: '6px'
+                      }}
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#c5a059' }}>add_circle</span>
+                      <span>+ Yeni Slayd Başlığı Əlavə Et</span>
+                    </button>
+                  </div>
+
+                  {/* SPEED & INDICATOR TOGGLES */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px', background: '#fafaf9', padding: '14px', borderRadius: '8px', border: '1px solid #e7e5e4', marginTop: '4px' }}>
                     <Field
-                      label="Fərdi Fırlanan Başlıqlar (Hər sətirdə 1 ifadə daxil edin)"
+                      label="İndikator Alt Mətni"
                       block={cmsHero}
                       setBlock={setCmsHero}
-                      fieldKey="rotatingTitles"
-                      multiline
-                      rows={4}
-                      placeholder="Potensialını kəşf et.&#10;Daxili gücünü tap.&#10;Şüurlu gələcək qur.&#10;Öz zirvənə çat."
-                      helpText="Hər 3-4 saniyədən bir başlıqda növbə ilə bu ifadələr kinetik animasiya ilə dəyişəcək."
+                      fieldKey="rotatingBadgeText"
+                      placeholder="DAİMİ İNKİŞAF"
+                      helpText="Nöqtələrin sağındakı qızılı etiket mətni"
                     />
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                      <Field
-                        label="İndikator Alt Mətni"
-                        block={cmsHero}
-                        setBlock={setCmsHero}
-                        fieldKey="rotatingBadgeText"
-                        placeholder="DAİMİ İNKİŞAF"
-                        helpText="Nöqtələrin sağındakı qızılı etiket mətni"
-                      />
 
-                      {/* FIRLANMA İNTERVALI / SÜRƏTİ */}
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <label className="admin-label" style={{ margin: 0 }}>Dəyişmə İntervalı (Sürət)</label>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '4px' }}>
-                          {[
-                            { val: 2500, label: '2.5 san' },
-                            { val: 3800, label: '3.8 san' },
-                            { val: 5000, label: '5.0 san' },
-                            { val: 7000, label: '7.0 san' }
-                          ].map(it => (
-                            <button
-                              key={it.val}
-                              type="button"
-                              onClick={() => setCmsHero(p => ({ ...p, rotationInterval: it.val }))}
-                              style={{
-                                padding: '5px 4px',
-                                borderRadius: '4px',
-                                fontSize: '11px',
-                                fontWeight: 700,
-                                cursor: 'pointer',
-                                border: (Number(cmsHero.rotationInterval) || 3800) === it.val ? '1.5px solid #c5a059' : '1px solid #cbd5e1',
-                                background: (Number(cmsHero.rotationInterval) || 3800) === it.val ? '#fffbeb' : '#ffffff',
-                                color: (Number(cmsHero.rotationInterval) || 3800) === it.val ? '#92400e' : '#475569'
-                              }}
-                            >
-                              {it.label}
-                            </button>
-                          ))}
-                        </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <label className="admin-label" style={{ margin: 0 }}>Dəyişmə İntervalı (Sürət)</label>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '4px' }}>
+                        {[
+                          { val: 2500, label: '2.5 san' },
+                          { val: 3800, label: '3.8 san' },
+                          { val: 5000, label: '5.0 san' },
+                          { val: 7000, label: '7.0 san' }
+                        ].map(it => (
+                          <button
+                            key={it.val}
+                            type="button"
+                            onClick={() => setCmsHero(p => ({ ...p, rotationInterval: it.val }))}
+                            style={{
+                              padding: '5px 4px',
+                              borderRadius: '4px',
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              border: (Number(cmsHero.rotationInterval) || 3800) === it.val ? '1.5px solid #c5a059' : '1px solid #cbd5e1',
+                              background: (Number(cmsHero.rotationInterval) || 3800) === it.val ? '#fffbeb' : '#ffffff',
+                              color: (Number(cmsHero.rotationInterval) || 3800) === it.val ? '#92400e' : '#475569'
+                            }}
+                          >
+                            {it.label}
+                          </button>
+                        ))}
                       </div>
 
-                      {/* İNDİKATOR GÖRÜNÜŞ TOGGLES */}
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', paddingTop: '4px' }}>
                         <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 600, color: '#334155', cursor: 'pointer' }}>
                           <input
