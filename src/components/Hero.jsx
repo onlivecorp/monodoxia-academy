@@ -26,6 +26,43 @@ export default function Hero() {
   const quoteText = getLocalized(hero, 'quote', currentLang, defaultLang) || t('hero_quote');
   const quoteSubText = getLocalized(hero, 'quoteSub', currentLang, defaultLang) || t('hero_philosophy');
 
+  // Top Badge features
+  const showBadge = hero.showBadge !== false;
+  const badgeIcon = hero.badgeIcon || 'sparkles';
+  const showBadgeBeacon = hero.showBadgeBeacon !== false;
+  const showBadgeIcon = hero.showBadgeIcon !== false;
+  const badgeStyle = hero.badgeStyle || 'glass';
+
+  // Headline features
+  const title1Animation = hero.title1Animation !== false;
+  const title2Shimmer = hero.title2Shimmer !== false;
+  const title2Italic = hero.title2Italic !== false;
+  const title2Color = hero.title2Color || '';
+  const headlineSize = hero.headlineSize || 'normal';
+
+  // Rotating headline & indicator features
+  const showRotatingIndicator = hero.showRotatingIndicator !== false;
+  const showRotatingSyncIcon = hero.showRotatingSyncIcon !== false;
+  const rotationInterval = Number(hero.rotationInterval) || 3800;
+
+  // Description features
+  const showDesc = hero.showDesc !== false;
+  const descSize = hero.descSize || 'normal';
+  const descWidth = hero.descWidth || 'xl';
+
+  // CTA button features
+  const showBtnPrimary = hero.showBtnPrimary !== false;
+  const btnPrimaryIcon = hero.btnPrimaryIcon || 'north_east';
+  const btnPrimaryShowIcon = hero.btnPrimaryShowIcon !== false;
+  const btnPrimaryStyle = hero.btnPrimaryStyle || 'dark';
+  const btnPrimaryNewTab = hero.btnPrimaryNewTab === true;
+
+  const showBtnSecondary = hero.showBtnSecondary !== false;
+  const btnSecondaryIcon = hero.btnSecondaryIcon || 'arrow_forward';
+  const btnSecondaryShowIcon = hero.btnSecondaryShowIcon !== false;
+  const btnSecondaryStyle = hero.btnSecondaryStyle || 'glass';
+  const btnSecondaryNewTab = hero.btnSecondaryNewTab === true;
+
   const mediaBadgeText = getLocalized(hero, 'mediaBadgeText', currentLang, defaultLang) || hero.mediaBadgeText || 'Beynəlxalq Standart';
   const mediaBadgeIcon = hero.mediaBadgeIcon || 'verified';
   const showMediaBadge = hero.showMediaBadge !== false;
@@ -80,7 +117,7 @@ export default function Hero() {
   const [isTitlePaused, setIsTitlePaused] = useState(false);
   const transitionTimerRef = useRef(null);
 
-  // Cycle rotating title automatically every 3.8s
+  // Cycle rotating title automatically using configured rotationInterval
   useEffect(() => {
     if (rotatingTitles.length <= 1 || isTitlePaused) return;
 
@@ -90,13 +127,13 @@ export default function Hero() {
         setActiveTitleIdx((prev) => (prev + 1) % rotatingTitles.length);
         setIsTitleExiting(false);
       }, 380);
-    }, 3800);
+    }, rotationInterval);
 
     return () => {
       clearInterval(interval);
       if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
     };
-  }, [rotatingTitles.length, isTitlePaused]);
+  }, [rotatingTitles.length, isTitlePaused, rotationInterval]);
 
   // Reset index if language changes
   useEffect(() => {
@@ -126,6 +163,7 @@ export default function Hero() {
   const secondaryLink = hero.btnSecondaryLink || (getPageUrl ? getPageUrl('club') : '/club');
 
   const handlePrimaryClick = (e) => {
+    if (btnPrimaryNewTab) return;
     if (!hero.btnPrimaryLink || hero.btnPrimaryLink.startsWith('/') || hero.btnPrimaryLink === 'akademiya') {
       e.preventDefault();
       const target = hero.btnPrimaryLink ? hero.btnPrimaryLink.replace(/^\//, '') : 'akademiya';
@@ -134,6 +172,7 @@ export default function Hero() {
   };
 
   const handleSecondaryClick = (e) => {
+    if (btnSecondaryNewTab) return;
     if (!hero.btnSecondaryLink || hero.btnSecondaryLink.startsWith('/') || hero.btnSecondaryLink === 'club') {
       e.preventDefault();
       const target = hero.btnSecondaryLink ? hero.btnSecondaryLink.replace(/^\//, '') : 'club';
@@ -171,18 +210,34 @@ export default function Hero() {
             <div className="hero-title-halo" />
 
             {/* BADGE WITH SHIMMER AND PULSING BEACON */}
-            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#c5a059]/40 bg-white/80 hover:bg-white backdrop-blur-md shadow-sm anim-hero-badge relative group transition-all duration-300">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#c5a059] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#9e782f]"></span>
-              </span>
-              <span className="text-[11px] sm:text-xs font-semibold text-[#775a19] tracking-[0.18em] uppercase select-none">
-                {badgeText}
-              </span>
-              <span className="material-symbols-outlined text-[13px] text-[#c5a059] opacity-70 group-hover:rotate-45 transition-transform duration-500">
-                sparkles
-              </span>
-            </div>
+            {showBadge && (
+              <div className={`inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full shadow-sm anim-hero-badge relative group transition-all duration-300 ${
+                badgeStyle === 'dark' 
+                  ? 'border border-[#c5a059]/60 bg-[#070f1e] text-[#fbf9f5] hover:bg-[#0c182b]'
+                  : badgeStyle === 'gold'
+                  ? 'border border-[#c5a059] bg-[#c5a059]/15 text-[#775a19] hover:bg-[#c5a059]/25'
+                  : badgeStyle === 'minimal'
+                  ? 'border border-[#e2d9c8] bg-white/60 text-[#775a19] hover:bg-white'
+                  : 'border border-[#c5a059]/40 bg-white/80 hover:bg-white backdrop-blur-md'
+              }`}>
+                {showBadgeBeacon && (
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#c5a059] opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#9e782f]"></span>
+                  </span>
+                )}
+                <span className={`text-[11px] sm:text-xs font-semibold tracking-[0.18em] uppercase select-none ${
+                  badgeStyle === 'dark' ? 'text-[#f5e6c8]' : 'text-[#775a19]'
+                }`}>
+                  {badgeText}
+                </span>
+                {showBadgeIcon && (
+                  <span className="material-symbols-outlined text-[13px] text-[#c5a059] opacity-80 group-hover:rotate-45 transition-transform duration-500">
+                    {badgeIcon}
+                  </span>
+                )}
+              </div>
+            )}
 
             {/* HEADLINE WITH KINETIC REVEAL & DYNAMIC ROTATING TITLE */}
             <div 
@@ -190,26 +245,43 @@ export default function Hero() {
               onMouseEnter={() => setIsTitlePaused(true)}
               onMouseLeave={() => setIsTitlePaused(false)}
             >
-              <h1 className="text-4xl sm:text-5xl lg:text-[3.65rem] xl:text-[4.15rem] text-[#070f1e] font-serif font-medium tracking-tight leading-[1.14]">
-                {/* LINE 1: WORD-BY-WORD STAGGERED REVEAL */}
+              <h1 className={`${
+                headlineSize === 'compact'
+                  ? 'text-3xl sm:text-4xl lg:text-[3.1rem] xl:text-[3.5rem]'
+                  : headlineSize === 'large'
+                  ? 'text-5xl sm:text-6xl lg:text-[4.2rem] xl:text-[4.75rem]'
+                  : 'text-4xl sm:text-5xl lg:text-[3.65rem] xl:text-[4.15rem]'
+              } text-[#070f1e] font-serif font-medium tracking-tight leading-[1.14]`}>
+                {/* LINE 1: WORD-BY-WORD STAGGERED REVEAL OR CLEAN */}
                 <div className="hero-text-mask flex flex-wrap items-baseline">
-                  {title1Words.map((word, idx) => (
-                    <span 
-                      key={idx} 
-                      className="hero-hover-word mr-[0.28em] inline-block cursor-default"
-                      style={{
-                        animation: 'heroWordReveal 1s cubic-bezier(0.16, 1, 0.3, 1) both',
-                        animationDelay: `${0.12 + idx * 0.08}s`
-                      }}
-                    >
-                      {word}
-                    </span>
-                  ))}
+                  {title1Animation ? (
+                    title1Words.map((word, idx) => (
+                      <span 
+                        key={idx} 
+                        className="hero-hover-word mr-[0.28em] inline-block cursor-default"
+                        style={{
+                          animation: 'heroWordReveal 1s cubic-bezier(0.16, 1, 0.3, 1) both',
+                          animationDelay: `${0.12 + idx * 0.08}s`
+                        }}
+                      >
+                        {word}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="cursor-default">{title1}</span>
+                  )}
                 </div>
 
                 {/* LINE 2: LIQUID GOLD SHIMMER & LUXURY ITALIC FOCUS */}
                 <div className="hero-text-mask mt-0.5">
-                  <span className="block italic font-normal gold-shimmer-text anim-hero-line-2 cursor-default select-none hover:brightness-110 transition-all">
+                  <span 
+                    className={`block cursor-default select-none transition-all ${
+                      title2Italic ? 'italic' : 'font-serif font-medium'
+                    } ${
+                      title2Shimmer ? 'gold-shimmer-text anim-hero-line-2 hover:brightness-110' : ''
+                    }`}
+                    style={!title2Shimmer && title2Color ? { color: title2Color } : (!title2Shimmer ? { color: '#775a19' } : {})}
+                  >
                     {title2}
                   </span>
                 </div>
@@ -227,12 +299,14 @@ export default function Hero() {
                       <span className="block font-medium tracking-tight text-[#070f1e] group-hover/dyn:text-[#775a19] transition-colors duration-300">
                         {rotatingTitles[activeTitleIdx] || title3}
                       </span>
-                      <span 
-                        className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#c5a059]/15 text-[#775a19] opacity-70 group-hover/dyn:opacity-100 group-hover/dyn:bg-[#c5a059]/25 transition-all duration-300 transform group-hover/dyn:rotate-180"
-                        title="Dəyişdir"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">sync</span>
-                      </span>
+                      {showRotatingSyncIcon && (
+                        <span 
+                          className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#c5a059]/15 text-[#775a19] opacity-70 group-hover/dyn:opacity-100 group-hover/dyn:bg-[#c5a059]/25 transition-all duration-300 transform group-hover/dyn:rotate-180"
+                          title="Dəyişdir"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">sync</span>
+                        </span>
+                      )}
                     </div>
                   ) : (
                     <span className="block font-medium tracking-tight text-[#070f1e]">
@@ -243,7 +317,7 @@ export default function Hero() {
               </h1>
 
               {/* DYNAMIC TITLE INDICATOR PILLS */}
-              {rotatingTitles.length > 1 && (
+              {rotatingTitles.length > 1 && showRotatingIndicator && (
                 <div className="flex items-center gap-2 pt-3 anim-hero-desc">
                   <div className="h-[2px] w-8 bg-gradient-to-r from-[#c5a059] to-transparent rounded-full" />
                   <div className="flex items-center gap-1.5">
@@ -269,35 +343,69 @@ export default function Hero() {
             </div>
 
             {/* DESCRIPTION */}
-            <p className="text-base sm:text-lg text-slate-600 max-w-xl leading-relaxed font-normal anim-hero-desc">
-              {descText}
-            </p>
+            {showDesc && (
+              <p className={`${
+                descSize === 'sm' ? 'text-sm sm:text-base' : descSize === 'lg' ? 'text-lg sm:text-xl' : 'text-base sm:text-lg'
+              } ${
+                descWidth === '2xl' ? 'max-w-2xl' : descWidth === 'full' ? 'max-w-none' : 'max-w-xl'
+              } text-slate-600 leading-relaxed font-normal anim-hero-desc`}>
+                {descText}
+              </p>
+            )}
 
             {/* CTA BUTTONS */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2 anim-hero-cta">
-              <a
-                className="group relative inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-lg bg-[#070f1e] hover:bg-[#0d1c32] text-white text-sm font-semibold tracking-wide border border-[#c5a059]/40 shadow-lg shadow-[#070f1e]/15 hover:shadow-xl hover:shadow-[#c5a059]/20 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer overflow-hidden"
-                href={primaryLink}
-                onClick={handlePrimaryClick}
-              >
-                <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out pointer-events-none" />
-                <span>{primaryBtnText}</span>
-                <span className="material-symbols-outlined text-[18px] text-[#c5a059] transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
-                  north_east
-                </span>
-              </a>
+            {(showBtnPrimary || showBtnSecondary) && (
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2 anim-hero-cta">
+                {showBtnPrimary && (
+                  <a
+                    className={`group relative inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-lg text-sm tracking-wide transition-all duration-300 cursor-pointer overflow-hidden ${
+                      btnPrimaryStyle === 'gold'
+                        ? 'bg-gradient-to-r from-[#c5a059] to-[#d4af37] hover:from-[#b8934b] hover:to-[#c5a059] text-[#070f1e] font-bold border border-[#f5e6c8]/60 shadow-lg shadow-[#c5a059]/25 hover:shadow-xl hover:shadow-[#c5a059]/35 hover:-translate-y-0.5'
+                        : btnPrimaryStyle === 'outline'
+                        ? 'bg-transparent hover:bg-[#070f1e] text-[#070f1e] hover:text-white font-semibold border-2 border-[#070f1e] shadow-sm hover:-translate-y-0.5'
+                        : 'bg-[#070f1e] hover:bg-[#0d1c32] text-white font-semibold border border-[#c5a059]/40 shadow-lg shadow-[#070f1e]/15 hover:shadow-xl hover:shadow-[#c5a059]/20 hover:-translate-y-0.5'
+                    }`}
+                    href={primaryLink}
+                    target={btnPrimaryNewTab ? '_blank' : undefined}
+                    rel={btnPrimaryNewTab ? 'noopener noreferrer' : undefined}
+                    onClick={handlePrimaryClick}
+                  >
+                    <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out pointer-events-none" />
+                    <span>{primaryBtnText}</span>
+                    {btnPrimaryShowIcon && (
+                      <span className={`material-symbols-outlined text-[18px] transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 ${
+                        btnPrimaryStyle === 'gold' ? 'text-[#070f1e]' : 'text-[#c5a059]'
+                      }`}>
+                        {btnPrimaryIcon}
+                      </span>
+                    )}
+                  </a>
+                )}
 
-              <a
-                className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-lg bg-white/70 hover:bg-[#c5a059]/10 text-[#070f1e] hover:text-[#775a19] text-sm font-semibold tracking-wide border border-[#c5a059]/60 hover:border-[#c5a059] shadow-sm backdrop-blur-sm hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
-                href={secondaryLink}
-                onClick={handleSecondaryClick}
-              >
-                <span>{secondaryBtnText}</span>
-                <span className="material-symbols-outlined text-[18px] opacity-70">
-                  arrow_forward
-                </span>
-              </a>
-            </div>
+                {showBtnSecondary && (
+                  <a
+                    className={`inline-flex items-center justify-center gap-2 px-7 py-4 rounded-lg text-sm font-semibold tracking-wide transition-all duration-300 cursor-pointer ${
+                      btnSecondaryStyle === 'outline'
+                        ? 'bg-transparent hover:bg-[#c5a059]/10 text-[#775a19] border-2 border-[#c5a059] shadow-none hover:-translate-y-0.5'
+                        : btnSecondaryStyle === 'light'
+                        ? 'bg-[#f4efe6] hover:bg-[#ede5d6] text-[#070f1e] hover:text-[#775a19] border border-[#d8cdb8] shadow-sm hover:-translate-y-0.5'
+                        : 'bg-white/70 hover:bg-[#c5a059]/10 text-[#070f1e] hover:text-[#775a19] border border-[#c5a059]/60 hover:border-[#c5a059] shadow-sm backdrop-blur-sm hover:-translate-y-0.5'
+                    }`}
+                    href={secondaryLink}
+                    target={btnSecondaryNewTab ? '_blank' : undefined}
+                    rel={btnSecondaryNewTab ? 'noopener noreferrer' : undefined}
+                    onClick={handleSecondaryClick}
+                  >
+                    <span>{secondaryBtnText}</span>
+                    {btnSecondaryShowIcon && (
+                      <span className="material-symbols-outlined text-[18px] opacity-70">
+                        {btnSecondaryIcon}
+                      </span>
+                    )}
+                  </a>
+                )}
+              </div>
+            )}
 
             {/* STATS STRIP */}
             {showStats && (
