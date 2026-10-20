@@ -23,8 +23,8 @@ export default function Hero() {
   const stat1Label = getLocalized(hero, 'stat1Label', currentLang, defaultLang) || t('hero_students');
   const stat2Label = getLocalized(hero, 'stat2Label', currentLang, defaultLang) || t('hero_satisfaction');
   const stat3Label = getLocalized(hero, 'stat3Label', currentLang, defaultLang) || t('hero_coaches');
-  const quoteText = getLocalized(hero, 'quote', currentLang, defaultLang) || t('hero_quote');
-  const quoteSubText = getLocalized(hero, 'quoteSub', currentLang, defaultLang) || t('hero_philosophy');
+  const quoteText = getLocalized(hero, 'quote', currentLang, defaultLang) || (hero.quote !== undefined && hero.quote !== null && String(hero.quote).trim() !== '' ? hero.quote : t('hero_quote'));
+  const quoteSubText = getLocalized(hero, 'quoteSub', currentLang, defaultLang) || (hero.quoteSub !== undefined && hero.quoteSub !== null && String(hero.quoteSub).trim() !== '' ? hero.quoteSub : t('hero_philosophy'));
 
   // Top Badge features
   const showBadge = hero.showBadge !== false;
@@ -446,8 +446,8 @@ export default function Hero() {
           </div>
 
           {/* RIGHT MEDIA */}
-          <div className="lg:col-span-5 relative flex justify-center anim-hero-media">
-            <div className="relative w-full" style={{ maxWidth: mediaStyles.maxWidth }}>
+          <div className="lg:col-span-5 relative flex justify-center items-center anim-hero-media w-full">
+            <div className="relative w-full mx-auto" style={{ maxWidth: mediaStyles.maxWidth, width: '100%' }}>
               {hero.showGlow !== false && (
                 <div className="absolute -inset-6 bg-gradient-to-tr from-[#c5a059]/20 via-[#c5a059]/10 to-transparent rounded-full blur-3xl pointer-events-none" />
               )}
