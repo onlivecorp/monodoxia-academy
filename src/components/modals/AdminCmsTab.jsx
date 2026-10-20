@@ -1037,6 +1037,56 @@ export default function AdminCmsTab() {
                 <Field label="Başlıq Sətir 2 (İtalik)" block={cmsHero} setBlock={setCmsHero} fieldKey="title2" />
                 <Field label="Başlıq Sətir 3" block={cmsHero} setBlock={setCmsHero} fieldKey="title3" />
               </div>
+
+              {/* DİNAMİK / FIRLANAN BAŞLIQ AYARLARI */}
+              <div style={{
+                background: '#fafaf9',
+                borderRadius: '8px',
+                padding: '12px 14px',
+                border: '1px solid #e7e5e4',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '10px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 700, color: '#1e293b', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={cmsHero.enableRotatingTitles === true || Boolean(cmsHero.rotatingTitles)}
+                      onChange={e => setCmsHero(p => ({ ...p, enableRotatingTitles: e.target.checked }))}
+                    />
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#c5a059' }}>sync</span>
+                      3-cü Başlıqda Kinetik Animasiya (Fırlanan Başlıqlar) Aktiv Olsun
+                    </span>
+                  </label>
+                  <span style={{ fontSize: '11px', color: '#64748b' }}>
+                    {cmsHero.enableRotatingTitles === true || Boolean(cmsHero.rotatingTitles) ? 'Dinamik fırlanan mətnlər aktivdir' : 'Yalnız yuxarıdakı Başlıq Sətir 3 sabit görünəcək'}
+                  </span>
+                </div>
+
+                {(cmsHero.enableRotatingTitles === true || Boolean(cmsHero.rotatingTitles)) && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px', paddingTop: '4px' }}>
+                    <Field
+                      label="Fərdi Fırlanan Başlıqlar (Hər sətirdə 1 ifadə)"
+                      block={cmsHero}
+                      setBlock={setCmsHero}
+                      fieldKey="rotatingTitles"
+                      multiline
+                      rows={3}
+                      placeholder="Potensialını kəşf et.&#10;Daxili gücünü tap.&#10;Şüurlu gələcək qur."
+                    />
+                    <Field
+                      label="İndikator Alt Mətni"
+                      block={cmsHero}
+                      setBlock={setCmsHero}
+                      fieldKey="rotatingBadgeText"
+                      placeholder="DAİMİ İNKİŞAF"
+                    />
+                  </div>
+                )}
+              </div>
+
               <Field label="Təsvir (desc)" block={cmsHero} setBlock={setCmsHero} fieldKey="desc" multiline />
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
                 <Field label="Əsas Düymə Mətni" block={cmsHero} setBlock={setCmsHero} fieldKey="btnPrimaryText" />
@@ -1046,6 +1096,54 @@ export default function AdminCmsTab() {
                 <Field label="İkinci Düymə Mətni" block={cmsHero} setBlock={setCmsHero} fieldKey="btnSecondaryText" />
                 <Field label="İkinci Düymə Linki" block={cmsHero} setBlock={setCmsHero} fieldKey="btnSecondaryLink" />
               </div>
+            </div>
+
+            {/* HERO STATİSTİKA ZOLAĞI (STATS STRIP) */}
+            <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0', flexWrap: 'wrap', gap: '8px' }}>
+                <div>
+                  <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span className="material-symbols-outlined" style={{ color: '#c5a059', fontSize: '18px' }}>analytics</span>
+                    Hero Statistika Zolağı (3 Əsas Göstərici)
+                  </h5>
+                  <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0' }}>
+                    Hero bölməsinin aşağısında yerləşən rəqəmsal nailiyyət və etibar göstəriciləri
+                  </p>
+                </div>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 700, color: '#334155', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={cmsHero.showStats !== false}
+                    onChange={e => setCmsHero(p => ({ ...p, showStats: e.target.checked }))}
+                  />
+                  <span>Statistikanı Göstər</span>
+                </label>
+              </div>
+
+              {cmsHero.showStats !== false && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+                  {/* STAT 1 */}
+                  <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 800, color: '#0f172a' }}>1-ci Göstərici</span>
+                    <Field label="Rəqəm / Mətn" block={cmsHero} setBlock={setCmsHero} fieldKey="stat1Num" placeholder="12,000+" />
+                    <Field label="İzah Mətni" block={cmsHero} setBlock={setCmsHero} fieldKey="stat1Label" placeholder="Fərdi Tələbə" />
+                  </div>
+
+                  {/* STAT 2 */}
+                  <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 800, color: '#775a19' }}>2-ci Göstərici (Qızılı)</span>
+                    <Field label="Rəqəm / Faiz" block={cmsHero} setBlock={setCmsHero} fieldKey="stat2Num" placeholder="98%" />
+                    <Field label="İzah Mətni" block={cmsHero} setBlock={setCmsHero} fieldKey="stat2Label" placeholder="Məmnuniyyət" />
+                  </div>
+
+                  {/* STAT 3 */}
+                  <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 800, color: '#0f172a' }}>3-cü Göstərici</span>
+                    <Field label="Rəqəm / Sertifikat" block={cmsHero} setBlock={setCmsHero} fieldKey="stat3Num" placeholder="ICF & PhD" />
+                    <Field label="İzah Mətni" block={cmsHero} setBlock={setCmsHero} fieldKey="stat3Label" placeholder="Sertifikatlı Kouçlar" />
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* HERO SAĞ MEDIA (ŞƏKİL / VİDEO, FRAME, STROKE, RADIUS, ÖLÇÜ) */}
@@ -1579,6 +1677,42 @@ export default function AdminCmsTab() {
                 )}
               </div>
 
+              {/* MEDIA ÜZƏRİNDƏKİ ÜZƏN STATUS NİŞANI (FLOATING BADGE) */}
+              <div style={{ background: '#0f172a', padding: '14px', borderRadius: '8px', border: '1px solid #1e293b', display: 'flex', flexDirection: 'column', gap: '10px', color: '#f8fafc' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: 700, color: '#f8fafc', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={cmsHero.showMediaBadge !== false}
+                      onChange={e => setCmsHero(p => ({ ...p, showMediaBadge: e.target.checked }))}
+                    />
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#c5a059' }}>verified</span>
+                      Media Üzərindəki Üzən Status Nişanını Göstər
+                    </span>
+                  </label>
+                  <span style={{ fontSize: '11px', color: '#94a3b8' }}>
+                    Şəklin yuxarı sol küncündəki tünd qızılı etiket
+                  </span>
+                </div>
+
+                {cmsHero.showMediaBadge !== false && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', paddingTop: '4px' }}>
+                    <Field label="Nişan Mətni" block={cmsHero} setBlock={setCmsHero} fieldKey="mediaBadgeText" placeholder="Beynəlxalq Standart" />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8' }}>Nişan İkonu (Material Icon)</label>
+                      <input
+                        type="text"
+                        className="admin-input"
+                        value={cmsHero.mediaBadgeIcon || 'verified'}
+                        onChange={e => setCmsHero(p => ({ ...p, mediaBadgeIcon: e.target.value }))}
+                        placeholder="verified, stars, workspace_premium"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* 6. CANLI İNTERAKTİV ÖNİZLƏMƏ (LIVE PREVIEW) */}
               <div style={{
                 background: '#ffffff',
@@ -1641,6 +1775,35 @@ export default function AdminCmsTab() {
                         padding: heroStyles.isFrameless ? '0px' : '8px'
                       }}
                     >
+                      {/* FLOATING BADGE PREVIEW */}
+                      {cmsHero.showMediaBadge !== false && (
+                        <div style={{
+                          position: 'absolute',
+                          top: '12px',
+                          left: '12px',
+                          zIndex: 20,
+                          background: 'rgba(7, 15, 30, 0.88)',
+                          backdropFilter: 'blur(4px)',
+                          border: '1px solid rgba(197, 160, 89, 0.5)',
+                          padding: '3px 8px',
+                          borderRadius: '999px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          color: '#fff',
+                          fontSize: '9px',
+                          fontWeight: 700,
+                          letterSpacing: '0.5px',
+                          textTransform: 'uppercase',
+                          pointerEvents: 'none'
+                        }}>
+                          <span className="material-symbols-outlined" style={{ fontSize: '12px', color: '#c5a059' }}>
+                            {cmsHero.mediaBadgeIcon || 'verified'}
+                          </span>
+                          <span>{cmsHero.mediaBadgeText || 'Beynəlxalq Standart'}</span>
+                        </div>
+                      )}
+
                       {/* INNER MEDIA CONTAINER */}
                       <div
                         style={{

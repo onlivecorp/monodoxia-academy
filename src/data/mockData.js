@@ -809,6 +809,13 @@ export const INITIAL_HOME_CONTENT = {
     showGlow: true,
     quote: "Daxili səssizlikdə bütün cavablar aşkarlanır.",
     quoteSub: "Monodoxia Fəlsəfəsi",
+    enableRotatingTitles: false,
+    rotatingTitles: "",
+    rotatingBadgeText: "Daimi İnkişaf",
+    showStats: true,
+    showMediaBadge: true,
+    mediaBadgeText: "Beynəlxalq Standart",
+    mediaBadgeIcon: "verified",
     translations: {
       az: {
         badge: "FƏRDİ İNKİŞAF VƏ PSİXOLOGİYA MƏRKƏZİ",
@@ -822,7 +829,9 @@ export const INITIAL_HOME_CONTENT = {
         stat2Label: "Məmnuniyyət",
         stat3Label: "Sertifikatlı Kouçlar",
         quote: "Daxili səssizlikdə bütün cavablar aşkarlanır.",
-        quoteSub: "Monodoxia Fəlsəfəsi"
+        quoteSub: "Monodoxia Fəlsəfəsi",
+        mediaBadgeText: "Beynəlxalq Standart",
+        rotatingBadgeText: "Daimi İnkişaf"
       },
       en: {
         badge: "PERSONAL GROWTH & PSYCHOLOGY CENTER",
@@ -836,7 +845,9 @@ export const INITIAL_HOME_CONTENT = {
         stat2Label: "Satisfaction Rate",
         stat3Label: "Certified Coaches",
         quote: "In inner silence, all answers are revealed.",
-        quoteSub: "Monodoxia Philosophy"
+        quoteSub: "Monodoxia Philosophy",
+        mediaBadgeText: "International Standard",
+        rotatingBadgeText: "Lifelong Evolution"
       },
       tr: {
         badge: "KİŞİSEL GELİŞİM VE PSİKOLOJİ MERKEZİ",
@@ -850,7 +861,9 @@ export const INITIAL_HOME_CONTENT = {
         stat2Label: "Memnuniyet Oranı",
         stat3Label: "Sertifikalı Koçlar",
         quote: "İçsel sessizlikte tüm cevaplar açığa çıkar.",
-        quoteSub: "Monodoxia Felsefesi"
+        quoteSub: "Monodoxia Felsefesi",
+        mediaBadgeText: "Uluslararası Standart",
+        rotatingBadgeText: "Sürekli Gelişim"
       },
       ru: {
         badge: "ЦЕНТР ЛИЧНОСТНОГО РАЗВИТИЯ И ПСИХОЛОГИИ",
@@ -864,7 +877,9 @@ export const INITIAL_HOME_CONTENT = {
         stat2Label: "Удовлетворенность",
         stat3Label: "Сертифицированные коучи",
         quote: "Во внутренней тишине раскрываются все ответы.",
-        quoteSub: "Философия Monodoxia"
+        quoteSub: "Философия Monodoxia",
+        mediaBadgeText: "Международный Стандарт",
+        rotatingBadgeText: "Трансформация"
       }
     }
   },

@@ -26,9 +26,26 @@ export default function Hero() {
   const quoteText = getLocalized(hero, 'quote', currentLang, defaultLang) || t('hero_quote');
   const quoteSubText = getLocalized(hero, 'quoteSub', currentLang, defaultLang) || t('hero_philosophy');
 
+  const mediaBadgeText = getLocalized(hero, 'mediaBadgeText', currentLang, defaultLang) || hero.mediaBadgeText || 'Beynəlxalq Standart';
+  const mediaBadgeIcon = hero.mediaBadgeIcon || 'verified';
+  const showMediaBadge = hero.showMediaBadge !== false;
+  const showStats = hero.showStats !== false;
+  const isRotatingEnabled = hero.enableRotatingTitles === true || Boolean(hero.rotatingTitles);
+  const rotatingBadgeText = getLocalized(hero, 'rotatingBadgeText', currentLang, defaultLang) || hero.rotatingBadgeText || (currentLang === 'az' ? 'Daimi İnkişaf' : currentLang === 'ru' ? 'Трансформация' : 'Lifelong Evolution');
+
   // Dynamic rotating titles for high-end kinetic headline
   const rotatingTitles = useMemo(() => {
     const defaultTitle = typeof title3 === 'string' && title3.trim() ? title3 : 'Həyatını dəyiş.';
+    if (!isRotatingEnabled) {
+      return [defaultTitle];
+    }
+    const customList = getLocalized(hero, 'rotatingTitles', currentLang, defaultLang) || hero.rotatingTitles;
+    if (customList) {
+      const items = (Array.isArray(customList) ? customList : String(customList).split(/\r?\n|,/))
+        .map(s => s.trim())
+        .filter(Boolean);
+      if (items.length > 0) return items;
+    }
     const listByLang = {
       az: [
         defaultTitle,
@@ -56,7 +73,7 @@ export default function Hero() {
     // Remove duplicates if title3 matches any preset
     const unique = Array.from(new Set(listByLang[langKey].filter(Boolean)));
     return unique.length > 0 ? unique : [defaultTitle];
-  }, [title3, currentLang]);
+  }, [title3, currentLang, isRotatingEnabled, hero.rotatingTitles, defaultLang]);
 
   const [activeTitleIdx, setActiveTitleIdx] = useState(0);
   const [isTitleExiting, setIsTitleExiting] = useState(false);
@@ -197,25 +214,31 @@ export default function Hero() {
                   </span>
                 </div>
 
-                {/* LINE 3: DYNAMIC 3D KINETIC TITLE SWITCHER */}
+                {/* LINE 3: DYNAMIC 3D KINETIC TITLE SWITCHER OR CLEAN STATIC LINE */}
                 <div className="hero-text-mask relative mt-1 min-h-[1.25em] flex items-baseline">
-                  <div
-                    onClick={handleNextTitle}
-                    title="Növbəti hədəf (dəyişmək üçün klikləyin)"
-                    className={`inline-flex items-center gap-3 cursor-pointer select-none group/dyn transition-all ${
-                      isTitleExiting ? 'anim-hero-dynamic-exit' : 'anim-hero-dynamic-enter'
-                    }`}
-                  >
-                    <span className="block font-medium tracking-tight text-[#070f1e] group-hover/dyn:text-[#775a19] transition-colors duration-300">
-                      {rotatingTitles[activeTitleIdx] || title3}
-                    </span>
-                    <span 
-                      className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#c5a059]/15 text-[#775a19] opacity-70 group-hover/dyn:opacity-100 group-hover/dyn:bg-[#c5a059]/25 transition-all duration-300 transform group-hover/dyn:rotate-180"
-                      title="Dəyişdir"
+                  {rotatingTitles.length > 1 ? (
+                    <div
+                      onClick={handleNextTitle}
+                      title="Növbəti hədəf (dəyişmək üçün klikləyin)"
+                      className={`inline-flex items-center gap-3 cursor-pointer select-none group/dyn transition-all ${
+                        isTitleExiting ? 'anim-hero-dynamic-exit' : 'anim-hero-dynamic-enter'
+                      }`}
                     >
-                      <span className="material-symbols-outlined text-[16px]">sync</span>
+                      <span className="block font-medium tracking-tight text-[#070f1e] group-hover/dyn:text-[#775a19] transition-colors duration-300">
+                        {rotatingTitles[activeTitleIdx] || title3}
+                      </span>
+                      <span 
+                        className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#c5a059]/15 text-[#775a19] opacity-70 group-hover/dyn:opacity-100 group-hover/dyn:bg-[#c5a059]/25 transition-all duration-300 transform group-hover/dyn:rotate-180"
+                        title="Dəyişdir"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">sync</span>
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="block font-medium tracking-tight text-[#070f1e]">
+                      {title3}
                     </span>
-                  </div>
+                  )}
                 </div>
               </h1>
 
@@ -239,7 +262,7 @@ export default function Hero() {
                     ))}
                   </div>
                   <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-[#775a19]/75 select-none hidden sm:inline">
-                    {currentLang === 'az' ? 'Daimi İnkişaf' : currentLang === 'ru' ? 'Трансформация' : 'Lifelong Evolution'}
+                    {rotatingBadgeText}
                   </span>
                 </div>
               )}
@@ -277,32 +300,34 @@ export default function Hero() {
             </div>
 
             {/* STATS STRIP */}
-            <div className="pt-8 border-t border-[#e2d9c8]/70 grid grid-cols-3 gap-4 sm:gap-6 max-w-xl anim-hero-stats">
-              <div className="space-y-1">
-                <div className="text-2xl sm:text-3xl font-serif font-bold text-[#070f1e] tracking-tight">
-                  {hero.stat1Num || '12,000+'}
+            {showStats && (
+              <div className="pt-8 border-t border-[#e2d9c8]/70 grid grid-cols-3 gap-4 sm:gap-6 max-w-xl anim-hero-stats">
+                <div className="space-y-1">
+                  <div className="text-2xl sm:text-3xl font-serif font-bold text-[#070f1e] tracking-tight">
+                    {hero.stat1Num || '12,000+'}
+                  </div>
+                  <div className="text-[10px] sm:text-[11px] font-semibold text-slate-500 tracking-[0.14em] uppercase">
+                    {stat1Label}
+                  </div>
                 </div>
-                <div className="text-[10px] sm:text-[11px] font-semibold text-slate-500 tracking-[0.14em] uppercase">
-                  {stat1Label}
+                <div className="border-l border-[#e2d9c8]/80 pl-4 sm:pl-6 space-y-1">
+                  <div className="text-2xl sm:text-3xl font-serif font-bold text-[#775a19] tracking-tight">
+                    <span className="gold-shimmer-text">{hero.stat2Num || '98%'}</span>
+                  </div>
+                  <div className="text-[10px] sm:text-[11px] font-semibold text-slate-500 tracking-[0.14em] uppercase">
+                    {stat2Label}
+                  </div>
+                </div>
+                <div className="border-l border-[#e2d9c8]/80 pl-4 sm:pl-6 space-y-1">
+                  <div className="text-2xl sm:text-3xl font-serif font-bold text-[#070f1e] tracking-tight">
+                    {hero.stat3Num || 'ICF & PhD'}
+                  </div>
+                  <div className="text-[10px] sm:text-[11px] font-semibold text-slate-500 tracking-[0.14em] uppercase">
+                    {stat3Label}
+                  </div>
                 </div>
               </div>
-              <div className="border-l border-[#e2d9c8]/80 pl-4 sm:pl-6 space-y-1">
-                <div className="text-2xl sm:text-3xl font-serif font-bold text-[#775a19] tracking-tight">
-                  <span className="gold-shimmer-text">{hero.stat2Num || '98%'}</span>
-                </div>
-                <div className="text-[10px] sm:text-[11px] font-semibold text-slate-500 tracking-[0.14em] uppercase">
-                  {stat2Label}
-                </div>
-              </div>
-              <div className="border-l border-[#e2d9c8]/80 pl-4 sm:pl-6 space-y-1">
-                <div className="text-2xl sm:text-3xl font-serif font-bold text-[#070f1e] tracking-tight">
-                  {hero.stat3Num || 'ICF & PhD'}
-                </div>
-                <div className="text-[10px] sm:text-[11px] font-semibold text-slate-500 tracking-[0.14em] uppercase">
-                  {stat3Label}
-                </div>
-              </div>
-            </div>
+            )}
           </div>
 
           {/* RIGHT MEDIA */}
@@ -313,12 +338,14 @@ export default function Hero() {
               )}
 
               {/* FLOATING LUXURY PILL BADGE */}
-              <div className="absolute top-4 left-4 z-20 px-3.5 py-1.5 rounded-full bg-[#070f1e]/85 backdrop-blur-md border border-[#c5a059]/40 text-white shadow-lg flex items-center gap-1.5 pointer-events-none">
-                <span className="material-symbols-outlined text-[#c5a059] text-[15px]">verified</span>
-                <span className="text-[10px] font-semibold tracking-wider uppercase">
-                  Beynəlxalq Standart
-                </span>
-              </div>
+              {showMediaBadge && (
+                <div className="absolute top-4 left-4 z-20 px-3.5 py-1.5 rounded-full bg-[#070f1e]/85 backdrop-blur-md border border-[#c5a059]/40 text-white shadow-lg flex items-center gap-1.5 pointer-events-none">
+                  <span className="material-symbols-outlined text-[#c5a059] text-[15px]">{mediaBadgeIcon}</span>
+                  <span className="text-[10px] font-semibold tracking-wider uppercase">
+                    {mediaBadgeText}
+                  </span>
+                </div>
+              )}
 
               {/* MEDIA CONTAINER */}
               <div
