@@ -50,13 +50,23 @@ export function getHeroMediaStyles(hero = {}) {
   const isFrameless = hero.isFrameless === true || hero.frameStyle === 'none';
   const frameStyle = hero.frameStyle || 'arch';
 
-  // Radius calculation
+  // Radius calculation: explicit borderRadius takes precedence over frameStyle defaults
   let outerRadius = '160px 160px 16px 16px';
   let innerRadius = '152px 152px 10px 10px';
 
-  const radiusMode = hero.borderRadius || (frameStyle === 'arch' ? 'arch' : (frameStyle === 'rectangle' ? 'none' : (frameStyle === 'pill' ? 'full' : 'arch')));
+  const radiusMode = hero.borderRadius || (
+    frameStyle === 'arch' ? 'arch' :
+    frameStyle === 'rectangle' ? 'none' :
+    frameStyle === 'pill' ? 'full' :
+    frameStyle === 'circle' ? 'circle' :
+    frameStyle === 'rounded' ? 'lg' : 'arch'
+  );
 
-  if (radiusMode === 'none' || frameStyle === 'rectangle') {
+  if (radiusMode === 'custom') {
+    const customPx = hero.customBorderRadius !== undefined ? Number(hero.customBorderRadius) : 24;
+    outerRadius = `${customPx}px`;
+    innerRadius = isFrameless ? `${customPx}px` : `${Math.max(0, customPx - 6)}px`;
+  } else if (radiusMode === 'none') {
     outerRadius = '0px';
     innerRadius = '0px';
   } else if (radiusMode === 'sm') {
@@ -65,23 +75,22 @@ export function getHeroMediaStyles(hero = {}) {
   } else if (radiusMode === 'md') {
     outerRadius = '16px';
     innerRadius = isFrameless ? '16px' : '10px';
-  } else if (radiusMode === 'lg' || frameStyle === 'rounded') {
+  } else if (radiusMode === 'lg') {
     outerRadius = '24px';
     innerRadius = isFrameless ? '24px' : '16px';
   } else if (radiusMode === 'xl') {
     outerRadius = '36px';
     innerRadius = isFrameless ? '36px' : '26px';
-  } else if (radiusMode === 'full' || frameStyle === 'pill') {
+  } else if (radiusMode === 'full') {
     outerRadius = '9999px';
     innerRadius = '9999px';
-  } else if (frameStyle === 'circle') {
+  } else if (radiusMode === 'circle' || frameStyle === 'circle') {
     outerRadius = '50%';
     innerRadius = '50%';
-  } else if (radiusMode === 'custom') {
-    const customPx = hero.customBorderRadius !== undefined ? Number(hero.customBorderRadius) : 24;
-    outerRadius = `${customPx}px`;
-    innerRadius = isFrameless ? `${customPx}px` : `${Math.max(0, customPx - 6)}px`;
-  } else if (radiusMode === 'arch' || frameStyle === 'arch') {
+  } else if (radiusMode === 'arch') {
+    outerRadius = '160px 160px 16px 16px';
+    innerRadius = isFrameless ? '160px 160px 16px 16px' : '152px 152px 10px 10px';
+  } else {
     outerRadius = '160px 160px 16px 16px';
     innerRadius = isFrameless ? '160px 160px 16px 16px' : '152px 152px 10px 10px';
   }
@@ -142,16 +151,20 @@ export function getAboutMediaStyles(about = {}) {
     frameStyle === 'rectangle' ? 'none' :
     frameStyle === 'pill' ? 'full' :
     frameStyle === 'circle' ? 'circle' :
-    (frameStyle === 'rounded' ? 'md' : 'md')
+    frameStyle === 'rounded' ? 'md' : 'md'
   );
 
-  if (radiusMode === 'none' || frameStyle === 'rectangle') {
+  if (radiusMode === 'custom') {
+    const customPx = about.customBorderRadius !== undefined ? Number(about.customBorderRadius) : 16;
+    outerRadius = `${customPx}px`;
+    innerRadius = isFrameless ? `${customPx}px` : `${Math.max(0, customPx - 6)}px`;
+  } else if (radiusMode === 'none') {
     outerRadius = '0px';
     innerRadius = '0px';
   } else if (radiusMode === 'sm') {
     outerRadius = '8px';
     innerRadius = isFrameless ? '8px' : '4px';
-  } else if (radiusMode === 'md' || frameStyle === 'rounded') {
+  } else if (radiusMode === 'md') {
     outerRadius = '16px';
     innerRadius = isFrameless ? '16px' : '10px';
   } else if (radiusMode === 'lg') {
@@ -160,19 +173,18 @@ export function getAboutMediaStyles(about = {}) {
   } else if (radiusMode === 'xl') {
     outerRadius = '36px';
     innerRadius = isFrameless ? '36px' : '28px';
-  } else if (radiusMode === 'full' || frameStyle === 'pill') {
+  } else if (radiusMode === 'full') {
     outerRadius = '9999px';
     innerRadius = '9999px';
-  } else if (frameStyle === 'circle') {
+  } else if (radiusMode === 'circle' || frameStyle === 'circle') {
     outerRadius = '50%';
     innerRadius = '50%';
-  } else if (radiusMode === 'custom') {
-    const customPx = about.customBorderRadius !== undefined ? Number(about.customBorderRadius) : 16;
-    outerRadius = `${customPx}px`;
-    innerRadius = isFrameless ? `${customPx}px` : `${Math.max(0, customPx - 4)}px`;
-  } else if (radiusMode === 'arch' || frameStyle === 'arch') {
-    outerRadius = '140px 140px 14px 14px';
-    innerRadius = isFrameless ? '140px 140px 14px 14px' : '132px 132px 10px 10px';
+  } else if (radiusMode === 'arch') {
+    outerRadius = '140px 140px 16px 16px';
+    innerRadius = isFrameless ? '140px 140px 16px 16px' : '132px 132px 10px 10px';
+  } else {
+    outerRadius = '16px';
+    innerRadius = isFrameless ? '16px' : '10px';
   }
 
   // Stroke / Border Thickness
