@@ -1547,6 +1547,12 @@ export const INITIAL_HOME_CONTENT = {
     placeholder: "E-poçt ünvanınızı daxil edin...",
     btnText: "Abunə ol",
     disclaimer: "Heç bir spam yoxdur. İstənilən vaxt abunəlikdən çıxa bilərsiniz.",
+    benefit1Icon: "verified",
+    benefit1Text: "Hər bazar günü",
+    benefit2Icon: "psychology",
+    benefit2Text: "Elmi & fəlsəfi qeydlər",
+    benefit3Icon: "lock",
+    benefit3Text: "Spam yoxdur",
     translations: {
       az: {
         badge: "HƏFTƏLİK MÜDRİKLİK",
@@ -1554,7 +1560,10 @@ export const INITIAL_HOME_CONTENT = {
         desc: "Hər bazar günü Dr. Leyla Əliyeva və kouçlarımızın qələmə aldığı elmi məqalələr, meditasiya audio bələdçiləri və fəlsəfi qeydlər.",
         placeholder: "E-poçt ünvanınızı daxil edin...",
         btnText: "Abunə ol",
-        disclaimer: "Heç bir spam yoxdur. İstənilən vaxt abunəlikdən çıxa bilərsiniz."
+        disclaimer: "Heç bir spam yoxdur. İstənilən vaxt abunəlikdən çıxa bilərsiniz.",
+        benefit1Text: "Hər bazar günü",
+        benefit2Text: "Elmi & fəlsəfi qeydlər",
+        benefit3Text: "Spam yoxdur"
       },
       en: {
         badge: "WEEKLY WISDOM",
@@ -1562,7 +1571,10 @@ export const INITIAL_HOME_CONTENT = {
         desc: "Every Sunday, scientific articles, meditation audio guides, and philosophical notes penned by Dr. Leyla Aliyeva and our coaches.",
         placeholder: "Enter your email address...",
         btnText: "Subscribe",
-        disclaimer: "Zero spam. Unsubscribe at any time."
+        disclaimer: "Zero spam. Unsubscribe at any time.",
+        benefit1Text: "Every Sunday",
+        benefit2Text: "Scientific & philosophical notes",
+        benefit3Text: "Zero spam"
       },
       tr: {
         badge: "HAFTALIK BİLGELİK",
@@ -1570,7 +1582,10 @@ export const INITIAL_HOME_CONTENT = {
         desc: "Her Pazar Dr. Leyla Aliyeva ve koçlarımızın kaleme aldığı bilimsel makaleler, meditasyon ses kayıtları ve felsefi notlar.",
         placeholder: "E-posta adresinizi girin...",
         btnText: "Abone Ol",
-        disclaimer: "Spam yok. İstediğiniz zaman abonelikten çıkabilirsiniz."
+        disclaimer: "Spam yok. İstediğiniz zaman abonelikten çıkabilirsiniz.",
+        benefit1Text: "Her Pazar günü",
+        benefit2Text: "Bilimsel ve felsefi notlar",
+        benefit3Text: "Spam yok"
       },
       ru: {
         badge: "ЕЖЕНЕДЕЛЬНАЯ МУДРОСТЬ",
@@ -1578,7 +1593,10 @@ export const INITIAL_HOME_CONTENT = {
         desc: "Каждое воскресенье научные статьи, аудиогиды по медитации и заметки от д-ра Лейлы Алиевой и наших коучей.",
         placeholder: "Введите ваш e-mail...",
         btnText: "Подписаться",
-        disclaimer: "Без спама. Отписка в любой момент в один клик."
+        disclaimer: "Без спама. Отписка в любой момент в один клик.",
+        benefit1Text: "Каждое воскресенье",
+        benefit2Text: "Научные и философские заметки",
+        benefit3Text: "Без спама"
       }
     }
   },

@@ -29,7 +29,7 @@ export default function Newsletter() {
   };
 
   return (
-    <section className="py-20 lg:py-28 bg-[#faf8f5] relative overflow-hidden">
+    <section id="bulleten" className="py-20 lg:py-28 bg-[#faf8f5] relative overflow-hidden">
       {/* Background Decorative Rings */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[850px] bg-gradient-to-br from-[#c5a059]/8 via-transparent to-transparent rounded-full blur-3xl pointer-events-none" />
 
@@ -73,18 +73,24 @@ export default function Newsletter() {
             {/* Quick Benefits / Value Props */}
             <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 pt-2 text-xs sm:text-sm text-[#94a3b8]">
               <div className="flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[16px] text-[#c5a059]">verified</span>
-                <span>Hər bazar günü</span>
+                <span className="material-symbols-outlined text-[16px] text-[#c5a059]">
+                  {newsletter?.benefit1Icon || 'verified'}
+                </span>
+                <span>{getLocalized(newsletter, 'benefit1Text', currentLang, defaultLang) || (newsletter?.benefit1Text !== undefined && newsletter?.benefit1Text !== null && String(newsletter?.benefit1Text).trim() !== '' ? newsletter.benefit1Text : 'Hər bazar günü')}</span>
               </div>
               <div className="w-1 h-1 rounded-full bg-white/20 hidden sm:block" />
               <div className="flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[16px] text-[#c5a059]">psychology</span>
-                <span>Elmi & fəlsəfi qeydlər</span>
+                <span className="material-symbols-outlined text-[16px] text-[#c5a059]">
+                  {newsletter?.benefit2Icon || 'psychology'}
+                </span>
+                <span>{getLocalized(newsletter, 'benefit2Text', currentLang, defaultLang) || (newsletter?.benefit2Text !== undefined && newsletter?.benefit2Text !== null && String(newsletter?.benefit2Text).trim() !== '' ? newsletter.benefit2Text : 'Elmi & fəlsəfi qeydlər')}</span>
               </div>
               <div className="w-1 h-1 rounded-full bg-white/20 hidden sm:block" />
               <div className="flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[16px] text-[#c5a059]">lock</span>
-                <span>Spam yoxdur</span>
+                <span className="material-symbols-outlined text-[16px] text-[#c5a059]">
+                  {newsletter?.benefit3Icon || 'lock'}
+                </span>
+                <span>{getLocalized(newsletter, 'benefit3Text', currentLang, defaultLang) || (newsletter?.benefit3Text !== undefined && newsletter?.benefit3Text !== null && String(newsletter?.benefit3Text).trim() !== '' ? newsletter.benefit3Text : 'Spam yoxdur')}</span>
               </div>
             </div>
 

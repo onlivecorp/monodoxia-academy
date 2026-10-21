@@ -932,6 +932,54 @@ export default function AdminCmsTab() {
     };
   };
 
+  const defaultNewsletterData = INITIAL_HOME_CONTENT?.newsletter || {
+    badge: "HƏFTƏLİK MÜDRİKLİK",
+    title: "Daxili Sükut və Şüur Bələdçisini Poçtunda Al",
+    desc: "Hər bazar günü Dr. Leyla Əliyeva və kouçlarımızın qələmə aldığı elmi məqalələr, meditasiya audio bələdçiləri və fəlsəfi qeydlər.",
+    placeholder: "E-poçt ünvanınızı daxil edin...",
+    btnText: "Abunə ol",
+    disclaimer: "Heç bir spam yoxdur. İstənilən vaxt abunəlikdən çıxa bilərsiniz.",
+    benefit1Icon: "verified",
+    benefit1Text: "Hər bazar günü",
+    benefit2Icon: "psychology",
+    benefit2Text: "Elmi & fəlsəfi qeydlər",
+    benefit3Icon: "lock",
+    benefit3Text: "Spam yoxdur",
+    translations: {
+      az: {
+        badge: "HƏFTƏLİK MÜDRİKLİK",
+        title: "Daxili Sükut və Şüur Bələdçisini Poçtunda Al",
+        desc: "Hər bazar günü Dr. Leyla Əliyeva və kouçlarımızın qələmə aldığı elmi məqalələr, meditasiya audio bələdçiləri və fəlsəfi qeydlər.",
+        placeholder: "E-poçt ünvanınızı daxil edin...",
+        btnText: "Abunə ol",
+        disclaimer: "Heç bir spam yoxdur. İstənilən vaxt abunəlikdən çıxa bilərsiniz.",
+        benefit1Text: "Hər bazar günü",
+        benefit2Text: "Elmi & fəlsəfi qeydlər",
+        benefit3Text: "Spam yoxdur"
+      }
+    }
+  };
+
+  const mergeNewsletterWithDefaults = (src) => {
+    const raw = src || {};
+    return {
+      ...defaultNewsletterData,
+      ...raw,
+      benefit1Icon: raw.benefit1Icon || defaultNewsletterData.benefit1Icon,
+      benefit1Text: raw.benefit1Text !== undefined && raw.benefit1Text !== null ? raw.benefit1Text : defaultNewsletterData.benefit1Text,
+      benefit2Icon: raw.benefit2Icon || defaultNewsletterData.benefit2Icon,
+      benefit2Text: raw.benefit2Text !== undefined && raw.benefit2Text !== null ? raw.benefit2Text : defaultNewsletterData.benefit2Text,
+      benefit3Icon: raw.benefit3Icon || defaultNewsletterData.benefit3Icon,
+      benefit3Text: raw.benefit3Text !== undefined && raw.benefit3Text !== null ? raw.benefit3Text : defaultNewsletterData.benefit3Text,
+      translations: {
+        az: { ...(defaultNewsletterData.translations?.az || {}), ...(raw.translations?.az || {}) },
+        en: { ...(defaultNewsletterData.translations?.en || {}), ...(raw.translations?.en || {}) },
+        tr: { ...(defaultNewsletterData.translations?.tr || {}), ...(raw.translations?.tr || {}) },
+        ru: { ...(defaultNewsletterData.translations?.ru || {}), ...(raw.translations?.ru || {}) },
+      }
+    };
+  };
+
   // Content block states
   const [cmsNavbar, setCmsNavbar] = useState(() => ({ ...(homeContent?.navbar || {}) }));
   const [cmsHero, setCmsHero] = useState(() => ({ ...(homeContent?.hero || {}) }));
@@ -944,7 +992,7 @@ export default function AdminCmsTab() {
   const [cmsCommunity, setCmsCommunity] = useState(() => mergeCommunityWithDefaults(homeContent?.community));
   const [cmsTestimonials, setCmsTestimonials] = useState(() => ({ ...(homeContent?.testimonials || {}) }));
   const [cmsFaq, setCmsFaq] = useState(() => ({ ...(homeContent?.faq || {}) }));
-  const [cmsNewsletter, setCmsNewsletter] = useState(() => ({ ...(homeContent?.newsletter || {}) }));
+  const [cmsNewsletter, setCmsNewsletter] = useState(() => mergeNewsletterWithDefaults(homeContent?.newsletter));
   const [cmsFooter, setCmsFooter] = useState(() => ({ ...(homeContent?.footer || {}) }));
 
   // Coach add/edit states
@@ -1020,7 +1068,7 @@ export default function AdminCmsTab() {
       setCmsCommunity(mergeCommunityWithDefaults(homeContent.community));
       setCmsTestimonials({ ...(homeContent.testimonials || {}) });
       setCmsFaq({ ...(homeContent.faq || {}) });
-      setCmsNewsletter({ ...(homeContent.newsletter || {}) });
+      setCmsNewsletter(mergeNewsletterWithDefaults(homeContent.newsletter));
       setCmsFooter({ ...(homeContent.footer || {}) });
 
       if (homeContent.about?.pillars && Array.isArray(homeContent.about.pillars) && homeContent.about.pillars.length > 0) {
@@ -5765,17 +5813,86 @@ export default function AdminCmsTab() {
       )}
 
       {/* NEWSLETTER */}
+      {/* NEWSLETTER */}
       {cmsBlock === 'newsletter' && (
         <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0' }}>Bülletenə Abunəlik Bölməsi</h5>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0', flexWrap: 'wrap', gap: '8px' }}>
+            <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Bülletenə Abunəlik Bölməsi</h5>
+            <button
+              type="button"
+              onClick={() => {
+                const el = document.getElementById('bulleten') || document.querySelector('section[id*="newsletter"]') || document.querySelector('footer');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="admin-btn-secondary"
+              style={{ padding: '4px 10px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>open_in_new</span>
+              <span>Saytda Bax</span>
+            </button>
+          </div>
           <Field label="Üst Etiket" block={cmsNewsletter} setBlock={setCmsNewsletter} fieldKey="badge" />
           <Field label="Başlıq" block={cmsNewsletter} setBlock={setCmsNewsletter} fieldKey="title" />
           <Field label="Təsvir" block={cmsNewsletter} setBlock={setCmsNewsletter} fieldKey="desc" multiline />
+
+          {/* BÜLLETEN ZƏMANƏT VƏ XÜSUSİYYƏT BƏNDLƏRİ (3 İNDİKATOR - İKON VƏ MƏTN) */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '4px', borderBottom: '1px solid #e2e8f0' }}>
+              <label className="admin-label" style={{ color: '#0f172a', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#c5a059' }}>verified_user</span>
+                <span>Bülleten Üstünlük / Zəmanət Bəndləri (3 İkon və Mətn)</span>
+              </label>
+              <span style={{ fontSize: '10px', color: '#64748b' }}>Əsas Səhifə</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '10px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label className="admin-label" style={{ color: '#475569', fontSize: '11px' }}>1-ci İkon</label>
+                <input
+                  type="text"
+                  className="admin-input"
+                  value={cmsNewsletter.benefit1Icon || 'verified'}
+                  onChange={e => setCmsNewsletter(p => ({ ...p, benefit1Icon: e.target.value }))}
+                  placeholder="verified"
+                />
+                <Field label="1-ci Mətn" block={cmsNewsletter} setBlock={setCmsNewsletter} fieldKey="benefit1Text" placeholder="Hər bazar günü" />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label className="admin-label" style={{ color: '#475569', fontSize: '11px' }}>2-ci İkon</label>
+                <input
+                  type="text"
+                  className="admin-input"
+                  value={cmsNewsletter.benefit2Icon || 'psychology'}
+                  onChange={e => setCmsNewsletter(p => ({ ...p, benefit2Icon: e.target.value }))}
+                  placeholder="psychology"
+                />
+                <Field label="2-ci Mətn" block={cmsNewsletter} setBlock={setCmsNewsletter} fieldKey="benefit2Text" placeholder="Elmi & fəlsəfi qeydlər" />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label className="admin-label" style={{ color: '#475569', fontSize: '11px' }}>3-cü İkon</label>
+                <input
+                  type="text"
+                  className="admin-input"
+                  value={cmsNewsletter.benefit3Icon || 'lock'}
+                  onChange={e => setCmsNewsletter(p => ({ ...p, benefit3Icon: e.target.value }))}
+                  placeholder="lock"
+                />
+                <Field label="3-cü Mətn" block={cmsNewsletter} setBlock={setCmsNewsletter} fieldKey="benefit3Text" placeholder="Spam yoxdur" />
+              </div>
+            </div>
+          </div>
+
           <Field label="Placeholder (email)" block={cmsNewsletter} setBlock={setCmsNewsletter} fieldKey="placeholder" />
           <Field label="Düymə Mətni" block={cmsNewsletter} setBlock={setCmsNewsletter} fieldKey="btnText" />
           <Field label="Disclaimer mətni" block={cmsNewsletter} setBlock={setCmsNewsletter} fieldKey="disclaimer" />
-          <div>
-            <button onClick={() => saveBlock('newsletter', cmsNewsletter)} className="admin-btn-primary">Yadda Saxla</button>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '6px' }}>
+            <button
+              onClick={() => saveBlock('newsletter', cmsNewsletter)}
+              className="admin-btn-primary"
+              style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>save</span>
+              <span>Bülleten Məzmununu Yadda Saxla</span>
+            </button>
           </div>
         </div>
       )}
