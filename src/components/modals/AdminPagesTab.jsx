@@ -1163,6 +1163,19 @@ export default function AdminPagesTab() {
               </div>
             </div>
 
+            {/* Sitat / Testimonial Rəy Bölməsi */}
+            <div style={{ background: '#fefce8', padding: '12px', borderRadius: '8px', border: '1px solid #fef08a', display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#854d0e' }}>4. Səhifə Alt Sitat və Rəy Kartı (Testimonial Quote)</span>
+                <span style={{ fontSize: '10px', background: '#fef08a', color: '#854d0e', padding: '2px 8px', borderRadius: '4px', fontWeight: 700 }}>Sitat</span>
+              </div>
+              <PageField label="Sitat Mətni" block={coachesData} setBlock={setCoachesData} fieldKey="quote" multiline rows={3} placeholder="Sitat və ya rəy mətni daxil edin..." />
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+                <PageField label="Sitat Müəllifi (Ad Soyad)" block={coachesData} setBlock={setCoachesData} fieldKey="quoteAuthor" placeholder="Məs: Aysel Məcidova" />
+                <PageField label="Müəllifin Vəzifəsi / Statusu" block={coachesData} setBlock={setCoachesData} fieldKey="quoteRole" placeholder="Məs: Memar & Şəxsi İnkişaf Məzunu" />
+              </div>
+            </div>
+
             <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px solid #f1f5f9' }}>
               <button
                 type="button"

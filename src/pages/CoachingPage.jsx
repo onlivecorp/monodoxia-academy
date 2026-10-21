@@ -274,21 +274,37 @@ export default function CoachingPage() {
           </div>
 
           {/* Testimonial Quote */}
-          {testimonialsList && testimonialsList.length > 0 && (
-            <div className="rounded-3xl bg-gradient-to-br from-[#071326] via-[#0a1932] to-[#040e1c] border border-[#c5a059]/30 p-8 sm:p-12 text-center max-w-4xl mx-auto shadow-2xl relative overflow-hidden text-white">
-              <div className="absolute -top-24 -left-24 w-72 h-72 bg-[#c5a059]/15 rounded-full blur-3xl pointer-events-none" />
-              <div className="relative z-10 space-y-4">
-                <span className="material-symbols-outlined text-4xl text-[#e5c57d]">format_quote</span>
-                <p className="font-serif text-lg sm:text-2xl text-white italic leading-relaxed max-w-2xl mx-auto font-light">
-                  "{getLocalized(testimonialsList[0], 'quote', currentLang, defaultLang) || testimonialsList[0].quote}"
-                </p>
-                <div className="pt-2">
-                  <div className="font-semibold text-sm text-[#e5c57d] tracking-wide">{testimonialsList[0].author}</div>
-                  <div className="text-xs text-[#cbd5e1] font-light">{getLocalized(testimonialsList[0], 'role', currentLang, defaultLang) || testimonialsList[0].role}</div>
+          {(() => {
+            const quoteText = getLocalized(coachesCms, 'quote', currentLang, defaultLang)
+              || (coachesCms.quote !== undefined && coachesCms.quote !== null && String(coachesCms.quote).trim() !== '' ? coachesCms.quote : null)
+              || (testimonialsList?.[0] ? (getLocalized(testimonialsList[0], 'quote', currentLang, defaultLang) || testimonialsList[0].quote) : '');
+
+            const quoteAuthor = (coachesCms.quoteAuthor !== undefined && coachesCms.quoteAuthor !== null && String(coachesCms.quoteAuthor).trim() !== '')
+              ? coachesCms.quoteAuthor
+              : (testimonialsList?.[0]?.author || '');
+
+            const quoteRole = getLocalized(coachesCms, 'quoteRole', currentLang, defaultLang)
+              || (coachesCms.quoteRole !== undefined && coachesCms.quoteRole !== null && String(coachesCms.quoteRole).trim() !== '' ? coachesCms.quoteRole : null)
+              || (testimonialsList?.[0] ? (getLocalized(testimonialsList[0], 'role', currentLang, defaultLang) || testimonialsList[0].role) : '');
+
+            if (!quoteText) return null;
+
+            return (
+              <div className="rounded-3xl bg-gradient-to-br from-[#071326] via-[#0a1932] to-[#040e1c] border border-[#c5a059]/30 p-8 sm:p-12 text-center max-w-4xl mx-auto shadow-2xl relative overflow-hidden text-white">
+                <div className="absolute -top-24 -left-24 w-72 h-72 bg-[#c5a059]/15 rounded-full blur-3xl pointer-events-none" />
+                <div className="relative z-10 space-y-4">
+                  <span className="material-symbols-outlined text-4xl text-[#e5c57d]">format_quote</span>
+                  <p className="font-serif text-lg sm:text-2xl text-white italic leading-relaxed max-w-2xl mx-auto font-light">
+                    "{quoteText}"
+                  </p>
+                  <div className="pt-2">
+                    <div className="font-semibold text-sm text-[#e5c57d] tracking-wide">{quoteAuthor}</div>
+                    <div className="text-xs text-[#cbd5e1] font-light">{quoteRole}</div>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
         </div>
       </section>

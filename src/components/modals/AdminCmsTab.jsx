@@ -631,7 +631,7 @@ export default function AdminCmsTab() {
     };
   };
 
-  const defaultCoachesData = INITIAL_HOME_CONTENT?.coaches || {
+  const fallbackCoachesData = {
     badge: "Ekspert Heyəti",
     title: "Fərdi Kouçinq və Mentorluq",
     desc: "Hər biri öz sahəsində akademik dərəcəyə və yüzlərlə saatlıq uğurlu klinik və fərdi kouçinq təcrübəsinə malik mütəxəssislər.",
@@ -656,6 +656,9 @@ export default function AdminCmsTab() {
     step4Num: "04",
     step4Title: "Davamlı Monitorinq",
     step4Desc: "Seanslar arası praktiki tapşırıqlar, fərdi rəy və davamlı inkişafın təhlili.",
+    quote: "Monodoxia mənim üçün sadəcə kurs olmadı. İllərdir daşıdığım daxili narahatlığı kökündən anlamağıma və özümlə barışmağıma imkan verdi.",
+    quoteAuthor: "Aysel Məcidova",
+    quoteRole: "Memar & Şəxsi İnkişaf Məzunu",
     translations: {
       az: {
         badge: "Ekspert Heyəti",
@@ -674,7 +677,9 @@ export default function AdminCmsTab() {
         step3Title: "Müntəzəm Seanslar",
         step3Desc: "Həftəlik və ya 2 həftədən bir keçirilən 60 dəqiqəlik dərin fərdi sessiyalar.",
         step4Title: "Davamlı Monitorinq",
-        step4Desc: "Seanslar arası praktiki tapşırıqlar, fərdi rəy və davamlı inkişafın təhlili."
+        step4Desc: "Seanslar arası praktiki tapşırıqlar, fərdi rəy və davamlı inkişafın təhlili.",
+        quote: "Monodoxia mənim üçün sadəcə kurs olmadı. İllərdir daşıdığım daxili narahatlığı kökündən anlamağıma və özümlə barışmağıma imkan verdi.",
+        quoteRole: "Memar & Şəxsi İnkişaf Məzunu"
       },
       en: {
         badge: "Expert Team",
@@ -693,7 +698,9 @@ export default function AdminCmsTab() {
         step3Title: "Regular Sessions",
         step3Desc: "Deep 60-minute 1-on-1 sessions held weekly or bi-weekly.",
         step4Title: "Continuous Monitoring",
-        step4Desc: "Inter-session practical exercises, feedback, and objective progress tracking."
+        step4Desc: "Inter-session practical exercises, feedback, and objective progress tracking.",
+        quote: "Monodoxia wasn't just a course for me. It allowed me to deeply understand the inner anxiety I carried for years and make peace with myself.",
+        quoteRole: "Architect & Personal Growth Graduate"
       },
       tr: {
         badge: "Uzman Kadro",
@@ -712,7 +719,9 @@ export default function AdminCmsTab() {
         step3Title: "Düzenli Seanslar",
         step3Desc: "Haftalık veya iki haftada bir gerçekleştirilen 60 dakikalık derin bireysel seanslar.",
         step4Title: "Sürekli İzleme",
-        step4Desc: "Seanslar arası pratik alıştırmalar, bireysel geri bildirim ve sürekli gelişimin analizi."
+        step4Desc: "Seanslar arası pratik alıştırmalar, bireysel geri bildirim ve sürekli gelişimin analizi.",
+        quote: "Monodoxia benim için sadece bir kurs olmadı. Yıllardır taşıdığım içsel huzursuzluğu derinden anlamama ve kendimle barışmama olanak tanıdı.",
+        quoteRole: "Mimar & Kişisel Gelişim Mezunu"
       },
       ru: {
         badge: "Экспертная Команда",
@@ -731,8 +740,25 @@ export default function AdminCmsTab() {
         step3Title: "Регулярные Сессии",
         step3Desc: "Глубокие 60-минутные индивидуальные сессии еженедельно или раз в две недели.",
         step4Title: "Постоянный Мониторинг",
-        step4Desc: "Практические задания между сессиями, обратная связь и анализ динамики развития."
+        step4Desc: "Практические задания между сессиями, обратная связь и анализ динамики развития.",
+        quote: "Monodoxia стала для меня не просто курсом. Она помогла мне глубоко осознать внутреннее беспокойство, которое я несла годами, и примириться с собой.",
+        quoteRole: "Архитектор и выпускник программы"
       }
+    }
+  };
+
+  const defaultCoachesData = {
+    ...fallbackCoachesData,
+    ...(INITIAL_HOME_CONTENT?.coaches || {}),
+    standardsBadge: (INITIAL_HOME_CONTENT?.coaches?.standardsBadge) || fallbackCoachesData.standardsBadge,
+    quote: (INITIAL_HOME_CONTENT?.coaches?.quote) || fallbackCoachesData.quote,
+    quoteAuthor: (INITIAL_HOME_CONTENT?.coaches?.quoteAuthor) || fallbackCoachesData.quoteAuthor,
+    quoteRole: (INITIAL_HOME_CONTENT?.coaches?.quoteRole) || fallbackCoachesData.quoteRole,
+    translations: {
+      az: { ...fallbackCoachesData.translations.az, ...(INITIAL_HOME_CONTENT?.coaches?.translations?.az || {}) },
+      en: { ...fallbackCoachesData.translations.en, ...(INITIAL_HOME_CONTENT?.coaches?.translations?.en || {}) },
+      tr: { ...fallbackCoachesData.translations.tr, ...(INITIAL_HOME_CONTENT?.coaches?.translations?.tr || {}) },
+      ru: { ...fallbackCoachesData.translations.ru, ...(INITIAL_HOME_CONTENT?.coaches?.translations?.ru || {}) },
     }
   };
 
@@ -741,6 +767,24 @@ export default function AdminCmsTab() {
     return {
       ...defaultCoachesData,
       ...raw,
+      standardsBadge: raw.standardsBadge !== undefined && raw.standardsBadge !== null ? raw.standardsBadge : defaultCoachesData.standardsBadge,
+      standardsTitle: raw.standardsTitle !== undefined && raw.standardsTitle !== null ? raw.standardsTitle : defaultCoachesData.standardsTitle,
+      standardsDesc: raw.standardsDesc !== undefined && raw.standardsDesc !== null ? raw.standardsDesc : defaultCoachesData.standardsDesc,
+      step1Num: raw.step1Num || defaultCoachesData.step1Num,
+      step1Title: raw.step1Title !== undefined && raw.step1Title !== null ? raw.step1Title : defaultCoachesData.step1Title,
+      step1Desc: raw.step1Desc !== undefined && raw.step1Desc !== null ? raw.step1Desc : defaultCoachesData.step1Desc,
+      step2Num: raw.step2Num || defaultCoachesData.step2Num,
+      step2Title: raw.step2Title !== undefined && raw.step2Title !== null ? raw.step2Title : defaultCoachesData.step2Title,
+      step2Desc: raw.step2Desc !== undefined && raw.step2Desc !== null ? raw.step2Desc : defaultCoachesData.step2Desc,
+      step3Num: raw.step3Num || defaultCoachesData.step3Num,
+      step3Title: raw.step3Title !== undefined && raw.step3Title !== null ? raw.step3Title : defaultCoachesData.step3Title,
+      step3Desc: raw.step3Desc !== undefined && raw.step3Desc !== null ? raw.step3Desc : defaultCoachesData.step3Desc,
+      step4Num: raw.step4Num || defaultCoachesData.step4Num,
+      step4Title: raw.step4Title !== undefined && raw.step4Title !== null ? raw.step4Title : defaultCoachesData.step4Title,
+      step4Desc: raw.step4Desc !== undefined && raw.step4Desc !== null ? raw.step4Desc : defaultCoachesData.step4Desc,
+      quote: raw.quote !== undefined && raw.quote !== null ? raw.quote : defaultCoachesData.quote,
+      quoteAuthor: raw.quoteAuthor !== undefined && raw.quoteAuthor !== null ? raw.quoteAuthor : defaultCoachesData.quoteAuthor,
+      quoteRole: raw.quoteRole !== undefined && raw.quoteRole !== null ? raw.quoteRole : defaultCoachesData.quoteRole,
       translations: {
         az: { ...(defaultCoachesData.translations?.az || {}), ...(raw.translations?.az || {}) },
         en: { ...(defaultCoachesData.translations?.en || {}), ...(raw.translations?.en || {}) },
@@ -4593,6 +4637,86 @@ export default function AdminCmsTab() {
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>save</span>
                 <span>Kouçinq Məzmununu Yadda Saxla</span>
+              </button>
+            </div>
+          </div>
+
+          {/* 4. Kouçinq Səhifəsi Alt Sitat / Testimonial Kartı */}
+          <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>4. Səhifə Alt Sitat və Rəy Kartı (Testimonial Quote)</span>
+              {testimonialsList && testimonialsList.length > 0 && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ fontSize: '11px', color: '#64748b' }}>Mövcud rəylərdən doldur:</span>
+                  <select
+                    className="admin-select"
+                    style={{ fontSize: '11px', padding: '2px 8px' }}
+                    defaultValue=""
+                    onChange={(e) => {
+                      const sel = testimonialsList.find(t => t.id === e.target.value);
+                      if (sel) {
+                        setCmsCoaches(p => ({
+                          ...p,
+                          quote: sel.quote,
+                          quoteAuthor: sel.author,
+                          quoteRole: sel.role,
+                          translations: {
+                            ...(p.translations || {}),
+                            az: { ...(p.translations?.az || {}), quote: sel.translations?.az?.quote || sel.quote, quoteRole: sel.translations?.az?.role || sel.role },
+                            en: { ...(p.translations?.en || {}), quote: sel.translations?.en?.quote || sel.quote, quoteRole: sel.translations?.en?.role || sel.role },
+                            tr: { ...(p.translations?.tr || {}), quote: sel.translations?.tr?.quote || sel.quote, quoteRole: sel.translations?.tr?.role || sel.role },
+                            ru: { ...(p.translations?.ru || {}), quote: sel.translations?.ru?.quote || sel.quote, quoteRole: sel.translations?.ru?.role || sel.role },
+                          }
+                        }));
+                        showToast(`"${sel.author}" rəyi sitat kartına tətbiq edildi!`, 'info');
+                      }
+                    }}
+                  >
+                    <option value="">-- Rəy seçin --</option>
+                    {testimonialsList.map(t => (
+                      <option key={t.id} value={t.id}>{t.author} ({t.role})</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+
+            <Field
+              label="Sitat Mətni"
+              block={cmsCoaches}
+              setBlock={setCmsCoaches}
+              fieldKey="quote"
+              multiline
+              rows={3}
+              placeholder="Sitat və ya rəy mətni daxil edin..."
+            />
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+              <Field
+                label="Sitat Müəllifi (Ad Soyad)"
+                block={cmsCoaches}
+                setBlock={setCmsCoaches}
+                fieldKey="quoteAuthor"
+                placeholder="Məs: Aysel Məcidova"
+              />
+              <Field
+                label="Müəllifin Vəzifəsi / Statusu"
+                block={cmsCoaches}
+                setBlock={setCmsCoaches}
+                fieldKey="quoteRole"
+                placeholder="Məs: Memar & Şəxsi İnkişaf Məzunu"
+              />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
+              <button
+                type="button"
+                onClick={() => saveBlock('coaches', cmsCoaches)}
+                className="admin-btn-primary"
+                style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>save</span>
+                <span>Sitat və Məzmunu Yadda Saxla</span>
               </button>
             </div>
           </div>

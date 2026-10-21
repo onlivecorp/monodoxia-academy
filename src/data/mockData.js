@@ -1218,6 +1218,7 @@ export const INITIAL_HOME_CONTENT = {
     heroBadge2Text: "100% Tam Konfidensiallıq",
     heroBadge3Icon: "videocam",
     heroBadge3Text: "Təhlükəsiz Onlayn Otaqlar",
+    standardsBadge: "İş Metodologiyası",
     standardsTitle: "Monodoxia Fərdi Kouçinq Standartları",
     standardsDesc: "Hər bir fərdlə iş prosesi elmi əsaslı psixoloji çərçivədə və tamamilə fərdiləşdirilmiş addımlarla aparılır.",
     step1Num: "01",
@@ -1232,6 +1233,9 @@ export const INITIAL_HOME_CONTENT = {
     step4Num: "04",
     step4Title: "Davamlı Monitorinq",
     step4Desc: "Seanslar arası praktiki tapşırıqlar, fərdi rəy və davamlı inkişafın təhlili.",
+    quote: "Monodoxia mənim üçün sadəcə kurs olmadı. İllərdir daşıdığım daxili narahatlığı kökündən anlamağıma və özümlə barışmağıma imkan verdi.",
+    quoteAuthor: "Aysel Məcidova",
+    quoteRole: "Memar & Şəxsi İnkişaf Məzunu",
     translations: {
       az: {
         badge: "Ekspert Heyəti",
@@ -1240,6 +1244,7 @@ export const INITIAL_HOME_CONTENT = {
         heroBadge1Text: "ICF Etik Məcəlləsi",
         heroBadge2Text: "100% Tam Konfidensiallıq",
         heroBadge3Text: "Təhlükəsiz Onlayn Otaqlar",
+        standardsBadge: "İş Metodologiyası",
         standardsTitle: "Monodoxia Fərdi Kouçinq Standartları",
         standardsDesc: "Hər bir fərdlə iş prosesi elmi əsaslı psixoloji çərçivədə və tamamilə fərdiləşdirilmiş addımlarla aparılır.",
         step1Title: "Daxili Diaqnostika",
@@ -1249,7 +1254,9 @@ export const INITIAL_HOME_CONTENT = {
         step3Title: "Müntəzəm Seanslar",
         step3Desc: "Həftəlik və ya 2 həftədən bir keçirilən 60 dəqiqəlik dərin fərdi sessiyalar.",
         step4Title: "Davamlı Monitorinq",
-        step4Desc: "Seanslar arası praktiki tapşırıqlar, fərdi rəy və davamlı inkişafın təhlili."
+        step4Desc: "Seanslar arası praktiki tapşırıqlar, fərdi rəy və davamlı inkişafın təhlili.",
+        quote: "Monodoxia mənim üçün sadəcə kurs olmadı. İllərdir daşıdığım daxili narahatlığı kökündən anlamağıma və özümlə barışmağıma imkan verdi.",
+        quoteRole: "Memar & Şəxsi İnkişaf Məzunu"
       },
       en: {
         badge: "Expert Team",
@@ -1258,6 +1265,7 @@ export const INITIAL_HOME_CONTENT = {
         heroBadge1Text: "ICF Code of Ethics",
         heroBadge2Text: "100% Confidentiality",
         heroBadge3Text: "Encrypted Online Rooms",
+        standardsBadge: "Work Methodology",
         standardsTitle: "Monodoxia Individual Coaching Standards",
         standardsDesc: "Every engagement is structured within an evidence-based psychological framework tailored to your rhythm.",
         step1Title: "Inner Diagnostics",
@@ -1267,7 +1275,9 @@ export const INITIAL_HOME_CONTENT = {
         step3Title: "Regular Sessions",
         step3Desc: "Deep 60-minute 1-on-1 sessions held weekly or bi-weekly.",
         step4Title: "Continuous Monitoring",
-        step4Desc: "Inter-session practical exercises, feedback, and objective progress tracking."
+        step4Desc: "Inter-session practical exercises, feedback, and objective progress tracking.",
+        quote: "Monodoxia wasn't just a course for me. It allowed me to deeply understand the inner anxiety I carried for years and make peace with myself.",
+        quoteRole: "Architect & Personal Growth Graduate"
       },
       tr: {
         badge: "Uzman Kadro",
@@ -1276,6 +1286,7 @@ export const INITIAL_HOME_CONTENT = {
         heroBadge1Text: "ICF Etik İlkeleri",
         heroBadge2Text: "%100 Tam Gizlilik",
         heroBadge3Text: "Güvenli Çevrimiçi Odalar",
+        standardsBadge: "İş Metodolojisi",
         standardsTitle: "Monodoxia Bireysel Koçluk Standartları",
         standardsDesc: "Bireyle çalışma süreci bilimsel temelli psikolojik çerçevede ve kişiselleştirilmiş adımlarla yürütülür.",
         step1Title: "İçsel Teşhis",
@@ -1285,7 +1296,9 @@ export const INITIAL_HOME_CONTENT = {
         step3Title: "Düzenli Seanslar",
         step3Desc: "Haftalık veya iki haftada bir gerçekleştirilen 60 dakikalık derin bireysel oturumlar.",
         step4Title: "Sürekli Takip",
-        step4Desc: "Seanslar arası pratik uygulamalar, bireysel geri bildirim ve gelişim analizi."
+        step4Desc: "Seanslar arası pratik uygulamalar, bireysel geri bildirim ve gelişim analizi.",
+        quote: "Monodoxia benim için sadece bir kurs olmadı. Yıllardır taşıdığım içsel huzursuzluğu derinden anlamama ve kendimle barışmama olanak tanıdı.",
+        quoteRole: "Mimar & Kişisel Gelişim Mezunu"
       },
       ru: {
         badge: "Команда экспертов",
@@ -1294,6 +1307,7 @@ export const INITIAL_HOME_CONTENT = {
         heroBadge1Text: "Этический кодекс ICF",
         heroBadge2Text: "100% Конфиденциальность",
         heroBadge3Text: "Защищенные онлайн-комнаты",
+        standardsBadge: "Методология работы",
         standardsTitle: "Стандарты индивидуального коучинга Monodoxia",
         standardsDesc: "Работа с каждым клиентом строится в рамках научно обоснованной модели и персонализированных шагов.",
         step1Title: "Внутренняя диагностика",
@@ -1303,7 +1317,9 @@ export const INITIAL_HOME_CONTENT = {
         step3Title: "Регулярные сессии",
         step3Desc: "Глубокие 60-минутные индивидуальные сессии еженедельно или раз в две недели.",
         step4Title: "Непрерывный мониторинг",
-        step4Desc: "Практические задания между сессиями, обратная связь и анализ динамики."
+        step4Desc: "Практические задания между сессиями, обратная связь и анализ динамики.",
+        quote: "Monodoxia стала для меня не просто курсом. Она помогла мне глубоко осознать внутреннее беспокойство, которое я несла годами, и примириться с собой.",
+        quoteRole: "Архитектор и выпускник программы"
       }
     }
   },
