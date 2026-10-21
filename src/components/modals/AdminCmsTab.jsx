@@ -631,6 +631,125 @@ export default function AdminCmsTab() {
     };
   };
 
+  const defaultCoachesData = INITIAL_HOME_CONTENT?.coaches || {
+    badge: "Ekspert Heyəti",
+    title: "Fərdi Kouçinq və Mentorluq",
+    desc: "Hər biri öz sahəsində akademik dərəcəyə və yüzlərlə saatlıq uğurlu klinik və fərdi kouçinq təcrübəsinə malik mütəxəssislər.",
+    heroBadge1Icon: "verified_user",
+    heroBadge1Text: "ICF Etik Məcəlləsi",
+    heroBadge2Icon: "lock",
+    heroBadge2Text: "100% Tam Konfidensiallıq",
+    heroBadge3Icon: "videocam",
+    heroBadge3Text: "Təhlükəsiz Onlayn Otaqlar",
+    standardsBadge: "İş Metodologiyası",
+    standardsTitle: "Monodoxia Fərdi Kouçinq Standartları",
+    standardsDesc: "Hər bir fərdlə iş prosesi elmi əsaslı psixoloji çərçivədə və tamamilə fərdiləşdirilmiş addımlarla aparılır.",
+    step1Num: "01",
+    step1Title: "Daxili Diaqnostika",
+    step1Desc: "İlkin görüşdə cari maneələr, emosional bloklar və hədəflər müəyyən edilir.",
+    step2Num: "02",
+    step2Title: "İnkişaf Strategiyası",
+    step2Desc: "Şəxsin xarakterinə və həyat ritminə uyğun fərdi transformasiya xəritəsi cızılır.",
+    step3Num: "03",
+    step3Title: "Müntəzəm Seanslar",
+    step3Desc: "Həftəlik və ya 2 həftədən bir keçirilən 60 dəqiqəlik dərin fərdi sessiyalar.",
+    step4Num: "04",
+    step4Title: "Davamlı Monitorinq",
+    step4Desc: "Seanslar arası praktiki tapşırıqlar, fərdi rəy və davamlı inkişafın təhlili.",
+    translations: {
+      az: {
+        badge: "Ekspert Heyəti",
+        title: "Fərdi Kouçinq və Mentorluq",
+        desc: "Hər biri öz sahəsində akademik dərəcəyə və yüzlərlə saatlıq uğurlu klinik və fərdi kouçinq təcrübəsinə malik mütəxəssislər.",
+        heroBadge1Text: "ICF Etik Məcəlləsi",
+        heroBadge2Text: "100% Tam Konfidensiallıq",
+        heroBadge3Text: "Təhlükəsiz Onlayn Otaqlar",
+        standardsBadge: "İş Metodologiyası",
+        standardsTitle: "Monodoxia Fərdi Kouçinq Standartları",
+        standardsDesc: "Hər bir fərdlə iş prosesi elmi əsaslı psixoloji çərçivədə və tamamilə fərdiləşdirilmiş addımlarla aparılır.",
+        step1Title: "Daxili Diaqnostika",
+        step1Desc: "İlkin görüşdə cari maneələr, emosional bloklar və hədəflər müəyyən edilir.",
+        step2Title: "İnkişaf Strategiyası",
+        step2Desc: "Şəxsin xarakterinə və həyat ritminə uyğun fərdi transformasiya xəritəsi cızılır.",
+        step3Title: "Müntəzəm Seanslar",
+        step3Desc: "Həftəlik və ya 2 həftədən bir keçirilən 60 dəqiqəlik dərin fərdi sessiyalar.",
+        step4Title: "Davamlı Monitorinq",
+        step4Desc: "Seanslar arası praktiki tapşırıqlar, fərdi rəy və davamlı inkişafın təhlili."
+      },
+      en: {
+        badge: "Expert Team",
+        title: "Personal Coaching & Mentorship",
+        desc: "Professionals holding academic degrees and hundreds of hours of successful clinical and coaching experience.",
+        heroBadge1Text: "ICF Code of Ethics",
+        heroBadge2Text: "100% Confidentiality",
+        heroBadge3Text: "Encrypted Online Rooms",
+        standardsBadge: "Work Methodology",
+        standardsTitle: "Monodoxia Individual Coaching Standards",
+        standardsDesc: "Every engagement is structured within an evidence-based psychological framework tailored to your rhythm.",
+        step1Title: "Inner Diagnostics",
+        step1Desc: "Initial exploratory session identifying current barriers, emotional blocks, and core aspirations.",
+        step2Title: "Growth Roadmap",
+        step2Desc: "A customized personal transformation roadmap tailored to your personality and lifestyle.",
+        step3Title: "Regular Sessions",
+        step3Desc: "Deep 60-minute 1-on-1 sessions held weekly or bi-weekly.",
+        step4Title: "Continuous Monitoring",
+        step4Desc: "Inter-session practical exercises, feedback, and objective progress tracking."
+      },
+      tr: {
+        badge: "Uzman Kadro",
+        title: "Bireysel Koçluk ve Mentorluk",
+        desc: "Alanında akademik dereceye ve yüzlerce saatlik başarılı klinik ve bireysel koçluk deneyimine sahip uzmanlar.",
+        heroBadge1Text: "ICF Etik İlkeleri",
+        heroBadge2Text: "%100 Tam Gizlilik",
+        heroBadge3Text: "Güvenli Çevrimiçi Odalar",
+        standardsBadge: "İş Metodolojisi",
+        standardsTitle: "Monodoxia Bireysel Koçluk Standartları",
+        standardsDesc: "Bireyle çalışma süreci bilimsel temelli psikolojik çerçevede ve kişiselleştirilmiş adımlarla yürütülür.",
+        step1Title: "İç Teşhis",
+        step1Desc: "İlk görüşmede mevcut engeller, duygusal bloklar ve hedefler belirlenir.",
+        step2Title: "Gelişim Stratejisi",
+        step2Desc: "Kişinin karakterine ve yaşam ritmine uygun bireysel dönüşüm haritası çizilir.",
+        step3Title: "Düzenli Seanslar",
+        step3Desc: "Haftalık veya iki haftada bir gerçekleştirilen 60 dakikalık derin bireysel seanslar.",
+        step4Title: "Sürekli İzleme",
+        step4Desc: "Seanslar arası pratik alıştırmalar, bireysel geri bildirim ve sürekli gelişimin analizi."
+      },
+      ru: {
+        badge: "Экспертная Команда",
+        title: "Индивидуальный Коучинг и Менторство",
+        desc: "Специалисты с академической степенью и сотнями часов успешной клинической и коучинговой практики.",
+        heroBadge1Text: "Этический кодекс ICF",
+        heroBadge2Text: "100% Полная Конфиденциальность",
+        heroBadge3Text: "Безопасные Онлайн-комнаты",
+        standardsBadge: "Методология Работы",
+        standardsTitle: "Стандарты Индивидуального Коучинга Monodoxia",
+        standardsDesc: "Процесс строится на научно обоснованной психологической базе и индивидуально подобранных этапах.",
+        step1Title: "Внутренняя Диагностика",
+        step1Desc: "На первой встрече выявляются текущие барьеры, эмоциональные блоки и цели.",
+        step2Title: "Стратегия Развития",
+        step2Desc: "Создается персональная карта трансформации под характер и ритм жизни клиента.",
+        step3Title: "Регулярные Сессии",
+        step3Desc: "Глубокие 60-минутные индивидуальные сессии еженедельно или раз в две недели.",
+        step4Title: "Постоянный Мониторинг",
+        step4Desc: "Практические задания между сессиями, обратная связь и анализ динамики развития."
+      }
+    }
+  };
+
+  const mergeCoachesWithDefaults = (src) => {
+    const raw = src || {};
+    return {
+      ...defaultCoachesData,
+      ...raw,
+      translations: {
+        az: { ...(defaultCoachesData.translations?.az || {}), ...(raw.translations?.az || {}) },
+        en: { ...(defaultCoachesData.translations?.en || {}), ...(raw.translations?.en || {}) },
+        tr: { ...(defaultCoachesData.translations?.tr || {}), ...(raw.translations?.tr || {}) },
+        ru: { ...(defaultCoachesData.translations?.ru || {}), ...(raw.translations?.ru || {}) },
+      }
+    };
+  };
+
   // Content block states
   const [cmsNavbar, setCmsNavbar] = useState(() => ({ ...(homeContent?.navbar || {}) }));
   const [cmsHero, setCmsHero] = useState(() => ({ ...(homeContent?.hero || {}) }));
@@ -638,7 +757,7 @@ export default function AdminCmsTab() {
   const [cmsAreas, setCmsAreas] = useState(() => ({ ...(homeContent?.areas || {}) }));
   const [cmsAcademy, setCmsAcademy] = useState(() => mergeAcademyWithDefaults(homeContent?.academy));
   const [cmsClub, setCmsClub] = useState(() => mergeClubWithDefaults(homeContent?.club));
-  const [cmsCoaches, setCmsCoaches] = useState(() => ({ ...(homeContent?.coaches || {}) }));
+  const [cmsCoaches, setCmsCoaches] = useState(() => mergeCoachesWithDefaults(homeContent?.coaches));
   const [cmsEvents, setCmsEvents] = useState(() => ({ ...(homeContent?.events || {}) }));
   const [cmsCommunity, setCmsCommunity] = useState(() => ({ ...(homeContent?.community || {}) }));
   const [cmsTestimonials, setCmsTestimonials] = useState(() => ({ ...(homeContent?.testimonials || {}) }));
@@ -714,7 +833,7 @@ export default function AdminCmsTab() {
       setCmsAreas({ ...(homeContent.areas || {}) });
       setCmsAcademy(mergeAcademyWithDefaults(homeContent.academy));
       setCmsClub(mergeClubWithDefaults(homeContent.club));
-      setCmsCoaches({ ...(homeContent.coaches || {}) });
+      setCmsCoaches(mergeCoachesWithDefaults(homeContent.coaches));
       setCmsEvents({ ...(homeContent.events || {}) });
       setCmsCommunity({ ...(homeContent.community || {}) });
       setCmsTestimonials({ ...(homeContent.testimonials || {}) });
@@ -4361,13 +4480,120 @@ export default function AdminCmsTab() {
       {/* COACHES */}
       {cmsBlock === 'coaches' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Header & Quick Action */}
           <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0' }}>Koçlar Bölməsi – Başlıq</h5>
-            <Field label="Üst Etiket" block={cmsCoaches} setBlock={setCmsCoaches} fieldKey="badge" />
-            <Field label="Başlıq" block={cmsCoaches} setBlock={setCmsCoaches} fieldKey="title" />
-            <Field label="Təsvir" block={cmsCoaches} setBlock={setCmsCoaches} fieldKey="desc" multiline />
-            <div>
-              <button onClick={() => saveBlock('coaches', cmsCoaches)} className="admin-btn-primary">Yadda Saxla</button>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0', flexWrap: 'wrap', gap: '10px' }}>
+              <div>
+                <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Kouçinq Səhifəsi və Ekspertlər Vitrini (#koucinq)</h5>
+                <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0' }}>Ana səhifədəki mentorlar bölməsi və daxili Kouçinq səhifəsinin bütün mətn və standartları</p>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (setAdminModalOpen) setAdminModalOpen(false);
+                    if (navigateTo) navigateTo('koucinq');
+                  }}
+                  className="admin-btn-secondary"
+                  style={{ fontSize: '11px', padding: '4px 10px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>visibility</span>
+                  <span>Canlı Baxış</span>
+                </button>
+                <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: '#fef3c7', color: '#b45309' }}>📄 Kouçinq</span>
+              </div>
+            </div>
+
+            {/* 1. Əsas Hero və Bölmə Başlıqları */}
+            <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>1. Əsas Bölmə Başlığı və Təsviri</span>
+            <Field label="Üst Etiket (Badge)" block={cmsCoaches} setBlock={setCmsCoaches} fieldKey="badge" placeholder="Məs: Ekspert Heyəti" />
+            <Field label="Əsas Başlıq (Title)" block={cmsCoaches} setBlock={setCmsCoaches} fieldKey="title" placeholder="Məs: Fərdi Kouçinq və Mentorluq" />
+            <Field label="Təsvir (Desc)" block={cmsCoaches} setBlock={setCmsCoaches} fieldKey="desc" multiline rows={3} placeholder="Mütəxəssislər haqqında ümumi məlumat..." />
+          </div>
+
+          {/* 2. Hero 3 Sürətli Göstərici Bəndləri */}
+          <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>2. Səhifə Üst Göstəriciləri (3 Bənd)</span>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label className="admin-label">1-ci Bənd İkonu</label>
+                <input type="text" className="admin-input" value={cmsCoaches.heroBadge1Icon || 'verified_user'} onChange={e => setCmsCoaches(p => ({ ...p, heroBadge1Icon: e.target.value }))} />
+                <Field label="1-ci Bənd Mətni" block={cmsCoaches} setBlock={setCmsCoaches} fieldKey="heroBadge1Text" placeholder="ICF Etik Məcəlləsi" />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label className="admin-label">2-ci Bənd İkonu</label>
+                <input type="text" className="admin-input" value={cmsCoaches.heroBadge2Icon || 'lock'} onChange={e => setCmsCoaches(p => ({ ...p, heroBadge2Icon: e.target.value }))} />
+                <Field label="2-ci Bənd Mətni" block={cmsCoaches} setBlock={setCmsCoaches} fieldKey="heroBadge2Text" placeholder="100% Tam Konfidensiallıq" />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label className="admin-label">3-cü Bənd İkonu</label>
+                <input type="text" className="admin-input" value={cmsCoaches.heroBadge3Icon || 'videocam'} onChange={e => setCmsCoaches(p => ({ ...p, heroBadge3Icon: e.target.value }))} />
+                <Field label="3-cü Bənd Mətni" block={cmsCoaches} setBlock={setCmsCoaches} fieldKey="heroBadge3Text" placeholder="Təhlükəsiz Onlayn Otaqlar" />
+              </div>
+            </div>
+          </div>
+
+          {/* 3. Kouçinq Standartları və Metodologiyası (4 Addım) */}
+          <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>3. Fərdi Kouçinq Standartları və 4 Addımlı Metodologiya</span>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '10px' }}>
+              <Field label="Bölmə Üst Etiketi" block={cmsCoaches} setBlock={setCmsCoaches} fieldKey="standardsBadge" placeholder="İş Metodologiyası" />
+              <Field label="Bölmə Başlığı" block={cmsCoaches} setBlock={setCmsCoaches} fieldKey="standardsTitle" placeholder="Monodoxia Fərdi Kouçinq Standartları" />
+            </div>
+            <Field label="Bölmə İzahı" block={cmsCoaches} setBlock={setCmsCoaches} fieldKey="standardsDesc" multiline rows={2} placeholder="Hər bir fərdlə iş prosesi elmi əsaslı psixoloji çərçivədə..." />
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px', marginTop: '6px' }}>
+              {/* Addım 1 */}
+              <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <input type="text" className="admin-input" style={{ width: '45px', textAlign: 'center', fontWeight: 700 }} value={cmsCoaches.step1Num || '01'} onChange={e => setCmsCoaches(p => ({ ...p, step1Num: e.target.value }))} />
+                  <span style={{ fontSize: '11px', fontWeight: 700, color: '#334155' }}>1-ci Addım</span>
+                </div>
+                <Field label="Başlıq" block={cmsCoaches} setBlock={setCmsCoaches} fieldKey="step1Title" placeholder="Daxili Diaqnostika" />
+                <Field label="İzah" block={cmsCoaches} setBlock={setCmsCoaches} fieldKey="step1Desc" multiline rows={2} />
+              </div>
+
+              {/* Addım 2 */}
+              <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <input type="text" className="admin-input" style={{ width: '45px', textAlign: 'center', fontWeight: 700 }} value={cmsCoaches.step2Num || '02'} onChange={e => setCmsCoaches(p => ({ ...p, step2Num: e.target.value }))} />
+                  <span style={{ fontSize: '11px', fontWeight: 700, color: '#334155' }}>2-ci Addım</span>
+                </div>
+                <Field label="Başlıq" block={cmsCoaches} setBlock={setCmsCoaches} fieldKey="step2Title" placeholder="İnkişaf Strategiyası" />
+                <Field label="İzah" block={cmsCoaches} setBlock={setCmsCoaches} fieldKey="step2Desc" multiline rows={2} />
+              </div>
+
+              {/* Addım 3 */}
+              <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <input type="text" className="admin-input" style={{ width: '45px', textAlign: 'center', fontWeight: 700 }} value={cmsCoaches.step3Num || '03'} onChange={e => setCmsCoaches(p => ({ ...p, step3Num: e.target.value }))} />
+                  <span style={{ fontSize: '11px', fontWeight: 700, color: '#334155' }}>3-cü Addım</span>
+                </div>
+                <Field label="Başlıq" block={cmsCoaches} setBlock={setCmsCoaches} fieldKey="step3Title" placeholder="Müntəzəm Seanslar" />
+                <Field label="İzah" block={cmsCoaches} setBlock={setCmsCoaches} fieldKey="step3Desc" multiline rows={2} />
+              </div>
+
+              {/* Addım 4 */}
+              <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <input type="text" className="admin-input" style={{ width: '45px', textAlign: 'center', fontWeight: 700 }} value={cmsCoaches.step4Num || '04'} onChange={e => setCmsCoaches(p => ({ ...p, step4Num: e.target.value }))} />
+                  <span style={{ fontSize: '11px', fontWeight: 700, color: '#334155' }}>4-cü Addım</span>
+                </div>
+                <Field label="Başlıq" block={cmsCoaches} setBlock={setCmsCoaches} fieldKey="step4Title" placeholder="Davamlı Monitorinq" />
+                <Field label="İzah" block={cmsCoaches} setBlock={setCmsCoaches} fieldKey="step4Desc" multiline rows={2} />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
+              <button
+                type="button"
+                onClick={() => saveBlock('coaches', cmsCoaches)}
+                className="admin-btn-primary"
+                style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>save</span>
+                <span>Kouçinq Məzmununu Yadda Saxla</span>
+              </button>
             </div>
           </div>
 

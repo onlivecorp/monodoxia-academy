@@ -2947,25 +2947,54 @@ export function AppProvider({ children }) {
   };
 
   const updateCoach = (id, updates) => {
-    let mergedCoach = null;
-    setCoachesList(prev => prev.map(c => {
-      if (c.id === id) {
-        const spec = typeof updates.specialties === 'string'
-          ? updates.specialties.split(',').map(s => s.trim()).filter(Boolean)
-          : updates.specialties;
-        mergedCoach = { ...c, ...updates, ...(spec ? { specialties: spec } : {}) };
-        return mergedCoach;
+    const existing = coachesList.find(c => c.id === id) || {};
+    const spec = typeof updates.specialties === 'string'
+      ? updates.specialties.split(',').map(s => s.trim()).filter(Boolean)
+      : (updates.specialties !== undefined ? updates.specialties : existing.specialties);
+
+    const mergedCoach = {
+      ...existing,
+      ...updates,
+      ...(spec ? { specialties: spec } : {}),
+      translations: {
+        ...(existing.translations || {}),
+        ...(updates?.translations || {})
       }
-      return c;
-    }));
-    if (mergedCoach) {
-      apiCall('save_coach', mergedCoach);
-    }
+    };
+
+    setCoachesList(prev => {
+      const nextList = prev.map(c => {
+        if (c.id === id) {
+          return {
+            ...c,
+            ...updates,
+            ...(spec ? { specialties: spec } : {}),
+            translations: {
+              ...(c.translations || {}),
+              ...(updates?.translations || {})
+            }
+          };
+        }
+        return c;
+      });
+      try {
+        localStorage.setItem('monodoxia_coaches', JSON.stringify(nextList));
+      } catch (e) {}
+      return nextList;
+    });
+
+    apiCall('save_coach', mergedCoach);
     showToast('Kouç profili yeniləndi', 'success');
   };
 
   const deleteCoach = (id) => {
-    setCoachesList(prev => prev.filter(c => c.id !== id));
+    setCoachesList(prev => {
+      const nextList = prev.filter(c => c.id !== id);
+      try {
+        localStorage.setItem('monodoxia_coaches', JSON.stringify(nextList));
+      } catch (e) {}
+      return nextList;
+    });
     apiCall('delete_coach', { id });
     showToast('Kouç silindi', 'info');
   };
