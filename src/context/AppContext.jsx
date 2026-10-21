@@ -2824,20 +2824,37 @@ export function AppProvider({ children }) {
 
   // Home Content CMS Block Editor
   const updateHomeBlock = (blockKey, blockData) => {
-    let mergedBlock = null;
+    const currentBlock = homeContent?.[blockKey] || {};
+    const mergedBlock = {
+      ...currentBlock,
+      ...blockData,
+      translations: {
+        ...(currentBlock.translations || {}),
+        ...(blockData?.translations || {})
+      }
+    };
+
     setHomeContent(prev => {
-      mergedBlock = {
-        ...prev[blockKey],
-        ...blockData
+      const prevBlock = prev?.[blockKey] || {};
+      const updated = {
+        ...prevBlock,
+        ...blockData,
+        translations: {
+          ...(prevBlock.translations || {}),
+          ...(blockData?.translations || {})
+        }
       };
-      return {
+      const nextContent = {
         ...prev,
-        [blockKey]: mergedBlock
+        [blockKey]: updated
       };
+      try {
+        localStorage.setItem('monodoxia_home_content', JSON.stringify(nextContent));
+      } catch (e) {}
+      return nextContent;
     });
-    if (mergedBlock) {
-      apiCall('save_cms_block', { block_key: blockKey, content: mergedBlock });
-    }
+
+    apiCall('save_cms_block', { block_key: blockKey, content: mergedBlock });
     showToast(`"${blockKey.toUpperCase()}" bloku uğurla yeniləndi!`, 'success');
   };
 

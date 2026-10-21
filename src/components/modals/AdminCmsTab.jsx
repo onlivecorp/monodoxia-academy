@@ -3,6 +3,7 @@ import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../i18n/LanguageContext';
 import AdminConfirmModal from './AdminConfirmModal';
 import { getHeroMediaStyles, getAboutMediaStyles, parseVideoUrl } from '../../utils/heroMediaHelper';
+import { INITIAL_HOME_CONTENT } from '../../data/mockData';
 
 
 const CmsFieldContext = createContext({
@@ -395,7 +396,9 @@ export default function AdminCmsTab() {
     updateCoach,
     deleteCoach,
     usersList = [],
-    showToast
+    showToast,
+    navigateTo,
+    setAdminModalOpen
   } = useApp();
 
   const { supportedLangs = [] } = useLanguage();
@@ -581,12 +584,59 @@ export default function AdminCmsTab() {
     };
   };
 
+  const defaultAcademyData = INITIAL_HOME_CONTENT?.academy || {
+    badge: "Akademik Tədris",
+    title: "Kurslar və Sertifikasiya Proqramları",
+    desc: "Akademik psixologiya, nevrobiologiya və fərdi inkişaf metodologiyaları əsasında hazırlanmış lisenziyalı proqramlar.",
+    ctaText: "Kurslara Bax",
+    heroBadge1Icon: "verified",
+    heroBadge1Text: "Beynəlxalq QR Sertifikat",
+    heroBadge2Icon: "psychology",
+    heroBadge2Text: "ICF & PhD Mentorlar",
+    heroBadge3Icon: "laptop_chromebook",
+    heroBadge3Text: "Ömürlük Giriş və LMS Arxiv",
+    searchPlaceholder: "Kurs və ya kouç axtar...",
+    emptyTitle: "Hal-hazırda aktiv kurs mövcud deyil",
+    emptyDesc: "Yeni proqramlar və qeydiyyat tarixləri tezliklə elan olunacaqdır.",
+    guarantee1Icon: "verified",
+    guarantee1Title: "Rəsmi QR Sertifikat",
+    guarantee1Desc: "İmtahanı uğurla başa vuran məzunlarımıza qlobal səviyyədə onlayn təsdiqlənən rəsmi QR kodlu sertifikat verilir.",
+    guarantee2Icon: "co_present",
+    guarantee2Title: "Fərdi Mentor Əlaqəsi",
+    guarantee2Desc: "Hər bir kurs çərçivəsində tələbələrə ev tapşırıqlarının auditində fərdi mentor rəyi və istiqamətləndirmə təmin edilir.",
+    guarantee3Icon: "all_inclusive",
+    guarantee3Title: "Daimi Material Girişi",
+    guarantee3Desc: "Kursu bitirdikdən sonra da bütün video dərslər, audio meditasiyalar və iş dəftərləri şəxsi kabinetinizdə qalır.",
+    translations: {
+      az: {
+        badge: "Akademik Tədris",
+        title: "Kurslar və Sertifikasiya Proqramları",
+        desc: "Akademik psixologiya, nevrobiologiya və fərdi inkişaf metodologiyaları əsasında hazırlanmış lisenziyalı proqramlar.",
+        ctaText: "Kurslara Bax"
+      }
+    }
+  };
+
+  const mergeAcademyWithDefaults = (src) => {
+    const raw = src || {};
+    return {
+      ...defaultAcademyData,
+      ...raw,
+      translations: {
+        az: { ...(defaultAcademyData.translations?.az || {}), ...(raw.translations?.az || {}) },
+        en: { ...(defaultAcademyData.translations?.en || {}), ...(raw.translations?.en || {}) },
+        tr: { ...(defaultAcademyData.translations?.tr || {}), ...(raw.translations?.tr || {}) },
+        ru: { ...(defaultAcademyData.translations?.ru || {}), ...(raw.translations?.ru || {}) },
+      }
+    };
+  };
+
   // Content block states
   const [cmsNavbar, setCmsNavbar] = useState(() => ({ ...(homeContent?.navbar || {}) }));
   const [cmsHero, setCmsHero] = useState(() => ({ ...(homeContent?.hero || {}) }));
   const [cmsAbout, setCmsAbout] = useState(() => ({ ...(homeContent?.about || {}) }));
   const [cmsAreas, setCmsAreas] = useState(() => ({ ...(homeContent?.areas || {}) }));
-  const [cmsAcademy, setCmsAcademy] = useState(() => ({ ...(homeContent?.academy || {}) }));
+  const [cmsAcademy, setCmsAcademy] = useState(() => mergeAcademyWithDefaults(homeContent?.academy));
   const [cmsClub, setCmsClub] = useState(() => mergeClubWithDefaults(homeContent?.club));
   const [cmsCoaches, setCmsCoaches] = useState(() => ({ ...(homeContent?.coaches || {}) }));
   const [cmsEvents, setCmsEvents] = useState(() => ({ ...(homeContent?.events || {}) }));
@@ -662,7 +712,7 @@ export default function AdminCmsTab() {
       setCmsHero({ ...(homeContent.hero || {}) });
       setCmsAbout({ ...(homeContent.about || {}) });
       setCmsAreas({ ...(homeContent.areas || {}) });
-      setCmsAcademy({ ...(homeContent.academy || {}) });
+      setCmsAcademy(mergeAcademyWithDefaults(homeContent.academy));
       setCmsClub(mergeClubWithDefaults(homeContent.club));
       setCmsCoaches({ ...(homeContent.coaches || {}) });
       setCmsEvents({ ...(homeContent.events || {}) });
@@ -4072,14 +4122,111 @@ export default function AdminCmsTab() {
 
       {/* ACADEMY */}
       {cmsBlock === 'academy' && (
-        <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0' }}>Akademiya Bölməsi</h5>
-          <Field label="Üst Etiket" block={cmsAcademy} setBlock={setCmsAcademy} fieldKey="badge" />
-          <Field label="Başlıq" block={cmsAcademy} setBlock={setCmsAcademy} fieldKey="title" />
-          <Field label="Təsvir (desc)" block={cmsAcademy} setBlock={setCmsAcademy} fieldKey="desc" multiline />
-          <Field label="Düymə Mətni" block={cmsAcademy} setBlock={setCmsAcademy} fieldKey="ctaText" />
-          <div>
-            <button onClick={() => saveBlock('academy', cmsAcademy)} className="admin-btn-primary">Yadda Saxla</button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Top Info & Quick Actions */}
+          <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0', flexWrap: 'wrap', gap: '8px' }}>
+              <div>
+                <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Akademiya Bölməsi və Səhifəsi (#akademiya)</h5>
+                <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0' }}>Ana səhifədəki kurs vitrini (#akademiya) və daxili Akademiya səhifəsinin məzmunları</p>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (setAdminModalOpen) setAdminModalOpen(false);
+                    if (navigateTo) navigateTo('akademiya');
+                  }}
+                  className="admin-btn-secondary"
+                  style={{ fontSize: '11px', padding: '4px 10px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>visibility</span>
+                  <span>Canlı Baxış</span>
+                </button>
+                <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: '#fef3c7', color: '#b45309' }}>📄 Akademiya</span>
+              </div>
+            </div>
+
+            {/* 1. Əsas Hero və Bölmə Başlıqları */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>1. Əsas Bölmə Başlığı və Təsviri</span>
+              <Field label="Üst Etiket (Badge)" block={cmsAcademy} setBlock={setCmsAcademy} fieldKey="badge" placeholder="Məs: Akademik Tədris" />
+              <Field label="Əsas Başlıq (Title)" block={cmsAcademy} setBlock={setCmsAcademy} fieldKey="title" placeholder="Məs: Kurslar və Sertifikasiya Proqramları" />
+              <Field label="Təsvir (Desc)" block={cmsAcademy} setBlock={setCmsAcademy} fieldKey="desc" multiline rows={3} placeholder="Akademiyanın təhsil istiqaməti haqqında geniş izah..." />
+              <Field label="Düymə Mətni (CTA)" block={cmsAcademy} setBlock={setCmsAcademy} fieldKey="ctaText" placeholder="Məs: Kurslara Bax" />
+            </div>
+          </div>
+
+          {/* 2. Hero Altındakı 3 Qısa İkonlu Bənd */}
+          <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>2. Akademiya Səhifəsi — 3 Qısa İkonlu Bənd</span>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label className="admin-label">1-ci Bənd İkonu</label>
+                <input type="text" className="admin-input" value={cmsAcademy.heroBadge1Icon || 'verified'} onChange={e => setCmsAcademy(p => ({ ...p, heroBadge1Icon: e.target.value }))} />
+                <Field label="1-ci Bənd Mətni" block={cmsAcademy} setBlock={setCmsAcademy} fieldKey="heroBadge1Text" placeholder="Beynəlxalq QR Sertifikat" />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label className="admin-label">2-ci Bənd İkonu</label>
+                <input type="text" className="admin-input" value={cmsAcademy.heroBadge2Icon || 'psychology'} onChange={e => setCmsAcademy(p => ({ ...p, heroBadge2Icon: e.target.value }))} />
+                <Field label="2-ci Bənd Mətni" block={cmsAcademy} setBlock={setCmsAcademy} fieldKey="heroBadge2Text" placeholder="ICF & PhD Mentorlar" />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label className="admin-label">3-cü Bənd İkonu</label>
+                <input type="text" className="admin-input" value={cmsAcademy.heroBadge3Icon || 'laptop_chromebook'} onChange={e => setCmsAcademy(p => ({ ...p, heroBadge3Icon: e.target.value }))} />
+                <Field label="3-cü Bənd Mətni" block={cmsAcademy} setBlock={setCmsAcademy} fieldKey="heroBadge3Text" placeholder="Ömürlük Giriş və LMS Arxiv" />
+              </div>
+            </div>
+          </div>
+
+          {/* 3. Axtarış və Boş Nəticə Mesajları */}
+          <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>3. Axtarış və Boş Nəticə Mesajları</span>
+            <Field label="Axtarış Giriş Mətni (Placeholder)" block={cmsAcademy} setBlock={setCmsAcademy} fieldKey="searchPlaceholder" placeholder="Kurs və ya kouç axtar..." />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '10px' }}>
+              <Field label="Aktiv Kurs Yoxdur — Başlıq" block={cmsAcademy} setBlock={setCmsAcademy} fieldKey="emptyTitle" placeholder="Hal-hazırda aktiv kurs mövcud deyil" />
+              <Field label="Aktiv Kurs Yoxdur — İzah" block={cmsAcademy} setBlock={setCmsAcademy} fieldKey="emptyDesc" multiline rows={2} placeholder="Yeni proqramlar və qeydiyyat tarixləri tezliklə elan olunacaqdır." />
+            </div>
+          </div>
+
+          {/* 4. Tədris Zəmanəti Kartları */}
+          <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>4. Tədris Zəmanəti Kartları (3 Kart)</span>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '10px' }}>
+              {/* Kart 1 */}
+              <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: '#334155' }}>1-ci Kart (Sertifikat)</span>
+                <input type="text" className="admin-input" value={cmsAcademy.guarantee1Icon || 'verified'} onChange={e => setCmsAcademy(p => ({ ...p, guarantee1Icon: e.target.value }))} placeholder="İkon" />
+                <Field label="Başlıq" block={cmsAcademy} setBlock={setCmsAcademy} fieldKey="guarantee1Title" placeholder="Rəsmi QR Sertifikat" />
+                <Field label="Təsvir" block={cmsAcademy} setBlock={setCmsAcademy} fieldKey="guarantee1Desc" multiline rows={2} />
+              </div>
+              {/* Kart 2 */}
+              <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: '#334155' }}>2-ci Kart (Mentor)</span>
+                <input type="text" className="admin-input" value={cmsAcademy.guarantee2Icon || 'co_present'} onChange={e => setCmsAcademy(p => ({ ...p, guarantee2Icon: e.target.value }))} placeholder="İkon" />
+                <Field label="Başlıq" block={cmsAcademy} setBlock={setCmsAcademy} fieldKey="guarantee2Title" placeholder="Fərdi Mentor Əlaqəsi" />
+                <Field label="Təsvir" block={cmsAcademy} setBlock={setCmsAcademy} fieldKey="guarantee2Desc" multiline rows={2} />
+              </div>
+              {/* Kart 3 */}
+              <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: '#334155' }}>3-cü Kart (Material Girişi)</span>
+                <input type="text" className="admin-input" value={cmsAcademy.guarantee3Icon || 'all_inclusive'} onChange={e => setCmsAcademy(p => ({ ...p, guarantee3Icon: e.target.value }))} placeholder="İkon" />
+                <Field label="Başlıq" block={cmsAcademy} setBlock={setCmsAcademy} fieldKey="guarantee3Title" placeholder="Daimi Material Girişi" />
+                <Field label="Təsvir" block={cmsAcademy} setBlock={setCmsAcademy} fieldKey="guarantee3Desc" multiline rows={2} />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
+              <button
+                type="button"
+                onClick={() => saveBlock('academy', cmsAcademy)}
+                className="admin-btn-primary"
+                style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>save</span>
+                <span>Akademiya Məzmununu Yadda Saxla</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

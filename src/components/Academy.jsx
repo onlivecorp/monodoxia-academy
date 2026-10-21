@@ -92,11 +92,11 @@ export default function Academy() {
             </span>
 
             <h3 className="font-serif text-xl sm:text-2xl font-semibold text-[#070f1e] mb-2">
-              Hal-hazırda aktiv kurs mövcud deyil
+              {getLocalized(academy, 'emptyTitle', currentLang, defaultLang) || (academy.emptyTitle || 'Hal-hazırda aktiv kurs mövcud deyil')}
             </h3>
             
             <p className="text-sm text-slate-600 max-w-md mx-auto leading-relaxed mb-6">
-              Yeni proqramlar və qeydiyyat tarixləri tezliklə elan olunacaqdır. Fərdi proqramlar və mentorluq üçün bizimlə əlaqə saxlaya bilərsiniz.
+              {getLocalized(academy, 'emptyDesc', currentLang, defaultLang) || (academy.emptyDesc || 'Yeni proqramlar və qeydiyyat tarixləri tezliklə elan olunacaqdır. Fərdi proqramlar və mentorluq üçün bizimlə əlaqə saxlaya bilərsiniz.')}
             </p>
 
             {filter !== 'all' ? (
@@ -104,7 +104,7 @@ export default function Academy() {
                 onClick={() => setFilter('all')}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#070f1e] text-white text-xs font-semibold tracking-wide shadow-md hover:bg-[#112240] transition-colors"
               >
-                <span>Bütün Proqramları Göstər</span>
+                <span>{getLocalized(academy, 'resetFilterBtnText', currentLang, defaultLang) || (academy.resetFilterBtnText || 'Bütün Proqramları Göstər')}</span>
                 <span className="material-symbols-outlined text-[16px]">restart_alt</span>
               </button>
             ) : (
