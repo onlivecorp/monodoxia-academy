@@ -86,18 +86,24 @@ export default function AboutPage() {
               {/* Core Tenets Bar */}
               <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 pb-10 text-xs sm:text-sm text-[#94a3b8]">
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[17px] text-[#c5a059]">verified</span>
-                  <span>Dərin Elmilik</span>
+                  <span className="material-symbols-outlined text-[17px] text-[#c5a059]">
+                    {about.manifestoTenet1Icon || 'verified'}
+                  </span>
+                  <span>{getLocalized(about, 'manifestoTenet1Text', currentLang, defaultLang) || 'Dərin Elmilik'}</span>
                 </div>
                 <div className="w-1 h-1 rounded-full bg-white/20 hidden sm:block" />
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[17px] text-[#c5a059]">lock</span>
-                  <span>Mütləq Məxfilik</span>
+                  <span className="material-symbols-outlined text-[17px] text-[#c5a059]">
+                    {about.manifestoTenet2Icon || 'lock'}
+                  </span>
+                  <span>{getLocalized(about, 'manifestoTenet2Text', currentLang, defaultLang) || 'Mütləq Məxfilik'}</span>
                 </div>
                 <div className="w-1 h-1 rounded-full bg-white/20 hidden sm:block" />
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[17px] text-[#c5a059]">workspace_premium</span>
-                  <span>Transformasiya Zəmanəti</span>
+                  <span className="material-symbols-outlined text-[17px] text-[#c5a059]">
+                    {about.manifestoTenet3Icon || 'workspace_premium'}
+                  </span>
+                  <span>{getLocalized(about, 'manifestoTenet3Text', currentLang, defaultLang) || 'Transformasiya Zəmanəti'}</span>
                 </div>
               </div>
 

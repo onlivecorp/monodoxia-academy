@@ -873,6 +873,12 @@ export default function AdminCmsTab() {
     manifestoBadge: "Monodoxia Manifesti",
     manifestoTitle: "\"İnsan xarici dünyanı fəth etməzdən əvvəl öz daxili krallığını kəşf etməlidir.\"",
     manifestoDesc: "Müasir dünyada informasiya həddindən artıq çox, fərqindəlik isə azdır. Monodoxia Academy hər kəsin daxilindəki sükutu dinləməsi, emosional və psixoloji bütövlüyünü bərpa etməsi üçün təhlükəsiz bir platformadır.",
+    manifestoTenet1Icon: "verified",
+    manifestoTenet1Text: "Dərin Elmilik",
+    manifestoTenet2Icon: "lock",
+    manifestoTenet2Text: "Mütləq Məxfilik",
+    manifestoTenet3Icon: "workspace_premium",
+    manifestoTenet3Text: "Transformasiya Zəmanəti",
     manifestoBtn1Text: "Akademiyanı Kəşf Et",
     manifestoBtn2Text: "Coaching Club-a Qoşul",
     translations: {
@@ -886,6 +892,9 @@ export default function AdminCmsTab() {
         manifestoBadge: "Monodoxia Manifesti",
         manifestoTitle: "\"İnsan xarici dünyanı fəth etməzdən əvvəl öz daxili krallığını kəşf etməlidir.\"",
         manifestoDesc: "Müasir dünyada informasiya həddindən artıq çox, fərqindəlik isə azdır.",
+        manifestoTenet1Text: "Dərin Elmilik",
+        manifestoTenet2Text: "Mütləq Məxfilik",
+        manifestoTenet3Text: "Transformasiya Zəmanəti",
         manifestoBtn1Text: "Akademiyanı Kəşf Et",
         manifestoBtn2Text: "Coaching Club-a Qoşul"
       }
@@ -906,6 +915,12 @@ export default function AdminCmsTab() {
       manifestoBadge: raw.manifestoBadge !== undefined && raw.manifestoBadge !== null ? raw.manifestoBadge : defaultAboutData.manifestoBadge,
       manifestoTitle: raw.manifestoTitle !== undefined && raw.manifestoTitle !== null ? raw.manifestoTitle : defaultAboutData.manifestoTitle,
       manifestoDesc: raw.manifestoDesc !== undefined && raw.manifestoDesc !== null ? raw.manifestoDesc : defaultAboutData.manifestoDesc,
+      manifestoTenet1Icon: raw.manifestoTenet1Icon || defaultAboutData.manifestoTenet1Icon,
+      manifestoTenet1Text: raw.manifestoTenet1Text !== undefined && raw.manifestoTenet1Text !== null ? raw.manifestoTenet1Text : defaultAboutData.manifestoTenet1Text,
+      manifestoTenet2Icon: raw.manifestoTenet2Icon || defaultAboutData.manifestoTenet2Icon,
+      manifestoTenet2Text: raw.manifestoTenet2Text !== undefined && raw.manifestoTenet2Text !== null ? raw.manifestoTenet2Text : defaultAboutData.manifestoTenet2Text,
+      manifestoTenet3Icon: raw.manifestoTenet3Icon || defaultAboutData.manifestoTenet3Icon,
+      manifestoTenet3Text: raw.manifestoTenet3Text !== undefined && raw.manifestoTenet3Text !== null ? raw.manifestoTenet3Text : defaultAboutData.manifestoTenet3Text,
       manifestoBtn1Text: raw.manifestoBtn1Text !== undefined && raw.manifestoBtn1Text !== null ? raw.manifestoBtn1Text : defaultAboutData.manifestoBtn1Text,
       manifestoBtn2Text: raw.manifestoBtn2Text !== undefined && raw.manifestoBtn2Text !== null ? raw.manifestoBtn2Text : defaultAboutData.manifestoBtn2Text,
       translations: {
@@ -4174,6 +4189,52 @@ export default function AdminCmsTab() {
               </div>
 
               <Field label="Manifest İzah Mətni" block={cmsAbout} setBlock={setCmsAbout} fieldKey="manifestoDesc" multiline rows={3} placeholder="Müasir dünyada informasiya həddindən artıq çox, fərqindəlik isə azdır..." />
+
+              {/* MANİFEST DƏYƏR / ZƏMANƏT BƏNDLƏRİ (3 İNDİKATOR - İKON VƏ MƏTN) */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', background: 'rgba(255,255,255,0.04)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(197, 160, 89, 0.25)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '4px', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                  <label className="admin-label" style={{ color: '#e5c57d', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>verified_user</span>
+                    <span>Manifest Zəmanət İndikatorları (Core Tenets — 3 İkon və Mətn)</span>
+                  </label>
+                  <span style={{ fontSize: '10px', color: '#94a3b8' }}>Daxili Səhifə</span>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '10px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                    <label className="admin-label" style={{ color: '#cbd5e1', fontSize: '11px' }}>1-ci İkon</label>
+                    <input
+                      type="text"
+                      className="admin-input"
+                      value={cmsAbout.manifestoTenet1Icon || 'verified'}
+                      onChange={e => setCmsAbout(p => ({ ...p, manifestoTenet1Icon: e.target.value }))}
+                      placeholder="verified"
+                    />
+                    <Field label="1-ci Mətn" block={cmsAbout} setBlock={setCmsAbout} fieldKey="manifestoTenet1Text" placeholder="Dərin Elmilik" />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                    <label className="admin-label" style={{ color: '#cbd5e1', fontSize: '11px' }}>2-ci İkon</label>
+                    <input
+                      type="text"
+                      className="admin-input"
+                      value={cmsAbout.manifestoTenet2Icon || 'lock'}
+                      onChange={e => setCmsAbout(p => ({ ...p, manifestoTenet2Icon: e.target.value }))}
+                      placeholder="lock"
+                    />
+                    <Field label="2-ci Mətn" block={cmsAbout} setBlock={setCmsAbout} fieldKey="manifestoTenet2Text" placeholder="Mütləq Məxfilik" />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                    <label className="admin-label" style={{ color: '#cbd5e1', fontSize: '11px' }}>3-cü İkon</label>
+                    <input
+                      type="text"
+                      className="admin-input"
+                      value={cmsAbout.manifestoTenet3Icon || 'workspace_premium'}
+                      onChange={e => setCmsAbout(p => ({ ...p, manifestoTenet3Icon: e.target.value }))}
+                      placeholder="workspace_premium"
+                    />
+                    <Field label="3-cü Mətn" block={cmsAbout} setBlock={setCmsAbout} fieldKey="manifestoTenet3Text" placeholder="Transformasiya Zəmanəti" />
+                  </div>
+                </div>
+              </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
                 <Field label="1-ci Düymə Mətni (Akademiya)" block={cmsAbout} setBlock={setCmsAbout} fieldKey="manifestoBtn1Text" placeholder="Akademiyanı Kəşf Et" />

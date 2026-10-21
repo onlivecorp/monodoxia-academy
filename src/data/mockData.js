@@ -899,6 +899,12 @@ export const INITIAL_HOME_CONTENT = {
     manifestoBadge: "Monodoxia Manifesti",
     manifestoTitle: "\"İnsan xarici dünyanı fəth etməzdən əvvəl öz daxili krallığını kəşf etməlidir.\"",
     manifestoDesc: "Müasir dünyada informasiya həddindən artıq çox, fərqindəlik isə azdır. Monodoxia Academy hər kəsin daxilindəki sükutu dinləməsi, emosional və psixoloji bütövlüyünü bərpa etməsi üçün təhlükəsiz bir platformadır.",
+    manifestoTenet1Icon: "verified",
+    manifestoTenet1Text: "Dərin Elmilik",
+    manifestoTenet2Icon: "lock",
+    manifestoTenet2Text: "Mütləq Məxfilik",
+    manifestoTenet3Icon: "workspace_premium",
+    manifestoTenet3Text: "Transformasiya Zəmanəti",
     manifestoBtn1Text: "Akademiyanı Kəşf Et",
     manifestoBtn2Text: "Coaching Club-a Qoşul",
     translations: {
@@ -914,6 +920,9 @@ export const INITIAL_HOME_CONTENT = {
         manifestoBadge: "Monodoxia Manifesti",
         manifestoTitle: "\"İnsan xarici dünyanı fəth etməzdən əvvəl öz daxili krallığını kəşf etməlidir.\"",
         manifestoDesc: "Müasir dünyada informasiya həddindən artıq çox, fərqindəlik isə azdır. Monodoxia Academy hər kəsin daxilindəki sükutu dinləməsi, emosional və psixoloji bütövlüyünü bərpa etməsi üçün təhlükəsiz bir platformadır.",
+        manifestoTenet1Text: "Dərin Elmilik",
+        manifestoTenet2Text: "Mütləq Məxfilik",
+        manifestoTenet3Text: "Transformasiya Zəmanəti",
         manifestoBtn1Text: "Akademiyanı Kəşf Et",
         manifestoBtn2Text: "Coaching Club-a Qoşul"
       },
@@ -929,6 +938,9 @@ export const INITIAL_HOME_CONTENT = {
         manifestoBadge: "Monodoxia Manifesto",
         manifestoTitle: "\"Before conquering the outer world, man must discover his inner kingdom.\"",
         manifestoDesc: "In today's world, information is abundant while awareness is scarce. Monodoxia Academy is a secure intellectual sanctuary for restoring emotional and psychological integrity.",
+        manifestoTenet1Text: "Deep Scientific Rigor",
+        manifestoTenet2Text: "Absolute Confidentiality",
+        manifestoTenet3Text: "Transformation Guarantee",
         manifestoBtn1Text: "Explore Academy",
         manifestoBtn2Text: "Join Coaching Club"
       },
@@ -944,6 +956,9 @@ export const INITIAL_HOME_CONTENT = {
         manifestoBadge: "Monodoxia Manifestosu",
         manifestoTitle: "\"İnsan dış dünyayı fethetmeden önce kendi içsel krallığını keşfetmelidir.\"",
         manifestoDesc: "Modern dünyada bilgi çok, farkındalık ise azdır. Monodoxia Academy duygusal ve psikolojik bütünlüğü yeniden inşa etmek için güvenli bir platformdur.",
+        manifestoTenet1Text: "Derin Bilimsellik",
+        manifestoTenet2Text: "Mutlak Gizlilik",
+        manifestoTenet3Text: "Dönüşüm Garantisi",
         manifestoBtn1Text: "Akademiyi Keşfet",
         manifestoBtn2Text: "Coaching Club'a Katıl"
       },
@@ -959,6 +974,9 @@ export const INITIAL_HOME_CONTENT = {
         manifestoBadge: "Манифест Monodoxia",
         manifestoTitle: "\"Прежде чем покорять внешний мир, человек должен открыть свое внутреннее царство.\"",
         manifestoDesc: "В современном мире слишком много информации и слишком мало осознанности. Monodoxia Academy — это безопасная платформа для восстановления душевной гармонии.",
+        manifestoTenet1Text: "Глубокая научность",
+        manifestoTenet2Text: "Абсолютная конфиденциальность",
+        manifestoTenet3Text: "Гарантия трансформации",
         manifestoBtn1Text: "Открыть Академию",
         manifestoBtn2Text: "Вступить в Coaching Club"
       }
