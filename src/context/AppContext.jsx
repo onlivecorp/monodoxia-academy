@@ -818,7 +818,22 @@ export function AppProvider({ children }) {
                 blockMap[b.block_key] = typeof b.content_json === 'string' ? JSON.parse(b.content_json) : b.content_json;
               } catch (e) {}
             });
-            setHomeContent(prev => ({ ...prev, ...blockMap }));
+            setHomeContent(prev => {
+              const updatedContent = { ...prev };
+              Object.keys(blockMap).forEach(key => {
+                const incoming = blockMap[key] || {};
+                const current = updatedContent[key] || INITIAL_HOME_CONTENT[key] || {};
+                updatedContent[key] = {
+                  ...current,
+                  ...incoming,
+                  translations: {
+                    ...(current.translations || {}),
+                    ...(incoming.translations || {})
+                  }
+                };
+              });
+              return updatedContent;
+            });
           }
           if (data.student_progress && data.student_progress.length > 0) {
             const progMap = {};
@@ -2568,35 +2583,36 @@ export function AppProvider({ children }) {
 
   const updateEvent = (id, updates) => {
     let mergedEvent = null;
+    const currentList = eventsList || [];
+    const target = currentList.find(e => e.id === id);
+    if (!target) return;
+
+    const updated = { ...target, ...updates };
+    const azTrans = { ...(updated.translations?.az || {}) };
+    if (updates.title !== undefined) azTrans.title = updates.title;
+    if (updates.desc !== undefined) azTrans.desc = updates.desc;
+    if (updates.typeBadge !== undefined) azTrans.typeBadge = updates.typeBadge;
+    if (updates.datetime !== undefined) azTrans.datetime = updates.datetime;
+
+    if (updates.translations?.az) {
+      if (updates.translations.az.title !== undefined) updated.title = updates.translations.az.title;
+      if (updates.translations.az.desc !== undefined) updated.desc = updates.translations.az.desc;
+      if (updates.translations.az.typeBadge !== undefined) updated.typeBadge = updates.translations.az.typeBadge;
+      if (updates.translations.az.datetime !== undefined) updated.datetime = updates.translations.az.datetime;
+    }
+
+    updated.translations = {
+      ...(updated.translations || target.translations || {}),
+      az: azTrans
+    };
+    mergedEvent = updated;
+
     setEventsList(prev => {
-      const next = prev.map(e => {
-        if (e.id !== id) return e;
-        const updated = { ...e, ...updates };
-
-        const azTrans = { ...(updated.translations?.az || {}) };
-        if (updates.title !== undefined) azTrans.title = updates.title;
-        if (updates.desc !== undefined) azTrans.desc = updates.desc;
-        if (updates.typeBadge !== undefined) azTrans.typeBadge = updates.typeBadge;
-        if (updates.datetime !== undefined) azTrans.datetime = updates.datetime;
-
-        if (updates.translations?.az) {
-          if (updates.translations.az.title !== undefined) updated.title = updates.translations.az.title;
-          if (updates.translations.az.desc !== undefined) updated.desc = updates.translations.az.desc;
-          if (updates.translations.az.typeBadge !== undefined) updated.typeBadge = updates.translations.az.typeBadge;
-          if (updates.translations.az.datetime !== undefined) updated.datetime = updates.translations.az.datetime;
-        }
-
-        updated.translations = {
-          ...(updated.translations || {}),
-          az: azTrans
-        };
-
-        mergedEvent = updated;
-        return updated;
-      });
+      const next = prev.map(e => e.id === id ? mergedEvent : e);
       safeSetLocalStorage('monodoxia_admin_events', next);
       return next;
     });
+
     if (mergedEvent) {
       apiCall('save_event', mergedEvent).catch(err => {
         console.error('save_event API update failed:', err);

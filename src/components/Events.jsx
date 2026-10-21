@@ -10,6 +10,7 @@ export default function Events() {
 
   const badgeText = getLocalized(events, 'badge', currentLang, defaultLang) || (events.badge !== undefined && events.badge !== null && String(events.badge).trim() !== '' ? events.badge : t('events_badge'));
   const titleText = getLocalized(events, 'title', currentLang, defaultLang) || (events.title !== undefined && events.title !== null && String(events.title).trim() !== '' ? events.title : t('events_title'));
+  const descText = getLocalized(events, 'desc', currentLang, defaultLang) || (events.desc !== undefined && events.desc !== null && String(events.desc).trim() !== '' ? events.desc : '');
   const calendarBtnText = getLocalized(events, 'calendarBtnText', currentLang, defaultLang) || (events.calendarBtnText !== undefined && events.calendarBtnText !== null && String(events.calendarBtnText).trim() !== '' ? events.calendarBtnText : t('events_calendar_btn'));
 
   const list = eventsList || [];
@@ -31,7 +32,7 @@ export default function Events() {
       <div className="relative max-w-7xl mx-auto px-6 md:px-12">
         {/* HEADER */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
-          <div>
+          <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#c5a059]/40 bg-white/70 backdrop-blur-md shadow-sm mb-2 anim-badge">
               <span className="w-1.5 h-1.5 rounded-full bg-[#9e782f]"></span>
               <span className="text-[11px] sm:text-xs font-semibold text-[#775a19] tracking-[0.2em] uppercase font-sans">
@@ -41,11 +42,16 @@ export default function Events() {
             <h2 className="text-3xl sm:text-4xl lg:text-[2.65rem] text-[#070f1e] font-serif font-medium tracking-tight leading-[1.2] anim-events-title">
               {titleText}
             </h2>
+            {descText && (
+              <p className="mt-3 text-base sm:text-lg text-slate-600 leading-relaxed font-normal">
+                {descText}
+              </p>
+            )}
           </div>
 
           <button
             onClick={() => navigateTo ? navigateTo('events') : null}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/75 hover:bg-white border border-[#e2d9c8]/80 hover:border-[#c5a059] shadow-sm text-xs font-semibold text-[#070f1e] hover:text-[#775a19] tracking-wider uppercase transition-all duration-200 cursor-pointer self-start md:self-auto"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/75 hover:bg-white border border-[#e2d9c8]/80 hover:border-[#c5a059] shadow-sm text-xs font-semibold text-[#070f1e] hover:text-[#775a19] tracking-wider uppercase transition-all duration-200 cursor-pointer self-start md:self-auto shrink-0"
           >
             <span>{calendarBtnText}</span>
             <span className="material-symbols-outlined text-[16px] text-[#c5a059]">calendar_month</span>

@@ -396,6 +396,10 @@ export default function AdminCmsTab() {
     updateCoach,
     deleteCoach,
     usersList = [],
+    eventsList = [],
+    addEvent,
+    updateEvent,
+    deleteEvent,
     showToast,
     navigateTo,
     setAdminModalOpen
@@ -4862,24 +4866,125 @@ export default function AdminCmsTab() {
 
       {/* EVENTS / TƏDBİRLƏR SƏHİFƏSİ */}
       {cmsBlock === 'events' && (
-        <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0' }}>
-            <div>
-              <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Tədbirlər Səhifəsi — Məzmun və Təqvim</h5>
-              <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0' }}>Tədbirlər səhifəsinin başlığı, üst etiketi və təqvim düyməsi mətni</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0', flexWrap: 'wrap', gap: '8px' }}>
+              <div>
+                <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#c5a059' }}>event</span>
+                  <span>Tədbirlər Səhifəsi və Əsas Səhifə Təqvimi</span>
+                </h5>
+                <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0' }}>Həm əsas səhifədəki tədbirlər bölməsi, həm də daxili tədbirlər səhifəsinin mətnləri</p>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: '#fef3c7', color: '#b45309' }}>📄 Tədbirlər Səhifəsi</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (setAdminModalOpen) setAdminModalOpen(false);
+                    if (navigateTo) navigateTo('tedbirler');
+                  }}
+                  className="admin-btn-secondary"
+                  style={{ padding: '4px 10px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>open_in_new</span>
+                  <span>Saytda Bax</span>
+                </button>
+              </div>
             </div>
-            <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: '#fef3c7', color: '#b45309' }}>📄 Tədbirlər Səhifəsi</span>
+
+            {/* 1. Əsas Başlıq və Təsvir */}
+            <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>1. Əsas Başlıq və Təsvir</span>
+              <Field label="Üst Etiket (Badge)" block={cmsEvents} setBlock={setCmsEvents} fieldKey="badge" placeholder="Məs: Canlı Təqvim" />
+              <Field label="Səhifə Başlığı (Title)" block={cmsEvents} setBlock={setCmsEvents} fieldKey="title" placeholder="Məs: Yaxınlaşan Tədbirlər və Masterklaslar" />
+              <Field label="Təsvir (Desc - Həm Əsas Səhifə, həm Tədbirlər Səhifəsi)" block={cmsEvents} setBlock={setCmsEvents} fieldKey="desc" multiline rows={3} placeholder="Məs: Canlı interaktiv vebinarlar, psixoloji emalatxanalar..." />
+              <Field label="Təqvim Düyməsi Mətni" block={cmsEvents} setBlock={setCmsEvents} fieldKey="calendarBtnText" placeholder="Məs: Bütün Təqvim" />
+            </div>
+
+            {/* 2. Hero 3 Qısa İkonlu Bənd */}
+            <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>2. Daxili Tədbirlər Səhifəsinin 3 Üst Bəndi</span>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label className="admin-label">1-ci Bənd İkonu</label>
+                  <input type="text" className="admin-input" value={cmsEvents.heroBadge1Icon || 'calendar_month'} onChange={e => setCmsEvents(p => ({ ...p, heroBadge1Icon: e.target.value }))} />
+                  <Field label="1-ci Bənd Mətni" block={cmsEvents} setBlock={setCmsEvents} fieldKey="heroBadge1Text" placeholder="Canlı Təqvim Qrafiki" />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label className="admin-label">2-ci Bənd İkonu</label>
+                  <input type="text" className="admin-input" value={cmsEvents.heroBadge2Icon || 'co_present'} onChange={e => setCmsEvents(p => ({ ...p, heroBadge2Icon: e.target.value }))} />
+                  <Field label="2-ci Bənd Mətni" block={cmsEvents} setBlock={setCmsEvents} fieldKey="heroBadge2Text" placeholder="İnteraktiv Q&A Sessiyaları" />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label className="admin-label">3-cü Bənd İkonu</label>
+                  <input type="text" className="admin-input" value={cmsEvents.heroBadge3Icon || 'mic'} onChange={e => setCmsEvents(p => ({ ...p, heroBadge3Icon: e.target.value }))} />
+                  <Field label="3-cü Bənd Mətni" block={cmsEvents} setBlock={setCmsEvents} fieldKey="heroBadge3Text" placeholder="Spikerlik İmkanı" />
+                </div>
+              </div>
+            </div>
+
+            {/* 3. Spikerlik və Əməkdaşlıq Bölməsi */}
+            <div style={{ background: '#fefce8', padding: '14px', borderRadius: '8px', border: '1.5px solid #fef08a', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <span style={{ fontSize: '13px', fontWeight: 800, color: '#854d0e' }}>3. Spikerlik & Əməkdaşlıq Bölməsi</span>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+                <Field label="Bölmə Üst Etiketi" block={cmsEvents} setBlock={setCmsEvents} fieldKey="speakerBadge" placeholder="Spikerlik & Əməkdaşlıq" />
+                <Field label="Bölmə Başlığı" block={cmsEvents} setBlock={setCmsEvents} fieldKey="speakerTitle" placeholder="Monodoxia Platformasında Öz Vebinarını və ya Tədbirini Təşkil Et" />
+              </div>
+              <Field label="Bölmə İzahı" block={cmsEvents} setBlock={setCmsEvents} fieldKey="speakerDesc" multiline rows={2} />
+              <Field label="Düymə Mətni (CTA)" block={cmsEvents} setBlock={setCmsEvents} fieldKey="speakerBtnText" placeholder="Spiker kimi Müraciət Et" />
+            </div>
+
+            <div style={{ paddingTop: '4px' }}>
+              <button onClick={() => saveBlock('events', cmsEvents)} className="admin-btn-primary">
+                Tədbirlər Məzmununu Yadda Saxla
+              </button>
+            </div>
           </div>
 
-          <Field label="Üst Etiket (Badge)" block={cmsEvents} setBlock={setCmsEvents} fieldKey="badge" placeholder="Məs: Canlı Təqvim" />
-          <Field label="Səhifə Başlığı (Title)" block={cmsEvents} setBlock={setCmsEvents} fieldKey="title" placeholder="Məs: Yaxınlaşan Tədbirlər və Masterklaslar" />
-          <Field label="Təsvir (Desc)" block={cmsEvents} setBlock={setCmsEvents} fieldKey="desc" multiline rows={3} placeholder="Məs: Canlı interaktiv vebinarlar..." />
-          <Field label="Təqvim Düyməsi Mətni" block={cmsEvents} setBlock={setCmsEvents} fieldKey="calendarBtnText" placeholder="Məs: Bütün Təqvim" />
+          {/* Quick Events Overview / Status */}
+          <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0' }}>
+              <div>
+                <h5 style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                  Aktiv Tədbirlər Siyahısı ({eventsList?.length || 0})
+                </h5>
+                <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0' }}>
+                  Əsas səhifədə və tədbirlər təqvimində nümayiş olunan cari kartlar
+                </p>
+              </div>
+              <span style={{ fontSize: '11px', fontWeight: 600, color: '#047857', background: '#d1fae5', padding: '2px 8px', borderRadius: '4px' }}>
+                Canlı Sinxronizasiya
+              </span>
+            </div>
 
-          <div style={{ paddingTop: '4px' }}>
-            <button onClick={() => saveBlock('events', cmsEvents)} className="admin-btn-primary">
-              Tədbirlər Məzmununu Yadda Saxla
-            </button>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '10px' }}>
+              {(eventsList || []).map(ev => (
+                <div
+                  key={ev.id}
+                  style={{
+                    background: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    padding: '10px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '4px'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '10px', fontWeight: 700, padding: '1px 6px', borderRadius: '4px', background: '#f1f5f9', color: '#475569' }}>
+                      {ev.typeBadge || 'VEBİNAR'}
+                    </span>
+                    <span style={{ fontSize: '10px', color: '#94a3b8' }}>{ev.datetime}</span>
+                  </div>
+                  <strong style={{ fontSize: '12px', color: '#0f172a', margin: '2px 0' }}>{ev.title}</strong>
+                  <p style={{ fontSize: '11px', color: '#64748b', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                    {ev.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
