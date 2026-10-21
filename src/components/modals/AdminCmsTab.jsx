@@ -798,6 +798,68 @@ export default function AdminCmsTab() {
     };
   };
 
+  const defaultCommunityData = INITIAL_HOME_CONTENT?.community || {
+    badge: "İntellektual Şəbəkə",
+    title: "Düşüncə və Təcrübə Mübadiləsi",
+    desc: "Akademiyamızın tələbələri və klub rezidentləri üçün gündəlik fəlsəfi dialoq və daxili kəşflər sahəsi.",
+    bullets: [
+      "Konfidensiallıq və qarşılıqlı hörmət etikası",
+      "Hər həftə yeni fəlsəfi və psixoloji mövzu müzakirəsi"
+    ],
+    newTopicBtnText: "Yeni Mövzu Başlat",
+    heroBadge1Icon: "shield",
+    heroBadge1Text: "Konfidensiallıq və Qarşılıqlı Hörmət",
+    heroBadge2Icon: "psychology",
+    heroBadge2Text: "Moderasiya Olunan Dərin Dialoq",
+    heroBadge3Icon: "forum",
+    heroBadge3Text: "Aktiv Müzakirələr",
+    rulesIcon: "shield",
+    rulesTitle: "İcma Etikası və Qaydaları",
+    rule1Title: "Məxfilik prinsipi:",
+    rule1Desc: "Müzakirə olunan şəxsi təcrübələr və etiraflar icmadan kənara çıxarılmır.",
+    rule2Title: "Konstruktiv yanaşma:",
+    rule2Desc: "Qınaq və mühakimə yoxdur; hər fikir təkamül nöqteyi-nəzərindən dinlənilir.",
+    rule3Title: "Səthilikdən uzaq:",
+    rule3Desc: "Siyasi, polemik və ya kommersiya xarakterli paylaşımlar qadağandır.",
+    weeklyBadge: "Həftənin Fəlsəfi Mövzusu",
+    weeklyTitle: "\"Daxili təzyiq qarşısında şüurlu müşahidəçi qalmaq necə mümkündür?\"",
+    weeklyDesc: "Bu həftə mentorlarımızın fasilitasiyası ilə emosional reaktivliyi idarə etməyin nevrobioloji yollarını müzakirə edirik.",
+    weeklyBtnText: "Müzakirəyə Qoşul"
+  };
+
+  const mergeCommunityWithDefaults = (src) => {
+    const raw = src || {};
+    return {
+      ...defaultCommunityData,
+      ...raw,
+      bullets: (Array.isArray(raw.bullets) && raw.bullets.length > 0) ? raw.bullets : defaultCommunityData.bullets,
+      heroBadge1Icon: raw.heroBadge1Icon || defaultCommunityData.heroBadge1Icon,
+      heroBadge1Text: raw.heroBadge1Text !== undefined && raw.heroBadge1Text !== null ? raw.heroBadge1Text : defaultCommunityData.heroBadge1Text,
+      heroBadge2Icon: raw.heroBadge2Icon || defaultCommunityData.heroBadge2Icon,
+      heroBadge2Text: raw.heroBadge2Text !== undefined && raw.heroBadge2Text !== null ? raw.heroBadge2Text : defaultCommunityData.heroBadge2Text,
+      heroBadge3Icon: raw.heroBadge3Icon || defaultCommunityData.heroBadge3Icon,
+      heroBadge3Text: raw.heroBadge3Text !== undefined && raw.heroBadge3Text !== null ? raw.heroBadge3Text : defaultCommunityData.heroBadge3Text,
+      rulesIcon: raw.rulesIcon || defaultCommunityData.rulesIcon,
+      rulesTitle: raw.rulesTitle !== undefined && raw.rulesTitle !== null ? raw.rulesTitle : defaultCommunityData.rulesTitle,
+      rule1Title: raw.rule1Title !== undefined && raw.rule1Title !== null ? raw.rule1Title : defaultCommunityData.rule1Title,
+      rule1Desc: raw.rule1Desc !== undefined && raw.rule1Desc !== null ? raw.rule1Desc : defaultCommunityData.rule1Desc,
+      rule2Title: raw.rule2Title !== undefined && raw.rule2Title !== null ? raw.rule2Title : defaultCommunityData.rule2Title,
+      rule2Desc: raw.rule2Desc !== undefined && raw.rule2Desc !== null ? raw.rule2Desc : defaultCommunityData.rule2Desc,
+      rule3Title: raw.rule3Title !== undefined && raw.rule3Title !== null ? raw.rule3Title : defaultCommunityData.rule3Title,
+      rule3Desc: raw.rule3Desc !== undefined && raw.rule3Desc !== null ? raw.rule3Desc : defaultCommunityData.rule3Desc,
+      weeklyBadge: raw.weeklyBadge !== undefined && raw.weeklyBadge !== null ? raw.weeklyBadge : defaultCommunityData.weeklyBadge,
+      weeklyTitle: raw.weeklyTitle !== undefined && raw.weeklyTitle !== null ? raw.weeklyTitle : defaultCommunityData.weeklyTitle,
+      weeklyDesc: raw.weeklyDesc !== undefined && raw.weeklyDesc !== null ? raw.weeklyDesc : defaultCommunityData.weeklyDesc,
+      weeklyBtnText: raw.weeklyBtnText !== undefined && raw.weeklyBtnText !== null ? raw.weeklyBtnText : defaultCommunityData.weeklyBtnText,
+      translations: {
+        az: { ...(defaultCommunityData.translations?.az || {}), ...(raw.translations?.az || {}) },
+        en: { ...(defaultCommunityData.translations?.en || {}), ...(raw.translations?.en || {}) },
+        tr: { ...(defaultCommunityData.translations?.tr || {}), ...(raw.translations?.tr || {}) },
+        ru: { ...(defaultCommunityData.translations?.ru || {}), ...(raw.translations?.ru || {}) },
+      }
+    };
+  };
+
   // Content block states
   const [cmsNavbar, setCmsNavbar] = useState(() => ({ ...(homeContent?.navbar || {}) }));
   const [cmsHero, setCmsHero] = useState(() => ({ ...(homeContent?.hero || {}) }));
@@ -807,7 +869,7 @@ export default function AdminCmsTab() {
   const [cmsClub, setCmsClub] = useState(() => mergeClubWithDefaults(homeContent?.club));
   const [cmsCoaches, setCmsCoaches] = useState(() => mergeCoachesWithDefaults(homeContent?.coaches));
   const [cmsEvents, setCmsEvents] = useState(() => ({ ...(homeContent?.events || {}) }));
-  const [cmsCommunity, setCmsCommunity] = useState(() => ({ ...(homeContent?.community || {}) }));
+  const [cmsCommunity, setCmsCommunity] = useState(() => mergeCommunityWithDefaults(homeContent?.community));
   const [cmsTestimonials, setCmsTestimonials] = useState(() => ({ ...(homeContent?.testimonials || {}) }));
   const [cmsFaq, setCmsFaq] = useState(() => ({ ...(homeContent?.faq || {}) }));
   const [cmsNewsletter, setCmsNewsletter] = useState(() => ({ ...(homeContent?.newsletter || {}) }));
@@ -883,7 +945,7 @@ export default function AdminCmsTab() {
       setCmsClub(mergeClubWithDefaults(homeContent.club));
       setCmsCoaches(mergeCoachesWithDefaults(homeContent.coaches));
       setCmsEvents({ ...(homeContent.events || {}) });
-      setCmsCommunity({ ...(homeContent.community || {}) });
+      setCmsCommunity(mergeCommunityWithDefaults(homeContent.community));
       setCmsTestimonials({ ...(homeContent.testimonials || {}) });
       setCmsFaq({ ...(homeContent.faq || {}) });
       setCmsNewsletter({ ...(homeContent.newsletter || {}) });
@@ -4991,23 +5053,116 @@ export default function AdminCmsTab() {
 
       {/* COMMUNITY */}
       {cmsBlock === 'community' && (
-        <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0' }}>İcma Bölməsi</h5>
-          <Field label="Üst Etiket" block={cmsCommunity} setBlock={setCmsCommunity} fieldKey="badge" />
-          <Field label="Başlıq" block={cmsCommunity} setBlock={setCmsCommunity} fieldKey="title" />
-          <Field label="Təsvir" block={cmsCommunity} setBlock={setCmsCommunity} fieldKey="desc" multiline />
-          <Field label="Düymə Mətni" block={cmsCommunity} setBlock={setCmsCommunity} fieldKey="newTopicBtnText" />
-          <Field
-            label="Xüsusiyyət Siyahısı"
-            block={cmsCommunity}
-            setBlock={setCmsCommunity}
-            fieldKey="bullets"
-            multiline
-            isArray={true}
-            rows={4}
-          />
-          <div>
-            <button onClick={() => saveBlock('community', cmsCommunity)} className="admin-btn-primary">Yadda Saxla</button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0', flexWrap: 'wrap', gap: '8px' }}>
+              <div>
+                <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#c5a059' }}>forum</span>
+                  <span>İcma Səhifəsi və Əsas Səhifə İcma Bölməsi</span>
+                </h5>
+                <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0' }}>İntellektual forum, üst 2 bənd, qaydalar və həftənin fəlsəfi mövzusu</p>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: '#fef3c7', color: '#b45309' }}>📄 İcma Səhifəsi</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (setAdminModalOpen) setAdminModalOpen(false);
+                    if (navigateTo) navigateTo('icma');
+                  }}
+                  className="admin-btn-secondary"
+                  style={{ padding: '4px 10px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>open_in_new</span>
+                  <span>Saytda Bax</span>
+                </button>
+              </div>
+            </div>
+
+            {/* 1. Əsas Başlıq və Təsvir */}
+            <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>1. Əsas Başlıq və Təsvir</span>
+              <Field label="Üst Etiket (Badge)" block={cmsCommunity} setBlock={setCmsCommunity} fieldKey="badge" placeholder="Məs: İntellektual Şəbəkə" />
+              <Field label="Səhifə Başlığı (Title)" block={cmsCommunity} setBlock={setCmsCommunity} fieldKey="title" placeholder="Məs: Düşüncə və Təcrübə Mübadiləsi" />
+              <Field label="Təsvir (Desc)" block={cmsCommunity} setBlock={setCmsCommunity} fieldKey="desc" multiline rows={3} placeholder="Məs: Akademiyamızın tələbələri üçün gündəlik dialoq sahəsi..." />
+              <Field label="Yeni Mövzu Düymə Mətni" block={cmsCommunity} setBlock={setCmsCommunity} fieldKey="newTopicBtnText" placeholder="Məs: Yeni Mövzu Başlat" />
+              <Field
+                label="Əsas Səhifə Xüsusiyyət Siyahısı (Bullets)"
+                block={cmsCommunity}
+                setBlock={setCmsCommunity}
+                fieldKey="bullets"
+                multiline
+                isArray={true}
+                rows={3}
+                placeholder="Hər sətirdə bir bənd..."
+              />
+            </div>
+
+            {/* 2. Hero Altındakı Qısa İkonlu Bəndlər */}
+            <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>2. İcma Səhifəsinin Üst Bəndləri (Hero Badges)</span>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label className="admin-label">1-ci Bənd İkonu</label>
+                  <input type="text" className="admin-input" value={cmsCommunity.heroBadge1Icon || 'verified_user'} onChange={e => setCmsCommunity(p => ({ ...p, heroBadge1Icon: e.target.value }))} />
+                  <Field label="1-ci Bənd Mətni" block={cmsCommunity} setBlock={setCmsCommunity} fieldKey="heroBadge1Text" placeholder="Konfidensiallıq və Qarşılıqlı Hörmət" />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label className="admin-label">2-ci Bənd İkonu</label>
+                  <input type="text" className="admin-input" value={cmsCommunity.heroBadge2Icon || 'psychology'} onChange={e => setCmsCommunity(p => ({ ...p, heroBadge2Icon: e.target.value }))} />
+                  <Field label="2-ci Bənd Mətni" block={cmsCommunity} setBlock={setCmsCommunity} fieldKey="heroBadge2Text" placeholder="Moderasiya Olunan Dərin Dialoq" />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label className="admin-label">3-cü Bənd İkonu (Əlavə)</label>
+                  <input type="text" className="admin-input" value={cmsCommunity.heroBadge3Icon || 'forum'} onChange={e => setCmsCommunity(p => ({ ...p, heroBadge3Icon: e.target.value }))} />
+                  <Field label="3-cü Bənd Mətni" block={cmsCommunity} setBlock={setCmsCommunity} fieldKey="heroBadge3Text" placeholder="Aktiv Müzakirələr" />
+                </div>
+              </div>
+            </div>
+
+            {/* 3. İcma Etikası və Qaydaları Kartı */}
+            <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '10px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label className="admin-label">Qaydalar İkonu</label>
+                  <input type="text" className="admin-input" value={cmsCommunity.rulesIcon || 'shield'} onChange={e => setCmsCommunity(p => ({ ...p, rulesIcon: e.target.value }))} />
+                </div>
+                <Field label="3. Qaydalar Kartı Başlığı" block={cmsCommunity} setBlock={setCmsCommunity} fieldKey="rulesTitle" placeholder="İcma Etikası və Qaydaları" />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+                <div style={{ background: '#ffffff', padding: '10px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                  <Field label="1-ci Qayda Başlığı" block={cmsCommunity} setBlock={setCmsCommunity} fieldKey="rule1Title" placeholder="Məxfilik prinsipi:" />
+                  <Field label="1-ci Qayda İzahı" block={cmsCommunity} setBlock={setCmsCommunity} fieldKey="rule1Desc" multiline rows={2} />
+                </div>
+                <div style={{ background: '#ffffff', padding: '10px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                  <Field label="2-ci Qayda Başlığı" block={cmsCommunity} setBlock={setCmsCommunity} fieldKey="rule2Title" placeholder="Konstruktiv yanaşma:" />
+                  <Field label="2-ci Qayda İzahı" block={cmsCommunity} setBlock={setCmsCommunity} fieldKey="rule2Desc" multiline rows={2} />
+                </div>
+                <div style={{ background: '#ffffff', padding: '10px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                  <Field label="3-cü Qayda Başlığı" block={cmsCommunity} setBlock={setCmsCommunity} fieldKey="rule3Title" placeholder="Səthilikdən uzaq:" />
+                  <Field label="3-cü Qayda İzahı" block={cmsCommunity} setBlock={setCmsCommunity} fieldKey="rule3Desc" multiline rows={2} />
+                </div>
+              </div>
+            </div>
+
+            {/* 4. Həftənin Fəlsəfi Mövzusu */}
+            <div style={{ background: '#fefce8', padding: '14px', borderRadius: '8px', border: '1.5px solid #fef08a', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <span style={{ fontSize: '13px', fontWeight: 800, color: '#854d0e' }}>4. Həftənin Fəlsəfi Mövzusu Bölməsi</span>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+                <Field label="Mövzu Üst Etiketi" block={cmsCommunity} setBlock={setCmsCommunity} fieldKey="weeklyBadge" placeholder="Həftənin Fəlsəfi Mövzusu" />
+                <Field label="Mövzu Başlığı" block={cmsCommunity} setBlock={setCmsCommunity} fieldKey="weeklyTitle" placeholder="Daxili təzyiq qarşısında şüurlu müşahidəçi qalmaq necə mümkündür?" />
+              </div>
+              <Field label="Mövzu İzahı" block={cmsCommunity} setBlock={setCmsCommunity} fieldKey="weeklyDesc" multiline rows={2} />
+              <Field label="Düymə Mətni (CTA)" block={cmsCommunity} setBlock={setCmsCommunity} fieldKey="weeklyBtnText" placeholder="Müzakirəyə Qoşul" />
+            </div>
+
+            <div style={{ paddingTop: '4px' }}>
+              <button onClick={() => saveBlock('community', cmsCommunity)} className="admin-btn-primary">
+                İcma Məzmununu Yadda Saxla
+              </button>
+            </div>
           </div>
         </div>
       )}
