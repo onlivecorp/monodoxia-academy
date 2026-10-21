@@ -860,10 +860,67 @@ export default function AdminCmsTab() {
     };
   };
 
+  const defaultAboutData = INITIAL_HOME_CONTENT?.about || {
+    badge: "Akademiyanın Məramı",
+    title: "Daxili ahəngdarlıq və şüurlu həyat üçün elmi və mənəvi yanaşma.",
+    desc: "Biz inanırıq ki, əsl inkişaf səthi motivasiya ilə deyil, dərin psixoloji fərqindəlik və daxili mənliyin tədqiqi ilə mümkündür. Monodoxia Academy hər bir fərdin öz gizli potensialını kəşf edərək sabit, harmonik və mənalı bir həyat qurması üçün elmi metodlara əsaslanan bələdçidir.",
+    heroBadge1Icon: "psychology",
+    heroBadge1Text: "Elmi & Psixoloji Əsaslar",
+    heroBadge2Icon: "auto_stories",
+    heroBadge2Text: "Qədim Fəlsəfi Miras",
+    heroBadge3Icon: "verified",
+    heroBadge3Text: "Etik Təhlükəsizlik Zəmanəti",
+    manifestoBadge: "Monodoxia Manifesti",
+    manifestoTitle: "\"İnsan xarici dünyanı fəth etməzdən əvvəl öz daxili krallığını kəşf etməlidir.\"",
+    manifestoDesc: "Müasir dünyada informasiya həddindən artıq çox, fərqindəlik isə azdır. Monodoxia Academy hər kəsin daxilindəki sükutu dinləməsi, emosional və psixoloji bütövlüyünü bərpa etməsi üçün təhlükəsiz bir platformadır.",
+    manifestoBtn1Text: "Akademiyanı Kəşf Et",
+    manifestoBtn2Text: "Coaching Club-a Qoşul",
+    translations: {
+      az: {
+        badge: "Akademiyanın Məramı",
+        title: "Daxili ahəngdarlıq və şüurlu həyat üçün elmi və mənəvi yanaşma.",
+        desc: "Biz inanırıq ki, əsl inkişaf səthi motivasiya ilə deyil, dərin psixoloji fərqindəlik və daxili mənliyin tədqiqi ilə mümkündür.",
+        heroBadge1Text: "Elmi & Psixoloji Əsaslar",
+        heroBadge2Text: "Qədim Fəlsəfi Miras",
+        heroBadge3Text: "Etik Təhlükəsizlik Zəmanəti",
+        manifestoBadge: "Monodoxia Manifesti",
+        manifestoTitle: "\"İnsan xarici dünyanı fəth etməzdən əvvəl öz daxili krallığını kəşf etməlidir.\"",
+        manifestoDesc: "Müasir dünyada informasiya həddindən artıq çox, fərqindəlik isə azdır.",
+        manifestoBtn1Text: "Akademiyanı Kəşf Et",
+        manifestoBtn2Text: "Coaching Club-a Qoşul"
+      }
+    }
+  };
+
+  const mergeAboutWithDefaults = (src) => {
+    const raw = src || {};
+    return {
+      ...defaultAboutData,
+      ...raw,
+      heroBadge1Icon: raw.heroBadge1Icon || defaultAboutData.heroBadge1Icon,
+      heroBadge1Text: raw.heroBadge1Text !== undefined && raw.heroBadge1Text !== null ? raw.heroBadge1Text : defaultAboutData.heroBadge1Text,
+      heroBadge2Icon: raw.heroBadge2Icon || defaultAboutData.heroBadge2Icon,
+      heroBadge2Text: raw.heroBadge2Text !== undefined && raw.heroBadge2Text !== null ? raw.heroBadge2Text : defaultAboutData.heroBadge2Text,
+      heroBadge3Icon: raw.heroBadge3Icon || defaultAboutData.heroBadge3Icon,
+      heroBadge3Text: raw.heroBadge3Text !== undefined && raw.heroBadge3Text !== null ? raw.heroBadge3Text : defaultAboutData.heroBadge3Text,
+      manifestoBadge: raw.manifestoBadge !== undefined && raw.manifestoBadge !== null ? raw.manifestoBadge : defaultAboutData.manifestoBadge,
+      manifestoTitle: raw.manifestoTitle !== undefined && raw.manifestoTitle !== null ? raw.manifestoTitle : defaultAboutData.manifestoTitle,
+      manifestoDesc: raw.manifestoDesc !== undefined && raw.manifestoDesc !== null ? raw.manifestoDesc : defaultAboutData.manifestoDesc,
+      manifestoBtn1Text: raw.manifestoBtn1Text !== undefined && raw.manifestoBtn1Text !== null ? raw.manifestoBtn1Text : defaultAboutData.manifestoBtn1Text,
+      manifestoBtn2Text: raw.manifestoBtn2Text !== undefined && raw.manifestoBtn2Text !== null ? raw.manifestoBtn2Text : defaultAboutData.manifestoBtn2Text,
+      translations: {
+        az: { ...(defaultAboutData.translations?.az || {}), ...(raw.translations?.az || {}) },
+        en: { ...(defaultAboutData.translations?.en || {}), ...(raw.translations?.en || {}) },
+        tr: { ...(defaultAboutData.translations?.tr || {}), ...(raw.translations?.tr || {}) },
+        ru: { ...(defaultAboutData.translations?.ru || {}), ...(raw.translations?.ru || {}) },
+      }
+    };
+  };
+
   // Content block states
   const [cmsNavbar, setCmsNavbar] = useState(() => ({ ...(homeContent?.navbar || {}) }));
   const [cmsHero, setCmsHero] = useState(() => ({ ...(homeContent?.hero || {}) }));
-  const [cmsAbout, setCmsAbout] = useState(() => ({ ...(homeContent?.about || {}) }));
+  const [cmsAbout, setCmsAbout] = useState(() => mergeAboutWithDefaults(homeContent?.about));
   const [cmsAreas, setCmsAreas] = useState(() => ({ ...(homeContent?.areas || {}) }));
   const [cmsAcademy, setCmsAcademy] = useState(() => mergeAcademyWithDefaults(homeContent?.academy));
   const [cmsClub, setCmsClub] = useState(() => mergeClubWithDefaults(homeContent?.club));
@@ -939,7 +996,7 @@ export default function AdminCmsTab() {
     if (homeContent) {
       setCmsNavbar({ ...(homeContent.navbar || {}) });
       setCmsHero({ ...(homeContent.hero || {}) });
-      setCmsAbout({ ...(homeContent.about || {}) });
+      setCmsAbout(mergeAboutWithDefaults(homeContent.about));
       setCmsAreas({ ...(homeContent.areas || {}) });
       setCmsAcademy(mergeAcademyWithDefaults(homeContent.academy));
       setCmsClub(mergeClubWithDefaults(homeContent.club));
@@ -3374,16 +3431,62 @@ export default function AdminCmsTab() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
             {/* ƏSAS MƏTNLƏR */}
             <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0', flexWrap: 'wrap', gap: '8px' }}>
                 <div>
-                  <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Akademiyanın Məramı – Əsas Mətnlər</h5>
-                  <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0 0' }}>Bölmənin üst etiketi, əsas fəlsəfə başlığı və ətraflı izahat mətni</p>
+                  <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#c5a059' }}>auto_stories</span>
+                    <span>Haqqımızda Səhifəsi (#haqqimizda) & Əsas Səhifə Məram Bölməsi</span>
+                  </h5>
+                  <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0 0' }}>Bölmənin üst etiketi, əsas fəlsəfə başlığı, təsvir, üst 3 bənd və manifest</p>
                 </div>
-                <span className="admin-count-badge">Məram Bölməsi</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span className="admin-count-badge">Məram Bölməsi</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (setAdminModalOpen) setAdminModalOpen(false);
+                      if (navigateTo) navigateTo('haqqimizda');
+                    }}
+                    className="admin-btn-secondary"
+                    style={{ padding: '4px 10px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>open_in_new</span>
+                    <span>Saytda Bax</span>
+                  </button>
+                </div>
               </div>
-              <Field label="Üst Etiket (Badge)" block={cmsAbout} setBlock={setCmsAbout} fieldKey="badge" />
-              <Field label="Əsas Başlıq" block={cmsAbout} setBlock={setCmsAbout} fieldKey="title" />
-              <Field label="Mətn (desc)" block={cmsAbout} setBlock={setCmsAbout} fieldKey="desc" multiline rows={4} />
+              <Field label="Üst Etiket (Badge)" block={cmsAbout} setBlock={setCmsAbout} fieldKey="badge" placeholder="Məs: Akademiyanın Məramı" />
+              <Field label="Əsas Başlıq" block={cmsAbout} setBlock={setCmsAbout} fieldKey="title" placeholder="Məs: Haqqımızda — Monodoxia Academy" />
+              <Field label="Mətn (desc)" block={cmsAbout} setBlock={setCmsAbout} fieldKey="desc" multiline rows={4} placeholder="Akademiyanın fəlsəfəsi və missiyası..." />
+            </div>
+
+            {/* HAQQIMIZDA SƏHİFƏSİ ÜST 3 QISA İKONLU BƏND (HERO BADGES) */}
+            <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '6px', borderBottom: '1px solid #e2e8f0' }}>
+                <h5 style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                  Haqqımızda Səhifəsinin Üst 3 İkonlu Bəndi (Hero Badges)
+                </h5>
+                <span style={{ fontSize: '10px', color: '#92400e', background: '#fef3c7', padding: '2px 8px', borderRadius: '4px', fontWeight: 700 }}>
+                  Daxili Səhifə
+                </span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label className="admin-label">1-ci Bənd İkonu</label>
+                  <input type="text" className="admin-input" value={cmsAbout.heroBadge1Icon || 'psychology'} onChange={e => setCmsAbout(p => ({ ...p, heroBadge1Icon: e.target.value }))} />
+                  <Field label="1-ci Bənd Mətni" block={cmsAbout} setBlock={setCmsAbout} fieldKey="heroBadge1Text" placeholder="Elmi & Psixoloji Əsaslar" />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label className="admin-label">2-ci Bənd İkonu</label>
+                  <input type="text" className="admin-input" value={cmsAbout.heroBadge2Icon || 'auto_stories'} onChange={e => setCmsAbout(p => ({ ...p, heroBadge2Icon: e.target.value }))} />
+                  <Field label="2-ci Bənd Mətni" block={cmsAbout} setBlock={setCmsAbout} fieldKey="heroBadge2Text" placeholder="Qədim Fəlsəfi Miras" />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label className="admin-label">3-cü Bənd İkonu</label>
+                  <input type="text" className="admin-input" value={cmsAbout.heroBadge3Icon || 'verified'} onChange={e => setCmsAbout(p => ({ ...p, heroBadge3Icon: e.target.value }))} />
+                  <Field label="3-cü Bənd Mətni" block={cmsAbout} setBlock={setCmsAbout} fieldKey="heroBadge3Text" placeholder="Etik Təhlükəsizlik Zəmanəti" />
+                </div>
+              </div>
             </div>
 
             {/* AKADEMİYANIN MƏRAMI SOL MEDIA (ŞƏKİL / VİDEO, FRAME, STROKE, RADIUS, ÖLÇÜ) */}
@@ -4044,6 +4147,48 @@ export default function AdminCmsTab() {
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>save</span>
                   <span>Akademiyanın Məramını Yadda Saxla</span>
+                </button>
+              </div>
+            </div>
+
+            {/* MONODOXIA MANİFESTİ BÖLMƏSİ (AŞAĞI QARA/VELVET BLOK) */}
+            <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px', background: '#0a192f', border: '1.5px solid #c5a059', color: '#ffffff' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '8px', borderBottom: '1px solid rgba(197, 160, 89, 0.3)', flexWrap: 'wrap', gap: '8px' }}>
+                <div>
+                  <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#e5c57d', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#e5c57d' }}>auto_awesome</span>
+                    <span>Monodoxia Manifesti Bölməsi (Velvet Obsidian Mərkəzi Blok)</span>
+                  </h5>
+                  <p style={{ fontSize: '11px', color: '#94a3b8', margin: '2px 0 0 0' }}>
+                    Haqqımızda səhifəsinin aşağısındakı zəngin qara kart: manifest sitatı, izah və 2 əsas düymə
+                  </p>
+                </div>
+                <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: 'rgba(197, 160, 89, 0.2)', color: '#e5c57d', border: '1px solid rgba(197, 160, 89, 0.4)' }}>
+                  Manifest Kartı
+                </span>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+                <Field label="Manifest Etiketi" block={cmsAbout} setBlock={setCmsAbout} fieldKey="manifestoBadge" placeholder="Məs: Monodoxia Manifesti" />
+                <Field label="Manifest Başlıq Sitatı" block={cmsAbout} setBlock={setCmsAbout} fieldKey="manifestoTitle" placeholder='"İnsan xarici dünyanı fəth etməzdən əvvəl öz daxili krallığını kəşf etməlidir."' />
+              </div>
+
+              <Field label="Manifest İzah Mətni" block={cmsAbout} setBlock={setCmsAbout} fieldKey="manifestoDesc" multiline rows={3} placeholder="Müasir dünyada informasiya həddindən artıq çox, fərqindəlik isə azdır..." />
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+                <Field label="1-ci Düymə Mətni (Akademiya)" block={cmsAbout} setBlock={setCmsAbout} fieldKey="manifestoBtn1Text" placeholder="Akademiyanı Kəşf Et" />
+                <Field label="2-ci Düymə Mətni (Coaching Club)" block={cmsAbout} setBlock={setCmsAbout} fieldKey="manifestoBtn2Text" placeholder="Coaching Club-a Qoşul" />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '6px' }}>
+                <button
+                  type="button"
+                  onClick={saveAboutWithPillars}
+                  className="admin-btn-primary"
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>save</span>
+                  <span>Manifest Məzmununu Yadda Saxla</span>
                 </button>
               </div>
             </div>
