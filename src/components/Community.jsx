@@ -8,6 +8,8 @@ export default function Community() {
   const {
     communityTopics,
     likeTopic,
+    isTopicLiked,
+    openTopicDetail,
     setNewTopicModalOpen,
     homeContent,
     currentUser,
@@ -156,60 +158,84 @@ export default function Community() {
                 const bPin = Boolean(b.pinned || (typeof b.badge === 'string' && b.badge.includes('📌')));
                 if (aPin === bPin) return 0;
                 return aPin ? -1 : 1;
-              }).map(topic => (
-                <div
-                  key={topic.id}
-                  className="group relative bg-white/85 hover:bg-white p-6 sm:p-7 rounded-2xl border border-[#e2d9c8]/75 hover:border-[#c5a059]/70 shadow-sm hover:shadow-2xl hover:shadow-[#c5a059]/12 transition-all duration-300 hover:-translate-y-1 overflow-hidden"
-                >
-                  {/* Top Ambient Shimmer */}
-                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#c5a059] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              }).map(topic => {
+                const isLiked = isTopicLiked(topic.id);
+                const commentsCount = (Array.isArray(topic.comments) ? topic.comments.length : 0) || topic.repliesCount || 0;
+                return (
+                  <div
+                    key={topic.id}
+                    onClick={() => openTopicDetail(topic)}
+                    className="group relative bg-white/85 hover:bg-white p-6 sm:p-7 rounded-2xl border border-[#e2d9c8]/75 hover:border-[#c5a059]/70 shadow-sm hover:shadow-2xl hover:shadow-[#c5a059]/12 transition-all duration-300 hover:-translate-y-1 overflow-hidden cursor-pointer"
+                  >
+                    {/* Top Ambient Shimmer */}
+                    <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#c5a059] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                  <div className="flex items-center justify-between text-xs text-slate-500 mb-2.5 flex-wrap gap-2">
-                    <div className="flex items-center gap-2">
-                      {topic.pinned && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-800 border border-amber-300/40 flex items-center gap-1">
-                          <span className="material-symbols-outlined text-[12px]">push_pin</span>
-                          <span>Sabit</span>
+                    <div className="flex items-center justify-between text-xs text-slate-500 mb-2.5 flex-wrap gap-2">
+                      <div className="flex items-center gap-2">
+                        {topic.pinned && (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-800 border border-amber-300/40 flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[12px]">push_pin</span>
+                            <span>Sabit</span>
+                          </span>
+                        )}
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-[#c5a059]/15 text-[#775a19] border border-[#c5a059]/30">
+                          {getLocalized(topic, 'badge', currentLang, defaultLang) || topic.badge || 'İcma Müzakirəsi'}
                         </span>
-                      )}
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-[#c5a059]/15 text-[#775a19] border border-[#c5a059]/30">
-                        {getLocalized(topic, 'badge', currentLang, defaultLang) || topic.badge || 'İcma Müzakirəsi'}
-                      </span>
+                      </div>
+                      <span className="text-xs font-mono text-slate-400">{topic.time || topic.time_ago || 'İndicə'}</span>
                     </div>
-                    <span className="text-xs font-mono text-slate-400">{topic.time || topic.time_ago || 'İndicə'}</span>
-                  </div>
 
-                  <h4 className="font-serif text-xl sm:text-[1.3rem] font-semibold text-[#070f1e] group-hover:text-[#775a19] transition-colors leading-snug my-2.5">
-                    "{getLocalized(topic, 'title', currentLang, defaultLang) || topic.title}"
-                  </h4>
+                    <h4 className="font-serif text-xl sm:text-[1.3rem] font-semibold text-[#070f1e] group-hover:text-[#775a19] transition-colors leading-snug my-2.5">
+                      "{getLocalized(topic, 'title', currentLang, defaultLang) || topic.title}"
+                    </h4>
 
-                  <p className="text-sm text-slate-600 line-clamp-2 leading-relaxed font-normal mb-4">
-                    {getLocalized(topic, 'snippet', currentLang, defaultLang) || getLocalized(topic, 'desc', currentLang, defaultLang) || topic.snippet || topic.desc || topic.content}
-                  </p>
+                    <p className="text-sm text-slate-600 line-clamp-2 leading-relaxed font-normal mb-4">
+                      {getLocalized(topic, 'snippet', currentLang, defaultLang) || getLocalized(topic, 'desc', currentLang, defaultLang) || topic.snippet || topic.desc || topic.content}
+                    </p>
 
-                  <div className="flex items-center justify-between pt-3 border-t border-[#e2d9c8]/50 text-xs">
-                    <span className="text-slate-500 font-medium flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-[15px] text-[#c5a059]">person</span>
-                      <span>Müəllif: <strong className="text-[#070f1e] font-semibold">{topic.author}</strong></span>
-                    </span>
-
-                    <div className="flex items-center gap-4 text-slate-500">
-                      <button
-                        onClick={() => likeTopic(topic.id)}
-                        className="flex items-center gap-1 hover:text-red-500 transition-colors cursor-pointer"
-                        title="Bəyən"
-                      >
-                        <span className="material-symbols-outlined text-[16px] text-red-500/80">favorite</span>
-                        <span className="font-semibold text-slate-700">{topic.likes}</span>
-                      </button>
-                      <span className="flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[16px] text-[#c5a059]">chat_bubble</span>
-                        <span className="font-semibold text-slate-700">{topic.repliesCount}</span>
+                    <div className="flex items-center justify-between pt-3 border-t border-[#e2d9c8]/50 text-xs">
+                      <span className="text-slate-500 font-medium flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-[15px] text-[#c5a059]">person</span>
+                        <span>Müəllif: <strong className="text-[#070f1e] font-semibold">{topic.author}</strong></span>
                       </span>
+
+                      <div className="flex items-center gap-3 text-slate-500">
+                        {/* 1 Like / Unlike Per User Button */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            likeTopic(topic.id);
+                          }}
+                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                            isLiked
+                              ? 'bg-rose-50 text-rose-600 font-bold'
+                              : 'hover:text-rose-600 hover:bg-slate-50'
+                          }`}
+                          title={isLiked ? 'Bəyənməni geri götür' : 'Bəyən'}
+                        >
+                          <span className={`material-symbols-outlined text-[17px] ${isLiked ? 'text-rose-600 fill-current scale-110' : 'text-slate-400'}`}>
+                            {isLiked ? 'favorite' : 'favorite_border'}
+                          </span>
+                          <span className={`text-xs ${isLiked ? 'text-rose-600 font-bold' : 'text-slate-700 font-semibold'}`}>{topic.likes || 0}</span>
+                        </button>
+
+                        {/* Comment Button (opens popup) */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openTopicDetail(topic);
+                          }}
+                          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg hover:text-[#070f1e] hover:bg-slate-50 transition-colors cursor-pointer"
+                          title="Şərhləri oxu və rəy bildir"
+                        >
+                          <span className="material-symbols-outlined text-[17px] text-[#c5a059]">chat_bubble</span>
+                          <span className="font-semibold text-slate-700 text-xs">{commentsCount}</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             ) : (
               <div className="relative overflow-hidden p-10 sm:p-12 rounded-2xl bg-white/85 backdrop-blur-md border border-[#e2d9c8]/80 shadow-xl text-center">
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#fbf9f5] to-[#f5f0e6] border border-[#c5a059]/35 text-[#8a6a1f] flex items-center justify-center mx-auto mb-4 shadow-sm">

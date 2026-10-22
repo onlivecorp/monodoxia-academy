@@ -465,6 +465,16 @@ export function AppProvider({ children }) {
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [activeCoach, setActiveCoach] = useState(null);
   const [newTopicModalOpen, setNewTopicModalOpen] = useState(false);
+  const [topicDetailModalOpen, setTopicDetailModalOpen] = useState(false);
+  const [selectedTopic, setSelectedTopic] = useState(null);
+  const [userLikedTopics, setUserLikedTopics] = useState(() => {
+    try {
+      const saved = localStorage.getItem('monodoxia_user_liked_topics');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
   const [adminModalOpen, setAdminModalOpen] = useState(false);
   const [adminModalTab, setAdminModalTab] = useState('overview');
   const [profileModalOpen, setProfileModalOpen] = useState(false);
@@ -765,23 +775,46 @@ export function AppProvider({ children }) {
             safeSetLocalStorage('monodoxia_admin_events', mappedEvents);
           }
           if (data.community && data.community.length > 0) {
-            const mappedCommunity = data.community.map(p => ({
-              id: p.id,
-              badge: p.badge,
-              badgeClass: p.badge_class || 'text-secondary font-semibold',
-              title: p.title,
-              snippet: p.snippet || p.content || '',
-              content: p.content || p.snippet || '',
-              desc: p.snippet || p.content || '',
-              author: p.author,
-              authorRole: p.author_role || 'Rezident',
-              time: p.time_ago || 'İndicə',
-              likes: Number(p.likes) || 0,
-              repliesCount: Number(p.replies) || 0,
-              pinned: Boolean(Number(p.pinned)),
-              allowComments: p.allow_comments !== undefined && p.allow_comments !== null ? Boolean(Number(p.allow_comments)) : (p.allowComments !== undefined ? Boolean(p.allowComments) : true),
-              translations: typeof p.translations_json === 'string' ? JSON.parse(p.translations_json || '{}') : (p.translations_json || {})
-            }));
+            const mappedCommunity = data.community.map(p => {
+              const defaultMatch = (COMMUNITY_TOPICS && Array.isArray(COMMUNITY_TOPICS))
+                ? COMMUNITY_TOPICS.find(ct => ct.id === p.id)
+                : null;
+              let parsedComments = [];
+              if (Array.isArray(p.comments) && p.comments.length > 0) {
+                parsedComments = p.comments;
+              } else if (typeof p.comments_json === 'string' && p.comments_json.trim()) {
+                try { parsedComments = JSON.parse(p.comments_json); } catch (e) {}
+              } else if (defaultMatch && Array.isArray(defaultMatch.comments)) {
+                parsedComments = defaultMatch.comments;
+              }
+
+              let parsedLikedBy = [];
+              if (Array.isArray(p.liked_by)) {
+                parsedLikedBy = p.liked_by;
+              } else if (typeof p.liked_by_json === 'string' && p.liked_by_json.trim()) {
+                try { parsedLikedBy = JSON.parse(p.liked_by_json); } catch (e) {}
+              }
+
+              return {
+                id: p.id,
+                badge: p.badge,
+                badgeClass: p.badge_class || 'text-secondary font-semibold',
+                title: p.title,
+                snippet: p.snippet || p.content || '',
+                content: p.content || (defaultMatch?.content) || p.snippet || '',
+                desc: p.snippet || p.content || '',
+                author: p.author,
+                authorRole: p.author_role || (defaultMatch?.authorRole) || 'Rezident',
+                time: p.time_ago || 'İndicə',
+                likes: Number(p.likes) || (defaultMatch?.likes) || 0,
+                likedBy: parsedLikedBy,
+                comments: parsedComments,
+                repliesCount: parsedComments.length || Number(p.replies) || (defaultMatch?.repliesCount) || 0,
+                pinned: Boolean(Number(p.pinned)),
+                allowComments: p.allow_comments !== undefined && p.allow_comments !== null ? Boolean(Number(p.allow_comments)) : (p.allowComments !== undefined ? Boolean(p.allowComments) : true),
+                translations: typeof p.translations_json === 'string' ? JSON.parse(p.translations_json || '{}') : (p.translations_json || {})
+              };
+            });
             setCommunityTopics(mappedCommunity);
             safeSetLocalStorage('monodoxia_admin_topics', mappedCommunity);
           }
@@ -1507,14 +1540,166 @@ export function AppProvider({ children }) {
     showToast(`Sessiya uğurla təyin edildi: ${bookingData.coachName}`, 'success');
   };
 
-  // Community
+  // Community Topic Details, Likes & Comments
+  const isTopicLiked = (topicId) => {
+    if (!topicId) return false;
+    const userId = currentUser?.id || 'guest';
+    const found = communityTopics.find(t => t.id === topicId);
+    if (found && Array.isArray(found.likedBy)) {
+      if (currentUser?.id && found.likedBy.includes(currentUser.id)) return true;
+      if (found.likedBy.includes(userId)) return true;
+    }
+    return userLikedTopics.includes(topicId);
+  };
+
   const likeTopic = (topicId) => {
-    setCommunityTopics(prev => prev.map(t => {
-      if (t.id === topicId) return { ...t, likes: t.likes + 1 };
-      return t;
-    }));
-    apiCall('like_community_post', { id: topicId });
-    showToast('Bəyənmə qeydə alındı', 'info');
+    if (!topicId) return;
+    const userId = currentUser?.id || 'guest';
+    const alreadyLiked = isTopicLiked(topicId);
+
+    setCommunityTopics(prev => {
+      const next = prev.map(t => {
+        if (t.id === topicId) {
+          const likedBy = Array.isArray(t.likedBy) ? [...t.likedBy] : [];
+          const curLikes = typeof t.likes === 'number' ? t.likes : 0;
+          if (alreadyLiked) {
+            const newLikes = Math.max(0, curLikes - 1);
+            return {
+              ...t,
+              likes: newLikes,
+              likedBy: likedBy.filter(uid => uid !== userId && uid !== currentUser?.id)
+            };
+          } else {
+            const newLikes = curLikes + 1;
+            if (!likedBy.includes(userId)) likedBy.push(userId);
+            return {
+              ...t,
+              likes: newLikes,
+              likedBy
+            };
+          }
+        }
+        return t;
+      });
+      safeSetLocalStorage('monodoxia_admin_topics', next);
+      return next;
+    });
+
+    setUserLikedTopics(prev => {
+      let next;
+      if (alreadyLiked) {
+        next = prev.filter(id => id !== topicId);
+        showToast('Bəyənmə geri götürüldü', 'info');
+      } else {
+        next = [...prev, topicId];
+        showToast('Bəyənmə qeydə alındı ❤️', 'success');
+      }
+      try {
+        localStorage.setItem('monodoxia_user_liked_topics', JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+
+    setSelectedTopic(prev => {
+      if (prev && prev.id === topicId) {
+        const likedBy = Array.isArray(prev.likedBy) ? [...prev.likedBy] : [];
+        const curLikes = typeof prev.likes === 'number' ? prev.likes : 0;
+        if (alreadyLiked) {
+          return {
+            ...prev,
+            likes: Math.max(0, curLikes - 1),
+            likedBy: likedBy.filter(uid => uid !== userId && uid !== currentUser?.id)
+          };
+        } else {
+          if (!likedBy.includes(userId)) likedBy.push(userId);
+          return {
+            ...prev,
+            likes: curLikes + 1,
+            likedBy
+          };
+        }
+      }
+      return prev;
+    });
+
+    apiCall('like_community_post', { id: topicId, unlike: alreadyLiked });
+  };
+
+  const openTopicDetail = (topic) => {
+    if (!topic) return;
+    const target = typeof topic === 'string' ? communityTopics.find(t => t.id === topic) : topic;
+    if (target) {
+      const fresh = communityTopics.find(t => t.id === target.id) || target;
+      setSelectedTopic(fresh);
+      setTopicDetailModalOpen(true);
+    }
+  };
+
+  const closeTopicDetail = () => {
+    setTopicDetailModalOpen(false);
+    setSelectedTopic(null);
+  };
+
+  const addCommentToTopic = (topicId, commentText, guestName = '') => {
+    if (!commentText || !commentText.trim()) {
+      showToast('Zəhmət olmasa rəyinizi daxil edin', 'warning');
+      return false;
+    }
+
+    const trimmed = commentText.trim();
+    const authorName = currentUser
+      ? `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim() || currentUser.email || 'İstifadəçi'
+      : (guestName.trim() || 'Qonaq İştirakçı');
+
+    const authorRole = currentUser?.role || (currentUser ? 'Klub Üzvü' : 'İcma Ziyarətçisi');
+
+    const newComment = {
+      id: 'c-' + Date.now(),
+      author: authorName,
+      authorRole: authorRole,
+      avatar: currentUser?.avatar || null,
+      text: trimmed,
+      time: 'İndicə',
+      createdAt: new Date().toISOString()
+    };
+
+    let updatedItem = null;
+
+    setCommunityTopics(prev => {
+      const next = prev.map(t => {
+        if (t.id === topicId) {
+          const currentComments = Array.isArray(t.comments) ? t.comments : [];
+          const newComments = [...currentComments, newComment];
+          updatedItem = {
+            ...t,
+            comments: newComments,
+            repliesCount: newComments.length,
+            time: 'İndicə'
+          };
+          return updatedItem;
+        }
+        return t;
+      });
+      safeSetLocalStorage('monodoxia_admin_topics', next);
+      return next;
+    });
+
+    setSelectedTopic(prev => {
+      if (prev && prev.id === topicId) {
+        const currentComments = Array.isArray(prev.comments) ? prev.comments : [];
+        const newComments = [...currentComments, newComment];
+        return {
+          ...prev,
+          comments: newComments,
+          repliesCount: newComments.length
+        };
+      }
+      return prev;
+    });
+
+    apiCall('save_community_post', updatedItem || { id: topicId });
+    showToast('Rəyiniz uğurla əlavə edildi', 'success');
+    return true;
   };
 
   const addTopic = (title, content, badge = "İcma Müzakirəsi", author = null, translations = {}) => {
@@ -1528,8 +1713,11 @@ export function AppProvider({ children }) {
       content,
       desc: content,
       author: author || (currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : "Rezident"),
+      authorRole: currentUser?.role || "Klub Üzvü",
       likes: 1,
+      likedBy: currentUser?.id ? [currentUser.id] : ['guest'],
       repliesCount: 0,
+      comments: [],
       translations: translations || {}
     };
     setCommunityTopics(prev => {
@@ -3277,7 +3465,11 @@ export function AppProvider({ children }) {
       bookingModalOpen, setBookingModalOpen,
       activeCoach, openBooking, openBookingModal: openBooking, confirmBooking,
       newTopicModalOpen, setNewTopicModalOpen,
-      likeTopic, addTopic, deleteTopic, pinTopic,
+      topicDetailModalOpen, setTopicDetailModalOpen,
+      selectedTopic, setSelectedTopic,
+      openTopicDetail, closeTopicDetail,
+      likeTopic, isTopicLiked, addCommentToTopic,
+      addTopic, deleteTopic, pinTopic,
       registerEvent, joinClubTier,
       adminModalOpen, setAdminModalOpen,
       adminModalTab, setAdminModalTab,

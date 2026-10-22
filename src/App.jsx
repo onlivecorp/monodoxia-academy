@@ -19,6 +19,7 @@ const NewTopicModal = lazy(() => import('./components/modals/NewTopicModal'));
 const ProfileModal = lazy(() => import('./components/modals/ProfileModal'));
 const ApplicationModal = lazy(() => import('./components/modals/ApplicationModal'));
 const CertificateViewModal = lazy(() => import('./components/modals/CertificateViewModal'));
+const TopicDetailModal = lazy(() => import('./components/modals/TopicDetailModal'));
 const CertificateVerifyPage = lazy(() => import('./certificates/CertificateVerifyPage'));
 
 import HomePage from './pages/HomePage';
@@ -296,6 +297,7 @@ function AppContent() {
         <ProfileModal />
         <ApplicationModal />
         <CertificateViewModal />
+        <TopicDetailModal />
       </Suspense>
     </div>
   );

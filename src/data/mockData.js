@@ -399,34 +399,98 @@ export const COMMUNITY_TOPICS = [
     id: "topic-1",
     badge: "Günün Müzakirəsi",
     badgeClass: "text-secondary font-semibold",
-    time: "42 şərh • 18 dəq əvvəl",
+    time: "18 dəq əvvəl",
     title: "Qüsursuzluq tələsi: Niyə mükəmməllik axtarışı bizi daxili sülhdən məhrum edir?",
     snippet: "Moderatör: Dr. Leyla Əliyeva. Tələbələr perfeksionizmin arxasında gizlənən uğursuzluq qorxusunu müzakirə edir.",
+    content: "Mükəmməllik axtarışı çox vaxt inkişaf arzusu kimi görünsə də, əslində dərin uğursuzluq və qeyri-kafilik qorxusunun maskasıdır. Şəxsiyyətin hər addımını mikroskop altında qiymətləndirmək daxili sakitliyi pozur və daimi narahatlıq yaradır. Siz daxili tənqidçinizin səsinə necə cavab verirsiniz və bu təzyiqi necə idarə edirsiniz?",
     author: "Dr. Leyla Əliyeva",
+    authorRole: "Baş Mentor & Psixoloq",
     likes: 64,
-    repliesCount: 42
+    likedBy: [],
+    repliesCount: 3,
+    comments: [
+      {
+        id: "c-101",
+        author: "Kənan Məmmədov",
+        authorRole: "Akademiya Tələbəsi",
+        text: "Məhz bu mövzuda fərqindəlik qazanmaq həyatımda böyük dönüş nöqtəsi oldu. Mükəmməl olmaq yerinə davamlı irəliləməyə kökləndikdə daxili rahatlıq gəlir.",
+        time: "15 dəq əvvəl"
+      },
+      {
+        id: "c-102",
+        author: "Günay Rəhimova",
+        authorRole: "Rezident",
+        text: "Təşəkkürlər Dr. Leyla xanım! Xüsusilə iş mühitində bu perfeksionizm çox vaxt prokrastinasiyaya səbəb olur.",
+        time: "10 dəq əvvəl"
+      },
+      {
+        id: "c-103",
+        author: "Rəşad Quliyev",
+        authorRole: "İcma Üzvü",
+        text: "Daxili dialoqlarımızda özümüzə qarşı şəfqətli olmağı öyrənmək əsas çıxış yoludur.",
+        time: "5 dəq əvvəl"
+      }
+    ]
   },
   {
     id: "topic-2",
     badge: "Təcrübə Paylaşımı",
     badgeClass: "text-secondary font-semibold",
-    time: "67 şərh • 2 saat əvvəl",
+    time: "2 saat əvvəl",
     title: "Səhər 20 dəqiqəlik sükut təcrübəsi: Bir ay ərzində qavrayış necə dəyişdi?",
     snippet: "İcma üzvü Elmir Həsənli özünün 30 günlük meditasiya və gündəlik tutma qeydlərini bölüşür.",
+    content: "Hər səhər günə 20 dəqiqəlik tam sükutla başlamaq qərarına gəldim: telefon yox, musiqi yox, planlaşdırma yox. İlk 10 gün zehin daimi narahatlıq və tələskənlik siqnalları göndərirdi. Lakin 2-ci həftədən sonra reaksiyalarımda heyrətamiz sakitlik, diqqət fokusunda dərinləşmə hiss etdim. Təcrübə edənlər varmı?",
     author: "Elmir Həsənli",
+    authorRole: "Klub Rezidenti",
     likes: 88,
-    repliesCount: 67
+    likedBy: [],
+    repliesCount: 2,
+    comments: [
+      {
+        id: "c-201",
+        author: "Nigar Sultanova",
+        authorRole: "Kouç",
+        text: "Möhtəşəm təcrübədir Elmir bəy. Beyin neyroplastikliyi baxımından səhər sükutu kortizol səviyyəsini tənzimləmək üçün ən effektiv üsullardan biridir.",
+        time: "1 saat əvvəl"
+      },
+      {
+        id: "c-202",
+        author: "Tural Bağırov",
+        authorRole: "İcma Üzvü",
+        text: "Mən də 10 gündür başlamışam, gün ərzində qərar vermək xeyli asanlaşıb.",
+        time: "30 dəq əvvəl"
+      }
+    ]
   },
   {
     id: "topic-3",
     badge: "Kitab Klubu",
     badgeClass: "text-secondary font-semibold",
-    time: "89 şərh • Dünən",
+    time: "Dünən",
     title: "Viktor Frankl - Həyatın mənasını axtararkən: Ekzistensial dözümlülük dərsləri",
     snippet: "Aylıq birgə mütaliə çərçivəsində loqoterapiya prinsiplərinin müasir çağırışlara tətbiqi.",
+    content: "Viktor Frankl konslager təcrübəsindən çıxardığı ən ali dərsi belə xülasə edir: 'İnsandan hər şeyi almaq olar, yalnız bir şeydən başqa — istənilən şəraitdə öz münasibətini və öz yolunu seçmək azadlığı.' Müasir dövrdə çətinliklərlə üzləşdikdə bu ekzistensial gücü daxilimizdə necə oyada bilərik?",
     author: "Nərgiz Qasımova",
+    authorRole: "Kitab Klubu Koordinatoru",
     likes: 124,
-    repliesCount: 89
+    likedBy: [],
+    repliesCount: 2,
+    comments: [
+      {
+        id: "c-301",
+        author: "Aysel Qurbanova",
+        authorRole: "Rezident",
+        text: "Franklın dediyi 'Məqsədi olan insan istənilən çətinliyə tab gətirər' fikri hər çətin gündə kompasım olur.",
+        time: "Dünən"
+      },
+      {
+        id: "c-302",
+        author: "Dr. Leyla Əliyeva",
+        authorRole: "Baş Mentor",
+        text: "Loqoterapiya həqiqətən psixoterapiyanın ən dərin dayaqlarındandır. Növbəti görüşümüzdə bu konsepsiyanı ətraflı təhlil edəcəyik.",
+        time: "Dünən"
+      }
+    ]
   }
 ];
 

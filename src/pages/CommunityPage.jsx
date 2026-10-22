@@ -10,6 +10,9 @@ export default function CommunityPage() {
     communityTopics = [],
     homeContent,
     setNewTopicModalOpen,
+    openTopicDetail,
+    likeTopic,
+    isTopicLiked,
     currentUser,
     setAuthModalOpen,
     categoriesList,
@@ -234,26 +237,43 @@ export default function CommunityPage() {
 
                       {/* Title & Desc */}
                       <h3 
-                        onClick={handleCreateTopic}
+                        onClick={() => openTopicDetail(topic)}
                         className="font-serif text-xl sm:text-2xl font-medium text-[#071326] mb-3 leading-snug group-hover:text-[#775a19] transition-colors cursor-pointer"
                       >
                         {title}
                       </h3>
-                      <p className="text-xs sm:text-sm text-[#475569] leading-relaxed mb-6 font-light">
+                      <p 
+                        onClick={() => openTopicDetail(topic)}
+                        className="text-xs sm:text-sm text-[#475569] leading-relaxed mb-6 font-light cursor-pointer hover:text-slate-800 transition-colors"
+                      >
                         {desc}
                       </p>
 
                       {/* Footer Actions */}
-                      <div className="flex items-center justify-between pt-4 border-t border-[#e2e8f0] text-xs text-[#64748b]">
-                        <div className="flex items-center gap-5">
-                          <span className="flex items-center gap-1.5 hover:text-[#071326] transition-colors">
+                      <div className="flex items-center justify-between pt-4 border-t border-[#e2d9c8]/70 text-xs text-[#64748b]">
+                        <div className="flex items-center gap-4">
+                          <button
+                            onClick={() => openTopicDetail(topic)}
+                            className="flex items-center gap-1.5 hover:text-[#071326] transition-colors cursor-pointer"
+                            title="Şərhləri oxu və ya yaz"
+                          >
                             <span className="material-symbols-outlined text-[16px] text-[#775a19]">forum</span>
-                            <span className="font-medium">{topic.repliesCount || topic.replies || topic.commentsCount || 0} şərh</span>
-                          </span>
-                          <span className="flex items-center gap-1.5 hover:text-[#071326] transition-colors">
-                            <span className="material-symbols-outlined text-[16px] text-rose-500/80">favorite</span>
+                            <span className="font-medium">{topic.comments?.length || topic.repliesCount || topic.replies || topic.commentsCount || 0} şərh</span>
+                          </button>
+                          <button
+                            onClick={() => likeTopic(topic.id)}
+                            className={`flex items-center gap-1.5 transition-colors cursor-pointer px-2 py-0.5 rounded-md ${
+                              isTopicLiked(topic.id)
+                                ? 'text-rose-600 bg-rose-50 font-bold'
+                                : 'hover:text-rose-600'
+                            }`}
+                            title={isTopicLiked(topic.id) ? 'Bəyənməni geri götür' : 'Bəyən'}
+                          >
+                            <span className={`material-symbols-outlined text-[16px] ${isTopicLiked(topic.id) ? 'text-rose-600 fill-current' : 'text-rose-500/80'}`}>
+                              {isTopicLiked(topic.id) ? 'favorite' : 'favorite_border'}
+                            </span>
                             <span className="font-medium">{topic.likes || 0} bəyənmə</span>
-                          </span>
+                          </button>
                         </div>
 
                         {topic.allowComments === false ? (
@@ -263,11 +283,11 @@ export default function CommunityPage() {
                           </span>
                         ) : (
                           <button
-                            onClick={handleCreateTopic}
+                            onClick={() => openTopicDetail(topic)}
                             className="text-[#775a19] hover:text-[#071326] text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
                           >
-                            <span>Cavab yaz</span>
-                            <span className="material-symbols-outlined text-[15px]">reply</span>
+                            <span>Ətraflı oxu & Cavab yaz</span>
+                            <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
                           </button>
                         )}
                       </div>
