@@ -37,28 +37,71 @@ export default function CertificateVerifyPage({ publicId, certId: certIdProp }) 
 
   useEffect(() => {
     if (!publicId && !certIdProp) { setStatus('idle'); return; }
-    const query = publicId || certIdProp;
+    const rawQuery = (publicId || certIdProp || '').trim();
+    const query = decodeURIComponent(rawQuery).replace(/\/$/, '');
     setStatus('loading');
-    setTimeout(() => {
-      const found = certificatesList.find(
-        c => c.publicId === query || c.number === query
-      );
-      if (!found) { setStatus('notfound'); return; }
+
+    let found = (certificatesList || []).find(
+      c => c.publicId === query || c.number === query ||
+           c.number?.toLowerCase() === query.toLowerCase() ||
+           c.publicId?.toLowerCase() === query.toLowerCase()
+    );
+
+    if (found) {
       setCert(found);
       setStatus(found.status === 'Yayında' ? 'found' : found.status === 'İptal Edilmiş' ? 'revoked' : 'draft');
-    }, 400);
+      return;
+    }
+
+    // Attempt lookup from server
+    fetch(`/api.php?action=verify_certificate&code=${encodeURIComponent(query)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data?.status === 'success' && data.certificate) {
+          setCert(data.certificate);
+          setStatus(data.certificate.status === 'Yayında' ? 'found' : data.certificate.status === 'İptal Edilmiş' ? 'revoked' : 'draft');
+        } else {
+          setStatus('notfound');
+        }
+      })
+      .catch(() => {
+        setStatus('notfound');
+      });
   }, [publicId, certIdProp, certificatesList]);
 
   const handleSearch = (e) => {
     e.preventDefault();
     if (!searchInput.trim()) return;
     const query = searchInput.trim();
-    const found = certificatesList.find(
-      c => c.publicId === query || c.number === query || c.number?.toLowerCase() === query.toLowerCase()
+    setStatus('loading');
+
+    let found = (certificatesList || []).find(
+      c => c.publicId === query || c.number === query ||
+           c.number?.toLowerCase() === query.toLowerCase() ||
+           c.publicId?.toLowerCase() === query.toLowerCase()
     );
-    if (!found) { setStatus('notfound'); setCert(null); return; }
-    setCert(found);
-    setStatus(found.status === 'Yayında' ? 'found' : found.status === 'İptal Edilmiş' ? 'revoked' : 'draft');
+
+    if (found) {
+      setCert(found);
+      setStatus(found.status === 'Yayında' ? 'found' : found.status === 'İptal Edilmiş' ? 'revoked' : 'draft');
+      return;
+    }
+
+    fetch(`/api.php?action=verify_certificate&code=${encodeURIComponent(query)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data?.status === 'success' && data.certificate) {
+          setCert(data.certificate);
+          setStatus(data.certificate.status === 'Yayında' ? 'found' : data.certificate.status === 'İptal Edilmiş' ? 'revoked' : 'draft');
+        } else {
+          setStatus('notfound');
+          setCert(null);
+        }
+      })
+      .catch(() => {
+        setStatus('notfound');
+        setCert(null);
+      });
   };
 
   const verifyUrl = cert?.publicId ? `${BASE_URL}/#/certificates/verify/${cert.publicId}` : '';
@@ -128,7 +171,7 @@ export default function CertificateVerifyPage({ publicId, certId: certIdProp }) 
               background: 'rgba(255,255,255,0.08)', color: '#fbbf24',
               padding: '6px 14px', borderRadius: 8, border: '1px solid rgba(251,191,36,0.3)'
             }}>
-              KOD: {publicId || certIdProp}
+              № {cert?.number || certIdProp || 'MA-000001'} {cert?.publicId ? `· ID: ${cert.publicId}` : (publicId ? `· ID: ${publicId}` : '')}
             </span>
           </div>
         ) : (
@@ -227,7 +270,7 @@ export default function CertificateVerifyPage({ publicId, certId: certIdProp }) 
           </div>
         )}
 
-        {(status === 'found' || status === 'revoked') && cert && (
+        {(status === 'found' || status === 'revoked' || status === 'draft') && cert && (
           <>
             {/* Verification Badge */}
             {status === 'found' && (
@@ -241,6 +284,23 @@ export default function CertificateVerifyPage({ publicId, certId: certIdProp }) 
                 <div>
                   <div style={{ fontSize: 15, fontWeight: 800, color: '#065f46' }}>✓ Doğrulandı — Sertifikat Etibarlıdır</div>
                   <div style={{ fontSize: 12, color: '#047857', marginTop: 2 }}>
+                    № {cert.number} · {cert.fields?.dateValue || cert.issuedAt} · {cert.fields?.recipientName || cert.userName}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {status === 'draft' && (
+              <div style={{
+                background: 'linear-gradient(135deg, #fef9c3, #fef08a)',
+                borderRadius: 16, padding: '16px 24px', marginBottom: 20,
+                border: '1.5px solid #fde047',
+                display: 'flex', alignItems: 'center', gap: 12
+              }}>
+                <span className="material-symbols-outlined" style={{ fontSize: 32, color: '#854d0e' }}>info</span>
+                <div>
+                  <div style={{ fontSize: 15, fontWeight: 800, color: '#854d0e' }}>● Rəsmi Sertifikat Qeydi (Aktivləşdirmə Rejimi)</div>
+                  <div style={{ fontSize: 12, color: '#a16207', marginTop: 2 }}>
                     № {cert.number} · {cert.fields?.dateValue || cert.issuedAt} · {cert.fields?.recipientName || cert.userName}
                   </div>
                 </div>
@@ -265,7 +325,12 @@ export default function CertificateVerifyPage({ publicId, certId: certIdProp }) 
                 pointerEvents: 'none'
               }}>
                 <CertificateTemplate
-                  data={{ ...(cert.fields || {}), certNumber: cert.number }}
+                  data={{
+                    ...(cert.fields || {}),
+                    certNumber: cert.number,
+                    number: cert.number,
+                    publicId: cert.publicId
+                  }}
                   verifyUrl={verifyUrl}
                 />
               </div>

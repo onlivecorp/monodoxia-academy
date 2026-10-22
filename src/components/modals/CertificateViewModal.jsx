@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import CertificateTemplate from '../../certificates/CertificateTemplate';
 import { useApp } from '../../context/AppContext';
 
@@ -13,39 +14,86 @@ const BASE_URL = window.location.origin;
 const CERT_W = 1491;
 const CERT_H = 1055;
 
+async function ensureFontsLoaded() {
+  try {
+    if (document.fonts) {
+      await Promise.all([
+        document.fonts.load("105px 'Alex Brush'"),
+        document.fonts.load("105px 'Great Vibes'"),
+        document.fonts.load("700 26px 'Playfair Display'"),
+        document.fonts.load("600 24px 'Plus Jakarta Sans'")
+      ]).catch(() => {});
+      await document.fonts.ready;
+    }
+  } catch (e) {}
+  await new Promise(r => setTimeout(r, 150));
+}
+
+async function renderSvgToCanvas(element, width = CERT_W, height = CERT_H, scale = 2) {
+  await ensureFontsLoaded();
+  const svg = element.querySelector('svg') || element;
+  
+  try {
+    const serializer = new XMLSerializer();
+    const svgStr = serializer.serializeToString(svg);
+    const svgBlob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(svgBlob);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width * scale;
+    canvas.height = height * scale;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#f8f5ec';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+        resolve();
+      };
+      img.onerror = (err) => {
+        URL.revokeObjectURL(url);
+        reject(err);
+      };
+      img.src = url;
+    });
+
+    return canvas;
+  } catch (svgErr) {
+    console.warn('Direct SVG canvas rendering fallback to html2canvas:', svgErr);
+    const html2canvas = (await import('html2canvas')).default;
+    return await html2canvas(element, {
+      scale,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#f8f5ec',
+      width,
+      height,
+      x: 0,
+      y: 0,
+      scrollX: 0,
+      scrollY: 0,
+      windowWidth: width,
+      windowHeight: height,
+      logging: false,
+    });
+  }
+}
+
 async function exportToPDF(element, filename = 'sertifikat.pdf') {
-  const html2canvas = (await import('html2canvas')).default;
   const { jsPDF } = await import('jspdf');
-
-  const canvas = await html2canvas(element, {
-    scale: 2,
-    useCORS: true,
-    allowTaint: true,
-    backgroundColor: '#f8f5ec',
-    width: CERT_W,
-    height: CERT_H,
-    logging: false,
-  });
-
+  const canvas = await renderSvgToCanvas(element, CERT_W, CERT_H, 2);
   const imgData = canvas.toDataURL('image/jpeg', 0.95);
-  const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-  pdf.addImage(imgData, 'JPEG', 0, 0, 297, 210);
-
+  const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4', compress: true });
+  pdf.addImage(imgData, 'JPEG', 0, 0, 297, 210, undefined, 'FAST');
   pdf.save(filename);
 }
 
 async function exportToJPG(element, filename = 'sertifikat.jpg') {
-  const html2canvas = (await import('html2canvas')).default;
-  const canvas = await html2canvas(element, {
-    scale: 2, // ~3000px wide ultra-crisp JPG
-    useCORS: true,
-    allowTaint: true,
-    backgroundColor: '#f8f5ec',
-    width: CERT_W,
-    height: CERT_H,
-    logging: false,
-  });
-
+  const canvas = await renderSvgToCanvas(element, CERT_W, CERT_H, 2);
   const link = document.createElement('a');
   link.download = filename;
   link.href = canvas.toDataURL('image/jpeg', 0.95);
@@ -234,43 +282,68 @@ export default function CertificateViewModal() {
       </div>
 
       {/* CERTIFICATE DISPLAY */}
-      <div style={{
-        background: '#1e293b',
-        borderRadius: 16,
-        padding: 20,
-        border: '1px solid rgba(255,255,255,0.1)',
-        overflow: 'hidden',
-        width: '100%',
-        maxWidth: 1040,
-        boxShadow: '0 25px 80px rgba(0,0,0,0.5)'
-      }}>
-        {/* Hidden full-scale cert for export (exact 1491x1055) */}
-        <div style={{ position: 'fixed', top: -9999, left: -9999, zIndex: -1, width: 1491, height: 1055 }}>
-          <div ref={certRef} style={{ width: 1491, height: 1055 }}>
-            <CertificateTemplate
-              data={cert.fields || {}}
-              verifyUrl={verifyUrl}
-              forExport={true}
-            />
-          </div>
-        </div>
+      {(() => {
+        const certData = {
+          ...(cert.fields || {}),
+          certNumber: cert.number,
+          number: cert.number,
+          publicId: cert.publicId
+        };
 
-        {/* Visible preview fitting exact certificate bounds */}
-        <div style={{
-          width: '100%',
-          aspectRatio: '1491 / 1055',
-          overflow: 'hidden',
-          borderRadius: 8,
-          border: '1px solid rgba(255,255,255,0.05)',
-          position: 'relative',
-          margin: '0 auto'
-        }}>
-          <CertificateTemplate
-            data={cert.fields || {}}
-            verifyUrl={verifyUrl}
-          />
-        </div>
-      </div>
+        return (
+          <>
+            <div style={{
+              background: '#1e293b',
+              borderRadius: 16,
+              padding: 20,
+              border: '1px solid rgba(255,255,255,0.1)',
+              overflow: 'hidden',
+              width: '100%',
+              maxWidth: 1040,
+              boxShadow: '0 25px 80px rgba(0,0,0,0.5)'
+            }}>
+              {/* Full-scale cert for export (exact 1491x1055) kept in DOM tree for font rasterization */}
+              <div style={{ position: 'fixed', top: 0, left: 0, zIndex: -999, width: 1491, height: 1055, opacity: 0, pointerEvents: 'none' }}>
+                <div ref={certRef} style={{ width: 1491, height: 1055 }}>
+                  <CertificateTemplate
+                    data={certData}
+                    verifyUrl={verifyUrl}
+                    forExport={true}
+                  />
+                </div>
+              </div>
+
+              {/* Visible preview fitting exact certificate bounds */}
+              <div style={{
+                width: '100%',
+                aspectRatio: '1491 / 1055',
+                overflow: 'hidden',
+                borderRadius: 8,
+                border: '1px solid rgba(255,255,255,0.05)',
+                position: 'relative',
+                margin: '0 auto'
+              }}>
+                <CertificateTemplate
+                  data={certData}
+                  verifyUrl={verifyUrl}
+                />
+              </div>
+            </div>
+
+            {/* Print Portal: Exactly 1 A4 Landscape Page */}
+            {typeof document !== 'undefined' && createPortal(
+              <div id="cert-print-portal">
+                <CertificateTemplate
+                  data={certData}
+                  verifyUrl={verifyUrl}
+                  forExport={true}
+                />
+              </div>,
+              document.body
+            )}
+          </>
+        );
+      })()}
 
       {/* STATUS + META */}
       <div style={{

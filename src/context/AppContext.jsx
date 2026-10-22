@@ -892,6 +892,16 @@ export function AppProvider({ children }) {
               date: c.issue_date
             })));
           }
+          if (Array.isArray(data.issued_certificates) && data.issued_certificates.length > 0) {
+            setCertificatesList(prev => {
+              const map = new Map();
+              data.issued_certificates.forEach(c => map.set(c.id, c));
+              (prev || []).forEach(c => { if (!map.has(c.id)) map.set(c.id, c); });
+              const merged = Array.from(map.values());
+              try { localStorage.setItem('monodoxia_certificates_v2', JSON.stringify(merged)); } catch (e) {}
+              return merged;
+            });
+          }
           if (data.bookings && data.bookings.length > 0) {
             setBookings(data.bookings.map(b => ({
               id: b.id,
@@ -3158,6 +3168,8 @@ export function AppProvider({ children }) {
       const number = 'MA-' + String(nextN).padStart(6, '0');
       const newCert = { ...certData, number };
       setCertificatesList(list => [...list, newCert]);
+      // Persist to server
+      apiCall('save_admin_certificate', newCert).catch(() => {});
       // Notify user if userId is set
       if (certData.userId) {
         const notification = {
@@ -3177,7 +3189,12 @@ export function AppProvider({ children }) {
   };
 
   const updateCertificate = (id, updates) => {
-    setCertificatesList(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
+    setCertificatesList(prev => {
+      const nextList = prev.map(c => c.id === id ? { ...c, ...updates, updatedAt: new Date().toISOString() } : c);
+      const updated = nextList.find(c => c.id === id);
+      if (updated) apiCall('save_admin_certificate', updated).catch(() => {});
+      return nextList;
+    });
   };
 
   /**
@@ -3188,18 +3205,28 @@ export function AppProvider({ children }) {
     if (hardDelete) {
       setCertificatesList(prev => prev.filter(c => c.id !== id));
     } else {
-      setCertificatesList(prev => prev.map(c =>
-        c.id === id ? { ...c, status: 'Silindi', deletedAt: new Date().toISOString() } : c
-      ));
+      setCertificatesList(prev => {
+        const nextList = prev.map(c =>
+          c.id === id ? { ...c, status: 'Silindi', deletedAt: new Date().toISOString() } : c
+        );
+        const deleted = nextList.find(c => c.id === id);
+        if (deleted) apiCall('save_admin_certificate', deleted).catch(() => {});
+        return nextList;
+      });
     }
   };
 
   const revokeCertificate = (id, reason = '') => {
-    setCertificatesList(prev => prev.map(c =>
-      c.id === id
-        ? { ...c, status: 'İptal Edilmiş', revokedAt: new Date().toISOString(), revokedReason: reason, updatedAt: new Date().toISOString() }
-        : c
-    ));
+    setCertificatesList(prev => {
+      const nextList = prev.map(c =>
+        c.id === id
+          ? { ...c, status: 'İptal Edilmiş', revokedAt: new Date().toISOString(), revokedReason: reason, updatedAt: new Date().toISOString() }
+          : c
+      );
+      const revoked = nextList.find(c => c.id === id);
+      if (revoked) apiCall('save_admin_certificate', revoked).catch(() => {});
+      return nextList;
+    });
   };
 
   const updateCertSettings = (settings) => {

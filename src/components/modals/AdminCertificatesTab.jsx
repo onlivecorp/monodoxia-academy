@@ -218,7 +218,7 @@ export default function AdminCertificatesTab() {
   // Form state
   const [fields, setFields] = useState({ ...DEFAULT_FIELDS });
   const [selectedUserId, setSelectedUserId] = useState('');
-  const [status, setStatus] = useState('Qaralama');
+  const [status, setStatus] = useState('Yayında');
   const [revokeReason, setRevokeReason] = useState('');
   const [formErrors, setFormErrors] = useState({});
 
@@ -243,7 +243,7 @@ export default function AdminCertificatesTab() {
     const defaults = certSettings || DEFAULT_FIELDS;
     setFields({ ...defaults, recipientName: '', courseName: '', dateValue: todayStr(), durationValue: '' });
     setSelectedUserId('');
-    setStatus('Qaralama');
+    setStatus('Yayında');
     setFormErrors({});
     setEditingId(null);
   }, [certSettings]);
@@ -281,14 +281,15 @@ export default function AdminCertificatesTab() {
     if (!validate()) return;
     setSaving(true);
     try {
+      const assignedNumber = formatCertNumber((certCounter || 0) + 1);
       const newCert = {
         id: 'cert-' + Date.now(),
         publicId: genPublicId(),
-        number: formatCertNumber((certCounter || 0) + 1),
+        number: assignedNumber,
         userId: selectedUserId || null,
         userName: fields.recipientName,
         status: status,
-        fields: { ...fields },
+        fields: { ...fields, certNumber: assignedNumber },
         version: 1,
         issuedAt: fields.dateValue || todayStr(),
         createdBy: currentUser?.id,

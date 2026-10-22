@@ -61,40 +61,37 @@ function AppContent() {
   }, [currentPage, platformSettings?.siteTitle, platformSettings?.subtitle]);
 
   // Public Certificate Verification Route handling
-  const [verifyRoute, setVerifyRoute] = useState(() => {
+  const resolveVerifyRoute = () => {
     try {
       const hash = window.location.hash || '';
+      const path = window.location.pathname || '';
       const params = new URLSearchParams(window.location.search);
-      const certParam = params.get('cert') || params.get('certId');
+      const certParam = params.get('cert') || params.get('certId') || params.get('code');
+
       if (hash.startsWith('#/certificates/verify/')) {
-        return { publicId: hash.replace('#/certificates/verify/', '') };
+        return { publicId: decodeURIComponent(hash.replace('#/certificates/verify/', '').replace(/\/$/, '').split('?')[0]) };
+      }
+      if (path.startsWith('/certificates/verify/')) {
+        return { publicId: decodeURIComponent(path.replace('/certificates/verify/', '').replace(/\/$/, '').split('?')[0]) };
       }
       if (hash.startsWith('#verify/')) {
-        return { publicId: hash.replace('#verify/', '') };
+        return { publicId: decodeURIComponent(hash.replace('#verify/', '').replace(/\/$/, '').split('?')[0]) };
+      }
+      if (path.startsWith('/verify/')) {
+        return { publicId: decodeURIComponent(path.replace('/verify/', '').replace(/\/$/, '').split('?')[0]) };
       }
       if (certParam) {
-        return { certId: certParam };
+        return { certId: decodeURIComponent(certParam) };
       }
     } catch (e) {}
     return null;
-  });
+  };
+
+  const [verifyRoute, setVerifyRoute] = useState(resolveVerifyRoute);
 
   useEffect(() => {
     const handleLocation = () => {
-      try {
-        const hash = window.location.hash || '';
-        const params = new URLSearchParams(window.location.search);
-        const certParam = params.get('cert') || params.get('certId');
-        if (hash.startsWith('#/certificates/verify/')) {
-          setVerifyRoute({ publicId: hash.replace('#/certificates/verify/', '') });
-        } else if (hash.startsWith('#verify/')) {
-          setVerifyRoute({ publicId: hash.replace('#verify/', '') });
-        } else if (certParam) {
-          setVerifyRoute({ certId: certParam });
-        } else {
-          setVerifyRoute(null);
-        }
-      } catch (e) {}
+      setVerifyRoute(resolveVerifyRoute());
     };
     window.addEventListener('hashchange', handleLocation);
     window.addEventListener('popstate', handleLocation);

@@ -309,6 +309,27 @@ if ($action === 'get_all') {
         } catch (PDOException $e) {}
     }
 
+    $issued_certificates = [];
+    try {
+        $cRows = $safeQuery("SELECT * FROM mdx_issued_certificates ORDER BY created_at DESC");
+        foreach ($cRows as $r) {
+            $issued_certificates[] = [
+                'id' => $r['id'],
+                'publicId' => $r['public_id'],
+                'number' => $r['number'],
+                'userId' => $r['user_id'],
+                'userName' => $r['user_name'],
+                'status' => $r['status'],
+                'fields' => json_decode($r['fields_json'], true) ?: [],
+                'version' => intval($r['version'] ?? 1),
+                'issuedAt' => $r['issued_at'],
+                'revokedAt' => $r['revoked_at'],
+                'revokedReason' => $r['revoked_reason'],
+                'createdAt' => $r['created_at']
+            ];
+        }
+    } catch (PDOException $e) {}
+
     echo json_encode([
         'status' => 'success',
         'lang' => $lang,
@@ -330,7 +351,8 @@ if ($action === 'get_all') {
         'cms_blocks' => $cms_blocks,
         'student_progress' => $student_progress,
         'student_certificates' => $student_certificates,
-        'bookings' => $bookings
+        'bookings' => $bookings,
+        'issued_certificates' => $issued_certificates
     ], JSON_UNESCAPED_UNICODE);
     exit();
 }
@@ -2100,6 +2122,113 @@ if ($action === 'get_certificates') {
     $stmt->execute([$authUser['id']]);
     echo json_encode(['status' => 'success', 'certificates' => $stmt->fetchAll()], JSON_UNESCAPED_UNICODE);
     exit();
+}
+
+// Public Certificate Verification (No auth required)
+if ($action === 'verify_certificate') {
+    $code = trim($_GET['code'] ?? ($_POST['code'] ?? ''));
+    if (!$code) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Kod tələb olunur'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM mdx_issued_certificates WHERE public_id = ? OR number = ? OR LOWER(number) = LOWER(?) LIMIT 1");
+        $stmt->execute([$code, $code, $code]);
+        $row = $stmt->fetch();
+        if ($row) {
+            echo json_encode([
+                'status' => 'success',
+                'certificate' => [
+                    'id' => $row['id'],
+                    'publicId' => $row['public_id'],
+                    'number' => $row['number'],
+                    'userId' => $row['user_id'],
+                    'userName' => $row['user_name'],
+                    'status' => $row['status'],
+                    'fields' => json_decode($row['fields_json'], true) ?: [],
+                    'version' => intval($row['version'] ?? 1),
+                    'issuedAt' => $row['issued_at'],
+                    'revokedAt' => $row['revoked_at'],
+                    'revokedReason' => $row['revoked_reason'],
+                    'createdAt' => $row['created_at']
+                ]
+            ], JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+    } catch (PDOException $e) {}
+
+    echo json_encode(['status' => 'notfound', 'message' => 'Sertifikat tapılmadı'], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+if ($action === 'save_admin_certificate' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $authUser = requireAuthUser($pdo);
+    if ($authUser['role'] !== 'Admin') {
+        http_response_code(403);
+        echo json_encode(['status' => 'error', 'message' => 'İcazə yoxdur'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+    verifyCsrfToken();
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+    $id = trim($input['id'] ?? ('cert-' . round(microtime(true) * 1000)));
+    $public_id = trim($input['publicId'] ?? '');
+    $number = trim($input['number'] ?? '');
+    $user_id = !empty($input['userId']) ? trim($input['userId']) : null;
+    $user_name = trim($input['userName'] ?? ($input['fields']['recipientName'] ?? ''));
+    $status = trim($input['status'] ?? 'Yayında');
+    $fields_json = json_encode($input['fields'] ?? [], JSON_UNESCAPED_UNICODE);
+    $version = intval($input['version'] ?? 1);
+    $issued_at = trim($input['issuedAt'] ?? date('d.m.Y'));
+    $created_by = $authUser['id'];
+    $revoked_at = !empty($input['revokedAt']) ? $input['revokedAt'] : null;
+    $revoked_reason = !empty($input['revokedReason']) ? $input['revokedReason'] : null;
+
+    try {
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS `mdx_issued_certificates` (
+                `id` varchar(50) NOT NULL,
+                `public_id` varchar(50) NOT NULL,
+                `number` varchar(50) NOT NULL,
+                `user_id` varchar(50) DEFAULT NULL,
+                `user_name` varchar(150) NOT NULL,
+                `status` varchar(50) NOT NULL DEFAULT 'Yayında',
+                `fields_json` LONGTEXT NOT NULL,
+                `version` int(11) NOT NULL DEFAULT 1,
+                `issued_at` varchar(50) NOT NULL,
+                `created_by` varchar(50) DEFAULT NULL,
+                `revoked_at` varchar(50) DEFAULT NULL,
+                `revoked_reason` text DEFAULT NULL,
+                `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+                `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+                PRIMARY KEY (`id`),
+                KEY `idx_cert_public_id` (`public_id`),
+                KEY `idx_cert_num` (`number`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ");
+
+        $stmt = $pdo->prepare("
+            INSERT INTO mdx_issued_certificates (id, public_id, number, user_id, user_name, status, fields_json, version, issued_at, created_by, revoked_at, revoked_reason)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                user_id = VALUES(user_id),
+                user_name = VALUES(user_name),
+                status = VALUES(status),
+                fields_json = VALUES(fields_json),
+                version = VALUES(version),
+                issued_at = VALUES(issued_at),
+                revoked_at = VALUES(revoked_at),
+                revoked_reason = VALUES(revoked_reason)
+        ");
+        $stmt->execute([$id, $public_id, $number, $user_id, $user_name, $status, $fields_json, $version, $issued_at, $created_by, $revoked_at, $revoked_reason]);
+
+        echo json_encode(['status' => 'success', 'message' => 'Sertifikat saxlandı', 'id' => $id], JSON_UNESCAPED_UNICODE);
+        exit();
+    } catch (PDOException $e) {
+        http_response_code(500);
+        echo json_encode(['status' => 'error', 'message' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
 }
 
 if ($action === 'save_booking' && $_SERVER['REQUEST_METHOD'] === 'POST') {

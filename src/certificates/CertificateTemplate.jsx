@@ -7,6 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import './CertificateTemplate.css';
+import { ALEX_BRUSH_BASE64 } from './fonts/alexBrushBase64';
 
 async function generateQRDataUrl(text, size = 132) {
   try {
@@ -49,9 +50,11 @@ export default function CertificateTemplate({
     sig2Title      = 'Təlimçi',
     sig2Image      = '',
     sealImage      = '',
-    certNumber     = 'MA-000001',
+    certNumber,
     publicId       = '',
   } = data;
+
+  const finalCertNumber = data.certNumber || data.number || data.certificate_number || certNumber || 'MA-000001';
 
   const [qrDataUrl, setQrDataUrl] = useState('');
 
@@ -82,7 +85,7 @@ export default function CertificateTemplate({
       ref={wrapperRef}
       className="cert-wrapper cert-print-region"
       style={containerStyle}
-      data-cert-number={certNumber}
+      data-cert-number={finalCertNumber}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -92,7 +95,15 @@ export default function CertificateTemplate({
         style={{ width: '100%', height: '100%', display: 'block', aspectRatio: '1491 / 1055' }}
       >
   <defs>
-    
+    <style>{`
+      @font-face {
+        font-family: 'Alex Brush';
+        font-style: normal;
+        font-weight: 400;
+        src: url('data:font/truetype;charset=utf-8;base64,${ALEX_BRUSH_BASE64}') format('truetype');
+      }
+      @import url('https://fonts.googleapis.com/css2?family=Alex+Brush&family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+    `}</style>
     <linearGradient id="linear-gradient" x1="245.8" y1="1028" x2="246.8" y2="1027" gradientTransform="translate(-366540 1084568) scale(1491 -1055)" gradientUnits="userSpaceOnUse">
       <stop offset="0" stopColor="#f8f5ec"/>
       <stop offset=".5" stopColor="#f4efe2"/>
@@ -397,7 +408,7 @@ export default function CertificateTemplate({
       <text className="cls-48" x="745.5" y="365.7" textAnchor="middle"><tspan x="745.5" y="365.7">{headerTitle || 'CERTIFICATE'}</tspan></text>
       <text className="cls-28" x="745.5" y="418" textAnchor="middle" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '24px', letterSpacing: '0.45em', fontWeight: 600 }}>{headerSub || 'OF COMPLETION'}</text>
       <text className="cls-40" x="745.5" y="474" textAnchor="middle" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '13px', letterSpacing: '0.25em', fontWeight: 600 }}>{thisCertifies || 'THIS CERTIFIES THAT'}</text>
-      <text className="cls-41" x="740" y="582" textAnchor="middle" fill="#14254b" style={{ fontFamily: "'Alex Brush', 'Great Vibes', cursive", fontSize: '105px' }}>{recipientName || 'Ad Soyad'}</text>
+      <text className="cls-41" x="740" y="582" textAnchor="middle" fill="#14254b" style={{ fontFamily: "'Alex Brush', 'Great Vibes', 'Playfair Display', serif", fontSize: '105px' }}>{recipientName || 'Ad Soyad'}</text>
       <text className="cls-40" x="745.5" y="642" textAnchor="middle" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '18px', letterSpacing: '0.04em', fontWeight: 500 }}>{descLine1 || 'Monodoxia Academy tərəfindən təşkil edilən'}</text>
       <text x="740" y="682" textAnchor="middle" fill="#c09a5c" style={{ fontFamily: "'Playfair Display', 'Cinzel', serif", fontSize: '26px', fontWeight: 700, letterSpacing: '0.12em' }}>{`“${(courseName || 'TƏLİMİN ADI').toUpperCase()}”`}</text>
       <text className="cls-40" x="745.5" y="718" textAnchor="middle" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '18px', letterSpacing: '0.04em', fontWeight: 500 }}>{descLine2 || 'təlimi başa vurmuşdur.'}</text>
@@ -405,7 +416,7 @@ export default function CertificateTemplate({
         <line className="cls-28" x1="346.9" y1="591.7" x2="1133.1" y2="591.7"/>
         <rect className="cls-28" x="346.9" y="591.2" width="786.2" height="1"/>
       </g>
-      <text x="1405" y="95" textAnchor="end" fill="#14254b" style={{ fontFamily: "'Plus Jakarta Sans', monospace, sans-serif", fontSize: '18px', fontWeight: 600, letterSpacing: '0.05em' }}>№: {certNumber || 'MA-000001'}</text>
+      <text x="1405" y="95" textAnchor="end" fill="#14254b" style={{ fontFamily: "'Plus Jakarta Sans', monospace, sans-serif", fontSize: '18px', fontWeight: 600, letterSpacing: '0.05em' }}>№: {finalCertNumber}</text>
       <g>
         <text x="110" y="956" fill="#14254b" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '13px', fontWeight: 600, letterSpacing: '0.08em' }}>{`${durationLabel || 'TƏLİMİN MÜDDƏTİ / SAAT'} : ${durationValue || '00 saat'}`}</text>
         <text x="1363" y="956" textAnchor="end" fill="#14254b" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '13px', fontWeight: 600, letterSpacing: '0.08em' }}>{`${dateLabel || 'VERİLMƏ TARİXİ'}: ${dateValue || 'DD.MM.YYYY'}`}</text>
