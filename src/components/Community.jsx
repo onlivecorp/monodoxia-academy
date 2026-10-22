@@ -154,25 +154,39 @@ export default function Community() {
           <div className="lg:col-span-7 space-y-4">
             {topicsList.length > 0 ? (
               [...topicsList].sort((a, b) => {
+                const aWeekly = Boolean(a.isWeekly || (typeof a.badge === 'string' && a.badge.includes('Həftənin Mövzusu')));
+                const bWeekly = Boolean(b.isWeekly || (typeof b.badge === 'string' && b.badge.includes('Həftənin Mövzusu')));
+                if (aWeekly !== bWeekly) return aWeekly ? -1 : 1;
                 const aPin = Boolean(a.pinned || (typeof a.badge === 'string' && a.badge.includes('📌')));
                 const bPin = Boolean(b.pinned || (typeof b.badge === 'string' && b.badge.includes('📌')));
                 if (aPin === bPin) return 0;
                 return aPin ? -1 : 1;
               }).map(topic => {
+                const isWeekly = Boolean(topic.isWeekly || (typeof topic.badge === 'string' && topic.badge.includes('Həftənin Mövzusu')));
                 const isLiked = isTopicLiked(topic.id);
                 const commentsCount = (Array.isArray(topic.comments) ? topic.comments.length : 0) || topic.repliesCount || 0;
                 return (
                   <div
                     key={topic.id}
                     onClick={() => openTopicDetail(topic)}
-                    className="group relative bg-white/85 hover:bg-white p-6 sm:p-7 rounded-2xl border border-[#e2d9c8]/75 hover:border-[#c5a059]/70 shadow-sm hover:shadow-2xl hover:shadow-[#c5a059]/12 transition-all duration-300 hover:-translate-y-1 overflow-hidden cursor-pointer"
+                    className={`group relative p-6 sm:p-7 rounded-2xl border transition-all duration-300 hover:-translate-y-1 overflow-hidden cursor-pointer ${
+                      isWeekly
+                        ? 'bg-gradient-to-br from-amber-50/70 via-white to-amber-50/40 border-[#c5a059] shadow-md shadow-[#c5a059]/10 hover:shadow-2xl hover:shadow-[#c5a059]/20'
+                        : 'bg-white/85 hover:bg-white border-[#e2d9c8]/75 hover:border-[#c5a059]/70 shadow-sm hover:shadow-2xl hover:shadow-[#c5a059]/12'
+                    }`}
                   >
                     {/* Top Ambient Shimmer */}
                     <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#c5a059] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                     <div className="flex items-center justify-between text-xs text-slate-500 mb-2.5 flex-wrap gap-2">
                       <div className="flex items-center gap-2">
-                        {topic.pinned && (
+                        {isWeekly && (
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#070f1e] text-[#e5c57d] border border-[#c5a059] flex items-center gap-1 shadow-sm">
+                            <span className="material-symbols-outlined text-[13px] text-[#e5c57d]">star</span>
+                            <span>Həftənin Mövzusu</span>
+                          </span>
+                        )}
+                        {topic.pinned && !isWeekly && (
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-800 border border-amber-300/40 flex items-center gap-1">
                             <span className="material-symbols-outlined text-[12px]">push_pin</span>
                             <span>Sabit</span>

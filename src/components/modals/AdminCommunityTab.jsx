@@ -13,9 +13,13 @@ export default function AdminCommunityTab() {
     updateTopic,
     deleteTopic,
     pinTopic,
+    setWeeklyTopic,
+    homeContent,
     categoriesList = [],
     showToast
   } = useApp();
+
+  const weeklyTopicId = homeContent?.community?.weeklyTopicId;
 
   // Search, Filter & Pagination
   const [searchTerm, setSearchTerm] = useState('');
@@ -113,7 +117,7 @@ export default function AdminCommunityTab() {
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <h4 className="admin-section-title">İcma Forumu və Məzmun Moderasiyası</h4>
-          <p className="admin-section-subtitle">Yeni icma müzakirələri yaradın, mövcud mövzuları redaktə edin, sabitləyin və ya silin</p>
+          <p className="admin-section-subtitle">Yeni icma müzakirələri yaradın, mövcud mövzuları redaktə edin, sabitləyin və ya həftənin mövzusu təyin edin</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span className="admin-count-badge">Cəmi: {communityTopics.length} mövzu</span>
@@ -126,6 +130,82 @@ export default function AdminCommunityTab() {
             <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>add_circle</span>
             <span>Yeni Mövzu</span>
           </button>
+        </div>
+      </div>
+
+      {/* Weekly Topic Quick Setter Card */}
+      <div style={{
+        padding: '16px 20px',
+        borderRadius: '16px',
+        background: 'linear-gradient(135deg, #071326 0%, #0d213f 100%)',
+        border: '1px solid rgba(197, 160, 89, 0.4)',
+        boxShadow: '0 10px 25px -5px rgba(7, 19, 38, 0.25)',
+        color: '#ffffff',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '14px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: '260px', flex: 1 }}>
+          <div style={{
+            width: '40px',
+            height: '40px',
+            borderRadius: '12px',
+            background: 'rgba(197, 160, 89, 0.2)',
+            border: '1px solid rgba(197, 160, 89, 0.4)',
+            color: '#e5c57d',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
+          }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>star</span>
+          </div>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#e5c57d', fontWeight: 800 }}>
+                Həftənin Mövzusu Təyini
+              </span>
+            </div>
+            <div style={{ fontSize: '13px', fontWeight: 600, color: '#f8fafc', marginTop: '2px' }}>
+              {(() => {
+                const cur = communityTopics.find(t => t.id === weeklyTopicId || t.isWeekly || t.badge?.includes('Həftənin Mövzusu'));
+                return cur ? `Seçilmiş: "${cur.title}"` : 'Hazırda xüsusi mövzu seçilməyib (default mövzu aktivdir)';
+              })()}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <select
+            value={(() => {
+              const cur = communityTopics.find(t => t.id === weeklyTopicId || t.isWeekly || t.badge?.includes('Həftənin Mövzusu'));
+              return cur ? cur.id : '';
+            })()}
+            onChange={(e) => {
+              const targetId = e.target.value;
+              if (targetId) setWeeklyTopic(targetId);
+            }}
+            style={{
+              padding: '8px 12px',
+              borderRadius: '10px',
+              fontSize: '12px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: '1px solid rgba(197, 160, 89, 0.4)',
+              color: '#ffffff',
+              outline: 'none',
+              maxWidth: '320px',
+              cursor: 'pointer'
+            }}
+          >
+            <option value="" style={{ color: '#071326' }}>-- Həftənin Mövzusunu Seçin --</option>
+            {communityTopics.map(t => (
+              <option key={t.id} value={t.id} style={{ color: '#071326' }}>
+                {t.title.length > 50 ? t.title.slice(0, 50) + '...' : t.title}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -414,6 +494,25 @@ export default function AdminCommunityTab() {
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>edit</span>
                   <span>Redaktə</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setWeeklyTopic(t.id)}
+                  className="admin-btn-secondary"
+                  style={{
+                    padding: '7px 11px',
+                    fontSize: '11px',
+                    color: (t.id === weeklyTopicId || t.isWeekly || t.badge?.includes('Həftənin Mövzusu')) ? '#071326' : '#775a19',
+                    backgroundColor: (t.id === weeklyTopicId || t.isWeekly || t.badge?.includes('Həftənin Mövzusu')) ? '#fef3c7' : 'transparent',
+                    borderColor: '#c5a059',
+                    fontWeight: 700
+                  }}
+                  title="Həftənin Mövzusu Təyin Et / Ləğv Et"
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>
+                    {(t.id === weeklyTopicId || t.isWeekly || t.badge?.includes('Həftənin Mövzusu')) ? 'star' : 'star_outline'}
+                  </span>
+                  <span>{(t.id === weeklyTopicId || t.isWeekly || t.badge?.includes('Həftənin Mövzusu')) ? 'Həftənin Mövzusu' : 'Həftənin Et'}</span>
                 </button>
                 <button
                   type="button"

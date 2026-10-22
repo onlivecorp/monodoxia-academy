@@ -63,17 +63,30 @@ export default function CommunityPage() {
 
     return matchesTag && matchesSearch;
   }).sort((a, b) => {
+    const aWeekly = Boolean(a.isWeekly || (typeof a.badge === 'string' && a.badge.includes('Həftənin Mövzusu')));
+    const bWeekly = Boolean(b.isWeekly || (typeof b.badge === 'string' && b.badge.includes('Həftənin Mövzusu')));
+    if (aWeekly !== bWeekly) return aWeekly ? -1 : 1;
     const aPin = Boolean(a.pinned || (typeof a.badge === 'string' && a.badge.includes('📌')));
     const bPin = Boolean(b.pinned || (typeof b.badge === 'string' && b.badge.includes('📌')));
     if (aPin === bPin) return 0;
     return aPin ? -1 : 1;
   });
 
+  const weeklyTopic = safeTopics.find(t => t.id === community.weeklyTopicId || t.isWeekly || t.badge?.includes('Həftənin Mövzusu'));
+
   const handleCreateTopic = () => {
     if (!currentUser) {
       setAuthModalOpen(true);
     } else {
       setNewTopicModalOpen(true);
+    }
+  };
+
+  const handleWeeklyTopicClick = () => {
+    if (weeklyTopic) {
+      openTopicDetail(weeklyTopic);
+    } else {
+      handleCreateTopic();
     }
   };
 
@@ -351,10 +364,10 @@ export default function CommunityPage() {
                     {getLocalized(community, 'weeklyDesc', currentLang, defaultLang) || 'Bu həftə mentorlarımızın fasilitasiyası ilə emosional reaktivliyi idarə etməyin nevrobioloji yollarını müzakirə edirik.'}
                   </p>
                   <button
-                    onClick={handleCreateTopic}
+                    onClick={handleWeeklyTopicClick}
                     className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#c5a059] via-[#e5c57d] to-[#b38f46] text-[#071326] font-semibold text-xs tracking-wider uppercase shadow-lg shadow-[#c5a059]/20 hover:shadow-xl hover:shadow-[#c5a059]/35 hover:scale-[1.02] active:scale-[0.98] transition-all text-center cursor-pointer"
                   >
-                    {getLocalized(community, 'weeklyBtnText', currentLang, defaultLang) || 'Müzakirəyə Qoşul'}
+                    {weeklyTopic ? 'Müzakirəni Aç və Şərh Yaz' : (getLocalized(community, 'weeklyBtnText', currentLang, defaultLang) || 'Müzakirəyə Qoşul')}
                   </button>
                 </div>
               </div>

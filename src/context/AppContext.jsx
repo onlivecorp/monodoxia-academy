@@ -1778,6 +1778,87 @@ export function AppProvider({ children }) {
     showToast('Mövzu uğurla silindi', 'info');
   };
 
+  const setWeeklyTopic = (topicId) => {
+    const selected = (communityTopics || []).find(t => t.id === topicId);
+    if (!selected) return;
+
+    // Toggle: if already weekly, allow unsetting
+    const isAlreadyWeekly = Boolean(selected.isWeekly || selected.badge?.includes('Həftənin Mövzusu'));
+
+    let updatedList = [];
+    let updatedTarget = null;
+
+    setCommunityTopics(prev => {
+      const next = prev.map(t => {
+        if (t.id === topicId) {
+          const nextWeekly = !isAlreadyWeekly;
+          let nextBadge = t.badge || 'İcma Müzakirəsi';
+          if (nextWeekly) {
+            nextBadge = '🌟 Həftənin Mövzusu';
+          } else {
+            nextBadge = nextBadge.replace('🌟 Həftənin Mövzusu', 'İcma Müzakirəsi').trim() || 'İcma Müzakirəsi';
+          }
+          updatedTarget = {
+            ...t,
+            isWeekly: nextWeekly,
+            badge: nextBadge,
+            pinned: nextWeekly ? true : t.pinned
+          };
+          return updatedTarget;
+        } else if (!isAlreadyWeekly) {
+          // Only one topic can be the Weekly topic
+          if (t.isWeekly || t.badge?.includes('Həftənin Mövzusu')) {
+            return {
+              ...t,
+              isWeekly: false,
+              badge: (t.badge || '').replace('🌟 Həftənin Mövzusu', 'İcma Müzakirəsi').trim() || 'İcma Müzakirəsi'
+            };
+          }
+        }
+        return t;
+      });
+      updatedList = next;
+      safeSetLocalStorage('monodoxia_admin_topics', next);
+      return next;
+    });
+
+    if (updatedTarget) {
+      apiCall('save_community_post', updatedTarget);
+    }
+
+    // Sync with homeContent.community weekly section so it reflects across the entire platform
+    setHomeContent(prev => {
+      const prevComm = prev?.community || {};
+      const newWeeklyTitle = !isAlreadyWeekly ? selected.title : prevComm.weeklyTitle;
+      const newWeeklyDesc = !isAlreadyWeekly ? (selected.content || selected.snippet || selected.desc) : prevComm.weeklyDesc;
+      const newWeeklyTopicId = !isAlreadyWeekly ? selected.id : null;
+
+      const nextComm = {
+        ...prevComm,
+        weeklyTopicId: newWeeklyTopicId,
+        ...(newWeeklyTitle ? { weeklyTitle: newWeeklyTitle } : {}),
+        ...(newWeeklyDesc ? { weeklyDesc: newWeeklyDesc } : {})
+      };
+
+      const nextContent = {
+        ...prev,
+        community: nextComm
+      };
+      try {
+        localStorage.setItem('monodoxia_home_content', JSON.stringify(nextContent));
+      } catch (e) {}
+
+      apiCall('save_cms_block', { block_key: 'community', content: nextComm });
+      return nextContent;
+    });
+
+    if (!isAlreadyWeekly) {
+      showToast(`"${selected.title.slice(0, 35)}..." Həftənin Mövzusu təyin edildi!`, 'success');
+    } else {
+      showToast('Həftənin mövzusu statusu ləğv edildi', 'info');
+    }
+  };
+
   const pinTopic = (topicId) => {
     let updatedItem = null;
     setCommunityTopics(prev => {
@@ -3507,7 +3588,7 @@ export function AppProvider({ children }) {
       selectedTopic, setSelectedTopic,
       openTopicDetail, closeTopicDetail,
       likeTopic, isTopicLiked, addCommentToTopic,
-      addTopic, deleteTopic, pinTopic,
+      addTopic, updateTopic, deleteTopic, pinTopic, setWeeklyTopic,
       registerEvent, joinClubTier,
       adminModalOpen, setAdminModalOpen,
       adminModalTab, setAdminModalTab,
@@ -3550,7 +3631,6 @@ export function AppProvider({ children }) {
       categoriesList, getCategoryLabel, addCategory, updateCategory, deleteCategory,
       updateClubTier, addClubTier, deleteClubTier,
       addEvent, updateEvent, deleteEvent,
-      updateTopic,
       updatePlatformSettings,
       updateSqlConfig,
       testSqlConnection,
