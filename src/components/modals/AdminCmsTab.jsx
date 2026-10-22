@@ -400,6 +400,7 @@ export default function AdminCmsTab() {
     addEvent,
     updateEvent,
     deleteEvent,
+    updatePlatformSettings,
     showToast,
     navigateTo,
     setAdminModalOpen
@@ -1187,6 +1188,16 @@ export default function AdminCmsTab() {
 
   const saveBlock = (blockKey, data) => {
     updateHomeBlock(blockKey, data);
+    if (blockKey === 'footer') {
+      const emailVal = data?.email || data?.translations?.az?.email;
+      const phoneVal = data?.phone || data?.translations?.az?.phone;
+      if (updatePlatformSettings) {
+        updatePlatformSettings({
+          ...(emailVal ? { contactEmail: emailVal, contact_email: emailVal } : {}),
+          ...(phoneVal ? { contactPhone: phoneVal, contact_phone: phoneVal } : {})
+        });
+      }
+    }
     showToast('Məzmun yadda saxlandı!', 'success');
   };
 
