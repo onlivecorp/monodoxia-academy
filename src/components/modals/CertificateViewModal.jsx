@@ -241,24 +241,24 @@ export default function CertificateViewModal() {
         border: '1px solid rgba(255,255,255,0.1)',
         overflow: 'hidden',
         width: '100%',
-        maxWidth: CERT_W * displayScale + 40,
+        maxWidth: 1040,
         boxShadow: '0 25px 80px rgba(0,0,0,0.5)'
       }}>
-        {/* Hidden full-scale cert for export */}
-        <div style={{ position: 'fixed', top: -9999, left: -9999, zIndex: -1 }}>
-          <CertificateTemplate
-            data={cert.fields || {}}
-            verifyUrl={verifyUrl}
-            wrapperRef={certRef}
-            forExport={true}
-            scale={1}
-          />
+        {/* Hidden full-scale cert for export (exact 1491x1055) */}
+        <div style={{ position: 'fixed', top: -9999, left: -9999, zIndex: -1, width: 1491, height: 1055 }}>
+          <div ref={certRef} style={{ width: 1491, height: 1055 }}>
+            <CertificateTemplate
+              data={cert.fields || {}}
+              verifyUrl={verifyUrl}
+              forExport={true}
+            />
+          </div>
         </div>
 
-        {/* Visible scaled preview */}
+        {/* Visible preview fitting exact certificate bounds */}
         <div style={{
-          width: CERT_W * displayScale,
-          height: CERT_H * displayScale,
+          width: '100%',
+          aspectRatio: '1491 / 1055',
           overflow: 'hidden',
           borderRadius: 8,
           border: '1px solid rgba(255,255,255,0.05)',
@@ -268,7 +268,6 @@ export default function CertificateViewModal() {
           <CertificateTemplate
             data={cert.fields || {}}
             verifyUrl={verifyUrl}
-            scale={displayScale}
           />
         </div>
       </div>

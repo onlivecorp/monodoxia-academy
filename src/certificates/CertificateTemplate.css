@@ -39,25 +39,22 @@
   --cert-font-title: 'Playfair Display', Georgia, serif;
   --cert-font-body:  'Plus Jakarta Sans', system-ui, sans-serif;
 
-  /* ── Dimensions (A4 landscape: 297x210mm @ 96dpi = 1123x794px) ── */
-  --cert-w: 1123px;
-  --cert-h: 794px;
+  /* ── Native dimensions: 1491 x 1055 (A4 landscape) ── */
+  --cert-w: 1491px;
+  --cert-h: 1055px;
 }
 
 .cert-wrapper {
   position: relative;
-  width: var(--cert-w);
-  height: var(--cert-h);
-  background: linear-gradient(
-    135deg,
-    var(--cert-bg-start) 0%,
-    var(--cert-bg-mid) 50%,
-    var(--cert-bg-end) 100%
-  );
+  width: 100%;
+  aspect-ratio: 1491 / 1055;
+  height: auto;
+  max-width: 100%;
   overflow: hidden;
-  font-family: var(--cert-font-body);
   box-sizing: border-box;
-  flex-shrink: 0;
+  display: block;
+  line-height: 0;
+  margin: 0 auto;
 }
 
 .cert-border {

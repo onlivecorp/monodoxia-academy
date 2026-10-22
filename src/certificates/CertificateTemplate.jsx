@@ -61,12 +61,12 @@ export default function CertificateTemplate({
     maxWidth: '1491px',
     aspectRatio: '1491 / 1055',
     margin: '0 auto',
-    boxShadow: '0 20px 50px rgba(15, 31, 74, 0.25)',
+    boxShadow: '0 10px 40px rgba(15, 31, 74, 0.2)',
     borderRadius: '4px',
     overflow: 'hidden',
-    backgroundColor: '#f8f5ec',
-    ...(scale !== 1 ? { transform: `scale(${scale})`, transformOrigin: 'top left' } : {}),
-    ...(forExport ? { printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact' } : {})
+    display: 'block',
+    lineHeight: 0,
+    ...(forExport ? { width: '1491px', height: '1055px', aspectRatio: 'unset', printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact' } : {})
   };
 
   return (
@@ -76,7 +76,13 @@ export default function CertificateTemplate({
       style={containerStyle}
       data-cert-number={certNumber}
     >
-      <svg xmlns="http://www.w3.org/2000/svg" version="1.1"  xmlnsXlink="http://www.w3.org/1999/xlink" viewBox="0 0 1491 1055">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        version="1.1"
+        xmlnsXlink="http://www.w3.org/1999/xlink"
+        viewBox="0 0 1491 1055"
+        style={{ width: '100%', height: '100%', display: 'block', aspectRatio: '1491 / 1055' }}
+      >
   <defs>
     
     <linearGradient id="linear-gradient" x1="245.8" y1="1028" x2="246.8" y2="1027" gradientTransform="translate(-366540 1084568) scale(1491 -1055)" gradientUnits="userSpaceOnUse">

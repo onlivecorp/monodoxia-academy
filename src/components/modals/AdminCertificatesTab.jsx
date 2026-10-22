@@ -13,8 +13,8 @@ import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import { useApp } from '../../context/AppContext';
 import CertificateTemplate from '../../certificates/CertificateTemplate';
 
-const CERT_W = 1123;
-const CERT_H = 794;
+const CERT_W = 1491;
+const CERT_H = 1055;
 const PREVIEW_SCALE = 0.38;
 const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
 
@@ -829,18 +829,20 @@ export default function AdminCertificatesTab() {
                 overflow: 'hidden', boxShadow: '0 10px 40px rgba(0,0,0,0.3)'
               }}>
                 <div style={{
-                  width: CERT_W * PREVIEW_SCALE,
-                  height: CERT_H * PREVIEW_SCALE,
-                  overflow: 'hidden', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)'
+                  width: '100%',
+                  aspectRatio: '1491 / 1055',
+                  overflow: 'hidden',
+                  borderRadius: 6,
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
                 }}>
                   <CertificateTemplate
                     data={fields}
                     verifyUrl="https://monodoxia.academy/certificates/verify/preview"
-                    scale={PREVIEW_SCALE}
                   />
                 </div>
                 <div style={{ marginTop: 10, fontSize: 10, color: '#64748b', textAlign: 'center' }}>
-                  A4 Yatay · {CERT_W}×{CERT_H}px · Ölçək {Math.round(PREVIEW_SCALE * 100)}%
+                  A4 Yatay · 1491×1055px (Orijinal Vektor)
                 </div>
               </div>
             </div>

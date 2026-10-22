@@ -213,13 +213,14 @@ export default function CertificateVerifyPage({ publicId, certId: certIdProp }) 
 
             {/* Certificate Preview */}
             <div style={{
-              background: '#fff', borderRadius: 16, padding: 24,
+              background: '#fff', borderRadius: 16, padding: 16,
               boxShadow: '0 8px 40px rgba(0,0,0,0.1)', border: '1px solid #e6dfc6',
               overflow: 'hidden', marginBottom: 20
             }}>
               <div style={{
-                width: 1123 * scale,
-                height: 794 * scale,
+                width: '100%',
+                maxWidth: 1000,
+                aspectRatio: '1491 / 1055',
                 overflow: 'hidden',
                 margin: '0 auto',
                 borderRadius: 8,
@@ -228,7 +229,6 @@ export default function CertificateVerifyPage({ publicId, certId: certIdProp }) 
                 <CertificateTemplate
                   data={cert.fields || {}}
                   verifyUrl={verifyUrl}
-                  scale={scale}
                 />
               </div>
             </div>
