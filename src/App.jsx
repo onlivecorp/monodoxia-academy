@@ -237,33 +237,33 @@ function AppContent() {
   };
 
   return (
-    <div className="bg-background text-on-surface antialiased selection:bg-secondary-fixed selection:text-on-secondary-fixed min-h-screen flex flex-col justify-between">
+    <div className="bg-background text-on-surface antialiased selection:bg-secondary-fixed selection:text-on-secondary-fixed min-h-screen flex flex-col justify-between overflow-x-hidden w-full max-w-full">
       <ToastContainer />
 
       {/* Top Banner if Maintenance Mode is active and Admin is in bypass mode */}
       {isMaintenanceModeActive && isAdminUser && (
-        <div className="bg-amber-600 text-white text-xs font-bold py-2 px-4 flex items-center justify-between gap-3 shadow-sm relative z-30 flex-wrap">
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[16px]">build</span>
-            <span>TEXNİKİ QULLUQ REJİMİ AKTİVDİR — Sayt hazırda yalnız sizin üçün açıqdır (Admin Bypass). Ziyarətçilər Təmir Ekranını görür.</span>
+        <div className="bg-amber-600 text-white text-xs font-bold py-2 px-3 sm:px-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 shadow-sm relative z-30 w-full max-w-full overflow-hidden">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="material-symbols-outlined text-[16px] shrink-0">build</span>
+            <span className="leading-snug">TEXNİKİ QULLUQ REJİMİ AKTİVDİR — Sayt hazırda yalnız sizin üçün açıqdır (Admin Bypass).</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
             <button
               onClick={() => {
                 sessionStorage.removeItem('monodoxia_admin_bypass');
                 setAdminBypass(false);
               }}
-              className="bg-white hover:bg-amber-50 text-amber-900 px-2.5 py-1 rounded text-[11px] font-bold transition-colors cursor-pointer flex items-center gap-1 shadow-sm"
+              className="bg-white hover:bg-amber-50 text-amber-900 px-2.5 py-1 rounded text-[11px] font-bold transition-colors cursor-pointer flex items-center gap-1 shadow-sm whitespace-nowrap"
             >
               <span className="material-symbols-outlined text-[14px]">lock</span>
-              <span>Təmir Ekranına Qayıt</span>
+              <span>Təmir Ekranı</span>
             </button>
             <button
               onClick={() => setAdminModalOpen(true)}
-              className="bg-amber-800 hover:bg-amber-900 text-white px-2.5 py-1 rounded text-[11px] font-bold transition-colors cursor-pointer flex items-center gap-1"
+              className="bg-amber-800 hover:bg-amber-900 text-white px-2.5 py-1 rounded text-[11px] font-bold transition-colors cursor-pointer flex items-center gap-1 whitespace-nowrap"
             >
               <span className="material-symbols-outlined text-[14px]">settings</span>
-              <span>Rejimi Dəyiş</span>
+              <span>Rejim</span>
             </button>
           </div>
         </div>
