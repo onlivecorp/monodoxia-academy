@@ -29,8 +29,55 @@ async function ensureFontsLoaded() {
   await new Promise(r => setTimeout(r, 150));
 }
 
+async function renderSvgToCanvas(svgElement, width = CERT_W, height = CERT_H, scale = 2) {
+  const clone = svgElement.cloneNode(true);
+  clone.setAttribute('width', String(width));
+  clone.setAttribute('height', String(height));
+  clone.removeAttribute('style');
+  clone.style.width = `${width}px`;
+  clone.style.height = `${height}px`;
+
+  const svgString = new XMLSerializer().serializeToString(clone);
+  const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = width * scale;
+      canvas.height = height * scale;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#f8f5ec';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(url);
+      resolve(canvas);
+    };
+    img.onerror = (err) => {
+      URL.revokeObjectURL(url);
+      reject(err);
+    };
+    img.src = url;
+  });
+}
+
 async function captureCertificateCanvas(element) {
   await ensureFontsLoaded();
+
+  const svgEl = element?.querySelector?.('svg');
+  if (svgEl) {
+    try {
+      const canvas = await renderSvgToCanvas(svgEl, CERT_W, CERT_H, 2);
+      if (canvas) return canvas;
+    } catch (e) {
+      console.warn('SVG direct rasterization failed, falling back to html2canvas', e);
+    }
+  }
+
   const html2canvas = (await import('html2canvas')).default;
   return await html2canvas(element, {
     scale: 2,
@@ -268,18 +315,29 @@ export default function CertificateViewModal() {
               borderRadius: 16,
               padding: 20,
               border: '1px solid rgba(255,255,255,0.1)',
-              overflow: 'hidden',
               width: '100%',
               maxWidth: 1040,
-              boxShadow: '0 25px 80px rgba(0,0,0,0.5)'
+              flexShrink: 0,
+              boxShadow: '0 25px 80px rgba(0,0,0,0.5)',
+              display: 'flex',
+              flexDirection: 'column'
             }}>
-              {/* Full-scale cert for export (exact 1491x1055) kept in DOM tree for font rasterization */}
-              <div style={{ position: 'fixed', top: 0, left: 0, zIndex: -999, width: 1491, height: 1055, opacity: 0, pointerEvents: 'none' }}>
+              {/* Full-scale cert for export (exact 1491x1055) kept in DOM tree off-screen with full opacity */}
+              <div style={{
+                position: 'fixed',
+                left: '-10000px',
+                top: 0,
+                width: 1491,
+                height: 1055,
+                opacity: 1,
+                pointerEvents: 'none'
+              }}>
                 <div ref={certRef} style={{ width: 1491, height: 1055 }}>
                   <CertificateTemplate
                     data={certData}
                     verifyUrl={verifyUrl}
                     forExport={true}
+                    idPrefix="cert-export"
                   />
                 </div>
               </div>
@@ -287,15 +345,18 @@ export default function CertificateViewModal() {
               {/* Visible preview fitting exact certificate bounds without cutting */}
               <div style={{
                 width: '100%',
+                aspectRatio: '1491 / 1055',
                 borderRadius: 8,
                 border: '1px solid rgba(255,255,255,0.05)',
                 position: 'relative',
                 margin: '0 auto',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                background: '#f8f5ec'
               }}>
                 <CertificateTemplate
                   data={certData}
                   verifyUrl={verifyUrl}
+                  idPrefix="cert-modal"
                 />
               </div>
             </div>
@@ -307,6 +368,7 @@ export default function CertificateViewModal() {
                   data={certData}
                   verifyUrl={verifyUrl}
                   forExport={true}
+                  idPrefix="cert-print"
                 />
               </div>,
               document.body

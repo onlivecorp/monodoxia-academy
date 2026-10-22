@@ -331,6 +331,7 @@ export default function CertificateVerifyPage({ publicId, certId: certIdProp }) 
                     publicId: cert.publicId
                   }}
                   verifyUrl={verifyUrl}
+                  idPrefix="verify-page"
                 />
               </div>
             </div>

@@ -28,8 +28,12 @@ export default function CertificateTemplate({
   verifyUrl = '',
   scale = 1,
   forExport = false,
-  wrapperRef = null
+  wrapperRef = null,
+  idPrefix
 }) {
+  const reactId = React.useId ? React.useId().replace(/[^a-zA-Z0-9]/g, '') : 'c1';
+  const p = idPrefix || `cert-${reactId}`;
+
   const {
     headerTitle    = 'CERTIFICATE',
     headerSub      = 'OF COMPLETION',
@@ -70,13 +74,14 @@ export default function CertificateTemplate({
     position: 'relative',
     width: '100%',
     maxWidth: '1491px',
+    aspectRatio: '1491 / 1055',
     margin: '0 auto',
     boxShadow: '0 10px 40px rgba(15, 31, 74, 0.2)',
     borderRadius: '4px',
     overflow: 'hidden',
     display: 'block',
     lineHeight: 0,
-    ...(forExport ? { width: '1491px', height: '1055px', minWidth: '1491px', minHeight: '1055px', printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact' } : {})
+    ...(forExport ? { width: '1491px', height: '1055px', minWidth: '1491px', minHeight: '1055px', aspectRatio: '1491 / 1055', printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact' } : {})
   };
 
   return (
@@ -87,13 +92,17 @@ export default function CertificateTemplate({
       data-cert-number={finalCertNumber}
     >
       <svg
+        id={p}
         xmlns="http://www.w3.org/2000/svg"
         version="1.1"
         xmlnsXlink="http://www.w3.org/1999/xlink"
         viewBox="0 0 1491 1055"
+        width="1491"
+        height="1055"
         style={{
           width: '100%',
           height: forExport ? '1055px' : 'auto',
+          aspectRatio: '1491 / 1055',
           display: 'block'
         }}
       >
@@ -107,120 +116,120 @@ export default function CertificateTemplate({
       }
       @import url('https://fonts.googleapis.com/css2?family=Alex+Brush&family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
-      .cls-1 { fill: url(#linear-gradient-15); }
-      .cls-2 { fill: url(#linear-gradient-13); }
-      .cls-3 { fill: #132448; }
-      .cls-4 { filter: url(#drop-shadow-2); }
-      .cls-5 { fill: #c09a5c; }
-      .cls-6 { fill: #11203a; }
-      .cls-7 { fill: url(#linear-gradient-10); }
-      .cls-8 { fill: url(#linear-gradient-12); }
-      .cls-9 { fill: #132344; }
-      .cls-10 { fill: #0e1c2d; }
-      .cls-11 { fill: #122241; }
-      .cls-12, .cls-13 { fill: #fff; }
-      .cls-14 { fill: #101f38; }
-      .cls-15 { fill: #12223f; }
-      .cls-16, .cls-17 { fill: none; }
-      .cls-18 { fill: url(#linear-gradient-4); }
-      .cls-19 { fill: #11213d; }
-      .cls-13 { filter: url(#drop-shadow-3); }
-      .cls-20 { fill: #0e1c2e; }
-      .cls-21 { fill: url(#radial-gradient); }
-      .cls-22 { fill: #11213c; }
-      .cls-23 { fill: #101f37; }
-      .cls-24 { fill: url(#linear-gradient-3); }
-      .cls-25 { clip-path: url(#clippath-1); }
-      .cls-26 { filter: url(#drop-shadow-1); }
-      .cls-27 { fill: url(#linear-gradient-5); }
-      .cls-17 { stroke: url(#linear-gradient-2); stroke-width: 2px; }
-      .cls-28 { fill: #b29c75; }
-      .cls-29 { fill: url(#linear-gradient-8); }
-      .cls-30 { opacity: .1; }
-      .cls-31 { fill: #122240; }
-      .cls-32 { fill: #132345; }
-      .cls-33 { fill: #0e1c2c; }
-      .cls-34 { clip-path: url(#clippath-3); }
-      .cls-35 { fill: #101e34; }
-      .cls-36 { fill: #0f1e33; }
-      .cls-37 { fill: url(#radial-gradient-2); }
-      .cls-38 { fill: url(#linear-gradient-14); }
-      .cls-39 { fill: #0f1d2f; }
-      .cls-40, .cls-41 { fill: #14254b; }
-      .cls-42 { fill: url(#linear-gradient-7); }
-      .cls-43 { fill: #101f35; }
-      .cls-44 { fill: #122242; }
-      .cls-45 { fill: url(#linear-gradient-9); }
-      .cls-46 { fill: #0f1e32; }
-      .cls-47 { fill: url(#linear-gradient-11); }
-      .cls-48 { fill: #0f1f4a; font-family: PlayfairDisplay-Regular, 'Playfair Display'; font-size: 100px; isolation: isolate; letter-spacing: .2em; }
-      .cls-41 { font-family: 'Alex Brush', 'Great Vibes', 'Playfair Display', serif; font-size: 105.9px; }
-      .cls-49 { fill: url(#linear-gradient-6); }
-      .cls-50 { fill: #12213e; }
-      .cls-51 { clip-path: url(#clippath-2); }
-      .cls-52 { fill: #101f36; }
-      .cls-53 { fill: #122343; }
-      .cls-54 { fill: #0f1d30; }
-      .cls-55 { fill: url(#linear-gradient-16); }
-      .cls-56 { fill: #112039; }
-      .cls-57 { fill: url(#linear-gradient); }
-      .cls-58 { clip-path: url(#clippath); }
-      .cls-59 { fill: #0f1d31; }
-      .cls-60 { fill: #0e1d2f; }
-      .cls-61 { fill: #11203b; }
-      .cls-62 { fill: #0e1d2e; }
+      #${p} .cls-1 { fill: url(#${p}-linear-gradient-15); }
+      #${p} .cls-2 { fill: url(#${p}-linear-gradient-13); }
+      #${p} .cls-3 { fill: #132448; }
+      #${p} .cls-4 { filter: url(#${p}-drop-shadow-2); }
+      #${p} .cls-5 { fill: #c09a5c; }
+      #${p} .cls-6 { fill: #11203a; }
+      #${p} .cls-7 { fill: url(#${p}-linear-gradient-10); }
+      #${p} .cls-8 { fill: url(#${p}-linear-gradient-12); }
+      #${p} .cls-9 { fill: #132344; }
+      #${p} .cls-10 { fill: #0e1c2d; }
+      #${p} .cls-11 { fill: #122241; }
+      #${p} .cls-12, #${p} .cls-13 { fill: #fff; }
+      #${p} .cls-14 { fill: #101f38; }
+      #${p} .cls-15 { fill: #12223f; }
+      #${p} .cls-16, #${p} .cls-17 { fill: none; }
+      #${p} .cls-18 { fill: url(#${p}-linear-gradient-4); }
+      #${p} .cls-19 { fill: #11213d; }
+      #${p} .cls-13 { filter: url(#${p}-drop-shadow-3); }
+      #${p} .cls-20 { fill: #0e1c2e; }
+      #${p} .cls-21 { fill: url(#${p}-radial-gradient); }
+      #${p} .cls-22 { fill: #11213c; }
+      #${p} .cls-23 { fill: #101f37; }
+      #${p} .cls-24 { fill: url(#${p}-linear-gradient-3); }
+      #${p} .cls-25 { clip-path: url(#${p}-clippath-1); }
+      #${p} .cls-26 { filter: url(#${p}-drop-shadow-1); }
+      #${p} .cls-27 { fill: url(#${p}-linear-gradient-5); }
+      #${p} .cls-17 { stroke: url(#${p}-linear-gradient-2); stroke-width: 2px; }
+      #${p} .cls-28 { fill: #b29c75; }
+      #${p} .cls-29 { fill: url(#${p}-linear-gradient-8); }
+      #${p} .cls-30 { opacity: .1; }
+      #${p} .cls-31 { fill: #122240; }
+      #${p} .cls-32 { fill: #132345; }
+      #${p} .cls-33 { fill: #0e1c2c; }
+      #${p} .cls-34 { clip-path: url(#${p}-clippath-3); }
+      #${p} .cls-35 { fill: #101e34; }
+      #${p} .cls-36 { fill: #0f1e33; }
+      #${p} .cls-37 { fill: url(#${p}-radial-gradient-2); }
+      #${p} .cls-38 { fill: url(#${p}-linear-gradient-14); }
+      #${p} .cls-39 { fill: #0f1d2f; }
+      #${p} .cls-40, #${p} .cls-41 { fill: #14254b; }
+      #${p} .cls-42 { fill: url(#${p}-linear-gradient-7); }
+      #${p} .cls-43 { fill: #101f35; }
+      #${p} .cls-44 { fill: #122242; }
+      #${p} .cls-45 { fill: url(#${p}-linear-gradient-9); }
+      #${p} .cls-46 { fill: #0f1e32; }
+      #${p} .cls-47 { fill: url(#${p}-linear-gradient-11); }
+      #${p} .cls-48 { fill: #0f1f4a; font-family: PlayfairDisplay-Regular, 'Playfair Display'; font-size: 100px; isolation: isolate; letter-spacing: .2em; }
+      #${p} .cls-41 { font-family: 'Alex Brush', 'Great Vibes', 'Playfair Display', serif; font-size: 105.9px; }
+      #${p} .cls-49 { fill: url(#${p}-linear-gradient-6); }
+      #${p} .cls-50 { fill: #12213e; }
+      #${p} .cls-51 { clip-path: url(#${p}-clippath-2); }
+      #${p} .cls-52 { fill: #101f36; }
+      #${p} .cls-53 { fill: #122343; }
+      #${p} .cls-54 { fill: #0f1d30; }
+      #${p} .cls-55 { fill: url(#${p}-linear-gradient-16); }
+      #${p} .cls-56 { fill: #112039; }
+      #${p} .cls-57 { fill: url(#${p}-linear-gradient); }
+      #${p} .cls-58 { clip-path: url(#${p}-clippath); }
+      #${p} .cls-59 { fill: #0f1d31; }
+      #${p} .cls-60 { fill: #0e1d2f; }
+      #${p} .cls-61 { fill: #11203b; }
+      #${p} .cls-62 { fill: #0e1d2e; }
     `}</style>
-    <linearGradient id="linear-gradient" x1="245.8" y1="1028" x2="246.8" y2="1027" gradientTransform="translate(-366540 1084568) scale(1491 -1055)" gradientUnits="userSpaceOnUse">
+    <linearGradient id={`${p}-linear-gradient`} x1="245.8" y1="1028" x2="246.8" y2="1027" gradientTransform="translate(-366540 1084568) scale(1491 -1055)" gradientUnits="userSpaceOnUse">
       <stop offset="0" stopColor="#f8f5ec"/>
       <stop offset=".5" stopColor="#f4efe2"/>
       <stop offset="1" stopColor="#efe8d6"/>
     </linearGradient>
-    <linearGradient id="linear-gradient-2" x1="245.8" y1="1028" x2="246.8" y2="1027" gradientTransform="translate(-353229 1028055) scale(1437 -1000)" gradientUnits="userSpaceOnUse">
+    <linearGradient id={`${p}-linear-gradient-2`} x1="245.8" y1="1028" x2="246.8" y2="1027" gradientTransform="translate(-353229 1028055) scale(1437 -1000)" gradientUnits="userSpaceOnUse">
       <stop offset="0" stopColor="#e9cf8e"/>
       <stop offset=".3" stopColor="#b8903f"/>
       <stop offset=".7" stopColor="#d9b96a"/>
       <stop offset="1" stopColor="#9a7430"/>
     </linearGradient>
-    <clipPath id="clippath">
+    <clipPath id={`${p}-clippath`}>
       <path className="cls-16" d="M0,0h668.3C388.6,34.2,108.8,163.2,0,318.6V0Z"/>
     </clipPath>
-    <linearGradient id="linear-gradient-3" x1="89.7" y1="402.4" x2="589.5" y2="-97.4" gradientUnits="userSpaceOnUse">
+    <linearGradient id={`${p}-linear-gradient-3`} x1="89.7" y1="402.4" x2="589.5" y2="-97.4" gradientUnits="userSpaceOnUse">
       <stop offset="0" stopColor="#e9cf8e"/>
       <stop offset=".3" stopColor="#b8903f"/>
       <stop offset=".7" stopColor="#d9b96a"/>
       <stop offset="1" stopColor="#9a7430"/>
     </linearGradient>
-    <filter id="drop-shadow-1" x="-15" y="-5" width="427" height="505" filterUnits="userSpaceOnUse">
+    <filter id={`${p}-drop-shadow-1`} x="-15" y="-5" width="427" height="505" filterUnits="userSpaceOnUse">
       <feOffset dx="0" dy="10"/>
       <feGaussianBlur result="blur" stdDeviation="5"/>
       <feFlood floodColor="#000" floodOpacity=".5"/>
       <feComposite in2="blur" operator="in"/>
       <feComposite in="SourceGraphic"/>
     </filter>
-    <clipPath id="clippath-1">
+    <clipPath id={`${p}-clippath-1`}>
       <path className="cls-16" d="M0,0h396.3C202.1,69.9,54.4,217.6,0,474V0Z"/>
     </clipPath>
-    <linearGradient id="linear-gradient-4" x1="-47" y1="428" x2="388.7" y2="-7.7" href="#linear-gradient-3"/>
-    <clipPath id="clippath-2">
+    <linearGradient id={`${p}-linear-gradient-4`} x1="-47" y1="428" x2="388.7" y2="-7.7" href={`#${p}-linear-gradient-3`}/>
+    <clipPath id={`${p}-clippath-2`}>
       <path className="cls-16" d="M1491,1055h-341.6c143-17.5,286-83.4,341.6-162.9v162.9Z"/>
     </clipPath>
-    <linearGradient id="linear-gradient-5" x1="-350.6" y1="110.6" x2="-95.1" y2="-144.9" gradientTransform="translate(1094.6 959.8) rotate(-180)" href="#linear-gradient-2"/>
-    <filter id="drop-shadow-2" x="1273" y="807" width="233" height="273" filterUnits="userSpaceOnUse">
+    <linearGradient id={`${p}-linear-gradient-5`} x1="-350.6" y1="110.6" x2="-95.1" y2="-144.9" gradientTransform="translate(1094.6 959.8) rotate(-180)" href={`#${p}-linear-gradient-2`}/>
+    <filter id={`${p}-drop-shadow-2`} x="1273" y="807" width="233" height="273" filterUnits="userSpaceOnUse">
       <feOffset dx="0" dy="10"/>
       <feGaussianBlur result="blur-2" stdDeviation="5"/>
       <feFlood floodColor="#000" floodOpacity=".5"/>
       <feComposite in2="blur-2" operator="in"/>
       <feComposite in="SourceGraphic"/>
     </filter>
-    <clipPath id="clippath-3">
+    <clipPath id={`${p}-clippath-3`}>
       <path className="cls-16" d="M1491,1055h-202.6c99.3-35.8,174.8-111.2,202.6-242.3v242.3Z"/>
     </clipPath>
-    <linearGradient id="linear-gradient-6" x1="-420.4" y1="123.6" x2="-197.7" y2="-99.1" gradientTransform="translate(1094.6 959.8) rotate(-180)" href="#linear-gradient-2"/>
-    <linearGradient id="linear-gradient-7" x1="765.7" y1="90.8" x2="765.7" y2="75.1" gradientUnits="userSpaceOnUse">
+    <linearGradient id={`${p}-linear-gradient-6`} x1="-420.4" y1="123.6" x2="-197.7" y2="-99.1" gradientTransform="translate(1094.6 959.8) rotate(-180)" href={`#${p}-linear-gradient-2`}/>
+    <linearGradient id={`${p}-linear-gradient-7`} x1="765.7" y1="90.8" x2="765.7" y2="75.1" gradientUnits="userSpaceOnUse">
       <stop offset="0" stopColor="#b48f38"/>
       <stop offset=".6" stopColor="#ebc264"/>
     </linearGradient>
-    <radialGradient id="radial-gradient" cx="747.6" cy="124.7" fx="747.6" fy="124.7" r="91.2" gradientUnits="userSpaceOnUse">
+    <radialGradient id={`${p}-radial-gradient`} cx="747.6" cy="124.7" fx="747.6" fy="124.7" r="91.2" gradientUnits="userSpaceOnUse">
       <stop offset="0" stopColor="#ebc264"/>
       <stop offset=".2" stopColor="#b48f38"/>
       <stop offset=".4" stopColor="#cfa94d"/>
@@ -228,11 +237,11 @@ export default function CertificateTemplate({
       <stop offset=".8" stopColor="#cfa94d"/>
       <stop offset="1" stopColor="#b48f38"/>
     </radialGradient>
-    <radialGradient id="radial-gradient-2" cx="698.4" cy="158.2" fx="698.4" fy="158.2" r="5.3" gradientUnits="userSpaceOnUse">
+    <radialGradient id={`${p}-radial-gradient-2`} cx="698.4" cy="158.2" fx="698.4" fy="158.2" r="5.3" gradientUnits="userSpaceOnUse">
       <stop offset="0" stopColor="#ebc264"/>
       <stop offset="1" stopColor="#b48f38"/>
     </radialGradient>
-    <linearGradient id="linear-gradient-8" x1="696.6" y1="213" x2="696.6" y2="204.3" gradientUnits="userSpaceOnUse">
+    <linearGradient id={`${p}-linear-gradient-8`} x1="696.6" y1="213" x2="696.6" y2="204.3" gradientUnits="userSpaceOnUse">
       <stop offset="0" stopColor="#ebc264"/>
       <stop offset=".2" stopColor="#b48f38"/>
       <stop offset=".4" stopColor="#cfa94d"/>
@@ -240,15 +249,15 @@ export default function CertificateTemplate({
       <stop offset=".8" stopColor="#cfa94d"/>
       <stop offset="1" stopColor="#b48f38"/>
     </linearGradient>
-    <linearGradient id="linear-gradient-9" x1="712.1" y1="213.2" x2="712.1" y2="204.2" href="#linear-gradient-8"/>
-    <linearGradient id="linear-gradient-10" x1="728.1" x2="728.1" href="#linear-gradient-8"/>
-    <linearGradient id="linear-gradient-11" x1="744.3" x2="744.3" y2="204.4" href="#linear-gradient-8"/>
-    <linearGradient id="linear-gradient-12" x1="760" x2="760" y2="204.4" href="#linear-gradient-8"/>
-    <linearGradient id="linear-gradient-13" x1="777.2" y1="213.1" x2="777.2" y2="204.4" href="#linear-gradient-8"/>
-    <linearGradient id="linear-gradient-14" x1="794.6" x2="794.6" y2="204.4" href="#linear-gradient-8"/>
-    <linearGradient id="linear-gradient-15" x1="675" y1="209" x2="675" y2="208.4" href="#linear-gradient-8"/>
-    <linearGradient id="linear-gradient-16" x1="816" y1="209" x2="816" y2="208.4" href="#linear-gradient-8"/>
-    <filter id="drop-shadow-3" x="632" y="744" width="207" height="207" filterUnits="userSpaceOnUse">
+    <linearGradient id={`${p}-linear-gradient-9`} x1="712.1" y1="213.2" x2="712.1" y2="204.2" href={`#${p}-linear-gradient-8`}/>
+    <linearGradient id={`${p}-linear-gradient-10`} x1="728.1" x2="728.1" href={`#${p}-linear-gradient-8`}/>
+    <linearGradient id={`${p}-linear-gradient-11`} x1="744.3" x2="744.3" y2="204.4" href={`#${p}-linear-gradient-8`}/>
+    <linearGradient id={`${p}-linear-gradient-12`} x1="760" x2="760" y2="204.4" href={`#${p}-linear-gradient-8`}/>
+    <linearGradient id={`${p}-linear-gradient-13`} x1="777.2" y1="213.1" x2="777.2" y2="204.4" href={`#${p}-linear-gradient-8`}/>
+    <linearGradient id={`${p}-linear-gradient-14`} x1="794.6" x2="794.6" y2="204.4" href={`#${p}-linear-gradient-8`}/>
+    <linearGradient id={`${p}-linear-gradient-15`} x1="675" y1="209" x2="675" y2="208.4" href={`#${p}-linear-gradient-8`}/>
+    <linearGradient id={`${p}-linear-gradient-16`} x1="816" y1="209" x2="816" y2="208.4" href={`#${p}-linear-gradient-8`}/>
+    <filter id={`${p}-drop-shadow-3`} x="632" y="744" width="207" height="207" filterUnits="userSpaceOnUse">
       <feOffset dx="-10" dy="0"/>
       <feGaussianBlur result="blur-3" stdDeviation="10"/>
       <feFlood floodColor="#000" floodOpacity="0"/>

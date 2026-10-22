@@ -864,6 +864,7 @@ export default function AdminCertificatesTab() {
                   <CertificateTemplate
                     data={{ ...fields, certNumber: activeNumber }}
                     verifyUrl="https://monodoxia.academy/certificates/verify/preview"
+                    idPrefix="admin-preview"
                   />
                 </div>
                 <div style={{ marginTop: 10, fontSize: 10, color: '#64748b', textAlign: 'center' }}>
