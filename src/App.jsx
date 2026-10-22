@@ -18,6 +18,8 @@ const AdminModal = lazy(() => import('./components/modals/AdminModal'));
 const NewTopicModal = lazy(() => import('./components/modals/NewTopicModal'));
 const ProfileModal = lazy(() => import('./components/modals/ProfileModal'));
 const ApplicationModal = lazy(() => import('./components/modals/ApplicationModal'));
+const CertificateViewModal = lazy(() => import('./components/modals/CertificateViewModal'));
+const CertificateVerifyPage = lazy(() => import('./certificates/CertificateVerifyPage'));
 
 import HomePage from './pages/HomePage';
 const AcademyPage = lazy(() => import('./pages/AcademyPage'));
@@ -28,7 +30,7 @@ const CommunityPage = lazy(() => import('./pages/CommunityPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 
 function AppContent() {
-  const { platformSettings, currentUser, setAuthModalOpen, canAccessAdmin, adminModalOpen, setAdminModalOpen, currentPage } = useApp();
+  const { platformSettings, currentUser, setAuthModalOpen, canAccessAdmin, adminModalOpen, setAdminModalOpen, currentPage, certViewModalOpen } = useApp();
   const [adminBypass, setAdminBypass] = useState(() => {
     return sessionStorage.getItem('monodoxia_admin_bypass') === 'true';
   });
@@ -57,6 +59,66 @@ function AppContent() {
     };
     document.title = titles[currentPage] || platformSettings?.siteTitle || 'Monodoxia Academy';
   }, [currentPage, platformSettings?.siteTitle, platformSettings?.subtitle]);
+
+  // Public Certificate Verification Route handling
+  const [verifyRoute, setVerifyRoute] = useState(() => {
+    try {
+      const hash = window.location.hash || '';
+      const params = new URLSearchParams(window.location.search);
+      const certParam = params.get('cert') || params.get('certId');
+      if (hash.startsWith('#/certificates/verify/')) {
+        return { publicId: hash.replace('#/certificates/verify/', '') };
+      }
+      if (hash.startsWith('#verify/')) {
+        return { publicId: hash.replace('#verify/', '') };
+      }
+      if (certParam) {
+        return { certId: certParam };
+      }
+    } catch (e) {}
+    return null;
+  });
+
+  useEffect(() => {
+    const handleLocation = () => {
+      try {
+        const hash = window.location.hash || '';
+        const params = new URLSearchParams(window.location.search);
+        const certParam = params.get('cert') || params.get('certId');
+        if (hash.startsWith('#/certificates/verify/')) {
+          setVerifyRoute({ publicId: hash.replace('#/certificates/verify/', '') });
+        } else if (hash.startsWith('#verify/')) {
+          setVerifyRoute({ publicId: hash.replace('#verify/', '') });
+        } else if (certParam) {
+          setVerifyRoute({ certId: certParam });
+        } else {
+          setVerifyRoute(null);
+        }
+      } catch (e) {}
+    };
+    window.addEventListener('hashchange', handleLocation);
+    window.addEventListener('popstate', handleLocation);
+    return () => {
+      window.removeEventListener('hashchange', handleLocation);
+      window.removeEventListener('popstate', handleLocation);
+    };
+  }, []);
+
+  // When visiting a public certificate verification link, render the verify page directly
+  if (verifyRoute) {
+    return (
+      <div className="min-h-screen bg-[#f8f5ec]">
+        <ToastContainer />
+        <Suspense fallback={
+          <div className="min-h-screen flex items-center justify-center">
+            <div className="w-10 h-10 border-4 border-[#c5a059] border-t-transparent rounded-full animate-spin" />
+          </div>
+        }>
+          <CertificateVerifyPage publicId={verifyRoute.publicId} certId={verifyRoute.certId} />
+        </Suspense>
+      </div>
+    );
+  }
 
   if (isMaintenance) {
     return (
@@ -191,6 +253,7 @@ function AppContent() {
         <NewTopicModal />
         <ProfileModal />
         <ApplicationModal />
+        <CertificateViewModal />
       </Suspense>
     </div>
   );

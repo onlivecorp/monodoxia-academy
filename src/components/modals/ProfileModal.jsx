@@ -27,7 +27,11 @@ export default function ProfileModal() {
     activeProfileTab,
     setActiveProfileTab,
     openPlayer,
-    showToast
+    showToast,
+    // Certificate System
+    certificatesList = [],
+    setCertViewModalOpen,
+    setActiveCertView,
   } = useApp();
 
   const activeTab = activeProfileTab || 'profile';
@@ -342,6 +346,20 @@ export default function ProfileModal() {
             >
               <span className="material-symbols-outlined text-[17px]">workspace_premium</span>
               <span>Tədris & Kouçinq</span>
+            </button>
+
+            {/* Certificates Tab */}
+            <button
+              onClick={() => setActiveTab('certificates')}
+              className={`pb-3.5 px-3.5 font-semibold transition-all border-b-2 flex items-center gap-1.5 whitespace-nowrap text-xs ${
+                activeTab === 'certificates'
+                  ? 'border-amber-600 text-amber-800'
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[17px]">card_membership</span>
+              <span>Sertifikatlarım</span>
+              {(() => { const n = certificatesList.filter(c => String(c.userId) === String(currentUser?.id) && c.status === 'Yayında').length; return n > 0 ? <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">{n}</span> : null; })()}
             </button>
 
             <button
@@ -1107,6 +1125,109 @@ export default function ProfileModal() {
               </div>
             </div>
           )}
+
+          {/* TAB: CERTIFICATES */}
+          {activeTab === 'certificates' && (() => {
+            const myCerts = certificatesList.filter(
+              c => String(c.userId) === String(currentUser?.id) && c.status !== 'Silindi'
+            );
+            const BASE_URL = window.location.origin;
+            const handleView = (cert) => { setActiveCertView(cert); setCertViewModalOpen(true); };
+            const handleCopyLink = (cert) => {
+              const url = `${BASE_URL}/#/certificates/verify/${cert.publicId}`;
+              navigator.clipboard.writeText(url).then(() => showToast('Link kopyalandı!', 'success'));
+            };
+
+            return (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1.5 font-mono">
+                    <span className="material-symbols-outlined text-[16px]">workspace_premium</span>
+                    Sertifikatlarım
+                  </h4>
+                  <span className="text-[11px] text-slate-500">{myCerts.length} sertifikat</span>
+                </div>
+
+                {myCerts.length === 0 ? (
+                  <div className="p-10 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex flex-col items-center gap-3">
+                    <span className="material-symbols-outlined text-[48px] text-amber-200">workspace_premium</span>
+                    <p className="text-xs text-slate-500 text-center">Hələ sertifikatınız yoxdur.<br />Kursları tamamladıqca sertifikatlarınız burada görünəcək.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-4">
+                    {myCerts.map(cert => {
+                      const verifyUrl = cert.publicId ? `${BASE_URL}/#/certificates/verify/${cert.publicId}` : '';
+                      const isRevoked = cert.status === 'İptal Edilmiş';
+                      return (
+                        <div key={cert.id} className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
+                          {/* Mini cert preview card */}
+                          <div className="flex items-start gap-4">
+                            {/* Gold icon */}
+                            <div className="w-14 h-14 rounded-xl shrink-0 flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #0a192f, #112240)' }}>
+                              <span className="material-symbols-outlined text-[28px]" style={{ color: '#d4af37' }}>workspace_premium</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-mono text-[11px] font-bold text-amber-700">{cert.number}</span>
+                                <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${ isRevoked ? 'bg-red-100 text-red-700 border border-red-300' : 'bg-emerald-100 text-emerald-700 border border-emerald-300' }`}>
+                                  {isRevoked ? 'İptal Edilmiş' : '✓ Etibarlı'}
+                                </span>
+                              </div>
+                              <div className="font-serif text-sm font-bold text-slate-900 mt-1 truncate">
+                                {cert.fields?.courseName || '—'}
+                              </div>
+                              <div className="text-[11px] text-slate-500 mt-0.5">
+                                {cert.fields?.dateValue || cert.issuedAt || '—'}
+                                {cert.fields?.durationValue && <> · {cert.fields.durationValue}</>}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Actions */}
+                          {!isRevoked && (
+                            <div className="flex gap-2 mt-3 pt-3 border-t border-slate-100 flex-wrap">
+                              <button
+                                onClick={() => handleView(cert)}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100 transition-colors cursor-pointer"
+                              >
+                                <span className="material-symbols-outlined text-[14px]">visibility</span>
+                                Bax / Yüklə
+                              </button>
+                              {verifyUrl && (
+                                <button
+                                  onClick={() => handleCopyLink(cert)}
+                                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100 transition-colors cursor-pointer"
+                                >
+                                  <span className="material-symbols-outlined text-[14px]">link</span>
+                                  Link Kopyala
+                                </button>
+                              )}
+                              {verifyUrl && (
+                                <a
+                                  href={verifyUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100 transition-colors"
+                                >
+                                  <span className="material-symbols-outlined text-[14px]">qr_code_2</span>
+                                  Doğrula
+                                </a>
+                              )}
+                            </div>
+                          )}
+                          {isRevoked && (
+                            <div className="mt-3 pt-3 border-t border-red-100 text-[11px] text-red-600">
+                              ⚠ Bu sertifikat ləğv edilmişdir{cert.revokedReason ? `: ${cert.revokedReason}` : '.'}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </div>
       </div>
     </div>

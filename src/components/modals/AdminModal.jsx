@@ -19,6 +19,7 @@ import AdminCmsTab from './AdminCmsTab';
 import AdminPagesTab from './AdminPagesTab';
 import AdminDatabaseTab from './AdminDatabaseTab';
 import AdminSettingsTab from './AdminSettingsTab';
+import AdminCertificatesTab from './AdminCertificatesTab';
 
 export default function AdminModal() {
   const {
@@ -85,6 +86,7 @@ export default function AdminModal() {
           { id: 'roles', icon: 'shield_person', label: 'Rollar & İcazələr (RBAC)', perm: 'roles.view' },
           { id: 'courses', icon: 'school', label: 'Kurslar & LMS', perm: 'courses.view' },
           { id: 'categories', icon: 'category', label: 'Kateqoriyalar', perm: 'categories.view' },
+          { id: 'certificates', icon: 'workspace_premium', label: 'Sertifikatlar', perm: 'courses.view' },
           { id: 'club', icon: 'card_membership', label: 'Club Tiers', perm: 'club.view' },
           { id: 'events', icon: 'event', label: 'Tədbirlər', perm: 'events.view' },
           { id: 'community', icon: 'forum', label: 'İcma & Forum', perm: 'community.view' }
@@ -534,6 +536,10 @@ export default function AdminModal() {
 
             {activeTab === 'database' && (
               <AdminDatabaseTab />
+            )}
+
+            {activeTab === 'certificates' && (
+              <AdminCertificatesTab />
             )}
 
             {activeTab === 'settings' && (

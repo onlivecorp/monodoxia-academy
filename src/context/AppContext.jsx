@@ -474,6 +474,44 @@ export function AppProvider({ children }) {
   const [applicationModalOpen, setApplicationModalOpen] = useState(false);
   const [activeApplicationTarget, setActiveApplicationTarget] = useState(null);
 
+  // ─── Certificate Management System ───────────────────────────
+  const [certificatesList, setCertificatesList] = useState(() => {
+    try {
+      const saved = localStorage.getItem('monodoxia_certificates_v2');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return [];
+  });
+
+  // Atomic counter for certificate numbers (MA-000001, MA-000002, ...)
+  const [certCounter, setCertCounter] = useState(() => {
+    try {
+      const saved = localStorage.getItem('monodoxia_cert_counter');
+      return saved ? parseInt(saved, 10) : 0;
+    } catch (e) { return 0; }
+  });
+
+  // Default template settings
+  const [certSettings, setCertSettings] = useState(() => {
+    try {
+      const saved = localStorage.getItem('monodoxia_cert_settings');
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) { return null; }
+  });
+
+  // Signature / seal asset library
+  const [assetLibrary, setAssetLibrary] = useState(() => {
+    try {
+      const saved = localStorage.getItem('monodoxia_cert_assets');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) { return []; }
+  });
+
+  // Certificate View Modal (full-screen preview + PDF/JPG)
+  const [certViewModalOpen, setCertViewModalOpen] = useState(false);
+  const [activeCertView, setActiveCertView] = useState(null);
+  // ─── End Certificate System ────────────────────────────────────
+
   // Page Routing (Separate pages with customizable URL slugs)
   const validPages = VALID_PAGE_IDS;
 
@@ -3089,6 +3127,95 @@ export function AppProvider({ children }) {
     showToast('Sual silindi', 'info');
   };
 
+  // ─── Certificate Management Operations ───────────────────────────────────────
+
+  // localStorage persistence for certificates
+  useEffect(() => {
+    try { localStorage.setItem('monodoxia_certificates_v2', JSON.stringify(certificatesList)); } catch (e) {}
+  }, [certificatesList]);
+
+  useEffect(() => {
+    try { localStorage.setItem('monodoxia_cert_counter', String(certCounter)); } catch (e) {}
+  }, [certCounter]);
+
+  useEffect(() => {
+    if (certSettings) {
+      try { localStorage.setItem('monodoxia_cert_settings', JSON.stringify(certSettings)); } catch (e) {}
+    }
+  }, [certSettings]);
+
+  useEffect(() => {
+    try { localStorage.setItem('monodoxia_cert_assets', JSON.stringify(assetLibrary)); } catch (e) {}
+  }, [assetLibrary]);
+
+  /**
+   * addCertificate — atomically increments counter, assigns number, persists
+   * Concurrent race condition is prevented by functional setState (React batching)
+   */
+  const addCertificate = (certData) => {
+    setCertCounter(prev => {
+      const nextN = prev + 1;
+      const number = 'MA-' + String(nextN).padStart(6, '0');
+      const newCert = { ...certData, number };
+      setCertificatesList(list => [...list, newCert]);
+      // Notify user if userId is set
+      if (certData.userId) {
+        const notification = {
+          id: 'notif-cert-' + Date.now(),
+          type: 'certificate',
+          userId: certData.userId,
+          title: 'Yeni sertifikat verildi!',
+          message: `"${certData.fields?.courseName || certData.fields?.recipientName}" üzrə sertifikatınız hazırdır.`,
+          certId: newCert.id,
+          isRead: false,
+          createdAt: new Date().toISOString()
+        };
+        setUserNotifications(prev => [notification, ...prev]);
+      }
+      return nextN;
+    });
+  };
+
+  const updateCertificate = (id, updates) => {
+    setCertificatesList(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
+  };
+
+  /**
+   * deleteCertificate — soft delete (sets deletedAt), preserves record
+   * Hard delete option also available via hardDelete param
+   */
+  const deleteCertificate = (id, hardDelete = false) => {
+    if (hardDelete) {
+      setCertificatesList(prev => prev.filter(c => c.id !== id));
+    } else {
+      setCertificatesList(prev => prev.map(c =>
+        c.id === id ? { ...c, status: 'Silindi', deletedAt: new Date().toISOString() } : c
+      ));
+    }
+  };
+
+  const revokeCertificate = (id, reason = '') => {
+    setCertificatesList(prev => prev.map(c =>
+      c.id === id
+        ? { ...c, status: 'İptal Edilmiş', revokedAt: new Date().toISOString(), revokedReason: reason, updatedAt: new Date().toISOString() }
+        : c
+    ));
+  };
+
+  const updateCertSettings = (settings) => {
+    setCertSettings(settings);
+  };
+
+  const addAsset = (asset) => {
+    setAssetLibrary(prev => {
+      // avoid duplicate URL
+      if (prev.some(a => a.url === asset.url)) return prev;
+      return [...prev, asset];
+    });
+  };
+
+  // ─── End Certificate Management Operations ───────────────────────────────────
+
   return (
     <AppContext.Provider value={{
       currentUser,
@@ -3207,7 +3334,15 @@ export function AppProvider({ children }) {
       getPageUrl,
       updatePageSlugs,
       PAGE_DEFINITIONS,
-      DEFAULT_PAGE_SLUGS
+      DEFAULT_PAGE_SLUGS,
+      // Certificate Management System
+      certificatesList, setCertificatesList,
+      addCertificate, updateCertificate, deleteCertificate, revokeCertificate,
+      certCounter,
+      certSettings, updateCertSettings,
+      assetLibrary, addAsset,
+      certViewModalOpen, setCertViewModalOpen,
+      activeCertView, setActiveCertView,
     }}>
       {children}
     </AppContext.Provider>

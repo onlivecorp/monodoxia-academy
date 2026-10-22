@@ -1,0 +1,401 @@
+/* ============================================================
+   MONODOXIA ACADEMY — Certificate Design Tokens
+   Colors extracted directly from Monodoxia_Certificate.svg
+   ============================================================ */
+
+/* Google Fonts — embedded for PDF fidelity */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  /* ── Cream Background Gradient ── */
+  --cert-bg-start: #f8f5ec;
+  --cert-bg-mid:   #f4efe2;
+  --cert-bg-end:   #efe8d6;
+
+  /* ── Gold Gradient (border, decorative) ── */
+  --cert-gold-1: #e9cf8e;
+  --cert-gold-2: #b8903f;
+  --cert-gold-3: #d9b96a;
+  --cert-gold-4: #9a7430;
+
+  /* ── Gold Radial (logo ring) ── */
+  --cert-gold-r1: #ebc264;
+  --cert-gold-r2: #b48f38;
+  --cert-gold-r3: #cfa94d;
+
+  /* ── Navy Blues (corners, waves) ── */
+  --cert-navy-deep:  #0e1c2c;
+  --cert-navy-core:  #11203a;
+  --cert-navy-mid:   #12223f;
+  --cert-navy-light: #132448;
+  --cert-navy-1:     #14254b;
+
+  /* ── Text Colors ── */
+  --cert-text-navy:  #0f1f4a;
+  --cert-text-gold:  #b29c75;
+  --cert-text-white: #ffffff;
+
+  /* ── Fonts ── */
+  --cert-font-title: 'Playfair Display', Georgia, serif;
+  --cert-font-body:  'Plus Jakarta Sans', system-ui, sans-serif;
+
+  /* ── Dimensions (A4 landscape: 297x210mm @ 96dpi = 1123x794px) ── */
+  --cert-w: 1123px;
+  --cert-h: 794px;
+}
+
+.cert-wrapper {
+  position: relative;
+  width: var(--cert-w);
+  height: var(--cert-h);
+  background: linear-gradient(
+    135deg,
+    var(--cert-bg-start) 0%,
+    var(--cert-bg-mid) 50%,
+    var(--cert-bg-end) 100%
+  );
+  overflow: hidden;
+  font-family: var(--cert-font-body);
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.cert-border {
+  position: absolute;
+  inset: 18px;
+  border: 2px solid;
+  border-image: linear-gradient(
+    135deg,
+    #e9cf8e 0%,
+    #b8903f 30%,
+    #d9b96a 70%,
+    #9a7430 100%
+  ) 1;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.cert-border-inner {
+  position: absolute;
+  inset: 24px;
+  border: 1px solid;
+  border-image: linear-gradient(
+    135deg,
+    #e9cf8e 0%,
+    #b8903f 30%,
+    #d9b96a 70%,
+    #9a7430 100%
+  ) 1;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.cert-logo-area {
+  position: absolute;
+  top: 38px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.cert-logo-img {
+  height: 52px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
+}
+
+.cert-logo-wordmark {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #11203a;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.cert-title-main {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 62px;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  color: #0f1f4a;
+  text-align: center;
+  line-height: 1;
+  margin: 0;
+}
+
+.cert-title-sub {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: #b29c75;
+  text-align: center;
+  margin: 0;
+}
+
+.cert-content {
+  position: absolute;
+  top: 115px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 10;
+}
+
+.cert-this-certifies {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #11203a;
+  text-align: center;
+  margin-top: 16px;
+}
+
+.cert-recipient-name {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 38px;
+  font-weight: 600;
+  font-style: italic;
+  color: #0e1c2c;
+  text-align: center;
+  margin: 6px 0 4px;
+  line-height: 1.15;
+}
+
+.cert-divider {
+  width: 280px;
+  height: 1.5px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    #e9cf8e 20%,
+    #b8903f 50%,
+    #e9cf8e 80%,
+    transparent 100%
+  );
+  margin: 8px auto;
+}
+
+.cert-description {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  color: #12223f;
+  text-align: center;
+  line-height: 1.7;
+  margin: 2px 0;
+}
+
+.cert-course-name {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: #0e1c2c;
+  text-align: center;
+  margin: 4px 0 2px;
+  letter-spacing: 0.03em;
+}
+
+.cert-bottom {
+  position: absolute;
+  bottom: 42px;
+  left: 42px;
+  right: 42px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  z-index: 10;
+}
+
+.cert-sig-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 140px;
+}
+
+.cert-sig-img {
+  height: 48px;
+  max-width: 130px;
+  object-fit: contain;
+}
+
+.cert-sig-line {
+  width: 140px;
+  height: 1px;
+  background: linear-gradient(90deg, #b8903f 0%, #e9cf8e 50%, #b8903f 100%);
+  margin-top: 4px;
+}
+
+.cert-sig-name {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 8.5px;
+  font-weight: 700;
+  color: #11203a;
+  text-align: center;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.cert-sig-title {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 7.5px;
+  font-weight: 400;
+  color: #b29c75;
+  text-align: center;
+  letter-spacing: 0.08em;
+  margin-top: 1px;
+}
+
+.cert-center-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.cert-seal-img {
+  height: 72px;
+  width: 72px;
+  object-fit: contain;
+}
+
+.cert-seal-placeholder {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 2px dashed #b8903f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(184, 144, 63, 0.05);
+}
+
+.cert-qr-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.cert-qr-box {
+  background: #ffffff;
+  border: 1.5px solid #b8903f;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.cert-qr-label {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 6.5px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #b29c75;
+  text-align: center;
+}
+
+.cert-details-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 2px;
+}
+
+.cert-detail-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cert-detail-label {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 6.5px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #b29c75;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.cert-detail-value {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 9px;
+  font-weight: 600;
+  color: #11203a;
+  text-align: center;
+}
+
+.cert-detail-separator {
+  width: 1px;
+  height: 20px;
+  background: linear-gradient(to bottom, transparent, #b8903f, transparent);
+}
+
+.cert-watermark {
+  position: absolute;
+  right: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.07;
+  z-index: 1;
+  pointer-events: none;
+  width: 200px;
+}
+
+.cert-number {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 7px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: #b29c75;
+  font-variant-numeric: tabular-nums;
+}
+
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 0;
+  }
+
+  body * { visibility: hidden; }
+  .cert-print-region,
+  .cert-print-region * { visibility: visible; }
+
+  .cert-print-region {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 297mm;
+    height: 210mm;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .cert-wrapper {
+    width: 297mm;
+    height: 210mm;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
