@@ -10,15 +10,15 @@ import CertificateTemplate from '../../certificates/CertificateTemplate';
 import { useApp } from '../../context/AppContext';
 
 const BASE_URL = window.location.origin;
-const CERT_W = 1123;
-const CERT_H = 794;
+const CERT_W = 1491;
+const CERT_H = 1055;
 
 async function exportToPDF(element, filename = 'sertifikat.pdf') {
   const html2canvas = (await import('html2canvas')).default;
   const { jsPDF } = await import('jspdf');
 
   const canvas = await html2canvas(element, {
-    scale: 3,
+    scale: 2,
     useCORS: true,
     allowTaint: true,
     backgroundColor: '#f8f5ec',
@@ -31,17 +31,13 @@ async function exportToPDF(element, filename = 'sertifikat.pdf') {
   const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
   pdf.addImage(imgData, 'JPEG', 0, 0, 297, 210);
 
-  // Encryption / permission flags (no editing, no form filling)
-  // jsPDF does not natively support encryption; this is noted as a known limitation.
-  // For true PDF encryption, a server-side solution (Puppeteer/pdf-lib) is needed.
-
   pdf.save(filename);
 }
 
 async function exportToJPG(element, filename = 'sertifikat.jpg') {
   const html2canvas = (await import('html2canvas')).default;
   const canvas = await html2canvas(element, {
-    scale: 3.5, // ~300dpi equivalent (1123 * 3.5 ≈ 3930px)
+    scale: 2, // ~3000px wide ultra-crisp JPG
     useCORS: true,
     allowTaint: true,
     backgroundColor: '#f8f5ec',
