@@ -17,6 +17,7 @@ import AdminTranslationsTab from './AdminTranslationsTab';
 import AdminMaintenanceTab from './AdminMaintenanceTab';
 import AdminCmsTab from './AdminCmsTab';
 import AdminPagesTab from './AdminPagesTab';
+import AdminNavigationTab from './AdminNavigationTab';
 import AdminDatabaseTab from './AdminDatabaseTab';
 import AdminSettingsTab from './AdminSettingsTab';
 import AdminCertificatesTab from './AdminCertificatesTab';
@@ -103,6 +104,7 @@ export default function AdminModal() {
         group: 'Sistem & Rejimlər',
         items: [
           { id: 'pages', icon: 'auto_stories', label: 'Səhifələr İdarəetməsi', perm: 'content.view' },
+          { id: 'navigation', icon: 'menu_open', label: 'Naviqasiya Menyusu', perm: 'content.view' },
           { id: 'content', icon: 'edit_document', label: 'Məzmun (CMS Blokları)', perm: 'content.view' },
           { id: 'maintenance', icon: 'construction', label: 'Texniki Qulluq Ekranı', perm: 'maintenance.view', highlight: Boolean(platformSettings?.maintenanceMode) },
           { id: 'database', icon: 'database', label: 'SQL Bazası', perm: 'database.view' },
@@ -528,6 +530,10 @@ export default function AdminModal() {
 
             {activeTab === 'pages' && (
               <AdminPagesTab />
+            )}
+
+            {activeTab === 'navigation' && (
+              <AdminNavigationTab />
             )}
 
             {activeTab === 'content' && (

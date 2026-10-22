@@ -4,6 +4,7 @@ import { useLanguage } from '../../i18n/LanguageContext';
 import AdminConfirmModal from './AdminConfirmModal';
 import { getHeroMediaStyles, getAboutMediaStyles, parseVideoUrl } from '../../utils/heroMediaHelper';
 import { INITIAL_HOME_CONTENT } from '../../data/mockData';
+import AdminNavigationTab from './AdminNavigationTab';
 
 
 const CmsFieldContext = createContext({
@@ -1375,17 +1376,21 @@ export default function AdminCmsTab() {
 
       {/* NAVBAR */}
       {cmsBlock === 'navbar' && (
-        <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0' }}>Naviqasiya və Loqo Tənzimləmələri</h5>
-          <ImageField
-            label="Sayt Loqosu (Header Logo)"
-            value={cmsNavbar.logoUrl}
-            onChange={v => setCmsNavbar(p => ({ ...p, logoUrl: v }))}
-          />
-          <p style={{ fontSize: '11px', color: '#64748b', margin: 0 }}>Qeyd: Əgər fərdi loqo yükləməsəniz, Monodoxia-nın rəsmi SVG simvolu və mətni göstərilir.</p>
-          <div>
-            <button onClick={() => saveBlock('navbar', cmsNavbar)} className="admin-btn-primary">Yadda Saxla</button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0' }}>Loqo Tənzimləmələri</h5>
+            <ImageField
+              label="Sayt Loqosu (Header Logo)"
+              value={cmsNavbar.logoUrl}
+              onChange={v => setCmsNavbar(p => ({ ...p, logoUrl: v }))}
+            />
+            <p style={{ fontSize: '11px', color: '#64748b', margin: 0 }}>Qeyd: Əgər fərdi loqo yükləməsəniz, Monodoxia-nın rəsmi SVG simvolu və mətni göstərilir.</p>
+            <div>
+              <button onClick={() => saveBlock('navbar', cmsNavbar)} className="admin-btn-primary">Loqonu Yadda Saxla</button>
+            </div>
           </div>
+
+          <AdminNavigationTab />
         </div>
       )}
 

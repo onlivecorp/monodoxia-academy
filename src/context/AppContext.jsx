@@ -8,7 +8,8 @@ import {
   INITIAL_PILLARS,
   INITIAL_TESTIMONIALS,
   INITIAL_FAQS,
-  INITIAL_HOME_CONTENT
+  INITIAL_HOME_CONTENT,
+  DEFAULT_NAVBAR_ITEMS
 } from '../data/mockData';
 import {
   INITIAL_APPLICATIONS,
@@ -372,8 +373,22 @@ export function AppProvider({ children }) {
 
   // Home Page Dynamic Content & Blocks (CMS)
   const [homeContent, setHomeContent] = useState(() => {
-    const saved = localStorage.getItem('monodoxia_home_content');
-    return saved ? JSON.parse(saved) : INITIAL_HOME_CONTENT;
+    try {
+      const saved = localStorage.getItem('monodoxia_home_content');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object') {
+          if (!parsed.navbar || !Array.isArray(parsed.navbar.items) || parsed.navbar.items.length === 0) {
+            parsed.navbar = {
+              ...(parsed.navbar || {}),
+              items: DEFAULT_NAVBAR_ITEMS
+            };
+          }
+          return parsed;
+        }
+      }
+    } catch (e) {}
+    return INITIAL_HOME_CONTENT;
   });
 
   const [pillarsList, setPillarsList] = useState(() => {
@@ -3240,6 +3255,25 @@ export function AppProvider({ children }) {
     }
   };
 
+  // Navigation Menu Items Operations
+  const updateNavItems = (newItems) => {
+    const sorted = [...(newItems || [])].map((item, idx) => ({
+      ...item,
+      order: idx + 1
+    }));
+    const currentNavbar = homeContent?.navbar || {};
+    const updatedNavbar = {
+      ...currentNavbar,
+      items: sorted
+    };
+    updateHomeBlock('navbar', updatedNavbar);
+  };
+
+  const resetNavItems = () => {
+    updateNavItems(DEFAULT_NAVBAR_ITEMS);
+    showToast('Naviqasiya menyusu ilkin vəziyyətinə qaytarıldı', 'info');
+  };
+
   // Pillars Operations
   const addPillar = (pillar) => {
     const newPillar = {
@@ -3641,6 +3675,9 @@ export function AppProvider({ children }) {
       homeContent,
       updateHomeBlock,
       resetHomeBlock,
+      updateNavItems,
+      resetNavItems,
+      DEFAULT_NAVBAR_ITEMS,
       pillarsList,
       addPillar,
       updatePillar,

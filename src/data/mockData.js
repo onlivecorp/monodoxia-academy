@@ -832,9 +832,19 @@ export const INITIAL_FAQS = [
   }
 ];
 
+export const DEFAULT_NAVBAR_ITEMS = [
+  { id: 'akademiya', pageId: 'akademiya', label: 'Akademiya', labelKey: 'nav_academy', type: 'internal', href: '/akademiya', icon: 'school', visible: true, openInNewTab: false, order: 1, translations: { az: 'Akademiya', en: 'Academy', tr: 'Akademi', ru: 'Академия' } },
+  { id: 'koucinq', pageId: 'koucinq', label: 'Kouçinq', labelKey: 'nav_coaching', type: 'internal', href: '/koucinq', icon: 'psychology', visible: true, openInNewTab: false, order: 2, translations: { az: 'Kouçinq', en: 'Coaching', tr: 'Koçluk', ru: 'Коучинг' } },
+  { id: 'club', pageId: 'club', label: 'Coaching Club', labelKey: 'nav_club', type: 'internal', href: '/club', icon: 'diamond', visible: true, openInNewTab: false, order: 3, translations: { az: 'Coaching Club', en: 'Coaching Club', tr: 'Coaching Club', ru: 'Coaching Club' } },
+  { id: 'tedbirler', pageId: 'tedbirler', label: 'Tədbirlər', labelKey: 'nav_events', type: 'internal', href: '/tedbirler', icon: 'event', visible: true, openInNewTab: false, order: 4, translations: { az: 'Tədbirlər', en: 'Events', tr: 'Etkinlikler', ru: 'Мероприятия' } },
+  { id: 'icma', pageId: 'icma', label: 'İcma', labelKey: 'nav_community', type: 'internal', href: '/icma', icon: 'forum', visible: true, openInNewTab: false, order: 5, translations: { az: 'İcma', en: 'Community', tr: 'Topluluk', ru: 'Сообщество' } },
+  { id: 'haqqimizda', pageId: 'haqqimizda', label: 'Haqqımızda', labelKey: 'nav_about', type: 'internal', href: '/haqqimizda', icon: 'info', visible: true, openInNewTab: false, order: 6, translations: { az: 'Haqqımızda', en: 'About Us', tr: 'Hakkımızda', ru: 'О нас' } }
+];
+
 export const INITIAL_HOME_CONTENT = {
   navbar: {
-    logoUrl: "/header_logo.svg"
+    logoUrl: "/header_logo.svg",
+    items: DEFAULT_NAVBAR_ITEMS
   },
   hero: {
     badge: "FƏRDİ İNKİŞAF VƏ PSİXOLOGİYA MƏRKƏZİ",

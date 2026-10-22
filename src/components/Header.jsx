@@ -37,14 +37,99 @@ export default function Header() {
     };
   }, [mobileMenuOpen]);
 
-  const navLinks = [
-    { id: 'akademiya', href: getPageUrl ? getPageUrl('akademiya') : '/akademiya', label: t('nav_academy'), icon: 'school' },
-    { id: 'koucinq', href: getPageUrl ? getPageUrl('koucinq') : '/koucinq', label: t('nav_coaching'), icon: 'psychology' },
-    { id: 'club', href: getPageUrl ? getPageUrl('club') : '/club', label: t('nav_club'), icon: 'diamond' },
-    { id: 'tedbirler', href: getPageUrl ? getPageUrl('tedbirler') : '/tedbirler', label: t('nav_events'), icon: 'event' },
-    { id: 'icma', href: getPageUrl ? getPageUrl('icma') : '/icma', label: t('nav_community'), icon: 'forum' },
-    { id: 'haqqimizda', href: getPageUrl ? getPageUrl('haqqimizda') : '/haqqimizda', label: t('nav_about'), icon: 'info' },
+  const DEFAULT_FALLBACK_LINKS = [
+    { id: 'akademiya', pageId: 'akademiya', label: 'Akademiya', labelKey: 'nav_academy', type: 'internal', href: '/akademiya', icon: 'school', visible: true, openInNewTab: false, order: 1 },
+    { id: 'koucinq', pageId: 'koucinq', label: 'Kouçinq', labelKey: 'nav_coaching', type: 'internal', href: '/koucinq', icon: 'psychology', visible: true, openInNewTab: false, order: 2 },
+    { id: 'club', pageId: 'club', label: 'Coaching Club', labelKey: 'nav_club', type: 'internal', href: '/club', icon: 'diamond', visible: true, openInNewTab: false, order: 3 },
+    { id: 'tedbirler', pageId: 'tedbirler', label: 'Tədbirlər', labelKey: 'nav_events', type: 'internal', href: '/tedbirler', icon: 'event', visible: true, openInNewTab: false, order: 4 },
+    { id: 'icma', pageId: 'icma', label: 'İcma', labelKey: 'nav_community', type: 'internal', href: '/icma', icon: 'forum', visible: true, openInNewTab: false, order: 5 },
+    { id: 'haqqimizda', pageId: 'haqqimizda', label: 'Haqqımızda', labelKey: 'nav_about', type: 'internal', href: '/haqqimizda', icon: 'info', visible: true, openInNewTab: false, order: 6 },
   ];
+
+  const rawNavItems = homeContent?.navbar?.items && Array.isArray(homeContent.navbar.items) && homeContent.navbar.items.length > 0
+    ? homeContent.navbar.items
+    : DEFAULT_FALLBACK_LINKS;
+
+  const activeNavItems = [...rawNavItems]
+    .filter(item => item.visible !== false)
+    .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
+
+  const navLinks = activeNavItems.map(item => {
+    let label = item.translations?.[lang];
+    if (!label) {
+      if (item.labelKey) {
+        label = t(item.labelKey);
+      } else {
+        label = item.label || item.id;
+      }
+    }
+
+    let href = item.href;
+    if (item.type === 'internal') {
+      if (item.pageId && getPageUrl) {
+        href = getPageUrl(item.pageId);
+      } else if (!href) {
+        href = `/${item.pageId || item.id}`;
+      }
+    }
+
+    return {
+      ...item,
+      label,
+      href
+    };
+  });
+
+  const handleLinkClick = (e, link) => {
+    if (link.type === 'external') {
+      if (link.openInNewTab) {
+        e.preventDefault();
+        window.open(link.href, '_blank', 'noopener,noreferrer');
+      }
+      setMobileMenuOpen(false);
+      return;
+    }
+
+    // Internal navigation
+    if (link.pageId) {
+      const validPages = ['home', 'akademiya', 'koucinq', 'club', 'tedbirler', 'icma', 'haqqimizda'];
+      if (validPages.includes(link.pageId)) {
+        e.preventDefault();
+        navigateTo(link.pageId);
+        setMobileMenuOpen(false);
+        return;
+      }
+    }
+
+    if (link.href && link.href.startsWith('#')) {
+      setMobileMenuOpen(false);
+      return;
+    }
+
+    if (link.href && link.href.startsWith('/')) {
+      const cleanPath = link.href.replace(/^\//, '').split('?')[0].split('#')[0];
+      const validPages = ['home', 'akademiya', 'koucinq', 'club', 'tedbirler', 'icma', 'haqqimizda'];
+      if (validPages.includes(cleanPath)) {
+        e.preventDefault();
+        navigateTo(cleanPath);
+        setMobileMenuOpen(false);
+        return;
+      }
+    }
+
+    if (link.openInNewTab) {
+      e.preventDefault();
+      window.open(link.href, '_blank', 'noopener,noreferrer');
+    }
+    setMobileMenuOpen(false);
+  };
+
+  const isLinkActive = (link) => {
+    if (link.type === 'external') return false;
+    if (link.pageId) return currentPage === link.pageId;
+    if (link.id) return currentPage === link.id;
+    return false;
+  };
 
   const unreadNotifs = (userNotifications || []).filter(
     n => String(n.userId) === String(currentUser?.id) && !n.isRead
@@ -81,22 +166,24 @@ export default function Header() {
         {/* CENTER DESKTOP NAVIGATION LINKS */}
         <nav className="hidden lg:flex items-center space-x-6 xl:space-x-8">
           {navLinks.map((link) => {
-            const isActive = currentPage === link.id;
+            const isActive = isLinkActive(link);
             return (
               <a
                 key={link.id}
                 href={link.href}
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigateTo(link.id);
-                }}
-                className={`whitespace-nowrap font-label-md text-sm transition-all duration-200 py-1 cursor-pointer ${
+                target={link.type === 'external' && link.openInNewTab ? '_blank' : undefined}
+                rel={link.type === 'external' && link.openInNewTab ? 'noopener noreferrer' : undefined}
+                onClick={(e) => handleLinkClick(e, link)}
+                className={`whitespace-nowrap font-label-md text-sm transition-all duration-200 py-1 cursor-pointer flex items-center gap-1.5 ${
                   isActive
                     ? 'text-primary font-bold border-b-2 border-secondary'
                     : 'text-on-surface-variant hover:text-secondary'
                 }`}
               >
-                {link.label}
+                <span>{link.label}</span>
+                {link.type === 'external' && (
+                  <span className="material-symbols-outlined text-[13px] opacity-60">open_in_new</span>
+                )}
               </a>
             );
           })}
@@ -341,16 +428,14 @@ export default function Header() {
             {/* Mobile Navigation Links */}
             <nav className="flex flex-col space-y-1">
               {navLinks.map((link) => {
-                const isActive = currentPage === link.id;
+                const isActive = isLinkActive(link);
                 return (
                   <a
                     key={link.id}
                     href={link.href}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      navigateTo(link.id);
-                      setMobileMenuOpen(false);
-                    }}
+                    target={link.type === 'external' && link.openInNewTab ? '_blank' : undefined}
+                    rel={link.type === 'external' && link.openInNewTab ? 'noopener noreferrer' : undefined}
+                    onClick={(e) => handleLinkClick(e, link)}
                     className={`px-3.5 py-3 rounded-xl text-sm font-medium transition-all cursor-pointer flex items-center justify-between ${
                       isActive
                         ? 'bg-gradient-to-r from-[#070f1e] to-[#112240] text-[#e5c57d] font-bold shadow-md'
@@ -359,12 +444,14 @@ export default function Header() {
                   >
                     <div className="flex items-center gap-3">
                       <span className={`material-symbols-outlined text-[19px] ${isActive ? 'text-[#c5a059]' : 'text-slate-400'}`}>
-                        {link.icon || 'arrow_forward'}
+                        {link.icon || (link.type === 'external' ? 'open_in_new' : 'arrow_forward')}
                       </span>
                       <span>{link.label}</span>
                     </div>
                     {isActive ? (
                       <span className="w-1.5 h-1.5 rounded-full bg-[#c5a059]" />
+                    ) : link.type === 'external' ? (
+                      <span className="material-symbols-outlined text-[16px] text-slate-300">open_in_new</span>
                     ) : (
                       <span className="material-symbols-outlined text-[16px] text-slate-300">chevron_right</span>
                     )}
