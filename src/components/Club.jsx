@@ -5,7 +5,7 @@ import { useApp } from '../context/AppContext';
 
 export default function Club() {
   const { t, currentLang, defaultLang } = useLanguage();
-  const { clubTiersList, homeContent, openApplication, currentUser, applicationsList, userTier } = useApp();
+  const { clubTiersList, homeContent, openApplication, currentUser, applicationsList, userTier, navigateTo } = useApp();
   const club = homeContent?.club || {};
 
   const premiumTier = clubTiersList.find(t => t.id === 'premium') || clubTiersList[2];
@@ -36,6 +36,72 @@ export default function Club() {
   const badgeText = getLocalized(club, 'badge', currentLang, defaultLang) || (club.badge !== undefined && club.badge !== null && String(club.badge).trim() !== '' ? club.badge : t('club_badge'));
   const titleText = getLocalized(club, 'title', currentLang, defaultLang) || (club.title !== undefined && club.title !== null && String(club.title).trim() !== '' ? club.title : t('club_title'));
   const descText = getLocalized(club, 'desc', currentLang, defaultLang) || (club.desc !== undefined && club.desc !== null && String(club.desc).trim() !== '' ? club.desc : t('club_desc'));
+
+  const isResident = userTier === 'Premium' || userTier === 'VIP';
+
+  // Left button text & link
+  const leftBtnText = isResident
+    ? (getLocalized(club, 'ctaBtnActiveText', currentLang, defaultLang) || club.ctaBtnActiveText || 'Rezident Statusunuz Aktivdir')
+    : (userClubApp 
+        ? `Müraciət: ${userClubApp.status}` 
+        : (getLocalized(club, 'ctaBtnText', currentLang, defaultLang) || club.ctaBtnText || t('club_join_btn') || 'Kluba qoşul'));
+
+  const leftBtnLink = isResident
+    ? (getLocalized(club, 'ctaBtnActiveLink', currentLang, defaultLang) || club.ctaBtnActiveLink)
+    : (getLocalized(club, 'ctaBtnLink', currentLang, defaultLang) || club.ctaBtnLink);
+
+  const handleLeftBtnClick = () => {
+    if (leftBtnLink && typeof leftBtnLink === 'string' && leftBtnLink.trim() !== '') {
+      const url = leftBtnLink.trim();
+      if (url.startsWith('http://') || url.startsWith('https://')) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      } else if (url.startsWith('#')) {
+        const el = document.getElementById(url.replace('#', ''));
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+        else window.location.hash = url;
+      } else {
+        if (navigateTo) {
+          navigateTo(url.replace(/^\//, ''));
+        } else {
+          window.location.href = url;
+        }
+      }
+      return;
+    }
+    openApplication(premiumTier || { id: 'premium', title: tierName, price: `₼ ${tierPrice}` }, 'club');
+  };
+
+  // Right card button text & link
+  const rightBtnText = isResident
+    ? (getLocalized(club, 'tierCtaActiveText', currentLang, defaultLang) || club.tierCtaActiveText || 'Aktiv Rezident')
+    : (userClubApp 
+        ? `Müraciət Statusu: ${userClubApp.status}` 
+        : (getLocalized(club, 'tierCtaText', currentLang, defaultLang) || club.tierCtaText || tierCtaText || 'REZİDENT OL'));
+
+  const rightBtnLink = isResident
+    ? (getLocalized(club, 'tierCtaActiveLink', currentLang, defaultLang) || club.tierCtaActiveLink)
+    : (getLocalized(club, 'tierCtaLink', currentLang, defaultLang) || club.tierCtaLink);
+
+  const handleRightBtnClick = () => {
+    if (rightBtnLink && typeof rightBtnLink === 'string' && rightBtnLink.trim() !== '') {
+      const url = rightBtnLink.trim();
+      if (url.startsWith('http://') || url.startsWith('https://')) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      } else if (url.startsWith('#')) {
+        const el = document.getElementById(url.replace('#', ''));
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+        else window.location.hash = url;
+      } else {
+        if (navigateTo) {
+          navigateTo(url.replace(/^\//, ''));
+        } else {
+          window.location.href = url;
+        }
+      }
+      return;
+    }
+    openApplication(premiumTier || { id: 'premium', title: tierName, price: `₼ ${tierPrice}` }, 'club');
+  };
 
   return (
     <section className="relative overflow-hidden py-20 md:py-28 bg-gradient-to-br from-[#051124] via-[#091b36] to-[#040e1c] text-white border-b border-[#0a192f]" id="club">
@@ -94,13 +160,11 @@ export default function Club() {
             {/* ACTION & CAPACITY STATUS */}
             <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
               <button
-                onClick={() => openApplication(premiumTier || { id: 'premium', title: tierName, price: `₼ ${tierPrice}` }, 'club')}
+                onClick={handleLeftBtnClick}
                 className="group relative inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-[#d4af37] via-[#e9c176] to-[#c5a059] hover:from-[#c5a059] hover:to-[#b98d2c] text-[#070f1e] font-semibold text-xs tracking-wider uppercase shadow-lg shadow-[#c5a059]/25 hover:shadow-xl hover:shadow-[#c5a059]/35 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer overflow-hidden"
               >
                 <span>
-                  {userTier === 'Premium' || userTier === 'VIP' 
-                    ? 'Rezident Statusunuz Aktivdir' 
-                    : (userClubApp ? `Müraciət: ${userClubApp.status}` : (getLocalized(club, 'ctaBtnText', currentLang, defaultLang) || t('club_join_btn')))}
+                  {leftBtnText}
                 </span>
                 <span className="material-symbols-outlined text-[18px]">how_to_reg</span>
               </button>
@@ -161,10 +225,10 @@ export default function Club() {
 
               {/* Card Action Button */}
               <button
-                onClick={() => openApplication(premiumTier || { id: 'premium', title: tierName, price: `₼ ${tierPrice}` }, 'club')}
+                onClick={handleRightBtnClick}
                 className="w-full py-4 text-center bg-[#070f1e] hover:bg-[#112240] text-white rounded-xl text-xs font-semibold uppercase tracking-[0.16em] border border-[#c5a059]/40 shadow-lg shadow-[#070f1e]/25 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
               >
-                {userTier === 'Premium' || userTier === 'VIP' ? 'Aktiv Rezident' : (userClubApp ? `Müraciət Statusu: ${userClubApp.status}` : tierCtaText)}
+                {rightBtnText}
               </button>
             </div>
           </div>

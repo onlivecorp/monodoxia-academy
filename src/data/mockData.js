@@ -1100,6 +1100,9 @@ export const INITIAL_HOME_CONTENT = {
       "Oflayn tədbirlərə və retreat-lərə VIP giriş: Qapalı illik düşərgələr."
     ],
     ctaBtnText: "Kluba qoşul",
+    ctaBtnLink: "",
+    ctaBtnActiveText: "Rezident Statusunuz Aktivdir",
+    ctaBtnActiveLink: "",
     limitedText: "Məhdud sayda yer: Aylıq qəbul",
     tierBadge: "PREMIUM REZİDENT",
     tierTitle: "Premium Rezident",
@@ -1115,6 +1118,9 @@ export const INITIAL_HOME_CONTENT = {
       "Tam 100+ saatlıq meditasiya və video arxivi"
     ],
     tierCtaText: "REZİDENT OL",
+    tierCtaLink: "",
+    tierCtaActiveText: "Aktiv Rezident",
+    tierCtaActiveLink: "",
     translations: {
       az: {
         badge: "QAPALI İCMA ÜZVLÜYÜ",
@@ -1127,6 +1133,9 @@ export const INITIAL_HOME_CONTENT = {
           "Oflayn tədbirlərə və retreat-lərə VIP giriş: Qapalı illik düşərgələr."
         ],
         ctaBtnText: "Kluba qoşul",
+        ctaBtnLink: "",
+        ctaBtnActiveText: "Rezident Statusunuz Aktivdir",
+        ctaBtnActiveLink: "",
         limitedText: "Məhdud sayda yer: Aylıq qəbul",
         tierBadge: "PREMIUM REZİDENT",
         tierTitle: "Premium Rezident",
@@ -1141,7 +1150,10 @@ export const INITIAL_HOME_CONTENT = {
           "Aylıq 1 fərdi diaqnostik orientasiya",
           "Tam 100+ saatlıq meditasiya və video arxivi"
         ],
-        tierCtaText: "REZİDENT OL"
+        tierCtaText: "REZİDENT OL",
+        tierCtaLink: "",
+        tierCtaActiveText: "Aktiv Rezident",
+        tierCtaActiveLink: ""
       },
       en: {
         badge: "EXCLUSIVE RESIDENCY",
@@ -1154,6 +1166,9 @@ export const INITIAL_HOME_CONTENT = {
           "VIP access to offline events and retreats: Exclusive annual camps."
         ],
         ctaBtnText: "Join the Club",
+        ctaBtnLink: "",
+        ctaBtnActiveText: "Resident Status Active",
+        ctaBtnActiveLink: "",
         limitedText: "Limited availability: Monthly cohorts",
         tierBadge: "PREMIUM RESIDENT",
         tierTitle: "Premium Resident",
@@ -1168,7 +1183,10 @@ export const INITIAL_HOME_CONTENT = {
           "1 monthly individual diagnostic orientation",
           "Full 100+ hours meditation and video archive"
         ],
-        tierCtaText: "BECOME A RESIDENT"
+        tierCtaText: "BECOME A RESIDENT",
+        tierCtaLink: "",
+        tierCtaActiveText: "Active Resident",
+        tierCtaActiveLink: ""
       },
       tr: {
         badge: "ÖZEL ÜYELİK",
@@ -1181,6 +1199,9 @@ export const INITIAL_HOME_CONTENT = {
           "Çevrimdışı etkinliklere ve kamplara VIP giriş: Kapalı yıllık kamplar."
         ],
         ctaBtnText: "Kulübe Katıl",
+        ctaBtnLink: "",
+        ctaBtnActiveText: "Rezidans Durumunuz Aktif",
+        ctaBtnActiveLink: "",
         limitedText: "Kontenjan sınırlı: Aylık kabul",
         tierBadge: "PREMİUM REZİDANS",
         tierTitle: "Premium Üye",
@@ -1195,7 +1216,10 @@ export const INITIAL_HOME_CONTENT = {
           "Ayda 1 bireysel diagnostik oryantasyon",
           "Tam 100+ saatlik meditasyon ve video arşivi"
         ],
-        tierCtaText: "REZİDENT OL"
+        tierCtaText: "REZİDENT OL",
+        tierCtaLink: "",
+        tierCtaActiveText: "Aktif Rezidans",
+        tierCtaActiveLink: ""
       },
       ru: {
         badge: "ЗАКРЫТОЕ ЧЛЕНСТВО",
@@ -1208,6 +1232,9 @@ export const INITIAL_HOME_CONTENT = {
           "VIP-доступ к офлайн-мероприятиям и ретритам: Закрытые ежегодные кемпы."
         ],
         ctaBtnText: "Вступить в клуб",
+        ctaBtnLink: "",
+        ctaBtnActiveText: "Статус Резидента Активен",
+        ctaBtnActiveLink: "",
         limitedText: "Ограниченное количество мест: Ежемесячный набор",
         tierBadge: "ПРЕМИУМ РЕЗИДЕНТ",
         tierTitle: "Премиум резидент",
@@ -1222,7 +1249,10 @@ export const INITIAL_HOME_CONTENT = {
           "1 индивидуальная диагностическая ориентация в месяц",
           "Полный архив 100+ часов медитаций и видео"
         ],
-        tierCtaText: "СТАТЬ РЕЗИДЕНТОМ"
+        tierCtaText: "СТАТЬ РЕЗИДЕНТОМ",
+        tierCtaLink: "",
+        tierCtaActiveText: "Активный Резидент",
+        tierCtaActiveLink: ""
       }
     }
   },

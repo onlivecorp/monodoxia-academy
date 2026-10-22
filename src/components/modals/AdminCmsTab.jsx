@@ -445,6 +445,9 @@ export default function AdminCmsTab() {
       "Oflayn tədbirlərə və retreat-lərə VIP giriş: Qapalı illik düşərgələr."
     ],
     ctaBtnText: "Kluba qoşul",
+    ctaBtnLink: "",
+    ctaBtnActiveText: "Rezident Statusunuz Aktivdir",
+    ctaBtnActiveLink: "",
     limitedText: "Məhdud sayda yer: Aylıq qəbul",
     tierBadge: "PREMIUM REZİDENT",
     tierTitle: "Premium Rezident",
@@ -460,6 +463,9 @@ export default function AdminCmsTab() {
       "Tam 100+ saatlıq meditasiya və video arxivi"
     ],
     tierCtaText: "REZİDENT OL",
+    tierCtaLink: "",
+    tierCtaActiveText: "Aktiv Rezident",
+    tierCtaActiveLink: "",
     translations: {
       az: {
         badge: "QAPALI İCMA ÜZVLÜYÜ",
@@ -472,6 +478,9 @@ export default function AdminCmsTab() {
           "Oflayn tədbirlərə və retreat-lərə VIP giriş: Qapalı illik düşərgələr."
         ],
         ctaBtnText: "Kluba qoşul",
+        ctaBtnLink: "",
+        ctaBtnActiveText: "Rezident Statusunuz Aktivdir",
+        ctaBtnActiveLink: "",
         limitedText: "Məhdud sayda yer: Aylıq qəbul",
         tierBadge: "PREMIUM REZİDENT",
         tierTitle: "Premium Rezident",
@@ -486,7 +495,10 @@ export default function AdminCmsTab() {
           "Aylıq 1 fərdi diaqnostik orientasiya",
           "Tam 100+ saatlıq meditasiya və video arxivi"
         ],
-        tierCtaText: "REZİDENT OL"
+        tierCtaText: "REZİDENT OL",
+        tierCtaLink: "",
+        tierCtaActiveText: "Aktiv Rezident",
+        tierCtaActiveLink: ""
       },
       en: {
         badge: "EXCLUSIVE RESIDENCY",
@@ -499,6 +511,9 @@ export default function AdminCmsTab() {
           "VIP access to offline events and retreats: Exclusive annual camps."
         ],
         ctaBtnText: "Join the Club",
+        ctaBtnLink: "",
+        ctaBtnActiveText: "Resident Status Active",
+        ctaBtnActiveLink: "",
         limitedText: "Limited availability: Monthly cohorts",
         tierBadge: "PREMIUM RESIDENT",
         tierTitle: "Premium Resident",
@@ -513,7 +528,10 @@ export default function AdminCmsTab() {
           "1 monthly individual diagnostic orientation",
           "Full 100+ hours meditation and video archive"
         ],
-        tierCtaText: "BECOME A RESIDENT"
+        tierCtaText: "BECOME A RESIDENT",
+        tierCtaLink: "",
+        tierCtaActiveText: "Active Resident",
+        tierCtaActiveLink: ""
       },
       tr: {
         badge: "ÖZEL ÜYELİK",
@@ -526,6 +544,9 @@ export default function AdminCmsTab() {
           "Çevrimdışı etkinliklere ve kamplara VIP giriş: Kapalı yıllık kamplar."
         ],
         ctaBtnText: "Kulübe Katıl",
+        ctaBtnLink: "",
+        ctaBtnActiveText: "Rezidans Durumunuz Aktif",
+        ctaBtnActiveLink: "",
         limitedText: "Kontenjan sınırlı: Aylık kabul",
         tierBadge: "PREMİUM REZİDANS",
         tierTitle: "Premium Üye",
@@ -540,7 +561,10 @@ export default function AdminCmsTab() {
           "Ayda 1 bireysel diagnostik oryantasyon",
           "Tam 100+ saatlik meditasyon ve video arşivi"
         ],
-        tierCtaText: "REZİDENT OL"
+        tierCtaText: "REZİDENT OL",
+        tierCtaLink: "",
+        tierCtaActiveText: "Aktif Rezidans",
+        tierCtaActiveLink: ""
       },
       ru: {
         badge: "ЗАКРЫТОЕ ЧЛЕНСТВО",
@@ -553,6 +577,9 @@ export default function AdminCmsTab() {
           "VIP-доступ к офлайн-мероприятиям и ретритам: Закрытые ежегодные кемпы."
         ],
         ctaBtnText: "Вступить в клуб",
+        ctaBtnLink: "",
+        ctaBtnActiveText: "Статус Резидента Активен",
+        ctaBtnActiveLink: "",
         limitedText: "Ограниченное количество мест: Ежемесячный набор",
         tierBadge: "ПРЕМИУМ РЕЗИДЕНТ",
         tierTitle: "Премиум резидент",
@@ -567,7 +594,10 @@ export default function AdminCmsTab() {
           "1 индивидуальная диагностическая ориентация в месяц",
           "Полный архив 100+ часов медитаций и видео"
         ],
-        tierCtaText: "СТАТЬ РЕЗИДЕНТОМ"
+        tierCtaText: "СТАТЬ РЕЗИДЕНТОМ",
+        tierCtaLink: "",
+        tierCtaActiveText: "Активный Резидент",
+        tierCtaActiveLink: ""
       }
     }
   };
@@ -4746,8 +4776,52 @@ export default function AdminCmsTab() {
               helpText="Sol sütunda 'verified' ikonu ilə göstərilən üstünlüklər. Hər sətirdə 1 bənd yazın."
             />
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
-              <Field label="Əsas Düymə Mətni (CTA)" block={cmsClub} setBlock={setCmsClub} fieldKey="ctaBtnText" placeholder="Məs: Kluba qoşul" />
+            <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '14px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#c5a059' }}>smart_button</span>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Sol Düymə Mətni və Keçid Linki
+                </span>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+                <Field
+                  label="Düymə Mətni (Normal / Qonaq)"
+                  block={cmsClub}
+                  setBlock={setCmsClub}
+                  fieldKey="ctaBtnText"
+                  placeholder="Məs: Kluba qoşul"
+                  helpText="İstifadəçi aktiv rezident deyilsə görünən mətn"
+                />
+                <Field
+                  label="Düymə Keçid Linki (Normal)"
+                  block={cmsClub}
+                  setBlock={setCmsClub}
+                  fieldKey="ctaBtnLink"
+                  placeholder="Məs: /club, https://... (boş = ərizə forması)"
+                  helpText="Xüsusi səhifə və ya link. Boş saxladıqda müraciət pəncərəsi açılır."
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+                <Field
+                  label="Düymə Mətni (Aktiv Rezident Üçün)"
+                  block={cmsClub}
+                  setBlock={setCmsClub}
+                  fieldKey="ctaBtnActiveText"
+                  placeholder="Məs: Rezident Statusunuz Aktivdir"
+                  helpText="İstifadəçi aktiv rezident olduqda görünən mətn"
+                />
+                <Field
+                  label="Düymə Keçid Linki (Aktiv Rezident)"
+                  block={cmsClub}
+                  setBlock={setCmsClub}
+                  fieldKey="ctaBtnActiveLink"
+                  placeholder="Məs: /club, /profile və ya link"
+                  helpText="Aktiv rezident düyməyə kliklədikdə açılacaq səhifə və ya URL"
+                />
+              </div>
+
               <Field label="Məhdudiyyət Xəbərdarlığı" block={cmsClub} setBlock={setCmsClub} fieldKey="limitedText" placeholder="Məs: Məhdud sayda yer: Aylıq qəbul" />
             </div>
           </div>
@@ -4788,7 +4862,52 @@ export default function AdminCmsTab() {
               helpText="Sağ kartda 'check_circle' ikonu ilə göstərilən maddələr. Hər sətirdə 1 maddə yazın."
             />
 
-            <Field label="Kart Düymə Mətni (CTA)" block={cmsClub} setBlock={setCmsClub} fieldKey="tierCtaText" placeholder="Məs: REZİDENT OL" />
+            <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '14px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#047857' }}>smart_button</span>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Sağ Kart Düyməsi Mətni və Keçid Linki
+                </span>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+                <Field
+                  label="Kart Düymə Mətni (Normal / Qonaq)"
+                  block={cmsClub}
+                  setBlock={setCmsClub}
+                  fieldKey="tierCtaText"
+                  placeholder="Məs: REZİDENT OL"
+                  helpText="Qonaqlar üçün kartın altındakı əsas düymə mətni"
+                />
+                <Field
+                  label="Kart Düymə Keçid Linki (Normal)"
+                  block={cmsClub}
+                  setBlock={setCmsClub}
+                  fieldKey="tierCtaLink"
+                  placeholder="Məs: /club, https://... (boş = ərizə forması)"
+                  helpText="Xüsusi səhifə və ya link. Boş saxladıqda müraciət pəncərəsi açılır."
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+                <Field
+                  label="Kart Düymə Mətni (Aktiv Rezident Üçün)"
+                  block={cmsClub}
+                  setBlock={setCmsClub}
+                  fieldKey="tierCtaActiveText"
+                  placeholder="Məs: Aktiv Rezident"
+                  helpText="İstifadəçi aktiv rezident olduqda kartda görünən mətn"
+                />
+                <Field
+                  label="Kart Düymə Keçid Linki (Aktiv Rezident)"
+                  block={cmsClub}
+                  setBlock={setCmsClub}
+                  fieldKey="tierCtaActiveLink"
+                  placeholder="Məs: /club, /profile və ya link"
+                  helpText="Aktiv rezident kliklədikdə açılacaq səhifə və ya URL"
+                />
+              </div>
+            </div>
           </div>
 
           <div>
