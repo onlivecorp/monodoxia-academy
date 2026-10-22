@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { getLocalized } from '../i18n/localize';
+import { getLocalized, getLocalizedArray } from '../i18n/localize';
 import { useApp } from '../context/AppContext';
 
 export default function Community() {
@@ -33,11 +33,30 @@ export default function Community() {
     setNewTopicModalOpen(true);
   };
 
-  const defaultBullets = [
-    "Konfidensiallıq və qarşılıqlı hörmət etikası",
-    "Hər həftə yeni fəlsəfi və psixoloji mövzu müzakirəsi"
-  ];
-  const bullets = community.bullets && community.bullets.length > 0 ? community.bullets : defaultBullets;
+  // İcma Səhifəsinin Üst Bəndləri (Hero Badges) & Bullets
+  const heroBadge1Text = getLocalized(community, 'heroBadge1Text', currentLang, defaultLang) || community.heroBadge1Text;
+  const heroBadge2Text = getLocalized(community, 'heroBadge2Text', currentLang, defaultLang) || community.heroBadge2Text;
+  const heroBadge3Text = getLocalized(community, 'heroBadge3Text', currentLang, defaultLang) || community.heroBadge3Text;
+
+  const rawBullets = getLocalizedArray(community, 'bullets', currentLang, defaultLang) || community.bullets || [];
+  const cleanBullets = (Array.isArray(rawBullets) ? rawBullets : [])
+    .map(b => (typeof b === 'string' ? b.trim() : (b?.text || '').trim()))
+    .filter(Boolean);
+
+  const heroBadges = [
+    {
+      icon: community.heroBadge1Icon || 'verified_user',
+      text: heroBadge1Text || cleanBullets[0] || 'Təhlükəsiz Məkan'
+    },
+    {
+      icon: community.heroBadge2Icon || 'psychology',
+      text: heroBadge2Text || cleanBullets[1] || 'Fəlsəfi Dialoq'
+    },
+    {
+      icon: community.heroBadge3Icon || 'forum',
+      text: heroBadge3Text || cleanBullets[2] || 'Aktiv Müzakirələr'
+    }
+  ].filter(b => b.text && String(b.text).trim() !== '');
 
   const badgeText = getLocalized(community, 'badge', currentLang, defaultLang) || (community.badge !== undefined && community.badge !== null && String(community.badge).trim() !== '' ? community.badge : t('community_badge'));
   const titleText = getLocalized(community, 'title', currentLang, defaultLang) || (community.title !== undefined && community.title !== null && String(community.title).trim() !== '' ? community.title : t('community_title'));
@@ -79,16 +98,36 @@ export default function Community() {
               {descText}
             </p>
 
-            <div className="space-y-3.5 pt-2">
-              {bullets.map((b, i) => (
-                <div key={i} className="flex items-center gap-3 text-sm text-slate-700">
-                  <div className="w-7 h-7 rounded-full bg-[#c5a059]/15 border border-[#c5a059]/35 text-[#775a19] flex items-center justify-center shrink-0 shadow-sm">
-                    <span className="material-symbols-outlined text-[15px]">{i === 0 ? 'verified_user' : 'forum'}</span>
-                  </div>
-                  <span className="font-medium">{b}</span>
+            {/* İCMA SƏHİFƏSİNİN ÜST BƏNDLƏRİ (HERO BADGES) */}
+            <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 pt-2">
+              {heroBadges.map((badge, idx) => (
+                <div
+                  key={idx}
+                  className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-[#c5a059]/35 text-xs text-[#071326] font-medium shadow-sm hover:border-[#c5a059]/60 hover:bg-white transition-all"
+                >
+                  <span className="material-symbols-outlined text-[#775a19] text-[18px]">
+                    {badge.icon}
+                  </span>
+                  <span>{badge.text}</span>
                 </div>
               ))}
             </div>
+
+            {/* ƏLAVƏ XÜSUSİ BƏNDLƏR (ƏGƏR DAXİL EDİLİBSƏ) */}
+            {cleanBullets.filter(b => !heroBadges.some(hb => hb.text.toLowerCase() === b.toLowerCase())).length > 0 && (
+              <div className="space-y-2.5 pt-1">
+                {cleanBullets
+                  .filter(b => !heroBadges.some(hb => hb.text.toLowerCase() === b.toLowerCase()))
+                  .map((b, i) => (
+                    <div key={i} className="flex items-center gap-2.5 text-xs sm:text-sm text-slate-700">
+                      <div className="w-5 h-5 rounded-full bg-[#c5a059]/15 border border-[#c5a059]/35 text-[#775a19] flex items-center justify-center shrink-0">
+                        <span className="material-symbols-outlined text-[13px]">check</span>
+                      </div>
+                      <span>{b}</span>
+                    </div>
+                  ))}
+              </div>
+            )}
 
             <div className="flex flex-wrap items-center gap-3.5 pt-3">
               <button
