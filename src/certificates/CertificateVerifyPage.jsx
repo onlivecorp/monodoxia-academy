@@ -317,7 +317,6 @@ export default function CertificateVerifyPage({ publicId, certId: certIdProp }) 
               <div style={{
                 width: '100%',
                 maxWidth: 1000,
-                aspectRatio: '1491 / 1055',
                 overflow: 'hidden',
                 margin: '0 auto',
                 borderRadius: 8,

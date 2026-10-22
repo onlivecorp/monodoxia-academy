@@ -47,10 +47,8 @@
 .cert-wrapper {
   position: relative;
   width: 100%;
-  aspect-ratio: 1491 / 1055;
   height: auto;
   max-width: 100%;
-  overflow: hidden;
   box-sizing: border-box;
   display: block;
   line-height: 0;

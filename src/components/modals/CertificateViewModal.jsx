@@ -29,74 +29,45 @@ async function ensureFontsLoaded() {
   await new Promise(r => setTimeout(r, 150));
 }
 
-async function renderSvgToCanvas(element, width = CERT_W, height = CERT_H, scale = 2) {
+async function captureCertificateCanvas(element) {
   await ensureFontsLoaded();
-  const svg = element.querySelector('svg') || element;
-  
-  try {
-    const serializer = new XMLSerializer();
-    const svgStr = serializer.serializeToString(svg);
-    const svgBlob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
-    const url = URL.createObjectURL(svgBlob);
-
-    const canvas = document.createElement('canvas');
-    canvas.width = width * scale;
-    canvas.height = height * scale;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#f8f5ec';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    await new Promise((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = () => {
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        URL.revokeObjectURL(url);
-        resolve();
-      };
-      img.onerror = (err) => {
-        URL.revokeObjectURL(url);
-        reject(err);
-      };
-      img.src = url;
-    });
-
-    return canvas;
-  } catch (svgErr) {
-    console.warn('Direct SVG canvas rendering fallback to html2canvas:', svgErr);
-    const html2canvas = (await import('html2canvas')).default;
-    return await html2canvas(element, {
-      scale,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: '#f8f5ec',
-      width,
-      height,
-      x: 0,
-      y: 0,
-      scrollX: 0,
-      scrollY: 0,
-      windowWidth: width,
-      windowHeight: height,
-      logging: false,
-    });
-  }
+  const html2canvas = (await import('html2canvas')).default;
+  return await html2canvas(element, {
+    scale: 2,
+    useCORS: true,
+    allowTaint: true,
+    backgroundColor: '#f8f5ec',
+    width: CERT_W,
+    height: CERT_H,
+    windowWidth: CERT_W,
+    windowHeight: CERT_H,
+    x: 0,
+    y: 0,
+    scrollX: 0,
+    scrollY: 0,
+    logging: false
+  });
 }
 
 async function exportToPDF(element, filename = 'sertifikat.pdf') {
   const { jsPDF } = await import('jspdf');
-  const canvas = await renderSvgToCanvas(element, CERT_W, CERT_H, 2);
-  const imgData = canvas.toDataURL('image/jpeg', 0.95);
-  const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4', compress: true });
+  const canvas = await captureCertificateCanvas(element);
+  const imgData = canvas.toDataURL('image/jpeg', 0.98);
+  const pdf = new jsPDF({
+    orientation: 'landscape',
+    unit: 'mm',
+    format: 'a4',
+    compress: true
+  });
   pdf.addImage(imgData, 'JPEG', 0, 0, 297, 210, undefined, 'FAST');
   pdf.save(filename);
 }
 
 async function exportToJPG(element, filename = 'sertifikat.jpg') {
-  const canvas = await renderSvgToCanvas(element, CERT_W, CERT_H, 2);
+  const canvas = await captureCertificateCanvas(element);
   const link = document.createElement('a');
   link.download = filename;
-  link.href = canvas.toDataURL('image/jpeg', 0.95);
+  link.href = canvas.toDataURL('image/jpeg', 0.98);
   link.click();
 }
 
@@ -313,15 +284,14 @@ export default function CertificateViewModal() {
                 </div>
               </div>
 
-              {/* Visible preview fitting exact certificate bounds */}
+              {/* Visible preview fitting exact certificate bounds without cutting */}
               <div style={{
                 width: '100%',
-                aspectRatio: '1491 / 1055',
-                overflow: 'hidden',
                 borderRadius: 8,
                 border: '1px solid rgba(255,255,255,0.05)',
                 position: 'relative',
-                margin: '0 auto'
+                margin: '0 auto',
+                overflow: 'hidden'
               }}>
                 <CertificateTemplate
                   data={certData}
