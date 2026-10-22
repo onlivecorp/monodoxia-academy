@@ -96,60 +96,96 @@ export default function CertificateVerifyPage({ publicId, certId: certIdProp }) 
       </div>
 
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 16px' }}>
-        {/* Search Bar */}
-        <div style={{
-          background: '#fff',
-          borderRadius: 16,
-          padding: '24px 28px',
-          boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
-          border: '1px solid #e6dfc6',
-          marginBottom: 28
-        }}>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: '#0a192f', margin: '0 0 6px' }}>
-            Sertifikat Doğrulama
-          </h1>
-          <p style={{ fontSize: 13, color: '#64748b', margin: '0 0 16px' }}>
-            Sertifikat nömrəsi (MA-000001) və ya doğrulama kodu ilə axtarış edin.
-          </p>
-          <form onSubmit={handleSearch} style={{ display: 'flex', gap: 10 }}>
-            <input
-              type="text"
-              value={searchInput}
-              onChange={e => setSearchInput(e.target.value)}
-              placeholder="MA-000001 və ya Doğrulama Kodu..."
-              style={{
-                flex: 1,
-                padding: '10px 16px',
-                borderRadius: 10,
-                border: '1.5px solid #e6dfc6',
-                fontSize: 13,
-                fontFamily: "'Plus Jakarta Sans', sans-serif",
-                outline: 'none',
-                background: '#faf9f6',
-                color: '#0a192f',
-                transition: 'border-color 0.2s'
-              }}
-              onFocus={e => e.target.style.borderColor = '#b8903f'}
-              onBlur={e => e.target.style.borderColor = '#e6dfc6'}
-            />
-            <button type="submit" style={{
-              padding: '10px 22px',
-              background: 'linear-gradient(135deg, #b8903f, #e9cf8e)',
-              color: '#0a192f',
-              border: 'none',
-              borderRadius: 10,
-              fontSize: 13,
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6
+        {/* Direct Link: Official Immutable Header. If no direct link: Search Bar */}
+        {(publicId || certIdProp) ? (
+          <div style={{
+            background: 'linear-gradient(135deg, #0a192f, #1e293b)',
+            borderRadius: 16,
+            padding: '20px 24px',
+            boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
+            border: '1.5px solid #d4af37',
+            marginBottom: 24,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 16
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <span className="material-symbols-outlined" style={{ fontSize: 36, color: '#fbbf24' }}>verified_user</span>
+              <div>
+                <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700, color: '#fff', margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  Rəsmi Elektron Sertifikat Sənədi
+                  <span style={{ fontSize: 10, background: '#10b981', color: '#fff', padding: '2px 8px', borderRadius: 100, fontWeight: 700, letterSpacing: '0.05em' }}>DƏYİŞDİRİLƏ BİLMƏZ</span>
+                </h1>
+                <p style={{ fontSize: 11, color: '#cbd5e1', margin: '4px 0 0', letterSpacing: '0.02em' }}>
+                  Bu sənəd Monodoxia Academy tərəfindən elektron təsdiqlənmişdir. Məlumatlar qorunur və heç bir halda redaktə edilə bilməz.
+                </p>
+              </div>
+            </div>
+            <span style={{
+              fontSize: 12, fontWeight: 700, fontFamily: 'monospace',
+              background: 'rgba(255,255,255,0.08)', color: '#fbbf24',
+              padding: '6px 14px', borderRadius: 8, border: '1px solid rgba(251,191,36,0.3)'
             }}>
-              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>search</span>
-              Axtar
-            </button>
-          </form>
-        </div>
+              KOD: {publicId || certIdProp}
+            </span>
+          </div>
+        ) : (
+          <div style={{
+            background: '#fff',
+            borderRadius: 16,
+            padding: '24px 28px',
+            boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
+            border: '1px solid #e6dfc6',
+            marginBottom: 28
+          }}>
+            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: '#0a192f', margin: '0 0 6px' }}>
+              Sertifikat Doğrulama
+            </h1>
+            <p style={{ fontSize: 13, color: '#64748b', margin: '0 0 16px' }}>
+              Sertifikat nömrəsi (MA-000001) və ya doğrulama kodu ilə axtarış edin.
+            </p>
+            <form onSubmit={handleSearch} style={{ display: 'flex', gap: 10 }}>
+              <input
+                type="text"
+                value={searchInput}
+                onChange={e => setSearchInput(e.target.value)}
+                placeholder="MA-000001 və ya Doğrulama Kodu..."
+                style={{
+                  flex: 1,
+                  padding: '10px 16px',
+                  borderRadius: 10,
+                  border: '1.5px solid #e6dfc6',
+                  fontSize: 13,
+                  fontFamily: "'Plus Jakarta Sans', sans-serif",
+                  outline: 'none',
+                  background: '#faf9f6',
+                  color: '#0a192f',
+                  transition: 'border-color 0.2s'
+                }}
+                onFocus={e => e.target.style.borderColor = '#b8903f'}
+                onBlur={e => e.target.style.borderColor = '#e6dfc6'}
+              />
+              <button type="submit" style={{
+                padding: '10px 22px',
+                background: 'linear-gradient(135deg, #b8903f, #e9cf8e)',
+                color: '#0a192f',
+                border: 'none',
+                borderRadius: 10,
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6
+              }}>
+                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>search</span>
+                Axtar
+              </button>
+            </form>
+          </div>
+        )}
 
         {/* Status Banner */}
         {status === 'loading' && (
@@ -211,11 +247,12 @@ export default function CertificateVerifyPage({ publicId, certId: certIdProp }) 
               </div>
             )}
 
-            {/* Certificate Preview */}
+            {/* Certificate Preview (Protected Read-Only Canvas) */}
             <div style={{
               background: '#fff', borderRadius: 16, padding: 16,
               boxShadow: '0 8px 40px rgba(0,0,0,0.1)', border: '1px solid #e6dfc6',
-              overflow: 'hidden', marginBottom: 20
+              overflow: 'hidden', marginBottom: 20,
+              userSelect: 'none', WebkitUserSelect: 'none'
             }}>
               <div style={{
                 width: '100%',
@@ -224,10 +261,11 @@ export default function CertificateVerifyPage({ publicId, certId: certIdProp }) 
                 overflow: 'hidden',
                 margin: '0 auto',
                 borderRadius: 8,
-                border: '1px solid #e6dfc6'
+                border: '1px solid #e6dfc6',
+                pointerEvents: 'none'
               }}>
                 <CertificateTemplate
-                  data={cert.fields || {}}
+                  data={{ ...(cert.fields || {}), certNumber: cert.number }}
                   verifyUrl={verifyUrl}
                 />
               </div>

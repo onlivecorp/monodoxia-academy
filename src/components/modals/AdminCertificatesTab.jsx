@@ -351,10 +351,23 @@ export default function AdminCertificatesTab() {
     setRevokeModal(null);
   };
 
+  // Next certificate number for create mode
+  const nextCertNumber = useMemo(() => {
+    return 'MA-' + String((certCounter || 0) + 1).padStart(6, '0');
+  }, [certCounter]);
+
+  // Current editing certificate object
+  const currentEditingCert = useMemo(() => {
+    return editingId ? certificatesList.find(x => x.id === editingId) : null;
+  }, [editingId, certificatesList]);
+
+  // Active certificate number for preview and header
+  const activeNumber = view === 'create' ? nextCertNumber : (currentEditingCert?.number || 'MA-000001');
+
   // Delete
   const handleDelete = (cert) => {
-    if (!window.confirm(`"${cert.number}" sertifikatını silmək istəyirsinizmi?`)) return;
-    deleteCertificate(cert.id);
+    if (!window.confirm(`"${cert.number}" sertifikatını həmişəlik silmək istəyirsinizmi?`)) return;
+    deleteCertificate(cert.id, true);
     showToast('Sertifikat silindi', 'info');
   };
 
@@ -379,7 +392,7 @@ export default function AdminCertificatesTab() {
 
   // Filtered + sorted list
   const filteredList = useMemo(() => {
-    let list = [...certificatesList];
+    let list = certificatesList.filter(c => c.status !== 'Silindi');
     if (search) {
       const q = search.toLowerCase();
       list = list.filter(c =>
@@ -657,10 +670,21 @@ export default function AdminCertificatesTab() {
             Siyahıya Qayıt
           </button>
 
-          <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', margin: '0 0 20px', fontFamily: "'Playfair Display', serif" }}>
-            {view === 'create' ? 'Yeni Sertifikat Yarat' : 'Sertifikatı Redaktə Et'}
-            {editingId && (() => { const c = certificatesList.find(x => x.id === editingId); return c ? ` — ${c.number}` : ''; })()}
-          </h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', margin: 0, fontFamily: "'Playfair Display', serif" }}>
+              {view === 'create' ? `Yeni Sertifikat Yarat — ${activeNumber}` : `Sertifikatı Redaktə Et — ${activeNumber}`}
+            </h3>
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              background: '#0f172a', color: '#fbbf24',
+              padding: '6px 14px', borderRadius: 8,
+              fontSize: 12, fontWeight: 700, fontFamily: 'monospace', letterSpacing: '0.08em',
+              border: '1px solid #334155'
+            }}>
+              <span className="material-symbols-outlined" style={{ fontSize: 16, color: '#fbbf24' }}>badge</span>
+              Sertifikat №: {activeNumber}
+            </span>
+          </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 500px', gap: 24, alignItems: 'start' }}>
             {/* LEFT: Form */}
@@ -837,7 +861,7 @@ export default function AdminCertificatesTab() {
                   boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
                 }}>
                   <CertificateTemplate
-                    data={fields}
+                    data={{ ...fields, certNumber: activeNumber }}
                     verifyUrl="https://monodoxia.academy/certificates/verify/preview"
                   />
                 </div>

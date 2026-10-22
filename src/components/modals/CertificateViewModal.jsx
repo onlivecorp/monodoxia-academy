@@ -117,9 +117,9 @@ export default function CertificateViewModal() {
 
   return (
     <div style={{
-      position: 'fixed', inset: 0, zIndex: 60,
-      background: 'rgba(7, 15, 30, 0.85)',
-      backdropFilter: 'blur(8px)',
+      position: 'fixed', inset: 0, zIndex: 999999,
+      background: 'rgba(7, 15, 30, 0.88)',
+      backdropFilter: 'blur(10px)',
       display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'flex-start',
       overflowY: 'auto', padding: '20px 16px'

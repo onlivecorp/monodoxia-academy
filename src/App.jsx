@@ -169,6 +169,7 @@ function AppContent() {
         <AuthModal />
         <Suspense fallback={null}>
           <AdminModal />
+          <CertificateViewModal />
         </Suspense>
       </div>
     );
