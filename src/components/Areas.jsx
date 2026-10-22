@@ -63,18 +63,18 @@ export default function Areas() {
       <div className="relative max-w-7xl mx-auto px-6 md:px-12">
         {/* HEADER */}
         <div className="text-center max-w-2xl mx-auto space-y-4 mb-16">
-          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#c5a059]/40 bg-white/70 backdrop-blur-md shadow-sm anim-badge">
+          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#c5a059]/40 bg-white/70 backdrop-blur-md shadow-sm transition-all duration-300">
             <span className="w-1.5 h-1.5 rounded-full bg-[#9e782f]"></span>
             <span className="text-[11px] sm:text-xs font-semibold text-[#775a19] tracking-[0.2em] uppercase font-sans">
               {badgeText}
             </span>
           </div>
 
-          <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] text-[#070f1e] font-serif font-medium tracking-tight leading-[1.2] anim-areas-title">
+          <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] text-[#070f1e] font-serif font-medium tracking-tight leading-[1.2]">
             {titleText}
           </h2>
 
-          <p className="text-base sm:text-lg text-slate-600 leading-relaxed font-normal anim-subtext">
+          <p className="text-base sm:text-lg text-slate-600 leading-relaxed font-normal">
             {descText}
           </p>
         </div>

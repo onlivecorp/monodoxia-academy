@@ -497,9 +497,8 @@
 }
 
 .anim-areas-title {
-  opacity: 0;
-  transform: perspective(600px) rotateX(25deg) translateY(24px);
-  animation: areasPerspectiveUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
+  opacity: 1;
+  transform: none;
 }
 .anim-areas-title.is-visible {
   animation: areasPerspectiveUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -680,39 +679,28 @@
   animation: newsletterStarPulse 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@keyframes autoFadeFallback {
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
 /* Section Subtitle / Paragraph Fade Up */
 .anim-subtext {
-  opacity: 0;
-  transform: translateY(14px);
-  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.18s, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.18s;
-  animation: autoFadeFallback 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .anim-subtext.is-visible {
   opacity: 1;
   transform: translateY(0);
-  animation: none;
 }
 
 /* Section Pill Badges - Shimmer and Scale In */
 .anim-badge {
-  opacity: 0;
-  transform: scale(0.92) translateY(6px);
+  opacity: 1;
+  transform: none;
   transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  animation: autoFadeFallback 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards;
 }
 
 .anim-badge.is-visible {
   opacity: 1;
   transform: scale(1) translateY(0);
-  animation: none;
 }
 
 
