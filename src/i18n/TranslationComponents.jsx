@@ -1,6 +1,7 @@
 // Monodoxia Academy - Reusable Translation UI Components
 import React, { useState } from 'react';
 import { useLanguage } from './LanguageContext';
+import FlagIcon from '../components/common/FlagIcon';
 
 /**
  * LanguageTabs - Tab switcher for editing per-language fields
@@ -30,13 +31,13 @@ export function LanguageTabs({ activeLang, onLangChange, statusMap = {}, support
           key={l.code}
           type="button"
           onClick={() => onLangChange(l.code)}
-          className={`flex items-center gap-1 px-3 py-1.5 rounded text-xs font-medium transition-all ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-all ${
             activeLang === l.code
               ? 'bg-primary-container text-on-primary font-semibold shadow-sm'
               : 'text-on-surface-variant hover:bg-surface-container'
           }`}
         >
-          <span>{l.flag}</span>
+          <FlagIcon code={l.code} className="w-4 h-3" />
           <span className="uppercase tracking-wider">{l.code}</span>
           {getStatusIcon(l.code)}
         </button>

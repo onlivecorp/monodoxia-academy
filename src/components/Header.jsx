@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useApp } from '../context/AppContext';
+import FlagIcon from './common/FlagIcon';
 
 export default function Header() {
   const { lang, setLang, supportedLangs, t } = useLanguage();
@@ -106,28 +107,47 @@ export default function Header() {
 
           {/* Desktop Language Switcher */}
           <div className="relative group hidden sm:block">
-            <button className="flex items-center space-x-1 px-2.5 py-1.5 rounded border border-transparent hover:border-outline-variant text-on-surface-variant hover:text-secondary text-xs font-semibold transition-all">
-              <span className="material-symbols-outlined text-[17px]">language</span>
-              <span className="uppercase tracking-wider">{lang}</span>
+            <button className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg border border-outline-variant/60 hover:border-secondary bg-surface-container-low/60 hover:bg-surface-container-low text-on-surface-variant hover:text-secondary text-xs font-semibold transition-all cursor-pointer">
+              <FlagIcon code={lang} className="w-4 h-3" />
+              <span className="uppercase tracking-wider font-bold">{lang}</span>
               <span className="material-symbols-outlined text-[14px]">expand_more</span>
             </button>
-            <div className="absolute right-0 top-full mt-1 hidden group-hover:block bg-surface-container-lowest border border-outline-variant rounded-md shadow-lg py-1 w-32 z-50">
+            <div className="absolute right-0 top-full mt-1.5 hidden group-hover:block bg-white border border-[#c5a059]/40 rounded-xl shadow-xl py-1.5 w-44 z-50 animate-fadeIn">
               {validLangs.map((item) => (
                 <button
                   key={item.code}
                   onClick={() => setLang(item.code)}
-                  className={`w-full text-left px-3 py-1.5 text-xs transition-colors flex items-center justify-between ${
+                  className={`w-full text-left px-3.5 py-2 text-xs transition-colors flex items-center justify-between gap-2 cursor-pointer ${
                     lang === item.code
-                      ? 'font-bold text-secondary bg-surface-container-low'
-                      : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'
+                      ? 'font-bold text-secondary bg-[#c5a059]/15'
+                      : 'text-slate-700 hover:bg-slate-50 hover:text-primary'
                   }`}
                 >
-                  <span>{item.flag} {item.code.toUpperCase()}</span>
-                  {lang === item.code && <span className="w-1.5 h-1.5 rounded-full bg-secondary"></span>}
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <FlagIcon code={item.code} className="w-4 h-3" />
+                    <span className="truncate">{item.name}</span>
+                  </div>
+                  <span className="text-[10px] font-mono font-bold uppercase text-slate-400">
+                    {item.code}
+                  </span>
                 </button>
               ))}
             </div>
           </div>
+
+          {/* Mobile Quick Language Toggle */}
+          <button
+            onClick={() => {
+              const codes = validLangs.map(l => l.code);
+              const nextIdx = (codes.indexOf(lang) + 1) % codes.length;
+              setLang(codes[nextIdx]);
+            }}
+            className="sm:hidden flex items-center gap-1 px-2 py-1.5 rounded-md border border-outline-variant/70 bg-surface-container-low text-xs font-bold text-slate-700 hover:border-secondary cursor-pointer shrink-0"
+            title="Dili dəyiş"
+          >
+            <FlagIcon code={lang} className="w-4 h-3" />
+            <span className="text-[10px] uppercase font-mono">{lang}</span>
+          </button>
 
           {/* Logged in Desktop and Mobile Mini Controls */}
           {currentUser ? (
@@ -355,10 +375,10 @@ export default function Header() {
 
             {/* Mobile Language Switcher Strip */}
             <div className="pt-2 border-t border-[#e2d9c8]/70">
-              <span className="block text-[10px] font-bold tracking-[0.16em] uppercase text-slate-400 mb-2">
+              <span className="block text-[10px] font-bold tracking-[0.16em] uppercase text-slate-400 mb-2.5">
                 Dil Seçimi (Language)
               </span>
-              <div className="grid grid-cols-4 gap-1.5">
+              <div className="grid grid-cols-2 gap-2">
                 {validLangs.map((item) => {
                   const isCurrent = lang === item.code;
                   return (
@@ -367,14 +387,19 @@ export default function Header() {
                       onClick={() => {
                         setLang(item.code);
                       }}
-                      className={`py-2 px-2 rounded-lg text-xs font-semibold flex flex-col items-center gap-1 transition-all border ${
+                      className={`py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-between gap-2 transition-all border cursor-pointer ${
                         isCurrent
-                          ? 'bg-[#070f1e] text-[#c5a059] border-[#c5a059] shadow-sm'
-                          : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
+                          ? 'bg-[#070f1e] text-[#c5a059] border-[#c5a059] shadow-sm font-bold'
+                          : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
                       }`}
                     >
-                      <span className="text-base">{item.flag}</span>
-                      <span className="text-[10px] uppercase font-mono tracking-wider">{item.code}</span>
+                      <div className="flex items-center gap-2">
+                        <FlagIcon code={item.code} className="w-5 h-3.5" />
+                        <span>{item.name}</span>
+                      </div>
+                      <span className={`text-[10px] uppercase font-mono tracking-wider ${isCurrent ? 'text-[#c5a059]' : 'text-slate-400'}`}>
+                        {item.code}
+                      </span>
                     </button>
                   );
                 })}
