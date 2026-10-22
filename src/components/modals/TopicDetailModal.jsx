@@ -21,6 +21,10 @@ export default function TopicDetailModal() {
   const [commentText, setCommentText] = useState('');
   const [guestName, setGuestName] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [activeReplyId, setActiveReplyId] = useState(null);
+  const [replyText, setReplyText] = useState('');
+  const [replyGuestName, setReplyGuestName] = useState('');
+  const [submittingReply, setSubmittingReply] = useState(false);
 
   if (!topicDetailModalOpen || !selectedTopic) return null;
 
@@ -28,7 +32,7 @@ export default function TopicDetailModal() {
   const isLiked = isTopicLiked(topic.id);
   const likesCount = typeof topic.likes === 'number' ? topic.likes : 0;
   const commentsList = Array.isArray(topic.comments) ? topic.comments : [];
-  const commentsCount = commentsList.length || topic.repliesCount || 0;
+  const commentsCount = commentsList.reduce((acc, c) => acc + 1 + (Array.isArray(c.replies) ? c.replies.length : 0), 0) || topic.repliesCount || 0;
 
   const title = getLocalized(topic, 'title', currentLang, defaultLang) || topic.title || '';
   const fullContent = topic.content || topic.desc || topic.snippet || '';
@@ -68,6 +72,31 @@ export default function TopicDetailModal() {
       setCommentText('');
     }
     setSubmitting(false);
+  };
+
+  const handleToggleReply = (commentId) => {
+    if (activeReplyId === commentId) {
+      setActiveReplyId(null);
+      setReplyText('');
+    } else {
+      setActiveReplyId(commentId);
+      setReplyText('');
+    }
+  };
+
+  const handleSubmitReply = (e, parentCommentId) => {
+    e.preventDefault();
+    if (!replyText.trim()) {
+      showToast('Zəhmət olmasa cavabınızı daxil edin', 'warning');
+      return;
+    }
+    setSubmittingReply(true);
+    const success = addCommentToTopic(topic.id, replyText, replyGuestName, parentCommentId);
+    if (success) {
+      setReplyText('');
+      setActiveReplyId(null);
+    }
+    setSubmittingReply(false);
   };
 
   return (
@@ -272,6 +301,123 @@ export default function TopicDetailModal() {
                     <p className="text-xs sm:text-sm text-slate-700 leading-relaxed pl-9 whitespace-pre-line font-normal">
                       {c.text}
                     </p>
+
+                    {/* Action Bar for Comment (Reply trigger) */}
+                    <div className="flex items-center justify-between pl-9 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleReply(c.id)}
+                        className={`inline-flex items-center gap-1.5 text-xs font-semibold transition-colors cursor-pointer ${
+                          activeReplyId === c.id
+                            ? 'text-[#775a19] underline'
+                            : 'text-slate-500 hover:text-[#775a19]'
+                        }`}
+                      >
+                        <span className="material-symbols-outlined text-[15px]">reply</span>
+                        <span>{activeReplyId === c.id ? 'Ləğv et' : 'Cavab yaz'}</span>
+                      </button>
+
+                      {Array.isArray(c.replies) && c.replies.length > 0 && (
+                        <span className="text-[11px] text-slate-400 font-mono">
+                          {c.replies.length} {c.replies.length === 1 ? 'cavab' : 'cavab'}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Inline Reply Form */}
+                    {activeReplyId === c.id && (
+                      <form
+                        onSubmit={(e) => handleSubmitReply(e, c.id)}
+                        className="ml-9 mt-2 p-3 sm:p-4 rounded-xl bg-[#faf8f5] border border-[#c5a059]/40 space-y-2.5 animate-fadeIn"
+                      >
+                        <div className="flex items-center justify-between text-[11px] text-[#775a19] font-semibold">
+                          <span className="flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[14px]">reply</span>
+                            <span>{c.author} şəxsinə cavab yazırsınız</span>
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setActiveReplyId(null)}
+                            className="text-slate-400 hover:text-slate-600 text-[10px] cursor-pointer"
+                          >
+                            ✕
+                          </button>
+                        </div>
+
+                        {!currentUser && (
+                          <input
+                            type="text"
+                            value={replyGuestName}
+                            onChange={(e) => setReplyGuestName(e.target.value)}
+                            placeholder="Adınız və ya Təxəllüsünüz (opsional)"
+                            className="w-full px-3 py-1.5 rounded-lg bg-white border border-[#c5a059]/30 text-xs text-[#071326] focus:outline-none focus:border-[#c5a059]"
+                          />
+                        )}
+
+                        <textarea
+                          value={replyText}
+                          onChange={(e) => setReplyText(e.target.value)}
+                          placeholder="Cavabınızı bura daxil edin..."
+                          rows={2}
+                          autoFocus
+                          className="w-full px-3 py-2 rounded-lg bg-white border border-[#c5a059]/30 text-xs text-[#071326] focus:outline-none focus:border-[#c5a059] shadow-inner resize-none"
+                          required
+                        />
+
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setActiveReplyId(null)}
+                            className="px-3 py-1 rounded-lg text-xs font-medium text-slate-500 hover:bg-slate-200/60 cursor-pointer"
+                          >
+                            Bağla
+                          </button>
+                          <button
+                            type="submit"
+                            disabled={submittingReply || !replyText.trim()}
+                            className="inline-flex items-center gap-1 px-4 py-1.5 rounded-lg bg-gradient-to-r from-[#070f1e] to-[#0c2242] text-[#e5c57d] text-xs font-semibold transition-all disabled:opacity-50 cursor-pointer shadow-sm"
+                          >
+                            <span>Cavabla</span>
+                            <span className="material-symbols-outlined text-[13px]">send</span>
+                          </button>
+                        </div>
+                      </form>
+                    )}
+
+                    {/* Nested Replies List */}
+                    {Array.isArray(c.replies) && c.replies.length > 0 && (
+                      <div className="ml-9 mt-3 pt-3 border-l-2 border-[#c5a059]/30 pl-3 sm:pl-4 space-y-2.5">
+                        {c.replies.map((reply, rIdx) => (
+                          <div
+                            key={reply.id || rIdx}
+                            className="p-3 rounded-xl bg-slate-50/80 border border-slate-200/80 space-y-1.5"
+                          >
+                            <div className="flex items-center justify-between text-xs">
+                              <div className="flex items-center gap-2">
+                                <div className="w-5 h-5 rounded-full bg-[#070f1e] text-[#e5c57d] font-bold text-[9px] flex items-center justify-center">
+                                  {(reply.author || 'Q').charAt(0).toUpperCase()}
+                                </div>
+                                <span className="font-semibold text-[#070f1e] text-xs">
+                                  {reply.author || 'Anonim'}
+                                </span>
+                                {reply.authorRole && (
+                                  <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-slate-200/70 text-slate-600 font-medium">
+                                    {reply.authorRole}
+                                  </span>
+                                )}
+                              </div>
+                              <span className="text-[10px] text-slate-400 font-mono">
+                                {reply.time || 'İndicə'}
+                              </span>
+                            </div>
+
+                            <p className="text-xs text-slate-700 pl-7 leading-relaxed whitespace-pre-line font-normal">
+                              {reply.text}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))
               ) : (

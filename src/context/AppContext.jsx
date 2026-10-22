@@ -1640,7 +1640,7 @@ export function AppProvider({ children }) {
     setSelectedTopic(null);
   };
 
-  const addCommentToTopic = (topicId, commentText, guestName = '') => {
+  const addCommentToTopic = (topicId, commentText, guestName = '', parentCommentId = null) => {
     if (!commentText || !commentText.trim()) {
       showToast('Zəhmət olmasa rəyinizi daxil edin', 'warning');
       return false;
@@ -1660,7 +1660,9 @@ export function AppProvider({ children }) {
       avatar: currentUser?.avatar || null,
       text: trimmed,
       time: 'İndicə',
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      parentId: parentCommentId || null,
+      replies: []
     };
 
     let updatedItem = null;
@@ -1668,12 +1670,30 @@ export function AppProvider({ children }) {
     setCommunityTopics(prev => {
       const next = prev.map(t => {
         if (t.id === topicId) {
-          const currentComments = Array.isArray(t.comments) ? t.comments : [];
-          const newComments = [...currentComments, newComment];
+          const currentComments = Array.isArray(t.comments) ? [...t.comments] : [];
+          let updatedComments = [];
+
+          if (parentCommentId) {
+            updatedComments = currentComments.map(c => {
+              if (c.id === parentCommentId) {
+                const curReplies = Array.isArray(c.replies) ? c.replies : [];
+                return {
+                  ...c,
+                  replies: [...curReplies, newComment]
+                };
+              }
+              return c;
+            });
+          } else {
+            updatedComments = [...currentComments, newComment];
+          }
+
+          const totalRepliesCount = updatedComments.reduce((acc, c) => acc + 1 + (Array.isArray(c.replies) ? c.replies.length : 0), 0);
+
           updatedItem = {
             ...t,
-            comments: newComments,
-            repliesCount: newComments.length,
+            comments: updatedComments,
+            repliesCount: totalRepliesCount,
             time: 'İndicə'
           };
           return updatedItem;
@@ -1686,19 +1706,37 @@ export function AppProvider({ children }) {
 
     setSelectedTopic(prev => {
       if (prev && prev.id === topicId) {
-        const currentComments = Array.isArray(prev.comments) ? prev.comments : [];
-        const newComments = [...currentComments, newComment];
+        const currentComments = Array.isArray(prev.comments) ? [...prev.comments] : [];
+        let updatedComments = [];
+
+        if (parentCommentId) {
+          updatedComments = currentComments.map(c => {
+            if (c.id === parentCommentId) {
+              const curReplies = Array.isArray(c.replies) ? c.replies : [];
+              return {
+                ...c,
+                replies: [...curReplies, newComment]
+              };
+            }
+            return c;
+          });
+        } else {
+          updatedComments = [...currentComments, newComment];
+        }
+
+        const totalRepliesCount = updatedComments.reduce((acc, c) => acc + 1 + (Array.isArray(c.replies) ? c.replies.length : 0), 0);
+
         return {
           ...prev,
-          comments: newComments,
-          repliesCount: newComments.length
+          comments: updatedComments,
+          repliesCount: totalRepliesCount
         };
       }
       return prev;
     });
 
     apiCall('save_community_post', updatedItem || { id: topicId });
-    showToast('Rəyiniz uğurla əlavə edildi', 'success');
+    showToast(parentCommentId ? 'Cavabınız uğurla əlavə edildi' : 'Rəyiniz uğurla əlavə edildi', 'success');
     return true;
   };
 
