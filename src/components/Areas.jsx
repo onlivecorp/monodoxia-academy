@@ -14,9 +14,19 @@ export default function Areas() {
   const badgeText = getLocalized(areas, 'badge', currentLang, defaultLang) || (areas.badge !== undefined && areas.badge !== null && String(areas.badge).trim() !== '' ? areas.badge : t('areas_badge'));
   const titleText = getLocalized(areas, 'title', currentLang, defaultLang) || (areas.title !== undefined && areas.title !== null && String(areas.title).trim() !== '' ? areas.title : t('areas_title'));
   const descText = getLocalized(areas, 'desc', currentLang, defaultLang) || (areas.desc !== undefined && areas.desc !== null && String(areas.desc).trim() !== '' ? areas.desc : t('areas_desc'));
+  const generalBtnText = getLocalized(areas, 'btnText', currentLang, defaultLang) || (areas.btnText !== undefined && areas.btnText !== null && String(areas.btnText).trim() !== '' ? areas.btnText : '');
+  const generalLink = areas.link || areas.exploreLink || '';
 
   const handleLinkClick = (e, targetLink) => {
     if (!targetLink) return;
+    if (targetLink.startsWith('http://') || targetLink.startsWith('https://')) {
+      if (targetLink.includes('monodoxia.com/haqqimizda') || targetLink.endsWith('/haqqimizda')) {
+        e.preventDefault();
+        if (navigateTo) navigateTo('haqqimizda');
+        return;
+      }
+      return;
+    }
     if (targetLink.startsWith('#')) {
       const id = targetLink.replace('#', '');
       const el = document.getElementById(id);
@@ -29,7 +39,7 @@ export default function Areas() {
         e.preventDefault();
         navigateTo('akademiya');
       }
-    } else if (targetLink.startsWith('/') || ['akademiya', 'club', 'coaching', 'community', 'events'].includes(targetLink)) {
+    } else if (targetLink.startsWith('/') || ['akademiya', 'club', 'coaching', 'community', 'events', 'haqqimizda'].includes(targetLink)) {
       e.preventDefault();
       const clean = targetLink.replace(/^\//, '');
       if (navigateTo) navigateTo(clean);
@@ -72,9 +82,9 @@ export default function Areas() {
         {/* DYNAMIC AREAS GRID */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {activeAreas.map((a, idx) => {
-            const cardLink = a.link || areas.link || areas.exploreLink || '#akademiya';
+            const cardLink = a.link || generalLink || '#akademiya';
             const btnLabel = getLocalized(a, 'btnText', currentLang, defaultLang) ||
-                             getLocalized(areas, 'btnText', currentLang, defaultLang) ||
+                             generalBtnText ||
                              t('area_explore');
 
             return (
@@ -124,6 +134,20 @@ export default function Areas() {
             );
           })}
         </div>
+
+        {/* GENERAL SECTION CTA BUTTON IF CONFIGURED */}
+        {(generalBtnText || generalLink) && (
+          <div className="mt-12 text-center">
+            <a
+              href={generalLink || '#haqqimizda'}
+              onClick={(e) => handleLinkClick(e, generalLink || '#haqqimizda')}
+              className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-xl bg-gradient-to-r from-[#070f1e] to-[#112240] text-[#e5c57d] hover:text-white font-medium text-xs sm:text-sm tracking-wider uppercase shadow-md hover:shadow-xl hover:shadow-[#070f1e]/20 transition-all duration-300 hover:-translate-y-0.5 border border-[#c5a059]/30 cursor-pointer group"
+            >
+              <span>{generalBtnText || 'Kəşf et'}</span>
+              <span className="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+            </a>
+          </div>
+        )}
       </div>
     </section>
   );

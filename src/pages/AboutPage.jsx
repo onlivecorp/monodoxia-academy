@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { getLocalized } from '../i18n/localize';
 import { useApp } from '../context/AppContext';
@@ -11,6 +11,32 @@ export default function AboutPage() {
   const { homeContent, navigateTo } = useApp();
 
   const about = homeContent?.about || {};
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        threshold: 0.05,
+        rootMargin: '50px 0px 50px 0px',
+      }
+    );
+
+    const elementsToObserve = document.querySelectorAll(
+      '.anim-badge, .anim-about-badge, .anim-subtext, [class*="anim-"][class*="-title"]'
+    );
+    elementsToObserve.forEach((el) => observer.observe(el));
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [homeContent]);
 
   return (
     <div className="min-h-screen bg-[#faf8f5] text-[#071326]">

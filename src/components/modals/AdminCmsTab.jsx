@@ -416,7 +416,7 @@ export default function AdminCmsTab() {
     { id: 'events', label: '📄 Tədbirlər Səhifəsi' },
     { id: 'community', label: '📄 İcma Səhifəsi' },
     { id: 'about', label: '📄 Haqqımızda (Məram & Sol Media)' },
-    { id: 'areas', label: '📄 Haqqımızda (8 Sahə Modulları)' },
+    { id: 'areas', label: '📄 Haqqımızda & Ana Səhifə (8 Sahə Modulları)' },
     { id: 'testimonials', label: 'Rəylər' },
     { id: 'faq', label: 'Tez-tez soruşulan suallar' },
     { id: 'newsletter', label: 'Bülletenə abunəlik' },
@@ -4430,9 +4430,9 @@ export default function AdminCmsTab() {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0' }}>
               <div>
                 <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Fundamental Sahələr – Başlıq və Giriş Mətni</h5>
-                <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0 0' }}>Ana səhifədəki 8 inkişaf istiqamətinin üst başlığı və təsviri</p>
+                <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0 0' }}>Ana səhifə və Haqqımızda səhifəsindəki 8 inkişaf istiqamətinin üst başlığı, təsviri və keçid düyməsi</p>
               </div>
-              <span style={{ fontSize: '11px', color: '#64748b', background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px' }}>Ana Səhifə</span>
+              <span style={{ fontSize: '11px', color: '#64748b', background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px' }}>Ana Səhifə & Haqqımızda</span>
             </div>
             <Field label="Üst Etiket (Badge)" block={cmsAreas} setBlock={setCmsAreas} fieldKey="badge" />
             <Field label="Əsas Başlıq" block={cmsAreas} setBlock={setCmsAreas} fieldKey="title" />

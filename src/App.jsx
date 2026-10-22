@@ -30,7 +30,7 @@ const CommunityPage = lazy(() => import('./pages/CommunityPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 
 function AppContent() {
-  const { platformSettings, currentUser, setAuthModalOpen, canAccessAdmin, adminModalOpen, setAdminModalOpen, currentPage, certViewModalOpen } = useApp();
+  const { platformSettings, currentUser, setAuthModalOpen, canAccessAdmin, adminModalOpen, setAdminModalOpen, currentPage, certViewModalOpen, homeContent } = useApp();
   const [adminBypass, setAdminBypass] = useState(() => {
     return sessionStorage.getItem('monodoxia_admin_bypass') === 'true';
   });
@@ -59,6 +59,50 @@ function AppContent() {
     };
     document.title = titles[currentPage] || platformSettings?.siteTitle || 'Monodoxia Academy';
   }, [currentPage, platformSettings?.siteTitle, platformSettings?.subtitle]);
+
+  // Global scroll & reveal animation observer for all pages and dynamic content
+  useEffect(() => {
+    let observer;
+    const observeAll = () => {
+      const elements = document.querySelectorAll(
+        '.anim-badge, .anim-about-badge, .anim-subtext, [class*="anim-"][class*="-title"]'
+      );
+      if (!elements || elements.length === 0) return;
+
+      if (!observer) {
+        observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                observer.unobserve(entry.target);
+              }
+            });
+          },
+          {
+            threshold: 0.05,
+            rootMargin: '60px 0px 60px 0px',
+          }
+        );
+      }
+
+      elements.forEach((el) => {
+        if (!el.classList.contains('is-visible')) {
+          observer.observe(el);
+        }
+      });
+    };
+
+    observeAll();
+    const t1 = setTimeout(observeAll, 120);
+    const t2 = setTimeout(observeAll, 500);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      if (observer) observer.disconnect();
+    };
+  }, [currentPage, homeContent]);
 
   // Public Certificate Verification Route handling
   const resolveVerifyRoute = () => {
