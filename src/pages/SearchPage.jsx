@@ -146,7 +146,7 @@ export default function SearchPage() {
           {/* Main Search Bar Card */}
           <div className="bg-white rounded-3xl border border-[#c5a059]/30 p-4 sm:p-6 shadow-[0_10px_35px_-10px_rgba(7,19,38,0.08)] mb-8">
             <div className="relative flex items-center">
-              <span className="material-symbols-outlined text-[26px] text-[#775a19] absolute left-4 pointer-events-none">
+              <span className="material-symbols-outlined text-[24px] text-[#775a19] absolute left-4.5 pointer-events-none shrink-0">
                 search
               </span>
 
@@ -155,7 +155,7 @@ export default function SearchPage() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Açar söz daxil edin (kurs, kouç, mövzu, tədbir)..."
-                className="w-full bg-[#faf8f5] border border-[#e2e8f0] focus:border-[#c5a059] rounded-2xl pl-13 pr-12 py-4 text-base sm:text-lg text-[#071326] placeholder:text-slate-400 focus:outline-hidden transition-all shadow-inner font-sans"
+                className="w-full bg-[#faf8f5] border border-[#e2e8f0] focus:border-[#c5a059] rounded-2xl pl-14 sm:pl-16 pr-12 py-3.5 sm:py-4 text-base sm:text-lg text-[#071326] placeholder:text-slate-400 focus:outline-hidden transition-all shadow-inner font-sans"
               />
 
               {query && (

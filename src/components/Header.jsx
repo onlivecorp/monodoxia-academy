@@ -197,17 +197,17 @@ export default function Header() {
           {/* Desktop Global Search Trigger */}
           <button
             onClick={() => setSearchModalOpen(true)}
-            className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-outline-variant/60 hover:border-secondary bg-surface-container-low/60 hover:bg-surface-container-low text-on-surface-variant hover:text-secondary text-xs font-semibold transition-all cursor-pointer shadow-2xs group"
+            className="hidden md:inline-flex items-center gap-2.5 px-3 py-1.5 rounded-lg border border-outline-variant/60 hover:border-secondary bg-surface-container-low/60 hover:bg-surface-container-low text-on-surface-variant hover:text-secondary text-xs font-medium transition-all cursor-pointer shadow-2xs group shrink-0"
             title="Qlobal Axtarış (⌘K / Ctrl+K)"
             aria-label="Qlobal Axtarış"
           >
-            <span className="material-symbols-outlined text-[17px] text-[#775a19] group-hover:scale-110 transition-transform">
+            <span className="material-symbols-outlined text-[17px] text-[#775a19] group-hover:scale-105 transition-transform shrink-0">
               search
             </span>
-            <span className="text-slate-500 font-medium">Axtarış...</span>
-            <kbd className="font-mono text-[10px] bg-white border border-slate-300 text-slate-500 px-1.5 py-0.2 rounded font-semibold ml-1">
+            <span className="text-slate-500 font-medium whitespace-nowrap">Axtarış...</span>
+            <span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded border border-slate-200 bg-white text-[10px] font-mono font-medium text-slate-500 leading-none shrink-0 shadow-2xs ml-0.5">
               ⌘K
-            </kbd>
+            </span>
           </button>
 
           {/* Desktop Language Switcher */}
