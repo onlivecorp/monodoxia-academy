@@ -267,16 +267,6 @@ export default function Header() {
           {/* Logged in Desktop and Mobile Mini Controls */}
           {currentUser ? (
             <div className="flex items-center gap-1.5 sm:gap-3">
-              {/* Desktop Name & Role */}
-              <div className="hidden md:flex flex-col text-right leading-tight">
-                <span className="text-xs font-semibold text-primary whitespace-nowrap">
-                  {currentUser.firstName} {currentUser.lastName}
-                </span>
-                <span className="text-[10px] text-secondary font-medium tracking-wide uppercase whitespace-nowrap">
-                  {currentUser.role || 'Tələbə'} • {userTier}
-                </span>
-              </div>
-
               {/* Notifications Bell (Desktop/Tablet) */}
               <button
                 onClick={() => {
