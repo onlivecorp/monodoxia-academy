@@ -19,7 +19,9 @@ export default function Header() {
     canAccessAdmin,
     currentPage,
     navigateTo,
-    getPageUrl
+    getPageUrl,
+    setSearchModalOpen,
+    openSearchModal
   } = useApp();
 
   const logoUrl = homeContent?.navbar?.logoUrl || '/header_logo.svg';
@@ -192,6 +194,22 @@ export default function Header() {
         {/* RIGHT ACTION CONTROLS */}
         <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
 
+          {/* Desktop Global Search Trigger */}
+          <button
+            onClick={() => setSearchModalOpen(true)}
+            className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-outline-variant/60 hover:border-secondary bg-surface-container-low/60 hover:bg-surface-container-low text-on-surface-variant hover:text-secondary text-xs font-semibold transition-all cursor-pointer shadow-2xs group"
+            title="Qlobal Axtarış (⌘K / Ctrl+K)"
+            aria-label="Qlobal Axtarış"
+          >
+            <span className="material-symbols-outlined text-[17px] text-[#775a19] group-hover:scale-110 transition-transform">
+              search
+            </span>
+            <span className="text-slate-500 font-medium">Axtarış...</span>
+            <kbd className="font-mono text-[10px] bg-white border border-slate-300 text-slate-500 px-1.5 py-0.2 rounded font-semibold ml-1">
+              ⌘K
+            </kbd>
+          </button>
+
           {/* Desktop Language Switcher */}
           <div className="relative group hidden sm:block">
             <button className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg border border-outline-variant/60 hover:border-secondary bg-surface-container-low/60 hover:bg-surface-container-low text-on-surface-variant hover:text-secondary text-xs font-semibold transition-all cursor-pointer">
@@ -234,6 +252,16 @@ export default function Header() {
           >
             <FlagIcon code={lang} className="w-4 h-3" />
             <span className="text-[10px] uppercase font-mono">{lang}</span>
+          </button>
+
+          {/* Mobile Quick Search Button */}
+          <button
+            onClick={() => setSearchModalOpen(true)}
+            className="md:hidden flex items-center justify-center w-8 h-8 rounded-lg border border-outline-variant/70 bg-surface-container-low text-slate-700 hover:text-secondary hover:border-secondary transition-colors cursor-pointer shrink-0"
+            title="Qlobal Axtarış"
+            aria-label="Qlobal Axtarış"
+          >
+            <span className="material-symbols-outlined text-[19px] text-[#775a19]">search</span>
           </button>
 
           {/* Logged in Desktop and Mobile Mini Controls */}
@@ -353,6 +381,23 @@ export default function Header() {
                 <span className="material-symbols-outlined text-[22px]">close</span>
               </button>
             </div>
+
+            {/* Mobile Drawer Search Bar Button */}
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                setSearchModalOpen(true);
+              }}
+              className="w-full flex items-center justify-between p-3 rounded-xl bg-white border border-[#c5a059]/40 text-slate-500 hover:text-primary hover:border-[#c5a059] shadow-xs cursor-pointer transition-all"
+            >
+              <div className="flex items-center gap-2.5">
+                <span className="material-symbols-outlined text-[#775a19] text-[20px]">search</span>
+                <span className="text-xs font-medium">Kurs, ekspert və ya forum axtar...</span>
+              </div>
+              <kbd className="font-mono text-[10px] bg-slate-100 px-1.5 py-0.5 rounded border border-slate-300 text-slate-600">
+                Axtar
+              </kbd>
+            </button>
 
             {/* Mobile User Profile Card */}
             {currentUser ? (

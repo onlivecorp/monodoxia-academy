@@ -499,6 +499,10 @@ export function AppProvider({ children }) {
   const [applicationModalOpen, setApplicationModalOpen] = useState(false);
   const [activeApplicationTarget, setActiveApplicationTarget] = useState(null);
 
+  // Global Search Modal
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
+  const openSearchModal = () => setSearchModalOpen(true);
+
   // ─── Certificate Management System ───────────────────────────
   const [certificatesList, setCertificatesList] = useState(() => {
     try {
@@ -3630,6 +3634,7 @@ export function AppProvider({ children }) {
       activeProfileTab, setActiveProfileTab,
       applicationModalOpen, setApplicationModalOpen,
       activeApplicationTarget, setActiveApplicationTarget,
+      searchModalOpen, setSearchModalOpen, openSearchModal,
       // Applications & Registrations
       applicationsList, setApplicationsList,
       formFieldsList, setFormFieldsList,

@@ -29,9 +29,23 @@ const ClubPage = lazy(() => import('./pages/ClubPage'));
 const EventsPage = lazy(() => import('./pages/EventsPage'));
 const CommunityPage = lazy(() => import('./pages/CommunityPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
+const SearchPage = lazy(() => import('./pages/SearchPage'));
+import GlobalSearchModal from './components/search/GlobalSearchModal';
 
 function AppContent() {
-  const { platformSettings, currentUser, setAuthModalOpen, canAccessAdmin, adminModalOpen, setAdminModalOpen, currentPage, certViewModalOpen, homeContent } = useApp();
+  const {
+    platformSettings,
+    currentUser,
+    setAuthModalOpen,
+    canAccessAdmin,
+    adminModalOpen,
+    setAdminModalOpen,
+    currentPage,
+    certViewModalOpen,
+    homeContent,
+    searchModalOpen,
+    setSearchModalOpen
+  } = useApp();
   const [adminBypass, setAdminBypass] = useState(() => {
     return sessionStorage.getItem('monodoxia_admin_bypass') === 'true';
   });
@@ -56,10 +70,32 @@ function AppContent() {
       club: 'Coaching Club | Monodoxia Academy',
       tedbirler: 'Tədbirlər və Masterklaslar | Monodoxia Academy',
       icma: 'İcma və Forum | Monodoxia Academy',
-      haqqimizda: 'Haqqımızda | Monodoxia Academy'
+      haqqimizda: 'Haqqımızda | Monodoxia Academy',
+      search: 'Qlobal Axtarış | Monodoxia Academy'
     };
     document.title = titles[currentPage] || platformSettings?.siteTitle || 'Monodoxia Academy';
   }, [currentPage, platformSettings?.siteTitle, platformSettings?.subtitle]);
+
+  // Global Keyboard Shortcut: Cmd+K / Ctrl+K or / to open Global Search
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Check for Cmd+K (Mac) or Ctrl+K (Windows/Linux)
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setSearchModalOpen(prev => !prev);
+        return;
+      }
+
+      // Check for forward slash '/' when not inside an input, textarea or contentEditable
+      if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName) && !document.activeElement?.isContentEditable) {
+        e.preventDefault();
+        setSearchModalOpen(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [setSearchModalOpen]);
 
   // Global scroll & reveal animation observer for all pages and dynamic content
   useEffect(() => {
@@ -231,6 +267,8 @@ function AppContent() {
         return <CommunityPage />;
       case 'haqqimizda':
         return <AboutPage />;
+      case 'search':
+        return <SearchPage />;
       case 'home':
       default:
         return <HomePage />;
@@ -299,6 +337,10 @@ function AppContent() {
         <CertificateViewModal />
         <TopicDetailModal />
       </Suspense>
+      <GlobalSearchModal
+        isOpen={Boolean(searchModalOpen)}
+        onClose={() => setSearchModalOpen(false)}
+      />
     </div>
   );
 }

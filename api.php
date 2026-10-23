@@ -358,6 +358,294 @@ if ($action === 'get_all') {
 }
 
 // --------------------------------------------------------
+// 2.5. QLOBAL AXTARIŞ APİ (GLOBAL SEARCH)
+// --------------------------------------------------------
+if ($action === 'search') {
+    $q = trim($_GET['q'] ?? '');
+    $category = strtolower(trim($_GET['category'] ?? 'all'));
+    $limit = min(50, max(1, intval($_GET['limit'] ?? 20)));
+    $page = max(1, intval($_GET['page'] ?? 1));
+    $offset = ($page - 1) * $limit;
+    $lang = strtolower(trim($_GET['lang'] ?? 'az'));
+
+    if ($q === '') {
+        echo json_encode([
+            'status' => 'success',
+            'query' => '',
+            'total' => 0,
+            'counts' => [
+                'all' => 0,
+                'courses' => 0,
+                'experts' => 0,
+                'users' => 0,
+                'events' => 0,
+                'forum' => 0
+            ],
+            'results' => []
+        ], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    $keywords = preg_split('/\s+/', $q, -1, PREG_SPLIT_NO_EMPTY);
+    $searchTerm = '%' . $q . '%';
+
+    $scoreRelevance = function($title, $subtitle, $body) use ($q, $keywords) {
+        $score = 0;
+        $titleLower = mb_strtolower($title ?? '', 'UTF-8');
+        $qLower = mb_strtolower($q, 'UTF-8');
+
+        if ($titleLower === $qLower) {
+            $score += 100;
+        } elseif (mb_strpos($titleLower, $qLower) === 0) {
+            $score += 70;
+        } elseif (mb_strpos($titleLower, $qLower) !== false) {
+            $score += 50;
+        }
+
+        if (!empty($subtitle)) {
+            $subLower = mb_strtolower($subtitle, 'UTF-8');
+            if (mb_strpos($subLower, $qLower) !== false) {
+                $score += 30;
+            }
+        }
+
+        if (!empty($body)) {
+            $bodyLower = mb_strtolower($body, 'UTF-8');
+            if (mb_strpos($bodyLower, $qLower) !== false) {
+                $score += 15;
+            }
+        }
+
+        foreach ($keywords as $kw) {
+            $kwLower = mb_strtolower($kw, 'UTF-8');
+            if (mb_strlen($kwLower) >= 2) {
+                if (mb_strpos($titleLower, $kwLower) !== false) $score += 10;
+                if (!empty($subtitle) && mb_strpos($subLower, $kwLower) !== false) $score += 5;
+                if (!empty($body) && mb_strpos($bodyLower, $kwLower) !== false) $score += 2;
+            }
+        }
+
+        return $score;
+    };
+
+    $allResults = [];
+    $counts = [
+        'all' => 0,
+        'courses' => 0,
+        'experts' => 0,
+        'users' => 0,
+        'events' => 0,
+        'forum' => 0
+    ];
+
+    // 1. COURSES SEARCH
+    if ($category === 'all' || $category === 'courses') {
+        try {
+            $cStmt = $pdo->prepare("
+                SELECT c.* 
+                FROM mdx_courses c
+                WHERE c.title LIKE ? 
+                   OR c.description LIKE ? 
+                   OR c.instructor LIKE ? 
+                   OR c.instructor_role LIKE ? 
+                   OR c.category LIKE ? 
+                   OR c.badge LIKE ?
+                LIMIT 50
+            ");
+            $cStmt->execute([$searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm]);
+            $foundCourses = $cStmt->fetchAll();
+
+            foreach ($foundCourses as $c) {
+                $score = $scoreRelevance($c['title'], ($c['instructor'] ?? '') . ' ' . ($c['category'] ?? ''), $c['description'] ?? '');
+                $allResults[] = [
+                    'id' => $c['id'],
+                    'type' => 'courses',
+                    'title' => $c['title'],
+                    'subtitle' => ($c['instructor'] ?? '') . (!empty($c['instructor_role']) ? ' • ' . $c['instructor_role'] : ''),
+                    'description' => $c['description'] ?? '',
+                    'category' => $c['category'] ?? '',
+                    'badge' => $c['badge'] ?? '',
+                    'duration' => $c['duration'] ?? '',
+                    'price' => $c['price'] ?? '',
+                    'occupancy' => $c['occupancy'] ?? 0,
+                    'status' => $c['status'] ?? '',
+                    'featured' => !empty($c['featured']),
+                    'score' => $score,
+                    'url' => '/akademiya',
+                    'actionType' => 'course'
+                ];
+                $counts['courses']++;
+            }
+        } catch (PDOException $e) {}
+    }
+
+    // 2. EXPERTS / COACHES SEARCH
+    if ($category === 'all' || $category === 'experts') {
+        try {
+            $coachStmt = $pdo->prepare("
+                SELECT id, name, title, bio, rating, reviews_count, hourly_rate, session_duration, specialties_json, languages_json, avatar_url, is_active
+                FROM mdx_coaches
+                WHERE is_active = 1
+                  AND (name LIKE ? OR title LIKE ? OR bio LIKE ? OR specialties_json LIKE ?)
+                LIMIT 50
+            ");
+            $coachStmt->execute([$searchTerm, $searchTerm, $searchTerm, $searchTerm]);
+            $foundCoaches = $coachStmt->fetchAll();
+
+            foreach ($foundCoaches as $coach) {
+                $specialties = json_decode($coach['specialties_json'] ?? '[]', true) ?: [];
+                $specsStr = is_array($specialties) ? implode(', ', $specialties) : '';
+                $score = $scoreRelevance($coach['name'], ($coach['title'] ?? '') . ' ' . $specsStr, $coach['bio'] ?? '');
+
+                $allResults[] = [
+                    'id' => $coach['id'],
+                    'type' => 'experts',
+                    'title' => $coach['name'],
+                    'subtitle' => $coach['title'] ?? 'Kouç & Ekspert',
+                    'description' => $coach['bio'] ?? '',
+                    'avatar' => $coach['avatar_url'] ?? '',
+                    'rating' => floatval($coach['rating'] ?? 5.0),
+                    'reviewsCount' => intval($coach['reviews_count'] ?? 0),
+                    'specialties' => $specialties,
+                    'hourlyRate' => $coach['hourly_rate'] ?? '',
+                    'sessionDuration' => $coach['session_duration'] ?? '60 dəqiqə',
+                    'score' => $score + 5,
+                    'url' => '/koucinq',
+                    'actionType' => 'expert'
+                ];
+                $counts['experts']++;
+            }
+        } catch (PDOException $e) {}
+    }
+
+    // 3. USERS SEARCH (Public Profile Safety Guarantee)
+    if ($category === 'all' || $category === 'users') {
+        try {
+            $uStmt = $pdo->prepare("
+                SELECT id, name, role, tier, status, joined_date
+                FROM mdx_users
+                WHERE status = 'Aktiv'
+                  AND (name LIKE ? OR role LIKE ? OR tier LIKE ?)
+                LIMIT 50
+            ");
+            $uStmt->execute([$searchTerm, $searchTerm, $searchTerm]);
+            $foundUsers = $uStmt->fetchAll();
+
+            foreach ($foundUsers as $u) {
+                $score = $scoreRelevance($u['name'], ($u['role'] ?? 'Tələbə') . ' • ' . ($u['tier'] ?? 'Basic'), '');
+                $allResults[] = [
+                    'id' => $u['id'],
+                    'type' => 'users',
+                    'title' => $u['name'],
+                    'subtitle' => ($u['role'] ?? 'Tələbə') . ' • ' . ($u['tier'] ?? 'Basic'),
+                    'description' => 'Üzv olma tarixi: ' . ($u['joined_date'] ?? ''),
+                    'role' => $u['role'] ?? 'Tələbə',
+                    'tier' => $u['tier'] ?? 'Basic',
+                    'joinedDate' => $u['joined_date'] ?? '',
+                    'score' => $score,
+                    'url' => '#',
+                    'actionType' => 'user'
+                ];
+                $counts['users']++;
+            }
+        } catch (PDOException $e) {}
+    }
+
+    // 4. EVENTS SEARCH
+    if ($category === 'all' || $category === 'events') {
+        try {
+            $eStmt = $pdo->prepare("
+                SELECT id, title, datetime_label, type_badge, speaker, capacity, registered, description, image
+                FROM mdx_events
+                WHERE title LIKE ? OR description LIKE ? OR speaker LIKE ? OR type_badge LIKE ?
+                LIMIT 50
+            ");
+            $eStmt->execute([$searchTerm, $searchTerm, $searchTerm, $searchTerm]);
+            $foundEvents = $eStmt->fetchAll();
+
+            foreach ($foundEvents as $ev) {
+                $score = $scoreRelevance($ev['title'], ($ev['speaker'] ?? '') . ' ' . ($ev['type_badge'] ?? ''), $ev['description'] ?? '');
+                $allResults[] = [
+                    'id' => $ev['id'],
+                    'type' => 'events',
+                    'title' => $ev['title'],
+                    'subtitle' => ($ev['speaker'] ?? '') . ' • ' . ($ev['datetime_label'] ?? ''),
+                    'description' => $ev['description'] ?? '',
+                    'speaker' => $ev['speaker'] ?? '',
+                    'datetimeLabel' => $ev['datetime_label'] ?? '',
+                    'typeBadge' => $ev['type_badge'] ?? '',
+                    'capacity' => intval($ev['capacity'] ?? 100),
+                    'registered' => intval($ev['registered'] ?? 0),
+                    'image' => $ev['image'] ?? '',
+                    'score' => $score,
+                    'url' => '/tedbirler',
+                    'actionType' => 'event'
+                ];
+                $counts['events']++;
+            }
+        } catch (PDOException $e) {}
+    }
+
+    // 5. FORUM / COMMUNITY POSTS SEARCH
+    if ($category === 'all' || $category === 'forum') {
+        try {
+            $pStmt = $pdo->prepare("
+                SELECT id, badge, title, snippet, author, time_ago, likes, replies, pinned
+                FROM mdx_community_posts
+                WHERE title LIKE ? OR snippet LIKE ? OR author LIKE ? OR badge LIKE ?
+                LIMIT 50
+            ");
+            $pStmt->execute([$searchTerm, $searchTerm, $searchTerm, $searchTerm]);
+            $foundPosts = $pStmt->fetchAll();
+
+            foreach ($foundPosts as $post) {
+                $score = $scoreRelevance($post['title'], ($post['author'] ?? '') . ' ' . ($post['badge'] ?? ''), $post['snippet'] ?? '');
+                $allResults[] = [
+                    'id' => $post['id'],
+                    'type' => 'forum',
+                    'title' => $post['title'],
+                    'subtitle' => ($post['author'] ?? '') . ' • ' . ($post['time_ago'] ?? ''),
+                    'description' => $post['snippet'] ?? '',
+                    'author' => $post['author'] ?? '',
+                    'badge' => $post['badge'] ?? '',
+                    'timeAgo' => $post['time_ago'] ?? '',
+                    'likes' => intval($post['likes'] ?? 0),
+                    'replies' => intval($post['replies'] ?? 0),
+                    'pinned' => !empty($post['pinned']),
+                    'score' => $score,
+                    'url' => '/icma',
+                    'actionType' => 'forum'
+                ];
+                $counts['forum']++;
+            }
+        } catch (PDOException $e) {}
+    }
+
+    $counts['all'] = $counts['courses'] + $counts['experts'] + $counts['users'] + $counts['events'] + $counts['forum'];
+
+    usort($allResults, function($a, $b) {
+        if ($b['score'] === $a['score']) {
+            return strcmp($a['title'], $b['title']);
+        }
+        return $b['score'] <=> $a['score'];
+    });
+
+    $paginatedResults = array_slice($allResults, $offset, $limit);
+
+    echo json_encode([
+        'status' => 'success',
+        'query' => $q,
+        'category' => $category,
+        'total' => $counts[$category] ?? $counts['all'],
+        'page' => $page,
+        'limit' => $limit,
+        'counts' => $counts,
+        'results' => $paginatedResults
+    ], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+// --------------------------------------------------------
 // 3. TƏRCÜMƏLƏR APİ ENDPOİNTLƏRİ
 // --------------------------------------------------------
 if ($action === 'get_translations') {
