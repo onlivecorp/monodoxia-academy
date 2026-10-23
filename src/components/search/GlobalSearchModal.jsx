@@ -8,8 +8,7 @@ import { useApp } from '../../context/AppContext';
 const CATEGORIES = [
   { id: 'all', label: 'Bütün', icon: 'grid_view' },
   { id: 'courses', label: 'Kurslar', icon: 'school' },
-  { id: 'experts', label: 'Uzmanlar', icon: 'psychology' },
-  { id: 'users', label: 'İstifadəçilər', icon: 'person' },
+  { id: 'experts', label: 'Uzmanlar & Kouçlar', icon: 'psychology' },
   { id: 'events', label: 'Tədbirlər', icon: 'event' },
   { id: 'forum', label: 'Forum', icon: 'forum' }
 ];

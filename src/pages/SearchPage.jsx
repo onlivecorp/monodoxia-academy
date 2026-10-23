@@ -10,7 +10,6 @@ const CATEGORIES = [
   { id: 'all', label: 'Bütün Kateqoriyalar', icon: 'grid_view' },
   { id: 'courses', label: 'Kurslar', icon: 'school' },
   { id: 'experts', label: 'Uzmanlar & Kouçlar', icon: 'psychology' },
-  { id: 'users', label: 'İstifadəçilər', icon: 'person' },
   { id: 'events', label: 'Tədbirlər & Masterklaslar', icon: 'event' },
   { id: 'forum', label: 'İcma & Forum', icon: 'forum' }
 ];

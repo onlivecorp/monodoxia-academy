@@ -175,40 +175,45 @@ export function performLocalSearch({
         counts.experts++;
       }
     });
-  }
 
-  // 3. Users (Safe Public Attributes Only)
-  if (category === 'all' || category === 'users') {
+    // Also include any user who is explicitly appointed as a Coach / Expert
+    const expertRoles = ['Kouç', 'Ekspert', 'Kouç & Ekspert', 'Coach', 'Mentor'];
     users.forEach(u => {
-      const name = u.name || `${u.firstName || ''} ${u.lastName || ''}`.trim() || 'İstifadəçi';
-      const role = u.role || 'Tələbə';
-      const tier = u.tier || 'Basic';
+      const role = u.role || '';
+      if (!expertRoles.includes(role)) return;
 
-      if (isMatch(name) || isMatch(role) || isMatch(tier)) {
-        const score = calculateRelevance(name, `${role} ${tier}`, '', qTrimmed, tokens);
+      const name = u.name || `${u.firstName || ''} ${u.lastName || ''}`.trim() || 'Ekspert';
+      if (coaches.some(c => (c.name || '').toLowerCase() === name.toLowerCase())) return;
+
+      if (isMatch(name) || isMatch(role)) {
+        const score = calculateRelevance(name, `${role} Ekspert`, '', qTrimmed, tokens) + 3;
         results.push({
           id: u.id,
-          type: 'users',
+          type: 'experts',
           title: name,
-          subtitle: `${role} • ${tier}`,
-          description: u.joinedDate ? `Üzv olma tarixi: ${u.joinedDate}` : '',
-          role,
-          tier,
+          subtitle: `${role} • Təyin Edilmiş Ekspert`,
+          description: 'Sertifikatlı kouçinq və mentorluq mütəxəssisi.',
           avatar: u.avatar || u.image || '',
-          joinedDate: u.joinedDate || '',
+          rating: 5.0,
+          reviewsCount: 0,
+          specialties: [role],
+          hourlyRate: '',
+          sessionDuration: '60 dəqiqə',
+          experience: '',
+          availableSlots: [],
           score,
-          url: '#',
-          actionType: 'user',
+          url: '/koucinq',
+          actionType: 'expert',
           rawData: {
             id: u.id,
             name,
-            role,
-            tier,
+            title: role,
+            bio: 'Sertifikatlı kouçinq və mentorluq mütəxəssisi.',
             avatar: u.avatar || u.image || '',
-            joinedDate: u.joinedDate || ''
+            specialties: [role]
           }
         });
-        counts.users++;
+        counts.experts++;
       }
     });
   }
@@ -278,7 +283,7 @@ export function performLocalSearch({
     });
   }
 
-  counts.all = counts.courses + counts.experts + counts.users + counts.events + counts.forum;
+  counts.all = counts.courses + counts.experts + counts.events + counts.forum;
 
   // Sort by score DESC
   results.sort((a, b) => {

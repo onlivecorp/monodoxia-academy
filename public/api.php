@@ -479,7 +479,7 @@ if ($action === 'search') {
         } catch (PDOException $e) {}
     }
 
-    // 2. EXPERTS / COACHES SEARCH
+    // 2. EXPERTS / COACHES SEARCH (Yalnız ekspert təyin edilmişlərin profilləri)
     if ($category === 'all' || $category === 'experts') {
         try {
             $coachStmt = $pdo->prepare("
@@ -492,10 +492,14 @@ if ($action === 'search') {
             $coachStmt->execute([$searchTerm, $searchTerm, $searchTerm, $searchTerm]);
             $foundCoaches = $coachStmt->fetchAll();
 
+            $seenCoachNames = [];
+
             foreach ($foundCoaches as $coach) {
                 $specialties = json_decode($coach['specialties_json'] ?? '[]', true) ?: [];
                 $specsStr = is_array($specialties) ? implode(', ', $specialties) : '';
                 $score = $scoreRelevance($coach['name'], ($coach['title'] ?? '') . ' ' . $specsStr, $coach['bio'] ?? '');
+
+                $seenCoachNames[mb_strtolower(trim($coach['name']), 'UTF-8')] = true;
 
                 $allResults[] = [
                     'id' => $coach['id'],
@@ -515,38 +519,41 @@ if ($action === 'search') {
                 ];
                 $counts['experts']++;
             }
-        } catch (PDOException $e) {}
-    }
 
-    // 3. USERS SEARCH (Public Profile Safety Guarantee)
-    if ($category === 'all' || $category === 'users') {
-        try {
+            // Yalnız ekspert/kouç rolu daşıyan istifadəçilər
             $uStmt = $pdo->prepare("
                 SELECT id, name, role, tier, status, joined_date
                 FROM mdx_users
                 WHERE status = 'Aktiv'
-                  AND (name LIKE ? OR role LIKE ? OR tier LIKE ?)
-                LIMIT 50
+                  AND role IN ('Kouç', 'Ekspert', 'Kouç & Ekspert', 'Coach', 'Mentor')
+                  AND (name LIKE ? OR role LIKE ?)
+                LIMIT 20
             ");
-            $uStmt->execute([$searchTerm, $searchTerm, $searchTerm]);
-            $foundUsers = $uStmt->fetchAll();
+            $uStmt->execute([$searchTerm, $searchTerm]);
+            $foundExpertUsers = $uStmt->fetchAll();
 
-            foreach ($foundUsers as $u) {
-                $score = $scoreRelevance($u['name'], ($u['role'] ?? 'Tələbə') . ' • ' . ($u['tier'] ?? 'Basic'), '');
+            foreach ($foundExpertUsers as $u) {
+                $lowerName = mb_strtolower(trim($u['name']), 'UTF-8');
+                if (isset($seenCoachNames[$lowerName])) continue;
+
+                $score = $scoreRelevance($u['name'], $u['role'], '');
                 $allResults[] = [
                     'id' => $u['id'],
-                    'type' => 'users',
+                    'type' => 'experts',
                     'title' => $u['name'],
-                    'subtitle' => ($u['role'] ?? 'Tələbə') . ' • ' . ($u['tier'] ?? 'Basic'),
-                    'description' => 'Üzv olma tarixi: ' . ($u['joined_date'] ?? ''),
-                    'role' => $u['role'] ?? 'Tələbə',
-                    'tier' => $u['tier'] ?? 'Basic',
-                    'joinedDate' => $u['joined_date'] ?? '',
-                    'score' => $score,
-                    'url' => '#',
-                    'actionType' => 'user'
+                    'subtitle' => $u['role'] . ' • Təyin Edilmiş Ekspert',
+                    'description' => 'Sertifikatlı kouçinq və mentorluq mütəxəssisi.',
+                    'avatar' => '',
+                    'rating' => 5.0,
+                    'reviewsCount' => 0,
+                    'specialties' => [$u['role']],
+                    'hourlyRate' => '',
+                    'sessionDuration' => '60 dəqiqə',
+                    'score' => $score + 3,
+                    'url' => '/koucinq',
+                    'actionType' => 'expert'
                 ];
-                $counts['users']++;
+                $counts['experts']++;
             }
         } catch (PDOException $e) {}
     }
@@ -621,7 +628,7 @@ if ($action === 'search') {
         } catch (PDOException $e) {}
     }
 
-    $counts['all'] = $counts['courses'] + $counts['experts'] + $counts['users'] + $counts['events'] + $counts['forum'];
+    $counts['all'] = $counts['courses'] + $counts['experts'] + $counts['events'] + $counts['forum'];
 
     usort($allResults, function($a, $b) {
         if ($b['score'] === $a['score']) {
