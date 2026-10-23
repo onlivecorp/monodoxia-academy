@@ -431,6 +431,27 @@ CREATE TABLE `mdx_bookings` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   KEY `idx_booking_user` (`user_id`)
+-- --------------------------------------------------------
+-- Cədvəl: mdx_contact_messages (Əlaqə Mesajları)
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `mdx_contact_messages`;
+CREATE TABLE `mdx_contact_messages` (
+  `id` varchar(50) NOT NULL,
+  `name` varchar(150) NOT NULL,
+  `email` varchar(150) NOT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `subject` varchar(255) NOT NULL,
+  `message` longtext NOT NULL,
+  `ip_address` varchar(50) DEFAULT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'Yeni',
+  `is_read` tinyint(1) NOT NULL DEFAULT 0,
+  `admin_notes` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `idx_msg_status` (`status`),
+  KEY `idx_msg_read` (`is_read`),
+  KEY `idx_msg_created` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 COMMIT;

@@ -21,6 +21,8 @@ import AdminNavigationTab from './AdminNavigationTab';
 import AdminDatabaseTab from './AdminDatabaseTab';
 import AdminSettingsTab from './AdminSettingsTab';
 import AdminCertificatesTab from './AdminCertificatesTab';
+import AdminContactMessagesTab from './AdminContactMessagesTab';
+import AdminContactSettingsTab from './AdminContactSettingsTab';
 
 export default function AdminModal() {
   const {
@@ -32,7 +34,8 @@ export default function AdminModal() {
     hasPermission,
     canAccessAdmin,
     adminModalTab,
-    setAdminModalTab
+    setAdminModalTab,
+    unreadContactMessagesCount
   } = useApp();
 
   const [activeTab, setActiveTab] = useState(adminModalTab || 'overview');
@@ -81,6 +84,7 @@ export default function AdminModal() {
       {
         group: 'İdarəetmə',
         items: [
+          { id: 'contact_messages', icon: 'inbox', label: 'Əlaqə Mesajları', perm: 'contacts.view', badge: unreadContactMessagesCount > 0 ? unreadContactMessagesCount : null },
           { id: 'applications', icon: 'assignment', label: 'Müraciətlər', perm: 'applications.view', badge: pendingAppsCount > 0 ? pendingAppsCount : null },
           { id: 'registrations', icon: 'how_to_reg', label: 'Qeydiyyatlar', perm: 'registrations.view' },
           { id: 'users', icon: 'group', label: 'İstifadəçilər', perm: 'users.view' },
@@ -104,6 +108,7 @@ export default function AdminModal() {
         group: 'Sistem & Rejimlər',
         items: [
           { id: 'pages', icon: 'auto_stories', label: 'Səhifələr İdarəetməsi', perm: 'content.view' },
+          { id: 'contact_settings', icon: 'contact_support', label: 'Əlaqə Səhifəsi Parametrləri', perm: 'contacts.settings' },
           { id: 'navigation', icon: 'menu_open', label: 'Naviqasiya Menyusu', perm: 'content.view' },
           { id: 'content', icon: 'edit_document', label: 'Məzmun (CMS Blokları)', perm: 'content.view' },
           { id: 'maintenance', icon: 'construction', label: 'Texniki Qulluq Ekranı', perm: 'maintenance.view', highlight: Boolean(platformSettings?.maintenanceMode) },
@@ -546,6 +551,14 @@ export default function AdminModal() {
 
             {activeTab === 'certificates' && (
               <AdminCertificatesTab />
+            )}
+
+            {activeTab === 'contact_messages' && (
+              <AdminContactMessagesTab />
+            )}
+
+            {activeTab === 'contact_settings' && (
+              <AdminContactSettingsTab />
             )}
 
             {activeTab === 'settings' && (

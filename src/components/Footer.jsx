@@ -103,6 +103,15 @@ export default function Footer() {
                   {t('nav_about')}
                 </a>
               </li>
+              <li>
+                <a
+                  className="text-on-primary-container hover:text-on-primary transition-colors cursor-pointer"
+                  href={getPageUrl ? getPageUrl('elaqe') : '/elaqe'}
+                  onClick={(e) => { e.preventDefault(); navigateTo('elaqe'); }}
+                >
+                  {t('nav_contact') || 'Əlaqə'}
+                </a>
+              </li>
             </ul>
           </div>
 

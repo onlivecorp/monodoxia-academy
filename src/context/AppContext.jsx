@@ -48,6 +48,32 @@ const INITIAL_SETTINGS = {
   maintenanceMode: false,
   allowRegistrations: true,
   pageSlugs: { ...DEFAULT_PAGE_SLUGS },
+  // Contact Page Settings
+  contactTitle: "Bizimlə əlaqə saxlayın",
+  contactSubtitle: "Sual, təklif və əməkdaşlıq üçün bizimlə əlaqə saxlayın. Komandamız ən qısa zamanda sizə cavab verəcəkdir.",
+  contactAddress: "Nizami küçəsi 142, İntellektual İnkişaf Mərkəzi, Bakı, Azərbaycan",
+  contactWorkHours: "Bazar ertəsi – Şənbə: 09:00 – 19:00",
+  contactCardsVisible: true,
+  contactPageActive: true,
+  contactMapEmbed: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3039.4284941913495!2d49.8452643!3d40.3771911!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40307da829c9ef71%3A0xe67cb56d05eb3e8!2sNizami%20St%2C%20Baku!5e0!3m2!1sen!2saz!4v1716000000000!5m2!1sen!2saz",
+  contactSocials: [
+    { id: 'instagram', name: 'Instagram', url: 'https://instagram.com/monodoxia.academy', icon: 'photo_camera', active: true, order: 1 },
+    { id: 'linkedin', name: 'LinkedIn', url: 'https://linkedin.com/company/monodoxia', icon: 'work', active: true, order: 2 },
+    { id: 'facebook', name: 'Facebook', url: 'https://facebook.com/monodoxia.academy', icon: 'public', active: true, order: 3 },
+    { id: 'telegram', name: 'Telegram', url: 'https://t.me/monodoxia', icon: 'send', active: true, order: 4 },
+    { id: 'whatsapp', name: 'WhatsApp', url: 'https://wa.me/994124908800', icon: 'chat', active: true, order: 5 }
+  ],
+  contactFormSettings: {
+    isActive: true,
+    showPhone: true,
+    requirePhone: false,
+    showSubject: true,
+    requireSubject: true,
+    targetEmail: 'contact@monodoxia.academy',
+    successMessage: 'Mesajınız uğurla qəbul edildi! Ən qısa zamanda sizinlə əlaqə saxlayacağıq.',
+    errorMessage: 'Mesaj göndərilərkən xəta baş verdi. Zəhmət olmasa bir az sonra yenidən cəhd edin.',
+    antiSpamEnabled: true
+  },
   maintenanceTitle: "Planlaşdırılmış Texniki Təkmilləşdirmə",
   maintenanceDesc: "Hörmətli ziyarətçi, Monodoxia Academy platformasında təhsil, analitika və təhlükəsizlik sistemlərini yeniləmək məqsədilə planlaşdırılmış texniki təkmilləşdirmə işləri aparılır. Sistem ən qısa zamanda yenidən tam fəaliyyətini bərpa edəcəkdir.",
   maintenanceNotice: "Tezliklə Aktiv",
@@ -467,6 +493,10 @@ export function AppProvider({ children }) {
     }
     return INITIAL_NOTIFICATIONS;
   });
+
+  // Contact Messages & Inbox State
+  const [unreadContactMessagesCount, setUnreadContactMessagesCount] = useState(0);
+  const [contactMessagesList, setContactMessagesList] = useState([]);
 
   // Modals
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -1094,6 +1124,9 @@ export function AppProvider({ children }) {
               updatedAt: r.updated_at ? r.updated_at.split(' ')[0] : '2025-01-01'
             }));
             setRolesList(mappedRoles);
+          }
+          if (data.unread_contact_messages_count !== undefined) {
+            setUnreadContactMessagesCount(Number(data.unread_contact_messages_count) || 0);
           }
         }
       })
@@ -3128,6 +3161,76 @@ export function AppProvider({ children }) {
     showToast('Platforma parametrləri yeniləndi', 'success');
   };
 
+  // Contact Messages Management Helpers
+  const submitContactMessage = async (formData) => {
+    try {
+      const res = await apiCall('submit_contact_message', formData);
+      if (res && res.status === 'success') {
+        showToast(res.message || 'Mesajınız qəbul edildi', 'success');
+        return { success: true, message: res.message };
+      } else {
+        const errMsg = res?.message || 'Mesaj göndərilmədi. Zəhmət olmasa yenidən cəhd edin.';
+        showToast(errMsg, 'error');
+        return { success: false, message: errMsg };
+      }
+    } catch (e) {
+      showToast('Şəbəkə xətası baş verdi', 'error');
+      return { success: false, message: 'Şəbəkə xətası baş verdi' };
+    }
+  };
+
+  const fetchContactMessages = async (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    try {
+      const res = await apiCall(`get_contact_messages&${qs}`, null, 'GET');
+      if (res?.status === 'success') {
+        setContactMessagesList(res.messages || []);
+        if (res.counts?.unread !== undefined) {
+          setUnreadContactMessagesCount(res.counts.unread);
+        }
+        return res;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const updateContactMessage = async (id, updates = {}) => {
+    try {
+      const res = await apiCall('update_contact_message', { id, ...updates });
+      if (res?.status === 'success') {
+        setContactMessagesList(prev => prev.map(m => m.id === id ? { ...m, ...updates } : m));
+        if (updates.is_read !== undefined) {
+          setUnreadContactMessagesCount(prev => Math.max(0, updates.is_read ? prev - 1 : prev + 1));
+        }
+        showToast(res.message || 'Mesaj yeniləndi', 'success');
+        return true;
+      }
+      showToast(res?.message || 'Xəta baş verdi', 'error');
+      return false;
+    } catch (e) {
+      showToast('Şəbəkə xətası', 'error');
+      return false;
+    }
+  };
+
+  const deleteContactMessage = async (id) => {
+    try {
+      const res = await apiCall('delete_contact_message', { id });
+      if (res?.status === 'success') {
+        setContactMessagesList(prev => prev.filter(m => m.id !== id));
+        showToast(res.message || 'Mesaj silindi', 'success');
+        return true;
+      }
+      showToast(res?.message || 'Silinmədi', 'error');
+      return false;
+    } catch (e) {
+      showToast('Şəbəkə xətası', 'error');
+      return false;
+    }
+  };
+
   const updateSqlConfig = (newConfig) => {
     setSqlConfig(prev => ({ ...prev, ...newConfig }));
     showToast('SQL Verilənlər Bazası konfiqurasiyası yadda saxlanıldı', 'success');
@@ -3722,6 +3825,11 @@ export function AppProvider({ children }) {
       assetLibrary, addAsset,
       certViewModalOpen, setCertViewModalOpen,
       activeCertView, setActiveCertView,
+      // Contact Page & Messaging
+      unreadContactMessagesCount, setUnreadContactMessagesCount,
+      contactMessagesList, setContactMessagesList,
+      submitContactMessage, fetchContactMessages,
+      updateContactMessage, deleteContactMessage,
     }}>
       {children}
     </AppContext.Provider>

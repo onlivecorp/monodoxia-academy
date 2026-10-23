@@ -46,6 +46,7 @@ export default function Header() {
     { id: 'tedbirler', pageId: 'tedbirler', label: 'Tədbirlər', labelKey: 'nav_events', type: 'internal', href: '/tedbirler', icon: 'event', visible: true, openInNewTab: false, order: 4 },
     { id: 'icma', pageId: 'icma', label: 'İcma', labelKey: 'nav_community', type: 'internal', href: '/icma', icon: 'forum', visible: true, openInNewTab: false, order: 5 },
     { id: 'haqqimizda', pageId: 'haqqimizda', label: 'Haqqımızda', labelKey: 'nav_about', type: 'internal', href: '/haqqimizda', icon: 'info', visible: true, openInNewTab: false, order: 6 },
+    { id: 'elaqe', pageId: 'elaqe', label: 'Əlaqə', labelKey: 'nav_contact', type: 'internal', href: '/elaqe', icon: 'contact_support', visible: true, openInNewTab: false, order: 7 },
   ];
 
   const rawNavItems = homeContent?.navbar?.items && Array.isArray(homeContent.navbar.items) && homeContent.navbar.items.length > 0
@@ -94,7 +95,7 @@ export default function Header() {
 
     // Internal navigation
     if (link.pageId) {
-      const validPages = ['home', 'akademiya', 'koucinq', 'club', 'tedbirler', 'icma', 'haqqimizda'];
+      const validPages = ['home', 'akademiya', 'koucinq', 'club', 'tedbirler', 'icma', 'haqqimizda', 'elaqe'];
       if (validPages.includes(link.pageId)) {
         e.preventDefault();
         navigateTo(link.pageId);
@@ -110,7 +111,7 @@ export default function Header() {
 
     if (link.href && link.href.startsWith('/')) {
       const cleanPath = link.href.replace(/^\//, '').split('?')[0].split('#')[0];
-      const validPages = ['home', 'akademiya', 'koucinq', 'club', 'tedbirler', 'icma', 'haqqimizda'];
+      const validPages = ['home', 'akademiya', 'koucinq', 'club', 'tedbirler', 'icma', 'haqqimizda', 'elaqe'];
       if (validPages.includes(cleanPath)) {
         e.preventDefault();
         navigateTo(cleanPath);

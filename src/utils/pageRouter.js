@@ -6,6 +6,7 @@ export const DEFAULT_PAGE_SLUGS = {
   tedbirler: 'tedbirler',
   icma: 'icma',
   haqqimizda: 'haqqimizda',
+  elaqe: 'elaqe',
   search: 'search'
 };
 
@@ -16,6 +17,7 @@ export const PAGE_DEFINITIONS = [
   { id: 'tedbirler', label: 'Tədbirlər & Masterklaslar', defaultSlug: 'tedbirler', icon: 'event', desc: 'Canlı təqvim, vebinarlar, oflayn görüşlər, spikerlik' },
   { id: 'icma', label: 'İcma & Müzakirə Forumu', defaultSlug: 'icma', icon: 'forum', desc: 'İntellektual forum, həftəlik mövzu, icma etikası qaydaları' },
   { id: 'haqqimizda', label: 'Haqqımızda', defaultSlug: 'haqqimizda', icon: 'auto_stories', desc: 'Akademiyanın məramı, dəyərlər, sahələr və manifest' },
+  { id: 'elaqe', label: 'Əlaqə', defaultSlug: 'elaqe', icon: 'contact_support', desc: 'Əlaqə məlumatları, əlaqə forması, sosial media və xəritə' },
   { id: 'search', label: 'Qlobal Axtarış', defaultSlug: 'search', icon: 'search', desc: 'Kurslar, ekspertlər, tədbirlər və müzakirələr üzrə axtarış' },
   { id: 'home', label: 'Ana Səhifə', defaultSlug: '', icon: 'home', desc: 'Əsas giriş hero mətni, statistika, hero media' }
 ];

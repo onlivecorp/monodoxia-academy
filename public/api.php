@@ -330,6 +330,11 @@ if ($action === 'get_all') {
         }
     } catch (PDOException $e) {}
 
+    $unread_contact_messages_count = 0;
+    try {
+        $unread_contact_messages_count = (int)$pdo->query("SELECT COUNT(*) FROM mdx_contact_messages WHERE is_read = 0")->fetchColumn();
+    } catch (PDOException $e) {}
+
     echo json_encode([
         'status' => 'success',
         'lang' => $lang,
@@ -352,7 +357,8 @@ if ($action === 'get_all') {
         'student_progress' => $student_progress,
         'student_certificates' => $student_certificates,
         'bookings' => $bookings,
-        'issued_certificates' => $issued_certificates
+        'issued_certificates' => $issued_certificates,
+        'unread_contact_messages_count' => $unread_contact_messages_count
     ], JSON_UNESCAPED_UNICODE);
     exit();
 }
@@ -1360,6 +1366,308 @@ if ($action === 'save_settings' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     echo json_encode(['status' => 'success', 'message' => 'Parametrlər yadda saxlandı'], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+// --------------------------------------------------------
+// 3.5. ƏLAQƏ MESAJLARI VƏ ƏLAQƏ SƏHİFƏSİ APİ (CONTACT API)
+// --------------------------------------------------------
+function ensureContactMessagesTable($pdo) {
+    static $ensured = false;
+    if ($ensured) return;
+    try {
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS `mdx_contact_messages` (
+                `id` varchar(50) NOT NULL,
+                `name` varchar(150) NOT NULL,
+                `email` varchar(150) NOT NULL,
+                `phone` varchar(50) DEFAULT NULL,
+                `subject` varchar(255) NOT NULL,
+                `message` longtext NOT NULL,
+                `ip_address` varchar(50) DEFAULT NULL,
+                `status` varchar(50) NOT NULL DEFAULT 'Yeni',
+                `is_read` tinyint(1) NOT NULL DEFAULT 0,
+                `admin_notes` text DEFAULT NULL,
+                `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+                `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+                PRIMARY KEY (`id`),
+                KEY `idx_msg_status` (`status`),
+                KEY `idx_msg_read` (`is_read`),
+                KEY `idx_msg_created` (`created_at`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ");
+        $ensured = true;
+    } catch (PDOException $e) {}
+}
+
+if ($action === 'submit_contact_message' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    ensureContactMessagesTable($pdo);
+    $rawInput = file_get_contents('php://input');
+    $input = json_decode($rawInput, true) ?: $_POST;
+
+    // 1. Anti-spam Honeypot Check (bots fill invisible inputs)
+    $honeypot = trim($input['hp_website'] ?? ($input['website'] ?? ($input['honeypot'] ?? '')));
+    if (!empty($honeypot)) {
+        // Silently accept to trap bots without saving
+        echo json_encode(['status' => 'success', 'message' => 'Mesajınız uğurla qəbul edildi!'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    // 2. IP Rate Limiting (max 6 messages per 10 minutes)
+    $ip = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? ($_SERVER['HTTP_X_FORWARDED_FOR'] ?? ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0'));
+    if (strpos($ip, ',') !== false) {
+        $ip = trim(explode(',', $ip)[0]);
+    }
+
+    try {
+        $rateStmt = $pdo->prepare("SELECT COUNT(*) FROM mdx_contact_messages WHERE ip_address = ? AND created_at > DATE_SUB(NOW(), INTERVAL 10 MINUTE)");
+        $rateStmt->execute([$ip]);
+        if ($rateStmt->fetchColumn() >= 6) {
+            http_response_code(429);
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Qısa müddətdə çox sayda müraciət göndərildi. Zəhmət olmasa 10 dəqiqə sonra yenidən cəhd edin.'
+            ], JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+    } catch (PDOException $e) {}
+
+    // 3. Validation
+    $name = trim($input['name'] ?? '');
+    $email = trim($input['email'] ?? '');
+    $phone = trim($input['phone'] ?? '');
+    $subject = trim($input['subject'] ?? 'Ümumi Müraciət');
+    $message = trim($input['message'] ?? '');
+
+    if (mb_strlen($name) < 2 || mb_strlen($name) > 150) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Ad və soyad 2 ilə 150 simvol arasında olmalıdır.'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Düzgün e-poçt ünvanı daxil edin (məsələn: ad@domain.com).'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    if (mb_strlen($subject) < 2 || mb_strlen($subject) > 255) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Mövzu 2 ilə 255 simvol arasında olmalıdır.'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    if (mb_strlen($message) < 5 || mb_strlen($message) > 6000) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Mesaj mətni 5 ilə 6000 simvol arasında olmalıdır.'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    // 4. Sanitization
+    $cleanName = htmlspecialchars(strip_tags($name), ENT_QUOTES, 'UTF-8');
+    $cleanPhone = htmlspecialchars(strip_tags($phone), ENT_QUOTES, 'UTF-8');
+    $cleanSubject = htmlspecialchars(strip_tags($subject), ENT_QUOTES, 'UTF-8');
+    $cleanMessage = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
+
+    $msgId = 'msg-' . round(microtime(true) * 1000) . '-' . substr(md5(uniqid()), 0, 5);
+
+    try {
+        $insertStmt = $pdo->prepare("
+            INSERT INTO mdx_contact_messages (id, name, email, phone, subject, message, ip_address, status, is_read, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 'Yeni', 0, NOW())
+        ");
+        $insertStmt->execute([$msgId, $cleanName, $email, $cleanPhone, $cleanSubject, $cleanMessage, $ip]);
+
+        // Add admin in-app notification
+        try {
+            $notifStmt = $pdo->prepare("
+                INSERT INTO mdx_notifications (id, user_id, title, message, type, is_read, created_at)
+                VALUES (?, 'admin', ?, ?, 'info', 0, NOW())
+            ");
+            $notifStmt->execute([
+                'notif-msg-' . uniqid(),
+                'Yeni Əlaqə Mesajı',
+                "{$cleanName} tərəfindən yeni əlaqə mesajı göndərildi: \"{$cleanSubject}\""
+            ]);
+        } catch (Exception $ne) {}
+
+        // Optional server-side email dispatch
+        try {
+            $destEmail = 'contact@monodoxia.academy';
+            $setStmt = $pdo->query("SELECT key_value FROM mdx_settings WHERE key_name = 'contact_destination_email' OR key_name = 'contactEmail' LIMIT 1");
+            $destRow = $setStmt ? $setStmt->fetch() : null;
+            if ($destRow && !empty($destRow['key_value'])) {
+                $destEmail = $destRow['key_value'];
+            }
+            $mailSubject = "=?UTF-8?B?" . base64_encode("[Əlaqə Forması] " . $cleanSubject) . "?=";
+            $mailBody = "Monodoxia Academy - Yeni Əlaqə Mesajı\n\n" .
+                        "Göndərən: {$cleanName}\n" .
+                        "E-poçt: {$email}\n" .
+                        "Telefon: {$cleanPhone}\n" .
+                        "Mövzu: {$cleanSubject}\n" .
+                        "Tarix: " . date('Y-m-d H:i:s') . "\n\n" .
+                        "Mesaj:\n" . $cleanMessage . "\n";
+            $headers = "From: Monodoxia Academy <no-reply@monodoxia.academy>\r\n" .
+                       "Reply-To: {$email}\r\n" .
+                       "Content-Type: text/plain; charset=UTF-8\r\n" .
+                       "X-Mailer: PHP/" . phpversion();
+            @mail($destEmail, $mailSubject, $mailBody, $headers);
+        } catch (Exception $me) {}
+
+        echo json_encode([
+            'status' => 'success',
+            'message' => 'Mesajınız uğurla qəbul edildi! Ən qısa zamanda sizinlə əlaqə saxlayacağıq.',
+            'id' => $msgId
+        ], JSON_UNESCAPED_UNICODE);
+        exit();
+
+    } catch (PDOException $ex) {
+        http_response_code(500);
+        error_log("Contact message save error: " . $ex->getMessage());
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Mesaj göndərilərkən daxili sistem xətası baş verdi. Zəhmət olmasa bir az sonra yenidən cəhd edin.'
+        ], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+}
+
+if ($action === 'get_contact_messages') {
+    requireAdminUser($pdo);
+    ensureContactMessagesTable($pdo);
+
+    $status = trim($_GET['status'] ?? 'all');
+    $search = trim($_GET['search'] ?? '');
+    $is_read = isset($_GET['is_read']) && $_GET['is_read'] !== '' ? intval($_GET['is_read']) : null;
+    $page = max(1, intval($_GET['page'] ?? 1));
+    $limit = min(100, max(1, intval($_GET['limit'] ?? 20)));
+    $offset = ($page - 1) * $limit;
+
+    $whereClauses = ["1=1"];
+    $params = [];
+
+    if ($status !== 'all' && !empty($status)) {
+        $whereClauses[] = "status = ?";
+        $params[] = $status;
+    }
+
+    if ($is_read !== null) {
+        $whereClauses[] = "is_read = ?";
+        $params[] = $is_read;
+    }
+
+    if (!empty($search)) {
+        $whereClauses[] = "(name LIKE ? OR email LIKE ? OR phone LIKE ? OR subject LIKE ? OR message LIKE ?)";
+        $searchTerm = "%{$search}%";
+        $params[] = $searchTerm;
+        $params[] = $searchTerm;
+        $params[] = $searchTerm;
+        $params[] = $searchTerm;
+        $params[] = $searchTerm;
+    }
+
+    $whereSql = implode(" AND ", $whereClauses);
+
+    // Get total count
+    $countStmt = $pdo->prepare("SELECT COUNT(*) FROM mdx_contact_messages WHERE {$whereSql}");
+    $countStmt->execute($params);
+    $total = (int)$countStmt->fetchColumn();
+
+    // Get paginated items
+    $sql = "SELECT id, name, email, phone, subject, message, ip_address, status, is_read, admin_notes, created_at, updated_at 
+            FROM mdx_contact_messages 
+            WHERE {$whereSql} 
+            ORDER BY created_at DESC 
+            LIMIT {$limit} OFFSET {$offset}";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    $messages = $stmt->fetchAll();
+
+    // Get status counts and unread count
+    $counts = [
+        'all' => (int)$pdo->query("SELECT COUNT(*) FROM mdx_contact_messages")->fetchColumn(),
+        'unread' => (int)$pdo->query("SELECT COUNT(*) FROM mdx_contact_messages WHERE is_read = 0")->fetchColumn(),
+        'yeni' => (int)$pdo->query("SELECT COUNT(*) FROM mdx_contact_messages WHERE status = 'Yeni'")->fetchColumn(),
+        'oxundu' => (int)$pdo->query("SELECT COUNT(*) FROM mdx_contact_messages WHERE status = 'Oxundu'")->fetchColumn(),
+        'cavablandirildi' => (int)$pdo->query("SELECT COUNT(*) FROM mdx_contact_messages WHERE status = 'Cavablandırıldı'")->fetchColumn(),
+        'arxiv' => (int)$pdo->query("SELECT COUNT(*) FROM mdx_contact_messages WHERE status = 'Arxiv'")->fetchColumn(),
+    ];
+
+    echo json_encode([
+        'status' => 'success',
+        'messages' => $messages,
+        'total' => $total,
+        'page' => $page,
+        'limit' => $limit,
+        'counts' => $counts
+    ], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+if ($action === 'update_contact_message' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    ensureContactMessagesTable($pdo);
+    verifyCsrfToken();
+
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+    $id = trim($input['id'] ?? '');
+
+    if (!$id) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Mesaj ID tələb olunur'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    $updates = [];
+    $params = [];
+
+    if (isset($input['status'])) {
+        $updates[] = "status = ?";
+        $params[] = trim($input['status']);
+    }
+
+    if (isset($input['is_read'])) {
+        $updates[] = "is_read = ?";
+        $params[] = intval($input['is_read']);
+    }
+
+    if (isset($input['admin_notes'])) {
+        $updates[] = "admin_notes = ?";
+        $params[] = trim($input['admin_notes']);
+    }
+
+    if (empty($updates)) {
+        echo json_encode(['status' => 'success', 'message' => 'Dəyişiklik edilmədi'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    $params[] = $id;
+    $sql = "UPDATE mdx_contact_messages SET " . implode(", ", $updates) . " WHERE id = ?";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+
+    echo json_encode(['status' => 'success', 'message' => 'Mesaj statusu uğurla yeniləndi', 'id' => $id], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+if ($action === 'delete_contact_message' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    ensureContactMessagesTable($pdo);
+    verifyCsrfToken();
+
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+    $id = trim($input['id'] ?? '');
+
+    if (!$id) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Mesaj ID tələb olunur'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    $stmt = $pdo->prepare("DELETE FROM mdx_contact_messages WHERE id = ?");
+    $stmt->execute([$id]);
+
+    echo json_encode(['status' => 'success', 'message' => 'Mesaj uğurla silindi', 'id' => $id], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
@@ -3038,6 +3346,29 @@ if ($action === 'migrate' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
     $results[] = 'mdx_bookings';
+
+    // 18. mdx_contact_messages
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS `mdx_contact_messages` (
+            `id` varchar(50) NOT NULL,
+            `name` varchar(150) NOT NULL,
+            `email` varchar(150) NOT NULL,
+            `phone` varchar(50) DEFAULT NULL,
+            `subject` varchar(255) NOT NULL,
+            `message` longtext NOT NULL,
+            `ip_address` varchar(50) DEFAULT NULL,
+            `status` varchar(50) NOT NULL DEFAULT 'Yeni',
+            `is_read` tinyint(1) NOT NULL DEFAULT 0,
+            `admin_notes` text DEFAULT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_msg_status` (`status`),
+            KEY `idx_msg_read` (`is_read`),
+            KEY `idx_msg_created` (`created_at`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+    $results[] = 'mdx_contact_messages';
 
     // Safe dynamic columns alteration on existing tables
     $alterStatements = [

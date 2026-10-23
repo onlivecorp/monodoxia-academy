@@ -169,6 +169,18 @@ export const PERMISSION_MODULES = [
     ]
   },
   {
+    id: 'contacts',
+    name: 'Əlaqə & Mesajlar',
+    icon: 'mail',
+    description: 'Vebsayt vasitəsilə daxil olan əlaqə mesajları və əlaqə səhifəsi parametrləri',
+    permissions: [
+      { id: 'contacts.view', name: 'Mesajlara baxış', description: 'Gələn bütün əlaqə mesajlarını oxumaq və axtarış aparmaq' },
+      { id: 'contacts.edit', name: 'Mesaj statusunu dəyişmə', description: 'Mesajları oxunmuş etmək, cavablandırıldı statusuna keçirmək və qeyd yazmaq' },
+      { id: 'contacts.delete', name: 'Mesajı silmə', description: 'Əlaqə mesajlarını sistemdən tamamilə silmək' },
+      { id: 'contacts.settings', name: 'Əlaqə səhifəsi parametrləri', description: 'Əlaqə məlumatları, xəritə, sosial şəbəkələr və form parametrlərini idarə etmək' }
+    ]
+  },
+  {
     id: 'settings',
     name: 'Sistem Parametrləri',
     icon: 'settings',
@@ -224,7 +236,9 @@ export const INITIAL_ROLES = [
       'community.create',
       'community.edit',
       'community.delete',
-      'events.view'
+      'events.view',
+      'contacts.view',
+      'contacts.edit'
     ],
     translations: {
       en: { name: 'Moderator', description: 'Operational control and moderation of applications, registrations, users, and community.' },

@@ -29,6 +29,7 @@ const ClubPage = lazy(() => import('./pages/ClubPage'));
 const EventsPage = lazy(() => import('./pages/EventsPage'));
 const CommunityPage = lazy(() => import('./pages/CommunityPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
 const SearchPage = lazy(() => import('./pages/SearchPage'));
 import GlobalSearchModal from './components/search/GlobalSearchModal';
 
@@ -71,6 +72,7 @@ function AppContent() {
       tedbirler: 'Tədbirlər və Masterklaslar | Monodoxia Academy',
       icma: 'İcma və Forum | Monodoxia Academy',
       haqqimizda: 'Haqqımızda | Monodoxia Academy',
+      elaqe: 'Əlaqə | Monodoxia Academy',
       search: 'Qlobal Axtarış | Monodoxia Academy'
     };
     document.title = titles[currentPage] || platformSettings?.siteTitle || 'Monodoxia Academy';
@@ -267,6 +269,8 @@ function AppContent() {
         return <CommunityPage />;
       case 'haqqimizda':
         return <AboutPage />;
+      case 'elaqe':
+        return <ContactPage />;
       case 'search':
         return <SearchPage />;
       case 'home':
