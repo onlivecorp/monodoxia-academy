@@ -14,11 +14,20 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
     addCoachReview,
     addCoachCertificate,
     deleteCoachCertificate,
+    updateCoach,
     setActiveCertView,
     setCertViewModalOpen
   } = useApp();
 
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'certificates' | 'reviews'
+
+  // Expert profile edit state (for self or admin)
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editBio, setEditBio] = useState('');
+  const [editSpecialties, setEditSpecialties] = useState('');
+  const [editSlots, setEditSlots] = useState([]);
+  const [newSlotInput, setNewSlotInput] = useState('');
+  const [saveSuccess, setSaveSuccess] = useState(false);
   
   // Review form state
   const [userRating, setUserRating] = useState(5);
@@ -84,6 +93,46 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
     if (openBooking) {
       openBooking(liveCoach.id);
     }
+  };
+
+  const handleStartEdit = () => {
+    setEditBio(liveCoach.bio || liveCoach.experience || '');
+    const currentSpecs = Array.isArray(liveCoach.specialties)
+      ? liveCoach.specialties.join(', ')
+      : (liveCoach.specialties || '');
+    setEditSpecialties(currentSpecs);
+    setEditSlots(Array.isArray(availableSlots) ? [...availableSlots] : []);
+    setIsEditingProfile(true);
+  };
+
+  const handleAddSlot = () => {
+    const val = newSlotInput.trim();
+    if (!val) return;
+    setEditSlots(prev => [...prev, val]);
+    setNewSlotInput('');
+  };
+
+  const handleRemoveSlot = (idx) => {
+    setEditSlots(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleSaveProfile = (e) => {
+    e.preventDefault();
+    const specsArr = editSpecialties
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean);
+    if (updateCoach) {
+      updateCoach(liveCoach.id, {
+        bio: editBio.trim(),
+        experience: editBio.trim(),
+        specialties: specsArr,
+        availableSlots: editSlots
+      });
+    }
+    setSaveSuccess(true);
+    setIsEditingProfile(false);
+    setTimeout(() => setSaveSuccess(false), 3000);
   };
 
   const handleReviewSubmit = (e) => {
@@ -267,79 +316,226 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
           {/* TAB 1: OVERVIEW */}
           {activeTab === 'overview' && (
             <div className="space-y-6 pt-5">
-              {/* Full Bio */}
-              <div>
-                <h3 className="text-xs uppercase tracking-wider font-bold text-[#775a19] mb-2 flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-[16px]">psychology</span>
-                  <span>Metodologiya və Təcrübə</span>
-                </h3>
-                <p className="text-sm text-[#334155] leading-relaxed font-light whitespace-pre-line">
-                  {coachBio}
-                </p>
-              </div>
-
-              {/* Specialties */}
-              {specialties.length > 0 && (
-                <div>
-                  <h3 className="text-xs uppercase tracking-wider font-bold text-[#775a19] mb-2.5 flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-[16px]">category</span>
-                    <span>İxtisaslaşdığı Sahələr</span>
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {specialties.map((spec, idx) => (
-                      <span
-                        key={idx}
-                        className="px-3 py-1.5 rounded-xl bg-[#faf8f5] text-[#1e293b] border border-[#c5a059]/20 text-xs font-medium"
-                      >
-                        {spec}
-                      </span>
-                    ))}
-                  </div>
+              {/* Alert & Action Header for Expert / Admin */}
+              {saveSuccess && (
+                <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2 animate-fadeIn">
+                  <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                  Məlumatlarınız uğurla yadda saxlanıldı!
                 </div>
               )}
 
-              {/* Session Details */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-4 rounded-2xl bg-[#faf8f5] border border-[#e2e8f0]">
-                  <div className="text-[11px] text-[#64748b] uppercase tracking-wider font-semibold mb-1">
-                    Seans Müddəti
-                  </div>
-                  <div className="text-sm font-bold text-[#071326] flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-[17px] text-[#775a19]">timer</span>
-                    <span>{liveCoach.sessionDuration || liveCoach.session_duration || '60 dəqiqə'}</span>
-                  </div>
+              {isExpertSelf && !isEditingProfile && (
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleStartEdit}
+                    className="px-3.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-[#775a19] border border-amber-500/30 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">edit</span>
+                    <span>Məlumatları Redaktə Et</span>
+                  </button>
                 </div>
+              )}
 
-                <div className="p-4 rounded-2xl bg-[#faf8f5] border border-[#e2e8f0]">
-                  <div className="text-[11px] text-[#64748b] uppercase tracking-wider font-semibold mb-1">
-                    İnteraktiv Format
+              {isEditingProfile ? (
+                /* EDIT FORM FOR EXPERT */
+                <form onSubmit={handleSaveProfile} className="p-4 sm:p-5 rounded-2xl bg-amber-50/50 border border-amber-200/80 space-y-4 animate-fadeIn">
+                  <div className="flex items-center justify-between pb-2 border-b border-amber-200/60">
+                    <span className="text-xs font-bold text-[#775a19] uppercase tracking-wider flex items-center gap-1.5 font-mono">
+                      <span className="material-symbols-outlined text-[17px]">edit_note</span>
+                      Profil Məlumatlarını Redaktə Et
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingProfile(false)}
+                      className="text-slate-400 hover:text-slate-600 text-xs flex items-center gap-0.5 cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">close</span>
+                      Ləğv et
+                    </button>
                   </div>
-                  <div className="text-sm font-bold text-[#071326] flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-[17px] text-[#775a19]">videocam</span>
-                    <span>Onlayn (Təhlükəsiz Video Otaq)</span>
-                  </div>
-                </div>
-              </div>
 
-              {/* Available Slots */}
-              {availableSlots.length > 0 && (
-                <div>
-                  <h3 className="text-xs uppercase tracking-wider font-bold text-[#775a19] mb-2 flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-[16px]">schedule</span>
-                    <span>Yaxın Tarixlər üçün Mövcud Saatlar</span>
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {availableSlots.map((slot, sIdx) => (
-                      <span
-                        key={sIdx}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold"
+                  {/* 1. Bio / Metodologiya */}
+                  <div>
+                    <label className="block text-xs font-bold text-[#775a19] mb-1 flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[15px]">psychology</span>
+                      Metodologiya və Təcrübə (Haqqında)
+                    </label>
+                    <textarea
+                      rows={4}
+                      value={editBio}
+                      onChange={e => setEditBio(e.target.value)}
+                      placeholder="Metodologiyanız, yanaşmanız və təcrübəniz haqqında yazın..."
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-slate-800 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all resize-none"
+                    />
+                  </div>
+
+                  {/* 2. Specialties */}
+                  <div>
+                    <label className="block text-xs font-bold text-[#775a19] mb-1 flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[15px]">category</span>
+                      İxtisaslaşdığı Sahələr (Vergüllə ayırın)
+                    </label>
+                    <input
+                      type="text"
+                      value={editSpecialties}
+                      onChange={e => setEditSpecialties(e.target.value)}
+                      placeholder="Məs: Fərdi İnkişaf, Psixologiya, Liderlik"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-slate-800 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all"
+                    />
+                    {editSpecialties && (
+                      <div className="flex flex-wrap gap-1.5 pt-2">
+                        {editSpecialties.split(',').map(s => s.trim()).filter(Boolean).map((sp, i) => (
+                          <span key={i} className="px-2.5 py-0.5 rounded-lg bg-amber-100 text-amber-900 border border-amber-300 text-[11px] font-medium">
+                            {sp}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 3. Available Slots */}
+                  <div>
+                    <label className="block text-xs font-bold text-[#775a19] mb-1 flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[15px]">schedule</span>
+                      Yaxın Tarixlər üçün Mövcud Saatlar
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={newSlotInput}
+                        onChange={e => setNewSlotInput(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddSlot(); }}}
+                        placeholder="Məs: Sabah 15:00 və ya Cümə 18:00"
+                        className="flex-1 px-3 py-2 rounded-xl border border-slate-300 bg-white text-slate-800 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddSlot}
+                        className="px-3 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors"
                       >
-                        <span className="material-symbols-outlined text-[14px]">event_available</span>
-                        <span>{slot}</span>
-                      </span>
-                    ))}
+                        <span className="material-symbols-outlined text-[16px]">add</span>
+                        Əlavə et
+                      </button>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 pt-2">
+                      {editSlots.map((slot, idx) => (
+                        <span
+                          key={idx}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold"
+                        >
+                          <span className="material-symbols-outlined text-[13px]">event_available</span>
+                          <span>{slot}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveSlot(idx)}
+                            className="text-emerald-700 hover:text-red-600 ml-1 cursor-pointer transition-colors"
+                            title="Sil"
+                          >
+                            <span className="material-symbols-outlined text-[14px]">close</span>
+                          </button>
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
+
+                  {/* Form Action Buttons */}
+                  <div className="flex justify-end gap-2 pt-2 border-t border-amber-200/60">
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingProfile(false)}
+                      className="px-3.5 py-1.5 text-xs text-slate-600 hover:bg-slate-200/50 rounded-xl cursor-pointer"
+                    >
+                      Ləğv et
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-1.5 text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 rounded-xl shadow-sm cursor-pointer flex items-center gap-1.5"
+                    >
+                      <span className="material-symbols-outlined text-[15px]">save</span>
+                      Yadda Saxla
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                /* READ-ONLY VIEW */
+                <>
+                  {/* Full Bio */}
+                  <div>
+                    <h3 className="text-xs uppercase tracking-wider font-bold text-[#775a19] mb-2 flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[16px]">psychology</span>
+                      <span>Metodologiya və Təcrübə</span>
+                    </h3>
+                    <p className="text-sm text-[#334155] leading-relaxed font-light whitespace-pre-line">
+                      {coachBio || 'Hələlik metodologiya məlumatı daxil edilməyib.'}
+                    </p>
+                  </div>
+
+                  {/* Specialties */}
+                  {specialties.length > 0 && (
+                    <div>
+                      <h3 className="text-xs uppercase tracking-wider font-bold text-[#775a19] mb-2.5 flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-[16px]">category</span>
+                        <span>İxtisaslaşdığı Sahələr</span>
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {specialties.map((spec, idx) => (
+                          <span
+                            key={idx}
+                            className="px-3 py-1.5 rounded-xl bg-[#faf8f5] text-[#1e293b] border border-[#c5a059]/20 text-xs font-medium"
+                          >
+                            {spec}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Session Details */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="p-4 rounded-2xl bg-[#faf8f5] border border-[#e2e8f0]">
+                      <div className="text-[11px] text-[#64748b] uppercase tracking-wider font-semibold mb-1">
+                        Seans Müddəti
+                      </div>
+                      <div className="text-sm font-bold text-[#071326] flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-[17px] text-[#775a19]">timer</span>
+                        <span>{liveCoach.sessionDuration || liveCoach.session_duration || '60 dəqiqə'}</span>
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-[#faf8f5] border border-[#e2e8f0]">
+                      <div className="text-[11px] text-[#64748b] uppercase tracking-wider font-semibold mb-1">
+                        İnteraktiv Format
+                      </div>
+                      <div className="text-sm font-bold text-[#071326] flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-[17px] text-[#775a19]">videocam</span>
+                        <span>Onlayn (Təhlükəsiz Video Otaq)</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Available Slots */}
+                  {availableSlots.length > 0 && (
+                    <div>
+                      <h3 className="text-xs uppercase tracking-wider font-bold text-[#775a19] mb-2 flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-[16px]">schedule</span>
+                        <span>Yaxın Tarixlər üçün Mövcud Saatlar</span>
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {availableSlots.map((slot, sIdx) => (
+                          <span
+                            key={sIdx}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold"
+                          >
+                            <span className="material-symbols-outlined text-[14px]">event_available</span>
+                            <span>{slot}</span>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )}
