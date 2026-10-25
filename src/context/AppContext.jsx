@@ -461,10 +461,17 @@ export function AppProvider({ children }) {
                 const lbl = typeof s === 'string' ? s : s?.label;
                 return lbl !== 'Sabah 15:00' && lbl !== 'Cümə 18:00';
               });
+            // Merge image from separate storage if missing
+            let coachImage = c.image || c.avatar || seed?.image || '';
+            try {
+              const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
+              if (imgStore[c.id]) coachImage = imgStore[c.id];
+            } catch (e) {}
             return {
               ...c,
               availableSlots: cleanAvail,
               scheduleSlots: cleanSched,
+              image: coachImage,
               userId: (c.id === 'coach-nargiz' && !c.userId) ? 'u-nargiz' : (c.userId || seed?.userId),
               customCertificates: mergedCustomCerts
             };
@@ -3660,9 +3667,20 @@ export function AppProvider({ children }) {
       ? updates.specialties.split(',').map(s => s.trim()).filter(Boolean)
       : (updates.specialties !== undefined ? updates.specialties : existing.specialties);
 
+    // Store image separately to avoid localStorage quota issues
+    const imageToSave = updates.image || existing.image || '';
+    if (imageToSave && imageToSave.startsWith('data:')) {
+      try {
+        const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
+        imgStore[id] = imageToSave;
+        localStorage.setItem('monodoxia_coach_images', JSON.stringify(imgStore));
+      } catch (e) {}
+    }
+
     const mergedCoach = {
       ...existing,
       ...updates,
+      image: imageToSave,
       ...(spec ? { specialties: spec } : {}),
       translations: {
         ...(existing.translations || {}),
@@ -3676,6 +3694,7 @@ export function AppProvider({ children }) {
           return {
             ...c,
             ...updates,
+            image: imageToSave,
             ...(spec ? { specialties: spec } : {}),
             translations: {
               ...(c.translations || {}),
@@ -3686,7 +3705,12 @@ export function AppProvider({ children }) {
         return c;
       });
       try {
-        localStorage.setItem('monodoxia_coaches', JSON.stringify(nextList));
+        // Save without large base64 images to avoid quota
+        const listToSave = nextList.map(c => ({
+          ...c,
+          image: (c.image && c.image.startsWith('data:')) ? '' : (c.image || '')
+        }));
+        localStorage.setItem('monodoxia_coaches', JSON.stringify(listToSave));
       } catch (e) {}
       return nextList;
     });

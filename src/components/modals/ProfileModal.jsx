@@ -1597,9 +1597,25 @@ export default function ProfileModal() {
                             onChange={e => {
                               const file = e.target.files?.[0];
                               if (!file) return;
-                              if (file.size > 5 * 1024 * 1024) { showToast('Şəkil 5MB-dan böyük ola bilməz', 'error'); return; }
+                              if (file.size > 10 * 1024 * 1024) { showToast('Şəkil 10MB-dan böyük ola bilməz', 'error'); return; }
                               const reader = new FileReader();
-                              reader.onload = ev => setExpertImage(ev.target.result);
+                              reader.onload = ev => {
+                                const img = new window.Image();
+                                img.onload = () => {
+                                  const MAX = 400;
+                                  const scale = Math.min(MAX / img.width, MAX / img.height, 1);
+                                  const w = Math.round(img.width * scale);
+                                  const h = Math.round(img.height * scale);
+                                  const canvas = document.createElement('canvas');
+                                  canvas.width = w;
+                                  canvas.height = h;
+                                  canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                                  const compressed = canvas.toDataURL('image/jpeg', 0.75);
+                                  setExpertImage(compressed);
+                                  showToast('Şəkil yükləndi!', 'success');
+                                };
+                                img.src = ev.target.result;
+                              };
                               reader.readAsDataURL(file);
                             }}
                           />
