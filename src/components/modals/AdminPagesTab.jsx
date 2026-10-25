@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useContext, createContext } from 'react';
+import React, { useState, useEffect, useContext, createContext } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { getHeroMediaStyles, getAboutMediaStyles, parseVideoUrl } from '../../utils/heroMediaHelper';
@@ -1284,7 +1284,7 @@ export default function AdminPagesTab() {
                   <PageField label="Xəbərdarlıq Başlığı" block={clubData} setBlock={setClubData} fieldKey="noticeTitle" placeholder="Məhdud Sayda Qəbul Siyasəti" />
                 </div>
                 <PageField label="Xəbərdarlıq Mətni" block={clubData} setBlock={setClubData} fieldKey="noticeDesc" multiline rows={2} placeholder="Daxili intellektual təhlükəsizliyi və məxfiliyi qorumaq üçün hər ay yalnız 25 yeni Üzv qəbul edilir." />
-                <PageField label="Düymə Mətni (CTA)" block={clubData} setBlock={setClubData} fieldKey="noticeBtnText" placeholder="Müraciət Ərizəsi Göndər" />
+                <PageField label="Düymə Mətni (CTA)" block={clubData} setBlock={setClubData} fieldKey="noticeBtnText" placeholder="Bizimlə Əlaqə" />
               </div>
             </div>
 

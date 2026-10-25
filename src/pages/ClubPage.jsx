@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { getLocalized } from '../i18n/localize';
 import { useApp } from '../context/AppContext';
@@ -294,7 +294,7 @@ export default function ClubPage() {
               onClick={() => openApplication({ id: 'club-resident', title: 'Zənginlər Klubu Üzvlük Müraciəti' }, 'club')}
               className="relative z-10 px-8 py-4 rounded-xl bg-gradient-to-r from-[#c5a059] via-[#e5c57d] to-[#b38f46] text-[#071326] font-semibold text-xs sm:text-sm tracking-wider uppercase shadow-lg shadow-[#c5a059]/20 hover:shadow-xl hover:shadow-[#c5a059]/35 hover:scale-[1.02] active:scale-[0.98] transition-all shrink-0 cursor-pointer"
             >
-              {getLocalized(club, 'noticeBtnText', currentLang, defaultLang) || 'Müraciət Ərizəsi Göndər'}
+              {getLocalized(club, 'noticeBtnText', currentLang, defaultLang) || 'Bizimlə Əlaqə'}
             </button>
           </div>
 

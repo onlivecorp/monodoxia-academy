@@ -1,4 +1,4 @@
-﻿// Monodoxia Academy - Domain Seed Data for React App
+// Monodoxia Academy - Domain Seed Data for React App
 
 export const AREAS = [
   {
@@ -1951,6 +1951,7 @@ export const INITIAL_HOME_CONTENT = {
     tierCtaLink: "",
     tierCtaActiveText: "Aktiv Üzv",
     tierCtaActiveLink: "",
+    noticeBtnText: "Bizimlə Əlaqə",
     translations: {
       az: {
         badge: "QAPALI İCMA ÜZVLÜYÜ",
@@ -1983,7 +1984,8 @@ export const INITIAL_HOME_CONTENT = {
         tierCtaText: "Üzv ol",
         tierCtaLink: "",
         tierCtaActiveText: "Aktiv Üzv",
-        tierCtaActiveLink: ""
+        tierCtaActiveLink: "",
+        noticeBtnText: "Bizimlə Əlaqə"
       },
       en: {
         badge: "EXCLUSIVE RESIDENCY",
