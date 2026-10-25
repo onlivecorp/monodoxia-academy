@@ -21,7 +21,7 @@ export default function Academy() {
   const ctaText = getLocalized(academy, 'ctaText', currentLang, defaultLang) || (academy.ctaText !== undefined && academy.ctaText !== null && String(academy.ctaText).trim() !== '' ? academy.ctaText : '');
 
   return (
-    <section className="relative overflow-hidden py-16 md:py-24 bg-[#fbf9f5] border-b border-[#e2d9c8]/70" id="akademiya">
+    <section className="relative overflow-hidden py-10 md:py-14 bg-[#fbf9f5] border-b border-[#e2d9c8]/70" id="akademiya">
       {/* AMBIENT BACKGROUND GLOW */}
       <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
         <div className="absolute top-1/2 left-1/4 w-[36rem] h-[36rem] rounded-full bg-gradient-to-tr from-[#c5a059]/10 via-[#c5a059]/5 to-transparent blur-3xl" />
@@ -36,9 +36,9 @@ export default function Academy() {
 
       <div className="relative max-w-7xl mx-auto px-6 md:px-12">
         {/* HEADER & FILTER TABS */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+        <div className="flex flex-col gap-6 mb-8">
           <div>
-            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#c5a059]/40 bg-white/70 backdrop-blur-md shadow-sm mb-2 anim-badge">
+            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#c5a059]/40 bg-white/70 backdrop-blur-md shadow-sm mb-3 anim-badge">
               <span className="w-1.5 h-1.5 rounded-full bg-[#9e782f]"></span>
               <span className="text-[11px] sm:text-xs font-semibold text-[#775a19] tracking-[0.2em] uppercase font-sans">
                 {badgeText}
@@ -48,14 +48,14 @@ export default function Academy() {
               {titleText}
             </h2>
             {descText && (
-              <p className="mt-3 text-sm sm:text-base text-slate-600 max-w-2xl font-light leading-relaxed">
+              <p className="mt-3 text-sm sm:text-base text-slate-600 max-w-4xl font-light leading-relaxed">
                 {descText}
               </p>
             )}
           </div>
 
           {/* Segmented Filter Tabs */}
-          <div className="inline-flex flex-wrap items-center p-1.5 rounded-xl bg-white/80 border border-[#e2d9c8]/80 shadow-sm gap-1">
+          <div className="inline-flex flex-wrap items-center p-1.5 rounded-xl bg-white/90 border border-[#e2d9c8]/80 shadow-sm gap-1.5">
             {[
               { id: 'all', label: t('filter_all') },
               ...courseCategories.map(cat => ({
@@ -66,7 +66,7 @@ export default function Academy() {
               <button
                 key={tab.id}
                 onClick={() => setFilter(tab.id)}
-                className={`px-4 py-2 rounded-lg text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer ${
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer ${
                   filter === tab.id
                     ? 'bg-[#070f1e] text-white shadow-md'
                     : 'text-slate-600 hover:text-[#070f1e] hover:bg-[#c5a059]/10'
