@@ -21,7 +21,9 @@ export default function BookingModal() {
 
   // Confirmed bookings for this coach from database
   const confirmedCoachBookings = useMemo(() => {
+    if (!activeCoach || !Array.isArray(bookings)) return [];
     return bookings.filter(b => {
+      if (!b) return false;
       const matchCoach = (b.coachId && b.coachId === activeCoach.id) ||
                          (b.coachName && activeCoach.name && b.coachName.toLowerCase().trim() === activeCoach.name.toLowerCase().trim());
       return matchCoach && b.status === 'Təsdiqləndi';
@@ -30,11 +32,13 @@ export default function BookingModal() {
 
   // Coach's booked slots from profile
   const coachBookedSlots = useMemo(() => {
+    if (!activeCoach) return [];
     return Array.isArray(activeCoach?.bookedSlots) ? activeCoach.bookedSlots : [];
   }, [activeCoach]);
 
   // Combine and normalize all schedule slots
   const allSlots = useMemo(() => {
+    if (!activeCoach) return [];
     const list = [];
     if (Array.isArray(activeCoach?.scheduleSlots) && activeCoach.scheduleSlots.length > 0) {
       activeCoach.scheduleSlots.forEach(s => {
@@ -77,8 +81,8 @@ export default function BookingModal() {
   const currentSlot = slot || firstAvailable || (allSlots[0]?.label || 'Fərdi razılaşma ilə');
 
   // Check if selected slot or custom time is booked
-  // Check if selected slot or custom time is booked
   const isSelectedSlotBooked = useMemo(() => {
+    if (!activeCoach) return false;
     if (useCustomTime) {
       if (customStartTime >= customEndTime) return true;
       const formattedDate = customDate.split('-').reverse().join('.');
