@@ -1,8 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 
 export default function BookingModal() {
-  const { bookingModalOpen, setBookingModalOpen, activeCoach, confirmBooking, currentUser, bookings = [] } = useApp();
+  const { bookingModalOpen, setBookingModalOpen, activeCoach, confirmBooking, currentUser, bookings = [], bookingPreselectedSlot, setBookingPreselectedSlot } = useApp();
   const [slot, setSlot] = useState('');
   const [useCustomTime, setUseCustomTime] = useState(false);
   const [customDate, setCustomDate] = useState(() => new Date().toISOString().split('T')[0]);
@@ -10,6 +10,14 @@ export default function BookingModal() {
   const [customEndTime, setCustomEndTime] = useState('16:00');
   const [type, setType] = useState('Online (Təhlükəsiz Video Otaq)');
   const [notes, setNotes] = useState('');
+
+  // Sync preselected slot when modal opens
+  useEffect(() => {
+    if (bookingModalOpen) {
+      setSlot(bookingPreselectedSlot || '');
+      setUseCustomTime(false);
+    }
+  }, [bookingModalOpen, bookingPreselectedSlot]);
 
   // Confirmed bookings for this coach from database
   const confirmedCoachBookings = useMemo(() => {

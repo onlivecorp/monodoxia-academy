@@ -561,6 +561,7 @@ export function AppProvider({ children }) {
   const [activeCertificate, setActiveCertificate] = useState(null);
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [activeCoach, setActiveCoach] = useState(null);
+  const [bookingPreselectedSlot, setBookingPreselectedSlot] = useState('');
   const [newTopicModalOpen, setNewTopicModalOpen] = useState(false);
   const [topicDetailModalOpen, setTopicDetailModalOpen] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState(null);
@@ -1667,11 +1668,12 @@ export function AppProvider({ children }) {
   };
 
   // Booking
-  const openBooking = (coachOrId) => {
+  const openBooking = (coachOrId, preselectedSlot) => {
     const coachId = typeof coachOrId === 'object' && coachOrId?.id ? coachOrId.id : coachOrId;
     const coach = coachesList.find(c => c.id === coachId) || (typeof coachOrId === 'object' && coachOrId?.name ? coachOrId : null);
     if (!coach) return;
     setActiveCoach(coach);
+    setBookingPreselectedSlot(preselectedSlot || '');
     setBookingModalOpen(true);
   };
 
@@ -4010,6 +4012,7 @@ export function AppProvider({ children }) {
       certificateModalOpen, setCertificateModalOpen,
       activeCertificate,
       bookingModalOpen, setBookingModalOpen,
+      bookingPreselectedSlot, setBookingPreselectedSlot,
       activeCoach, openBooking, openBookingModal: openBooking, confirmBooking, updateBookingStatus,
       newTopicModalOpen, setNewTopicModalOpen,
       topicDetailModalOpen, setTopicDetailModalOpen,

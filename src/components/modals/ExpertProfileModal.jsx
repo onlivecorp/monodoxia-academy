@@ -637,38 +637,50 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                           <span className="material-symbols-outlined text-[16px]">schedule</span>
                           <span>Yaxın Tarixlər üçün Saat Cədvəli</span>
                         </span>
+                        <span className="text-[10px] font-normal text-slate-400 normal-case">
+                          🟢 Boş = rezerv edə bilərsiniz • 🔴 Dolu = tutulub
+                        </span>
                       </h3>
                       <div className="flex flex-wrap gap-2">
                         {scheduleSlots.length > 0 ? (
                           scheduleSlots.map(s => (
-                            <span
-                              key={s.id}
-                              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold ${
-                                s.isBooked
-                                  ? 'bg-rose-50 text-rose-800 border-rose-200'
-                                  : 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                              }`}
-                            >
-                              <span className="material-symbols-outlined text-[14px]">
-                                {s.isBooked ? 'event_busy' : 'event_available'}
+                            s.isBooked ? (
+                              <span
+                                key={s.id}
+                                title="Bu saat artıq rezerv olunub"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold bg-rose-50 text-rose-400 border-rose-200 opacity-70 cursor-not-allowed select-none"
+                              >
+                                <span className="material-symbols-outlined text-[14px]">event_busy</span>
+                                <span>{s.label}</span>
+                                <span className="text-[10px] font-bold px-1.5 rounded bg-rose-200/60 text-rose-900">Dolu</span>
                               </span>
-                              <span>{s.label}</span>
-                              <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded ${
-                                s.isBooked ? 'bg-rose-200/60 text-rose-900' : 'bg-emerald-200/60 text-emerald-900'
-                              }`}>
-                                {s.isBooked ? 'Dolu' : 'Boş'}
-                              </span>
-                            </span>
+                            ) : (
+                              <button
+                                key={s.id}
+                                type="button"
+                                onClick={() => { onClose(); openBooking(liveCoach.id, s.label); }}
+                                title="Bu saat üçün rezervasiya et"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100 hover:border-emerald-500 hover:shadow-sm transition-all cursor-pointer"
+                              >
+                                <span className="material-symbols-outlined text-[14px]">event_available</span>
+                                <span>{s.label}</span>
+                                <span className="text-[10px] font-bold px-1.5 rounded bg-emerald-200/60 text-emerald-900">Rezerv Et</span>
+                              </button>
+                            )
                           ))
                         ) : (
                           availableSlots.map((slot, sIdx) => (
-                            <span
+                            <button
                               key={sIdx}
-                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold"
+                              type="button"
+                              onClick={() => { onClose(); openBooking(liveCoach.id, slot); }}
+                              title="Bu saat üçün rezervasiya et"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100 hover:border-emerald-500 hover:shadow-sm transition-all cursor-pointer"
                             >
                               <span className="material-symbols-outlined text-[14px]">event_available</span>
                               <span>{slot}</span>
-                            </span>
+                              <span className="text-[10px] font-bold px-1.5 rounded bg-emerald-200/60 text-emerald-900">Rezerv Et</span>
+                            </button>
                           ))
                         )}
                       </div>
