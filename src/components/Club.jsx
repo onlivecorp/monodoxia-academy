@@ -26,7 +26,14 @@ export default function Club() {
   const tierSubtitle = getLocalized(club, 'tierSubtitle', currentLang, defaultLang) || 'Aylıq və ya illik ödəniş əsasında';
   const tierPrice = activePopularTier ? activePopularTier.price : ((club.tierPrice !== undefined && club.tierPrice !== null && String(club.tierPrice).trim() !== '') ? club.tierPrice : '75');
   const tierPeriod = activePopularTier ? getLocalized(activePopularTier, 'period', currentLang, defaultLang) : (getLocalized(club, 'tierPeriod', currentLang, defaultLang) || (t('club_tier_period') || '/ aylıq'));
-  const tierOffer = getLocalized(club, 'tierOffer', currentLang, defaultLang) || 'İlk ödənişə 2 ay HƏDİYYƏ';
+  
+  // Xüsusi təklif / endirim qeydi (deaktiv edilibsə və ya dəyişdirilibsə)
+  const isOfferDisabled = activePopularTier?.offerDisabled;
+  const tierOffer = isOfferDisabled
+    ? ''
+    : (activePopularTier?.offer !== undefined && activePopularTier?.offer !== null && String(activePopularTier.offer).trim() !== ''
+        ? activePopularTier.offer
+        : (getLocalized(club, 'tierOffer', currentLang, defaultLang) || 'İlk ödənişə 2 ay HƏDİYYƏ'));
   
   const popularFeatures = activePopularTier ? getLocalizedArray(activePopularTier, 'features', currentLang, defaultLang) : [];
   const clubFeatures = getLocalizedArray(club, 'tierFeatures', currentLang, defaultLang);

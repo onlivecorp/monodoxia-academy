@@ -1302,6 +1302,10 @@ if ($action === 'save_club_tier' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $translations = $input['translations'] ?? [];
     $translationsJson = is_array($translations) ? json_encode($translations, JSON_UNESCAPED_UNICODE) : (string)$translations;
 
+    $annualPrice = trim($input['annualPrice'] ?? ($input['annual_price'] ?? ''));
+    $offer = trim($input['offer'] ?? '');
+    $offerDisabled = !empty($input['offerDisabled']) || !empty($input['offer_disabled']) ? 1 : 0;
+
     if (!$name) {
         http_response_code(400);
         echo json_encode(['status' => 'error', 'message' => 'Paket adı tələb olunur'], JSON_UNESCAPED_UNICODE);
@@ -1310,21 +1314,27 @@ if ($action === 'save_club_tier' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         $pdo->exec("ALTER TABLE mdx_club_tiers ADD COLUMN IF NOT EXISTS translations LONGTEXT DEFAULT NULL");
+        $pdo->exec("ALTER TABLE mdx_club_tiers ADD COLUMN IF NOT EXISTS annual_price VARCHAR(50) DEFAULT NULL");
+        $pdo->exec("ALTER TABLE mdx_club_tiers ADD COLUMN IF NOT EXISTS offer VARCHAR(255) DEFAULT NULL");
+        $pdo->exec("ALTER TABLE mdx_club_tiers ADD COLUMN IF NOT EXISTS offer_disabled TINYINT(1) DEFAULT 0");
     } catch (PDOException $e) {}
 
     $stmt = $pdo->prepare("
-        INSERT INTO mdx_club_tiers (id, name, price, period, popular, features_json, active, translations)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO mdx_club_tiers (id, name, price, annual_price, offer, offer_disabled, period, popular, features_json, active, translations)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE
             name = VALUES(name),
             price = VALUES(price),
+            annual_price = VALUES(annual_price),
+            offer = VALUES(offer),
+            offer_disabled = VALUES(offer_disabled),
             period = VALUES(period),
             popular = VALUES(popular),
             features_json = VALUES(features_json),
             active = VALUES(active),
             translations = VALUES(translations)
     ");
-    $stmt->execute([$id, $name, $price, $period, $popular, $featuresJson, $active, $translationsJson]);
+    $stmt->execute([$id, $name, $price, $annualPrice, $offer, $offerDisabled, $period, $popular, $featuresJson, $active, $translationsJson]);
 
     echo json_encode(['status' => 'success', 'message' => 'Abunəlik paketi bazada saxlanıldı', 'id' => $id], JSON_UNESCAPED_UNICODE);
     exit();

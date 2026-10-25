@@ -69,6 +69,9 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
   // Add Tier State with automatic default period translations
   const [newTierName, setNewTierName] = useState('');
   const [newTierPrice, setNewTierPrice] = useState('65');
+  const [newTierAnnualPrice, setNewTierAnnualPrice] = useState('');
+  const [newTierOffer, setNewTierOffer] = useState('İlk ödənişə 2 ay HƏDİYYƏ');
+  const [newTierOfferDisabled, setNewTierOfferDisabled] = useState(false);
   const [newTierPeriod, setNewTierPeriod] = useState('/ aylıq');
   const [newTierFeatures, setNewTierFeatures] = useState('');
   const [newTierPopular, setNewTierPopular] = useState(false);
@@ -150,6 +153,9 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
     addClubTier({
       name: newTierName.trim(),
       price: newTierPrice.trim(),
+      annualPrice: newTierAnnualPrice.trim(),
+      offer: newTierOfferDisabled ? '' : newTierOffer.trim(),
+      offerDisabled: Boolean(newTierOfferDisabled),
       period: newTierPeriod,
       popular: newTierPopular,
       features: newTierFeatures,
@@ -157,6 +163,9 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
     });
     setNewTierName('');
     setNewTierPrice('65');
+    setNewTierAnnualPrice('');
+    setNewTierOffer('İlk ödənişə 2 ay HƏDİYYƏ');
+    setNewTierOfferDisabled(false);
     setNewTierPeriod('/ aylıq');
     setNewTierFeatures('');
     setNewTierPopular(false);
@@ -176,6 +185,9 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
     updateClubTier(editingTier.id, {
       name: editingTier.name,
       price: editingTier.price,
+      annualPrice: editingTier.annualPrice || '',
+      offer: editingTier.offerDisabled ? '' : (editingTier.offer || ''),
+      offerDisabled: Boolean(editingTier.offerDisabled),
       period: editingTier.period,
       popular: Boolean(editingTier.popular),
       features: typeof editingTier.features === 'string'
@@ -209,8 +221,8 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <h4 className="admin-section-title">Coaching Club Abunəlik Paketləri</h4>
-          <p className="admin-section-subtitle">Rezidentlik paketlərini yaradın, qiymətləri, ödəniş dövrünü və imtiyazları tənzimləyin</p>
+          <h4 className="admin-section-title">Zənginlər Klubu Paketləri</h4>
+          <p className="admin-section-subtitle">Zənginlər Klubu rezidentlik paketlərini, aylıq/illik qiymətləri və xüsusi təklifləri tənzimləyin</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span className="admin-count-badge">Cəmi: {clubTiersList.length} paket</span>
@@ -258,6 +270,17 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
                 />
               </div>
               <div>
+                <label className="admin-label">İllik Məbləğ (₼)</label>
+                <input
+                  type="text"
+                  placeholder="Məs: 750 (Boşdursa aylıq*10)"
+                  value={editingTier.annualPrice || ''}
+                  onChange={(e) => setEditingTier({ ...editingTier, annualPrice: e.target.value })}
+                  className="admin-input"
+                  style={{ fontWeight: 700, color: '#b45309' }}
+                />
+              </div>
+              <div>
                 <label className="admin-label">Ödəniş Dövrü</label>
                 <select
                   value={editingTier.period}
@@ -269,6 +292,31 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
                   ))}
                 </select>
               </div>
+            </div>
+
+            {/* Offer / Discount text customization */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '12px', alignItems: 'flex-end', background: '#fafaf9', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e7e5e4' }}>
+              <div style={{ flex: 1 }}>
+                <label className="admin-label">Xüsusi Təklif / Endirim Qeydi</label>
+                <input
+                  type="text"
+                  disabled={Boolean(editingTier.offerDisabled)}
+                  placeholder="Məs: İlk ödənişə 2 ay HƏDİYYƏ"
+                  value={editingTier.offer !== undefined ? editingTier.offer : 'İlk ödənişə 2 ay HƏDİYYƏ'}
+                  onChange={(e) => setEditingTier({ ...editingTier, offer: e.target.value })}
+                  className="admin-input"
+                  style={{ opacity: editingTier.offerDisabled ? 0.5 : 1 }}
+                />
+              </div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 600, color: '#64748b', cursor: 'pointer', paddingBottom: '8px', userSelect: 'none' }}>
+                <input
+                  type="checkbox"
+                  checked={Boolean(editingTier.offerDisabled)}
+                  onChange={(e) => setEditingTier({ ...editingTier, offerDisabled: e.target.checked })}
+                  style={{ cursor: 'pointer', accentColor: '#c5a059', width: '15px', height: '15px' }}
+                />
+                <span>Təklif qeydini deaktiv et (Gizlət)</span>
+              </label>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -371,6 +419,17 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
               />
             </div>
             <div>
+              <label className="admin-label">İllik Məbləğ (₼)</label>
+              <input
+                type="text"
+                placeholder="məsələn: 650"
+                value={newTierAnnualPrice}
+                onChange={(e) => setNewTierAnnualPrice(e.target.value)}
+                className="admin-input"
+                style={{ fontWeight: 700, color: '#b45309' }}
+              />
+            </div>
+            <div>
               <label className="admin-label">Ödəniş Dövrü</label>
               <select
                 value={newTierPeriod}
@@ -382,6 +441,31 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
                 ))}
               </select>
             </div>
+          </div>
+
+          {/* Offer / Discount text customization */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '12px', alignItems: 'flex-end', background: '#fafaf9', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e7e5e4' }}>
+            <div style={{ flex: 1 }}>
+              <label className="admin-label">Xüsusi Təklif / Endirim Qeydi</label>
+              <input
+                type="text"
+                disabled={newTierOfferDisabled}
+                placeholder="Məs: İlk ödənişə 2 ay HƏDİYYƏ"
+                value={newTierOffer}
+                onChange={(e) => setNewTierOffer(e.target.value)}
+                className="admin-input"
+                style={{ opacity: newTierOfferDisabled ? 0.5 : 1 }}
+              />
+            </div>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 600, color: '#64748b', cursor: 'pointer', paddingBottom: '8px', userSelect: 'none' }}>
+              <input
+                type="checkbox"
+                checked={newTierOfferDisabled}
+                onChange={(e) => setNewTierOfferDisabled(e.target.checked)}
+                style={{ cursor: 'pointer', accentColor: '#c5a059', width: '15px', height: '15px' }}
+              />
+              <span>Təklif qeydini deaktiv et (Gizlət)</span>
+            </label>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -516,9 +600,21 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', padding: '10px 0', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', marginBottom: '12px' }}>
-                  <span style={{ fontSize: '22px', fontWeight: 700, fontFamily: "'Playfair Display',serif", color: '#b45309' }}>₼ {t.price}</span>
-                  <span style={{ fontSize: '12px', color: '#64748b' }}>{t.period}</span>
+                <div style={{ padding: '10px 0', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', marginBottom: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                    <span style={{ fontSize: '22px', fontWeight: 700, fontFamily: "'Playfair Display',serif", color: '#b45309' }}>₼ {t.price}</span>
+                    <span style={{ fontSize: '12px', color: '#64748b' }}>{t.period}</span>
+                    {t.annualPrice && (
+                      <span style={{ fontSize: '11px', color: '#16a34a', fontWeight: 600, marginLeft: 'auto' }}>
+                        İllik: ₼{t.annualPrice}
+                      </span>
+                    )}
+                  </div>
+                  {!t.offerDisabled && t.offer && (
+                    <div style={{ display: 'inline-block', fontSize: '10px', fontWeight: 600, background: '#fef3c7', color: '#92400e', padding: '2px 8px', borderRadius: '4px', marginTop: '6px' }}>
+                      {t.offer}
+                    </div>
+                  )}
                 </div>
 
                 <div>

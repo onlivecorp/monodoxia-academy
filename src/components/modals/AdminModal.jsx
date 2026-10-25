@@ -92,7 +92,7 @@ export default function AdminModal() {
           { id: 'courses', icon: 'school', label: 'Kurslar & LMS', perm: 'courses.view' },
           { id: 'categories', icon: 'category', label: 'Kateqoriyalar', perm: 'categories.view' },
           { id: 'certificates', icon: 'workspace_premium', label: 'Sertifikatlar', perm: 'courses.view' },
-          { id: 'club', icon: 'card_membership', label: 'Club Tiers', perm: 'club.view' },
+          { id: 'club', icon: 'card_membership', label: 'Zənginlər Klubu', perm: 'club.view' },
           { id: 'events', icon: 'event', label: 'Tədbirlər', perm: 'events.view' },
           { id: 'community', icon: 'forum', label: 'İcma & Forum', perm: 'community.view' }
         ]

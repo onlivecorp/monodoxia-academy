@@ -99,8 +99,9 @@ export default function ClubPage() {
               const isCurrentTier = currentTierStr.toLowerCase() === (tier.id || '').toLowerCase();
               const isPopular = tier.id === 'premium' || Boolean(tier.popular);
               const rawPrice = Number(tier.price) || 0;
+              const customAnnual = tier.annualPrice ? Number(tier.annualPrice) : null;
               const displayPrice = billingCycle === 'annual' && rawPrice > 0
-                ? Math.round(rawPrice * 10)
+                ? (customAnnual && customAnnual > 0 ? customAnnual : Math.round(rawPrice * 10))
                 : rawPrice;
               const periodText = billingCycle === 'annual' && rawPrice > 0 ? '/ illik' : (tier.period || '/ aylıq');
               const tierName = getLocalized(tier, 'name', currentLang, defaultLang) || tier.name || tier.id || 'Klub Rezidentliyi';
