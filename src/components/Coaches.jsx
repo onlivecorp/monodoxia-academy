@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { getLocalized, getLocalizedArray } from '../i18n/localize';
 import { useApp } from '../context/AppContext';
+import ExpertProfileModal from './modals/ExpertProfileModal';
 
 export default function Coaches() {
   const { t, currentLang, defaultLang } = useLanguage();
   const { openBooking, coachesList, homeContent } = useApp();
   const coaches = homeContent?.coaches || {};
+  const [selectedCoach, setSelectedCoach] = useState(null);
 
   const badgeText = getLocalized(coaches, 'badge', currentLang, defaultLang) || (coaches.badge !== undefined && coaches.badge !== null && String(coaches.badge).trim() !== '' ? coaches.badge : t('experts_badge'));
   const titleText = getLocalized(coaches, 'title', currentLang, defaultLang) || (coaches.title !== undefined && coaches.title !== null && String(coaches.title).trim() !== '' ? coaches.title : t('experts_title'));
@@ -61,7 +63,15 @@ export default function Coaches() {
                   {/* Top Ambient Gold Shimmer */}
                   <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#c5a059] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
 
-                  <div>
+                  {/* CLICKABLE INFO AREA */}
+                  <div
+                    onClick={() => setSelectedCoach(c)}
+                    className="cursor-pointer"
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedCoach(c); } }}
+                    title="Ekspert profilini və haqqında məlumatı aç"
+                  >
                     {/* PHOTO CONTAINER */}
                     <div className="relative aspect-[4/4] bg-[#f5f3ef] overflow-hidden flex items-center justify-center">
                       {c.image ? (
@@ -89,8 +99,9 @@ export default function Coaches() {
                         {coachTitle}
                       </div>
 
-                      <h3 className="font-serif text-2xl font-bold text-[#070f1e] group-hover:text-[#775a19] transition-colors leading-snug">
-                        {c.name}
+                      <h3 className="font-serif text-2xl font-bold text-[#070f1e] group-hover:text-[#775a19] transition-colors leading-snug flex items-center gap-1.5">
+                        <span>{c.name}</span>
+                        <span className="material-symbols-outlined text-[18px] text-[#c5a059] opacity-70 group-hover:opacity-100 transition-opacity">open_in_new</span>
                       </h3>
 
                       <p className="text-sm text-slate-600 line-clamp-3 leading-relaxed font-normal mt-2.5 mb-5">
@@ -109,13 +120,25 @@ export default function Coaches() {
                   </div>
 
                   {/* ACTION CTA */}
-                  <div className="p-7 pt-0">
+                  <div className="p-7 pt-0 flex flex-col gap-2">
                     <button
-                      onClick={() => openBooking(c.id)}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openBooking(c.id);
+                      }}
                       className="w-full py-3.5 rounded-xl bg-[#070f1e] hover:bg-[#112240] text-white text-xs font-semibold uppercase tracking-[0.16em] border border-[#c5a059]/40 shadow-md hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <span>{t('expert_book_btn')}</span>
                       <span className="material-symbols-outlined text-[16px] text-[#c5a059]">calendar_month</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCoach(c)}
+                      className="w-full py-2 px-3 rounded-lg border border-[#c5a059]/35 hover:border-[#c5a059] bg-[#faf8f5] hover:bg-white text-[#775a19] text-[11px] font-semibold tracking-wide transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-[15px]">badge</span>
+                      <span>Haqqında & Profil Məlumatı</span>
                     </button>
                   </div>
                 </div>
@@ -139,6 +162,13 @@ export default function Coaches() {
           </div>
         )}
       </div>
+
+      {/* Expert Profile Modal */}
+      <ExpertProfileModal
+        coach={selectedCoach}
+        isOpen={Boolean(selectedCoach)}
+        onClose={() => setSelectedCoach(null)}
+      />
     </section>
   );
 }
