@@ -454,8 +454,17 @@ export function AppProvider({ children }) {
             const mergedCustomCerts = (c.customCertificates && c.customCertificates.length > 0) 
               ? c.customCertificates 
               : (seed?.customCertificates || []);
+            const cleanAvail = (Array.isArray(c.availableSlots) ? c.availableSlots : (Array.isArray(c.available_slots) ? c.available_slots : []))
+              .filter(s => s !== 'Sabah 15:00' && s !== 'Cümə 18:00');
+            const cleanSched = (Array.isArray(c.scheduleSlots) ? c.scheduleSlots : [])
+              .filter(s => {
+                const lbl = typeof s === 'string' ? s : s?.label;
+                return lbl !== 'Sabah 15:00' && lbl !== 'Cümə 18:00';
+              });
             return {
               ...c,
+              availableSlots: cleanAvail,
+              scheduleSlots: cleanSched,
               userId: (c.id === 'coach-nargiz' && !c.userId) ? 'u-nargiz' : (c.userId || seed?.userId),
               customCertificates: mergedCustomCerts
             };
@@ -1013,7 +1022,7 @@ export function AppProvider({ children }) {
               isActive: Boolean(Number(c.is_active ?? 1)),
               specialties: typeof c.specialties_json === 'string' ? JSON.parse(c.specialties_json || '[]') : (c.specialties_json || []),
               languages: typeof c.languages_json === 'string' ? JSON.parse(c.languages_json || '[]') : (c.languages_json || []),
-              availableSlots: typeof c.available_slots_json === 'string' ? JSON.parse(c.available_slots_json || '[]') : (c.available_slots_json || []),
+              availableSlots: (typeof c.available_slots_json === 'string' ? JSON.parse(c.available_slots_json || '[]') : (c.available_slots_json || [])).filter(s => s !== 'Sabah 15:00' && s !== 'Cümə 18:00'),
               translations: typeof c.translations_json === 'string' ? JSON.parse(c.translations_json || '{}') : (c.translations_json || {})
             })));
           }
@@ -3633,7 +3642,7 @@ export function AppProvider({ children }) {
       bio: coach.bio || coach.experience || '',
       image: coach.image || '',
       specialties: Array.isArray(coach.specialties) ? coach.specialties : (coach.specialties ? coach.specialties.split(',').map(s => s.trim()).filter(Boolean) : ['Fərdi İnkişaf']),
-      availableSlots: coach.availableSlots || ['Sabah 15:00', 'Cümə 18:00']
+      availableSlots: coach.availableSlots || []
     };
     setCoachesList(prev => [...prev, newCoach]);
     if (coach.userId) {

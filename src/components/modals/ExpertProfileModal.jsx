@@ -61,9 +61,15 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
     ? rawSpecialties
     : (Array.isArray(liveCoach.specialties) ? liveCoach.specialties : (liveCoach.specialties || '').split(',').map(s => s.trim()).filter(Boolean));
 
-  const availableSlots = Array.isArray(liveCoach.availableSlots)
+  const availableSlots = (Array.isArray(liveCoach.availableSlots)
     ? liveCoach.availableSlots
-    : (Array.isArray(liveCoach.available_slots) ? liveCoach.available_slots : []);
+    : (Array.isArray(liveCoach.available_slots) ? liveCoach.available_slots : [])
+  ).filter(s => s !== 'Sabah 15:00' && s !== 'Cümə 18:00');
+
+  const scheduleSlots = (Array.isArray(liveCoach.scheduleSlots) ? liveCoach.scheduleSlots : []).filter(s => {
+    const lbl = typeof s === 'string' ? s : s?.label;
+    return lbl !== 'Sabah 15:00' && lbl !== 'Cümə 18:00';
+  });
 
   // Filter reviews for this coach
   const expertReviews = (coachReviews || []).filter(r => r.coachId === liveCoach.id);
@@ -624,7 +630,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                   </div>
 
                   {/* Available / Scheduled Slots Display */}
-                  {((Array.isArray(liveCoach.scheduleSlots) && liveCoach.scheduleSlots.length > 0) || availableSlots.length > 0) && (
+                  {(scheduleSlots.length > 0 || availableSlots.length > 0) && (
                     <div>
                       <h3 className="text-xs uppercase tracking-wider font-bold text-[#775a19] mb-2 flex items-center justify-between">
                         <span className="flex items-center gap-1.5">
@@ -633,8 +639,8 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                         </span>
                       </h3>
                       <div className="flex flex-wrap gap-2">
-                        {Array.isArray(liveCoach.scheduleSlots) && liveCoach.scheduleSlots.length > 0 ? (
-                          liveCoach.scheduleSlots.map(s => (
+                        {scheduleSlots.length > 0 ? (
+                          scheduleSlots.map(s => (
                             <span
                               key={s.id}
                               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold ${

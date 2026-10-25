@@ -1048,7 +1048,7 @@ export const COACHES = [
     bio: "Koqnitiv fərqindəlik və şüuraltı travmalar üzrə baş ekspert. Harvard və Bakı Dövlət Universitetinin tədqiqat layihələrinin məzunu.",
     image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCn9ZjfxW-PL-o_xZ9Me83EiOB9x_aaIbuIEYtOce00950-vB-hL99E3BUxNBeJriyWWNWGGDlnTJRCJGRwkjlEPSCAIQYPacFkDcUc0Gx7SG3u_LdP-yJ9ZvAxESWMhqm8PQ0_Jjk2lpNGCZW3k-pFcnjQ873cYwWNg72N95sYxMH-w5fpXfjJZfJo1LZC2K5AStfFo8Xfl-GQ968CVb_yfDTaqIDcMiTxISBiZMVtj4d_vRd_K_L3",
     specialties: ["Travma terapiyası", "Şüuraltı inanc dəyişimi", "Mindfulness"],
-    availableSlots: ["Sabah 11:00", "Sabah 15:30", "Cümə 18:00"],
+    availableSlots: [],
     customCertificates: [
       {
         id: "cc-leyla-1",
@@ -1101,7 +1101,7 @@ export const COACHES = [
     bio: "Top menecerlər və sahibkarlar üçün ekzekyutiv kouçinq, böhran idarəçiliyi və emosional liderlik üzrə baş məsləhətçi.",
     image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBdkVIgrGvOaJjxAlQWP_tOgF6MLIc1W_hVcrzQBsdy3Nmj3_bg1aNTtm-J7ngXIQHCb_HUk8Wgmb1fcNip_lsrL-Gmar-UetvxkeR45_vSt4q1wmYr827ItSKFD3KvdecV_H8wq93ilFYULT8I6h79AaRYC4hHvZXNqnITSxTBQyhdlEbyKM6jmxqnqbhzDwzEMCBH3hkOs9Ek7d1JxL4eWrgGao9MIfgwjA76wbSTi5zJlsf9FF_w",
     specialties: ["EQ Liderlik", "Karyera sıçrayışı", "Stres menecmenti"],
-    availableSlots: ["Bazar ertəsi 14:00", "Çərşənbə 16:30", "Şənbə 12:00"],
+    availableSlots: [],
     customCertificates: [
       {
         id: "cc-farid-1",
@@ -1154,7 +1154,7 @@ export const COACHES = [
     bio: "Cütlüklər və fərdlər üçün münasibət dinamikası, psixosomatika və affektiv tənzimləmə üzrə mütəxəssis.",
     image: "https://lh3.googleusercontent.com/aida-public/AB6AXuApho0mk-jt09_EKWhr9Kr-rV4ni1mNVZ9NMTTJnSr7Io_rS9AF4YMxdvwdvNBSQ5niLnit1PKeNozwDdDlqiBGbJTz1MOiuOo8yyY1b3AbDK33_Lc-ZOXlb5WzmwRuSsfZWSPYV7fmbNuRtSts2hYeTZFmwlHsu99rLvjRaczoStwMfhP4xbjxoLfdcfKKedG3I9Wsc86Mw84ULdwPbgpzWaz6dnC5ZnLFz2n5VuHMa6K1rX1itB96",
     specialties: ["Münasibətlər", "Bədən-zihin harmoniyası", "Özünü bağışlama"],
-    availableSlots: ["Sabah 17:00", "Cümə axşamı 19:00", "Şənbə 15:00"],
+    availableSlots: [],
     customCertificates: [
       {
         id: "cc-nargiz-1",

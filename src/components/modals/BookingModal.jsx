@@ -32,9 +32,11 @@ export default function BookingModal() {
     const list = [];
     if (Array.isArray(activeCoach?.scheduleSlots) && activeCoach.scheduleSlots.length > 0) {
       activeCoach.scheduleSlots.forEach(s => {
+        const lbl = s.label || `${s.date || ''} ${s.startTime || ''}-${s.endTime || ''}`.trim();
+        if (lbl === 'Sabah 15:00' || lbl === 'Cümə 18:00') return;
         list.push({
-          id: s.id || s.label,
-          label: s.label || `${s.date || ''} ${s.startTime || ''}-${s.endTime || ''}`.trim(),
+          id: s.id || lbl,
+          label: lbl,
           isBooked: Boolean(s.isBooked),
           date: s.date,
           startTime: s.startTime,
@@ -47,6 +49,7 @@ export default function BookingModal() {
     if (Array.isArray(activeCoach?.availableSlots)) {
       activeCoach.availableSlots.forEach((s, idx) => {
         const text = typeof s === 'string' ? s : (s.label || s.slot || '');
+        if (text === 'Sabah 15:00' || text === 'Cümə 18:00') return;
         if (text && !list.some(item => item.label === text)) {
           // Check if marked in coachBookedSlots or confirmedCoachBookings
           const isMarkedBooked = coachBookedSlots.some(bs => (typeof bs === 'string' && bs === text) || (bs.slot && bs.slot === text)) ||

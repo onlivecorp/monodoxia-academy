@@ -555,7 +555,7 @@ export default function AdminUsersTab() {
                               experience: '5+ il təcrübə',
                               bio: `${editingUser.name} — Monodoxia Academy fərdi inkişaf və kouçinq ekspertidir.`,
                               specialties: ['Fərdi İnkişaf', 'Psixologiya'],
-                              availableSlots: ['Sabah 15:00', 'Cümə 18:00']
+                              availableSlots: []
                             });
                             setEditingUser({ ...editingUser, role: 'Kouç' });
                             showToast(`${editingUser.name} Ekspert Heyətinə təyin edildi!`, 'success');
@@ -984,7 +984,7 @@ export default function AdminUsersTab() {
                               experience: '5+ il təcrübə',
                               bio: `${u.name} — Monodoxia Academy fərdi inkişaf və kouçinq ekspertidir.`,
                               specialties: ['Fərdi İnkişaf', 'Psixologiya'],
-                              availableSlots: ['Sabah 15:00', 'Cümə 18:00']
+                              availableSlots: []
                             });
                             updateUser(u.id, { role: 'Kouç' });
                             showToast(`${u.name} Ekspert Heyətinə təyin edildi!`, 'success');

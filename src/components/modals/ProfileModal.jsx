@@ -406,21 +406,27 @@ export default function ProfileModal() {
                         ? myCoachProfile.specialties.join(', ')
                         : (myCoachProfile.specialties || '');
                       setExpertSpecialties(specs);
-                      setExpertSlots(Array.isArray(myCoachProfile.availableSlots) ? myCoachProfile.availableSlots : (Array.isArray(myCoachProfile.available_slots) ? myCoachProfile.available_slots : []));
+                      const rawAvail = Array.isArray(myCoachProfile.availableSlots) ? myCoachProfile.availableSlots : (Array.isArray(myCoachProfile.available_slots) ? myCoachProfile.available_slots : []);
+                      const filteredAvail = rawAvail.filter(s => s !== 'Sabah 15:00' && s !== 'Cümə 18:00');
+                      setExpertSlots(filteredAvail);
 
-                      const initialSched = Array.isArray(myCoachProfile.scheduleSlots) && myCoachProfile.scheduleSlots.length > 0
-                        ? myCoachProfile.scheduleSlots
-                        : (Array.isArray(myCoachProfile.availableSlots)
-                            ? myCoachProfile.availableSlots.map((s, idx) => ({
-                                id: 'slot-init-' + idx,
-                                label: typeof s === 'string' ? s : (s.label || s.slot || 'Saat'),
-                                date: '',
-                                startTime: '',
-                                endTime: '',
-                                isBooked: false,
-                                note: ''
-                              }))
-                            : []);
+                      const rawSched = Array.isArray(myCoachProfile.scheduleSlots) ? myCoachProfile.scheduleSlots : [];
+                      const filteredSched = rawSched.filter(s => {
+                        const lbl = typeof s === 'string' ? s : s?.label;
+                        return lbl !== 'Sabah 15:00' && lbl !== 'Cümə 18:00';
+                      });
+
+                      const initialSched = filteredSched.length > 0
+                        ? filteredSched
+                        : filteredAvail.map((s, idx) => ({
+                            id: 'slot-init-' + idx,
+                            label: typeof s === 'string' ? s : (s.label || s.slot || 'Saat'),
+                            date: '',
+                            startTime: '',
+                            endTime: '',
+                            isBooked: false,
+                            note: ''
+                          }));
                       setExpertSchedule(initialSched);
                       setExpertProfileInited(true);
                     }
