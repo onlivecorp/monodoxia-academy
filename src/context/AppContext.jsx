@@ -793,8 +793,17 @@ export function AppProvider({ children }) {
                 tags: parsedTags
               };
             });
-            setCoursesList(mappedCourses);
-            localStorage.setItem('monodoxia_admin_courses', JSON.stringify(mappedCourses));
+            if (mappedCourses.length > 0) {
+              setCoursesList(mappedCourses);
+              localStorage.setItem('monodoxia_admin_courses', JSON.stringify(mappedCourses));
+            } else if (COURSES && COURSES.length > 0) {
+              setCoursesList(COURSES);
+              localStorage.setItem('monodoxia_admin_courses', JSON.stringify(COURSES));
+              COURSES.forEach(c => apiCall('save_course', c).catch(() => {}));
+            }
+          } else if (COURSES && COURSES.length > 0) {
+            setCoursesList(COURSES);
+            localStorage.setItem('monodoxia_admin_courses', JSON.stringify(COURSES));
           }
           if (Array.isArray(data.events)) {
             const mappedEvents = data.events.map(e => {
@@ -906,14 +915,17 @@ export function AppProvider({ children }) {
             }
           }
           if (data.categories && data.categories.length > 0) {
-            setCategoriesList(data.categories.map(cat => ({
+            const serverCats = data.categories.map(cat => ({
               id: cat.id,
               key: cat.slug || cat.id,
               type: cat.target_type || 'course',
               name: cat.name,
               icon: cat.icon || 'category',
               translations: typeof cat.translations_json === 'string' ? JSON.parse(cat.translations_json || '{}') : (cat.translations_json || {})
-            })));
+            }));
+            const existingKeys = new Set(serverCats.map(c => c.key));
+            const mergedCats = [...serverCats, ...INITIAL_CATEGORIES.filter(c => !existingKeys.has(c.key))];
+            setCategoriesList(mergedCats);
           }
           if (data.coaches && data.coaches.length > 0) {
             setCoachesList(data.coaches.map(c => ({

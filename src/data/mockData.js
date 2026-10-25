@@ -110,6 +110,762 @@ export const AREAS = [
 
 export const COURSES = [
   {
+    id: "course-c1",
+    category: "child-psychology",
+    badge: "",
+    badgeClass: "bg-secondary/10 text-secondary",
+    duration: "",
+    title: "Uşaq Psixologiyası",
+    description: "Uşaqların yaş dövrlərinə uyğun psixoloji inkişaf qanunauyğunluqları, emosional ehtiyacları və koqnitiv formalaşma mexanizmləri.",
+    instructor: "",
+    instructorRole: "",
+    status: "Qrup qəbulu aktivdir",
+    occupancy: 0,
+    price: "",
+    featured: false,
+    maxParticipants: null,
+    translations: {
+      az: {
+        title: "Uşaq Psixologiyası",
+        description: "Uşaqların yaş dövrlərinə uyğun psixoloji inkişaf qanunauyğunluqları, emosional ehtiyacları və koqnitiv formalaşma mexanizmləri.",
+        badge: "",
+        status: "Qrup qəbulu aktivdir"
+      },
+      en: {
+        title: "Child Psychology",
+        description: "Developmental patterns, emotional needs, and cognitive formation mechanisms of children across different age stages.",
+        badge: "",
+        status: "Group enrollment open"
+      },
+      tr: {
+        title: "Çocuk Psikolojisi",
+        description: "Çocukların yaş dönemlerine göre gelişimsel özellikleri, duygusal gereksinimleri ve bilişsel yapılanma mekanizmaları.",
+        badge: "",
+        status: "Grup kaydı aktif"
+      },
+      ru: {
+        title: "Детская Психология",
+        description: "Закономерности психологического развития детей по возрастным периодам, эмоциональные потребности и механизмы когнитивного формирования.",
+        badge: "",
+        status: "Набор в группу открыт"
+      }
+    }
+  },
+  {
+    id: "course-c2",
+    category: "child-psychology",
+    badge: "",
+    badgeClass: "bg-secondary/10 text-secondary",
+    duration: "",
+    title: "Yeniyetmələrlə Psixoloji İş",
+    description: "Yeniyetməlik böhranı, kimlik axtarışı, daxili ziddiyyətlər və sağlam ünsiyyət körpülərinin qurulması metodikası.",
+    instructor: "",
+    instructorRole: "",
+    status: "Qrup qəbulu aktivdir",
+    occupancy: 0,
+    price: "",
+    featured: false,
+    maxParticipants: null,
+    translations: {
+      az: {
+        title: "Yeniyetmələrlə Psixoloji İş",
+        description: "Yeniyetməlik böhranı, kimlik axtarışı, daxili ziddiyyətlər və sağlam ünsiyyət körpülərinin qurulması metodikası.",
+        badge: "",
+        status: "Qrup qəbulu aktivdir"
+      },
+      en: {
+        title: "Psychological Work with Adolescents",
+        description: "Adolescent crises, identity search, resolving inner conflicts, and establishing healthy communication bridges.",
+        badge: "",
+        status: "Group enrollment open"
+      },
+      tr: {
+        title: "Ergenlerle Psikolojik Çalışma",
+        description: "Ergenlik krizi, kimlik arayışı, içsel çatışmalar ve sağlıklı iletişim köprüleri kurma yöntemleri.",
+        badge: "",
+        status: "Grup kaydı aktif"
+      },
+      ru: {
+        title: "Психологическая Работа с Подростками",
+        description: "Подростковые кризисы, поиск идентичности, разрешение внутренних противоречий и построение доверительного контакта.",
+        badge: "",
+        status: "Набор в группу открыт"
+      }
+    }
+  },
+  {
+    id: "course-c3",
+    category: "family",
+    badge: "",
+    badgeClass: "bg-secondary/10 text-secondary",
+    duration: "",
+    title: "Valideyn–Uşaq Münasibətləri",
+    description: "Sağlam emosional bağın qurulması, effektiv intizam prinsipləri və nəsil fərqlərindən doğan ziddiyyətlərin həlli.",
+    instructor: "",
+    instructorRole: "",
+    status: "Qrup qəbulu aktivdir",
+    occupancy: 0,
+    price: "",
+    featured: false,
+    maxParticipants: null,
+    translations: {
+      az: {
+        title: "Valideyn–Uşaq Münasibətləri",
+        description: "Sağlam emosional bağın qurulması, effektiv intizam prinsipləri və nəsil fərqlərindən doğan ziddiyyətlərin həlli.",
+        badge: "",
+        status: "Qrup qəbulu aktivdir"
+      },
+      en: {
+        title: "Parent–Child Relationships",
+        description: "Cultivating secure attachment, positive discipline strategies, and navigating generational communication barriers.",
+        badge: "",
+        status: "Group enrollment open"
+      },
+      tr: {
+        title: "Ebeveyn–Çocuk İlişkileri",
+        description: "Güvenli bağlanma inşası, pozitif disiplin prensipleri ve kuşaklararası iletişim sorunlarının çözümü.",
+        badge: "",
+        status: "Grup kaydı aktif"
+      },
+      ru: {
+        title: "Детско-Родительские Отношения",
+        description: "Формирование здоровой привязанности, принципы эффективного воспитания и преодоление барьеров между поколениями.",
+        badge: "",
+        status: "Набор в группу открыт"
+      }
+    }
+  },
+  {
+    id: "course-c4",
+    category: "family",
+    badge: "",
+    badgeClass: "bg-secondary/10 text-secondary",
+    duration: "",
+    title: "Ailə Psixologiyası",
+    description: "Ailə sisteminin dinamikası, ailədaxili rollar, sərhədlər və böhran dövrlərində balansın qorunması strategiyaları.",
+    instructor: "",
+    instructorRole: "",
+    status: "Qrup qəbulu aktivdir",
+    occupancy: 0,
+    price: "",
+    featured: false,
+    maxParticipants: null,
+    translations: {
+      az: {
+        title: "Ailə Psixologiyası",
+        description: "Ailə sisteminin dinamikası, ailədaxili rollar, sərhədlər və böhran dövrlərində balansın qorunması strategiyaları.",
+        badge: "",
+        status: "Qrup qəbulu aktivdir"
+      },
+      en: {
+        title: "Family Psychology",
+        description: "Family system dynamics, interpersonal roles, boundary setting, and sustaining harmony through life transitions.",
+        badge: "",
+        status: "Group enrollment open"
+      },
+      tr: {
+        title: "Aile Psikolojisi",
+        description: "Aile sistemi dinamikleri, roller, sağlıklı sınırlar ve kriz dönemlerinde dengenin korunması yaklaşımları.",
+        badge: "",
+        status: "Grup kaydı aktif"
+      },
+      ru: {
+        title: "Семейная Психология",
+        description: "Динамика семейной системы, распределение ролей, личные границы и сохранение равновесия в кризисные периоды.",
+        badge: "",
+        status: "Набор в группу открыт"
+      }
+    }
+  },
+  {
+    id: "course-c5",
+    category: "family",
+    badge: "",
+    badgeClass: "bg-secondary/10 text-secondary",
+    duration: "",
+    title: "Cütlük Münasibətləri üzrə Konsultasiya",
+    description: "Tərəflər arasında qarşılıqlı anlaşma, emosional yaxınlıq, konfliktlərin konstruktiv həlli və münasibətlərin yenilənməsi.",
+    instructor: "",
+    instructorRole: "",
+    status: "Qrup qəbulu aktivdir",
+    occupancy: 0,
+    price: "",
+    featured: false,
+    maxParticipants: null,
+    translations: {
+      az: {
+        title: "Cütlük Münasibətləri üzrə Konsultasiya",
+        description: "Tərəflər arasında qarşılıqlı anlaşma, emosional yaxınlıq, konfliktlərin konstruktiv həlli və münasibətlərin yenilənməsi.",
+        badge: "",
+        status: "Qrup qəbulu aktivdir"
+      },
+      en: {
+        title: "Couples Counseling",
+        description: "Fostering mutual understanding, deep emotional intimacy, constructive conflict resolution, and relational rejuvenation.",
+        badge: "",
+        status: "Group enrollment open"
+      },
+      tr: {
+        title: "Çift İlişkileri Danışmanlığı",
+        description: "Karşılıklı anlayış, duygusal yakınlık, yapıcı çatışma çözümü ve ilişkilerin yeniden canlandırılması stratejileri.",
+        badge: "",
+        status: "Grup kaydı aktif"
+      },
+      ru: {
+        title: "Консультирование Пар и Отношений",
+        description: "Взаимопонимание, укрепление эмоциональной близости, конструктивное решение конфликтов и обновление отношений.",
+        badge: "",
+        status: "Набор в группу открыт"
+      }
+    }
+  },
+  {
+    id: "course-c6",
+    category: "personal-growth",
+    badge: "",
+    badgeClass: "bg-secondary/10 text-secondary",
+    duration: "",
+    title: "Özünüdərk və Şəxsi İnkişaf",
+    description: "Şüuraltı maneələrin kəşfi, daxili resursların aktivləşdirilməsi və şəxsi potensialın maksimum səviyyədə reallaşdırılması.",
+    instructor: "",
+    instructorRole: "",
+    status: "Qrup qəbulu aktivdir",
+    occupancy: 0,
+    price: "",
+    featured: false,
+    maxParticipants: null,
+    translations: {
+      az: {
+        title: "Özünüdərk və Şəxsi İnkişaf",
+        description: "Şüuraltı maneələrin kəşfi, daxili resursların aktivləşdirilməsi və şəxsi potensialın maksimum səviyyədə reallaşdırılması.",
+        badge: "",
+        status: "Qrup qəbulu aktivdir"
+      },
+      en: {
+        title: "Self-Awareness & Personal Development",
+        description: "Uncovering subconscious blocks, mobilizing internal resources, and maximizing personal potential.",
+        badge: "",
+        status: "Group enrollment open"
+      },
+      tr: {
+        title: "Öz Farkındalık ve Kişisel Gelişim",
+        description: "Bilinçaltı engellerin keşfi, içsel kaynakların harekete geçirilmesi ve bireysel potansiyelin tam olarak ortaya çıkarılması.",
+        badge: "",
+        status: "Grup kaydı aktif"
+      },
+      ru: {
+        title: "Самопознание и Личностное Развитие",
+        description: "Раскрытие подсознательных барьеров, активизация внутренних ресурсов и максимальная реализация личностного потенциала.",
+        badge: "",
+        status: "Набор в группу открыт"
+      }
+    }
+  },
+  {
+    id: "course-c7",
+    category: "personal-growth",
+    badge: "",
+    badgeClass: "bg-secondary/10 text-secondary",
+    duration: "",
+    title: "Özünəinam və Özünüqiymətləndirmə",
+    description: "Daxili tənqidçini neytrallaşdırmaq, stabil özünüqiymətləndirmə formalaşdırmaq və cəsarətli qərarlar qəbul etmək bacarığı.",
+    instructor: "",
+    instructorRole: "",
+    status: "Qrup qəbulu aktivdir",
+    occupancy: 0,
+    price: "",
+    featured: false,
+    maxParticipants: null,
+    translations: {
+      az: {
+        title: "Özünəinam və Özünüqiymətləndirmə",
+        description: "Daxili tənqidçini neytrallaşdırmaq, stabil özünüqiymətləndirmə formalaşdırmaq və cəsarətli qərarlar qəbul etmək bacarığı.",
+        badge: "",
+        status: "Qrup qəbulu aktivdir"
+      },
+      en: {
+        title: "Self-Confidence & Self-Esteem",
+        description: "Calming the inner critic, establishing resilient self-esteem, and developing decisive courage in life choices.",
+        badge: "",
+        status: "Group enrollment open"
+      },
+      tr: {
+        title: "Özgüven ve Öz Değer",
+        description: "İçsel eleştirmeni dönüştürme, istikrarlı öz değer inşa etme ve cesur kararlar alma becerisi.",
+        badge: "",
+        status: "Grup kaydı aktif"
+      },
+      ru: {
+        title: "Уверенность в Себе и Самооценка",
+        description: "Нейтрализация внутреннего критика, формирование устойчивой самооценки и развитие смелости в принятии решений.",
+        badge: "",
+        status: "Набор в группу открыт"
+      }
+    }
+  },
+  {
+    id: "course-c8",
+    category: "eq",
+    badge: "",
+    badgeClass: "bg-secondary/10 text-secondary",
+    duration: "",
+    title: "Emosiyaların İdarə Olunması",
+    description: "Duyğuları tanıma, qəbul etmə, qəzəb və narahatlığı tənzimləmə və emosional yetkinliyə çatma metodları.",
+    instructor: "",
+    instructorRole: "",
+    status: "Qrup qəbulu aktivdir",
+    occupancy: 0,
+    price: "",
+    featured: false,
+    maxParticipants: null,
+    translations: {
+      az: {
+        title: "Emosiyaların İdarə Olunması",
+        description: "Duyğuları tanıma, qəbul etmə, qəzəb və narahatlığı tənzimləmə və emosional yetkinliyə çatma metodları.",
+        badge: "",
+        status: "Qrup qəbulu aktivdir"
+      },
+      en: {
+        title: "Emotion Management",
+        description: "Recognizing, accepting, and regulating complex emotions such as anger and anxiety to cultivate emotional maturity.",
+        badge: "",
+        status: "Group enrollment open"
+      },
+      tr: {
+        title: "Duygu Yönetimi",
+        description: "Duyguları tanıma, kabullenme, öfke ve kaygıyı dengeleme ve duygusal olgunluğa ulaşma yöntemleri.",
+        badge: "",
+        status: "Grup kaydı aktif"
+      },
+      ru: {
+        title: "Управление Эмоциями",
+        description: "Осознание, принятие и регулирование сложных эмоций, работа с гневом и тревогой, достижение эмоциональной зрелости.",
+        badge: "",
+        status: "Набор в группу открыт"
+      }
+    }
+  },
+  {
+    id: "course-c9",
+    category: "crisis-support",
+    badge: "",
+    badgeClass: "bg-secondary/10 text-secondary",
+    duration: "",
+    title: "Stress və Narahatlıqla Mübarizə",
+    description: "Xroniki gərginliyin aradan qaldırılması, panik və təşviş vəziyyətlərində somatik və zehni sabitliyin bərpası.",
+    instructor: "",
+    instructorRole: "",
+    status: "Qrup qəbulu aktivdir",
+    occupancy: 0,
+    price: "",
+    featured: false,
+    maxParticipants: null,
+    translations: {
+      az: {
+        title: "Stress və Narahatlıqla Mübarizə",
+        description: "Xroniki gərginliyin aradan qaldırılması, panik və təşviş vəziyyətlərində somatik və zehni sabitliyin bərpası.",
+        badge: "",
+        status: "Qrup qəbulu aktivdir"
+      },
+      en: {
+        title: "Coping with Stress & Anxiety",
+        description: "Overcoming chronic tension, alleviating panic and worry, and restoring somatic and mental equanimity.",
+        badge: "",
+        status: "Group enrollment open"
+      },
+      tr: {
+        title: "Stres ve Kaygıyla Mücadele",
+        description: "Kronik gerginliğin giderilmesi, panik ve endişe durumlarında bedensel ve zihinsel dengenin yeniden kazanılması.",
+        badge: "",
+        status: "Grup kaydı aktif"
+      },
+      ru: {
+        title: "Преодоление Стресса и Тревожности",
+        description: "Снятие хронического напряжения, совладание с тревогой и паникой, восстановление соматического и душевного спокойствия.",
+        badge: "",
+        status: "Набор в группу открыт"
+      }
+    }
+  },
+  {
+    id: "course-c10",
+    category: "communication",
+    badge: "",
+    badgeClass: "bg-secondary/10 text-secondary",
+    duration: "",
+    title: "Ünsiyyət və Sosial Bacarıqlar",
+    description: "Fikirləri aydın ifadə etmə, aktiv dinləmə, şəxsi sərhədləri qoruma və sosial mühitdə rahatlıq qazanma təlimi.",
+    instructor: "",
+    instructorRole: "",
+    status: "Qrup qəbulu aktivdir",
+    occupancy: 0,
+    price: "",
+    featured: false,
+    maxParticipants: null,
+    translations: {
+      az: {
+        title: "Ünsiyyət və Sosial Bacarıqlar",
+        description: "Fikirləri aydın ifadə etmə, aktiv dinləmə, şəxsi sərhədləri qoruma və sosial mühitdə rahatlıq qazanma təlimi.",
+        badge: "",
+        status: "Qrup qəbulu aktivdir"
+      },
+      en: {
+        title: "Communication & Social Skills",
+        description: "Mastering assertive expression, active listening, healthy boundary defense, and social fluency.",
+        badge: "",
+        status: "Group enrollment open"
+      },
+      tr: {
+        title: "İletişim ve Sosyal Beceriler",
+        description: "Kendini net ifade etme, etkin dinleme, kişisel sınırları koruma ve sosyal ortamlarda rahatlık kazanma.",
+        badge: "",
+        status: "Grup kaydı aktif"
+      },
+      ru: {
+        title: "Общение и Социальные Навыки",
+        description: "Четкое выражение мыслей, активное слушание, защита личных границ и уверенность в социальном окружении.",
+        badge: "",
+        status: "Набор в группу открыт"
+      }
+    }
+  },
+  {
+    id: "course-c11",
+    category: "child-psychology",
+    badge: "",
+    badgeClass: "bg-secondary/10 text-secondary",
+    duration: "",
+    title: "Məktəbə Adaptasiya və Məktəb Problemləri",
+    description: "Tədris mühitinə uyğunlaşma çətinlikləri, diqqət dağınıqlığı, motivasiya çatışmazlığı və imtahan həyəcanı ilə iş.",
+    instructor: "",
+    instructorRole: "",
+    status: "Qrup qəbulu aktivdir",
+    occupancy: 0,
+    price: "",
+    featured: false,
+    maxParticipants: null,
+    translations: {
+      az: {
+        title: "Məktəbə Adaptasiya və Məktəb Problemləri",
+        description: "Tədris mühitinə uyğunlaşma çətinlikləri, diqqət dağınıqlığı, motivasiya çatışmazlığı və imtahan həyəcanı ilə iş.",
+        badge: "",
+        status: "Qrup qəbulu aktivdir"
+      },
+      en: {
+        title: "School Adaptation & Academic Difficulties",
+        description: "Overcoming learning environment adjustments, focus struggles, motivational drops, and academic anxiety.",
+        badge: "",
+        status: "Group enrollment open"
+      },
+      tr: {
+        title: "Okula Uyum ve Okul Problemleri",
+        description: "Okul ortamına adaptasyon güçlükleri, dikkat dağınıklığı, motivasyon düşüklüğü ve sınav kaygısıyla başa çıkma.",
+        badge: "",
+        status: "Grup kaydı aktif"
+      },
+      ru: {
+        title: "Школьная Адаптация и Трудности в Обучении",
+        description: "Трудности привыкания к учебной среде, синдром рассеянности, нехватка мотивации и преодоление экзаменационного стресса.",
+        badge: "",
+        status: "Набор в группу открыт"
+      }
+    }
+  },
+  {
+    id: "course-c12",
+    category: "family",
+    badge: "",
+    badgeClass: "bg-secondary/10 text-secondary",
+    duration: "",
+    title: "Davranış Çətinlikləri ilə Bağlı Valideyn Konsultasiyası",
+    description: "Uşaqlarda aqressiya, hiperaktivlik, inadkarlıq və emosional partlayışlara qarşı elmi əsaslı valideyn bələdçisi.",
+    instructor: "",
+    instructorRole: "",
+    status: "Qrup qəbulu aktivdir",
+    occupancy: 0,
+    price: "",
+    featured: false,
+    maxParticipants: null,
+    translations: {
+      az: {
+        title: "Davranış Çətinlikləri ilə Bağlı Valideyn Konsultasiyası",
+        description: "Uşaqlarda aqressiya, hiperaktivlik, inadkarlıq və emosional partlayışlara qarşı elmi əsaslı valideyn bələdçisi.",
+        badge: "",
+        status: "Qrup qəbulu aktivdir"
+      },
+      en: {
+        title: "Parental Guidance for Behavioral Challenges",
+        description: "Evidence-based parental guidance addressing childhood aggression, impulsivity, stubbornness, and emotional meltdowns.",
+        badge: "",
+        status: "Group enrollment open"
+      },
+      tr: {
+        title: "Davranış Zorluklarında Ebeveyn Danışmanlığı",
+        description: "Çocuklarda öfke, hiperaktivite, inatçılık ve kriz durumlarına karşı bilimsel ebeveyn rehberliği.",
+        badge: "",
+        status: "Grup kaydı aktif"
+      },
+      ru: {
+        title: "Родительские Консультации при Трудностях Поведения",
+        description: "Научно обоснованные рекомендации родителям при детской агрессии, упрямстве, гиперактивности и вспышках эмоций.",
+        badge: "",
+        status: "Набор в группу открыт"
+      }
+    }
+  },
+  {
+    id: "course-c13",
+    category: "family",
+    badge: "",
+    badgeClass: "bg-secondary/10 text-secondary",
+    duration: "",
+    title: "Boşanma və Ailədaxili Dəyişikliklərə Uyğunlaşma",
+    description: "Ayrılıq prosesində psixoloji sabitlik, uşaqların travmadan qorunması və yeni həyat mərhələsinə sağlam adaptasiya.",
+    instructor: "",
+    instructorRole: "",
+    status: "Qrup qəbulu aktivdir",
+    occupancy: 0,
+    price: "",
+    featured: false,
+    maxParticipants: null,
+    translations: {
+      az: {
+        title: "Boşanma və Ailədaxili Dəyişikliklərə Uyğunlaşma",
+        description: "Ayrılıq prosesində psixoloji sabitlik, uşaqların travmadan qorunması və yeni həyat mərhələsinə sağlam adaptasiya.",
+        badge: "",
+        status: "Qrup qəbulu aktivdir"
+      },
+      en: {
+        title: "Navigating Divorce & Family Transitions",
+        description: "Maintaining emotional equilibrium through separation, shielding children from trauma, and adapting to new life chapters.",
+        badge: "",
+        status: "Group enrollment open"
+      },
+      tr: {
+        title: "Boşanma ve Aile İçi Değişimlere Uyum",
+        description: "Ayrılık sürecinde ruhsal denge, çocukları travmadan koruma ve yeni yaşam evresine sağlıklı adaptasyon.",
+        badge: "",
+        status: "Grup kaydı aktif"
+      },
+      ru: {
+        title: "Адаптация к Разводу и Семейным Переменам",
+        description: "Психологическая устойчивость при расставании, защита детей от травм и бережный переход к новому жизненному этапу.",
+        badge: "",
+        status: "Набор в группу открыт"
+      }
+    }
+  },
+  {
+    id: "course-c14",
+    category: "crisis-support",
+    badge: "",
+    badgeClass: "bg-secondary/10 text-secondary",
+    duration: "",
+    title: "İtki və Yas Dövründə Psixoloji Dəstək",
+    description: "Ağır itkilərin qəbul edilməsi, yas mərhələlərindən keçid və həyata yenidən məna və güclə qayıtma yolları.",
+    instructor: "",
+    instructorRole: "",
+    status: "Qrup qəbulu aktivdir",
+    occupancy: 0,
+    price: "",
+    featured: false,
+    maxParticipants: null,
+    translations: {
+      az: {
+        title: "İtki və Yas Dövründə Psixoloji Dəstək",
+        description: "Ağır itkilərin qəbul edilməsi, yas mərhələlərindən keçid və həyata yenidən məna və güclə qayıtma yolları.",
+        badge: "",
+        status: "Qrup qəbulu aktivdir"
+      },
+      en: {
+        title: "Psychological Support for Grief & Loss",
+        description: "Processing acute loss, navigating the natural stages of mourning, and finding renewed strength and meaning.",
+        badge: "",
+        status: "Group enrollment open"
+      },
+      tr: {
+        title: "Kayıp ve Yas Döneminde Psikolojik Destek",
+        description: "Ağır kayıpları kabullenme, yas evrelerinden sağlıklı geçiş ve yaşama yeniden anlam ve güçle tutunma yolları.",
+        badge: "",
+        status: "Grup kaydı aktif"
+      },
+      ru: {
+        title: "Психологическая Поддержка при Утрате и Горевании",
+        description: "Принятие тяжелой утраты, прохождение стадий горя и возвращение к жизни с обновленным смыслом и силой.",
+        badge: "",
+        status: "Набор в группу открыт"
+      }
+    }
+  },
+  {
+    id: "course-c15",
+    category: "career-guidance",
+    badge: "",
+    badgeClass: "bg-secondary/10 text-secondary",
+    duration: "",
+    title: "Karyera Seçimi və Peşəyönümü",
+    description: "Şəxsi istedad və meyillərin analizi, gələcəyin peşələri və şüurlu karyera trayektoriyasının müəyyənləşdirilməsi.",
+    instructor: "",
+    instructorRole: "",
+    status: "Qrup qəbulu aktivdir",
+    occupancy: 0,
+    price: "",
+    featured: false,
+    maxParticipants: null,
+    translations: {
+      az: {
+        title: "Karyera Seçimi və Peşəyönümü",
+        description: "Şəxsi istedad və meyillərin analizi, gələcəyin peşələri və şüurlu karyera trayektoriyasının müəyyənləşdirilməsi.",
+        badge: "",
+        status: "Qrup qəbulu aktivdir"
+      },
+      en: {
+        title: "Career Choice & Vocational Orientation",
+        description: "Analyzing personal aptitudes and strengths, exploring future professions, and mapping an authentic career trajectory.",
+        badge: "",
+        status: "Group enrollment open"
+      },
+      tr: {
+        title: "Kariyer Seçimi ve Mesleki Yönlendirme",
+        description: "Yetenek ve ilgi alanlarının analizi, geleceğin meslekleri ve bilinçli kariyer yol haritası belirleme.",
+        badge: "",
+        status: "Grup kaydı aktif"
+      },
+      ru: {
+        title: "Выбор Карьеры и Профориентация",
+        description: "Анализ личных склонностей и талантов, востребованные профессии будущего и осознанное построение карьерного пути.",
+        badge: "",
+        status: "Набор в группу открыт"
+      }
+    }
+  },
+  {
+    id: "course-c16",
+    category: "communication",
+    badge: "",
+    badgeClass: "bg-secondary/10 text-secondary",
+    duration: "",
+    title: "Şəxsiyyətlərarası Münasibətlər",
+    description: "Ətrafdakılarla qarşılıqlı etimad, manipulyasiyaların qarşısının alınması və dərin, harmonik əlaqələrin qurulması.",
+    instructor: "",
+    instructorRole: "",
+    status: "Qrup qəbulu aktivdir",
+    occupancy: 0,
+    price: "",
+    featured: false,
+    maxParticipants: null,
+    translations: {
+      az: {
+        title: "Şəxsiyyətlərarası Münasibətlər",
+        description: "Ətrafdakılarla qarşılıqlı etimad, manipulyasiyaların qarşısının alınması və dərin, harmonik əlaqələrin qurulması.",
+        badge: "",
+        status: "Qrup qəbulu aktivdir"
+      },
+      en: {
+        title: "Interpersonal Relationships",
+        description: "Establishing mutual trust, recognizing and defusing manipulation, and forging genuine, harmonious connections.",
+        badge: "",
+        status: "Group enrollment open"
+      },
+      tr: {
+        title: "Kişilerarası İlişkiler",
+        description: "Çevreyle karşılıklı güven tesis etme, manipülasyonlardan korunma ve derin, uyumlu bağlar geliştirme.",
+        badge: "",
+        status: "Grup kaydı aktif"
+      },
+      ru: {
+        title: "Межличностные Отношения",
+        description: "Построение доверия с окружающими, защита от психологических манипуляций и создание гармоничных связей.",
+        badge: "",
+        status: "Набор в группу открыт"
+      }
+    }
+  },
+  {
+    id: "course-c17",
+    category: "personal-growth",
+    badge: "",
+    badgeClass: "bg-secondary/10 text-secondary",
+    duration: "",
+    title: "Həyat Dəyişikliklərinə Uyğunlaşma",
+    description: "Karyera dəyişikliyi, köç, yaş böhranları və qeyri-müəyyənlik qarşısında elastiklik və adaptasiya gücü.",
+    instructor: "",
+    instructorRole: "",
+    status: "Qrup qəbulu aktivdir",
+    occupancy: 0,
+    price: "",
+    featured: false,
+    maxParticipants: null,
+    translations: {
+      az: {
+        title: "Həyat Dəyişikliklərinə Uyğunlaşma",
+        description: "Karyera dəyişikliyi, köç, yaş böhranları və qeyri-müəyyənlik qarşısında elastiklik və adaptasiya gücü.",
+        badge: "",
+        status: "Qrup qəbulu aktivdir"
+      },
+      en: {
+        title: "Adapting to Life Transitions",
+        description: "Building psychological resilience, flexibility, and proactive mindset amidst career shifts, relocations, and uncertainty.",
+        badge: "",
+        status: "Group enrollment open"
+      },
+      tr: {
+        title: "Hayat Değişimlerine Uyum",
+        description: "Kariyer değişikliği, taşınma, yaş dönümleri ve belirsizlik karşısında psikolojik dayanıklılık ve esneklik.",
+        badge: "",
+        status: "Grup kaydı aktif"
+      },
+      ru: {
+        title: "Адаптация к Жизненным Переменам",
+        description: "Развитие психологической гибкости и жизнестойкости при смене работы, переезде, возрастных кризисах и неопределенности.",
+        badge: "",
+        status: "Набор в группу открыт"
+      }
+    }
+  },
+  {
+    id: "course-c18",
+    category: "coaching",
+    badge: "",
+    badgeClass: "bg-secondary/10 text-secondary",
+    duration: "",
+    title: "Motivasiya və Məqsədlərin Müəyyənləşdirilməsi",
+    description: "Daxili motivasiyanın oyadılması, təxirəsalma vərdişinin məğlub edilməsi və aydın hədəflər üzrə irəliləmə sistemi.",
+    instructor: "",
+    instructorRole: "",
+    status: "Qrup qəbulu aktivdir",
+    occupancy: 0,
+    price: "",
+    featured: false,
+    maxParticipants: null,
+    translations: {
+      az: {
+        title: "Motivasiya və Məqsədlərin Müəyyənləşdirilməsi",
+        description: "Daxili motivasiyanın oyadılması, təxirəsalma vərdişinin məğlub edilməsi və aydın hədəflər üzrə irəliləmə sistemi.",
+        badge: "",
+        status: "Qrup qəbulu aktivdir"
+      },
+      en: {
+        title: "Motivation & Goal Setting",
+        description: "Igniting intrinsic motivation, overcoming procrastination, and designing structured systems to attain vital goals.",
+        badge: "",
+        status: "Group enrollment open"
+      },
+      tr: {
+        title: "Motivasyon ve Hedef Belirleme",
+        description: "İçsel motivasyonu uyandırma, erteleme alışkanlığını kırma ve net hedefler doğrultusunda istikrarlı ilerleme sistemi.",
+        badge: "",
+        status: "Grup kaydı aktif"
+      },
+      ru: {
+        title: "Мотивация и Постановка Целей",
+        description: "Пробуждение внутренней мотивации, преодоление прокрастинации и построение пошаговой системы достижения целей.",
+        badge: "",
+        status: "Набор в группу открыт"
+      }
+    }
+  },
+  {
     id: "course-1",
     category: "psychology",
     badge: "SERTİFİKATLI KURS",

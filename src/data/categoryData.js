@@ -55,6 +55,84 @@ export const INITIAL_CATEGORIES = [
     }
   },
   {
+    id: "cat-child-psychology",
+    key: "child-psychology",
+    type: "course",
+    icon: "child_care",
+    name: "Uşaq və Yeniyetmə Psixologiyası",
+    translations: {
+      az: { name: "Uşaq və Yeniyetmə Psixologiyası", desc: "Uşaq inkişafı, yeniyetməlik dövrü və məktəb adaptasiyası" },
+      en: { name: "Child & Adolescent Psychology", desc: "Child development, adolescence, and school adaptation" },
+      tr: { name: "Çocuk ve Ergen Psikolojisi", desc: "Çocuk gelişimi, ergenlik dönemi ve okula uyum" },
+      ru: { name: "Детская и Подростковая Психология", desc: "Развитие детей, подростковый возраст и школьная адаптация" }
+    }
+  },
+  {
+    id: "cat-family",
+    key: "family",
+    type: "course",
+    icon: "family_restroom",
+    name: "Ailə və Valideynlik",
+    translations: {
+      az: { name: "Ailə və Valideynlik", desc: "Valideyn-uşaq münasibətləri, ailə dinamikası və cütlük konsultasiyası" },
+      en: { name: "Family & Parenting", desc: "Parent-child bonds, family dynamics and couples counseling" },
+      tr: { name: "Aile ve Ebeveynlik", desc: "Ebeveyn-çocuk bağları, aile dinamikleri ve çift ilişkileri" },
+      ru: { name: "Семья и Родительство", desc: "Детско-родительские связи, динамика семьи и консультирование пар" }
+    }
+  },
+  {
+    id: "cat-personal-growth",
+    key: "personal-growth",
+    type: "course",
+    icon: "psychology",
+    name: "Şəxsi İnkişaf və Özünüdərk",
+    translations: {
+      az: { name: "Şəxsi İnkişaf və Özünüdərk", desc: "Özünəinam, potensialın reallaşdırılması və daxili inkişaf" },
+      en: { name: "Personal Growth & Self-Discovery", desc: "Self-confidence, potential realization and inner growth" },
+      tr: { name: "Kişisel Gelişim ve Öz Farkındalık", desc: "Özgüven, potansiyelin gerçekleştirilmesi ve içsel gelişim" },
+      ru: { name: "Личностный Рост и Самопознание", desc: "Уверенность в себе, реализация потенциала и внутренний рост" }
+    }
+  },
+  {
+    id: "cat-crisis-support",
+    key: "crisis-support",
+    type: "course",
+    icon: "healing",
+    name: "Böhran və Psixoloji Dəstək",
+    translations: {
+      az: { name: "Böhran və Psixoloji Dəstək", desc: "Stress, itki, yas və həyat dəyişikliklərinə adaptasiya" },
+      en: { name: "Crisis & Psychological Support", desc: "Stress, grief, loss and adaptation to life transitions" },
+      tr: { name: "Kriz ve Psikolojik Destek", desc: "Stres, kayıp, yas ve yaşam değişimlerine uyum" },
+      ru: { name: "Кризисная и Психологическая Поддержка", desc: "Стресс, переживание утраты, горевание и адаптация к переменам" }
+    }
+  },
+  {
+    id: "cat-communication",
+    key: "communication",
+    type: "course",
+    icon: "record_voice_over",
+    name: "Ünsiyyət və Sosial Bacarıqlar",
+    translations: {
+      az: { name: "Ünsiyyət və Sosial Bacarıqlar", desc: "Effektiv dialoq, sərhədlər və şəxsiyyətlərarası münasibətlər" },
+      en: { name: "Communication & Social Skills", desc: "Effective dialogue, healthy boundaries and interpersonal relationships" },
+      tr: { name: "İletişim ve Sosyal Beceriler", desc: "Etkili diyalog, sağlıklı sınırlar ve kişilerarası ilişkiler" },
+      ru: { name: "Общение и Социальные Навыки", desc: "Эффективный диалог, личные границы и межличностные отношения" }
+    }
+  },
+  {
+    id: "cat-career-guidance",
+    key: "career-guidance",
+    type: "course",
+    icon: "work",
+    name: "Karyera və Peşəyönümü",
+    translations: {
+      az: { name: "Karyera və Peşəyönümü", desc: "Peşə seçimi, karyera planlaşdırılması və motivasiya" },
+      en: { name: "Career & Vocational Guidance", desc: "Career choices, vocational planning and professional orientation" },
+      tr: { name: "Kariyer ve Mesleki Rehberlik", desc: "Meslek seçimi, kariyer planlaması ve profesyonel gelişim" },
+      ru: { name: "Карьера и Профориентация", desc: "Выбор профессии, карьерное планирование и профессиональное ориентирование" }
+    }
+  },
+  {
     id: "cat-webinar",
     key: "webinar",
     type: "event",
