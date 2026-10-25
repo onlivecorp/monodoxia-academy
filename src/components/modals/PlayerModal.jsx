@@ -32,9 +32,11 @@ export default function PlayerModal() {
             <h4 className="font-headline-sm text-sm md:text-base font-serif text-primary truncate max-w-md">
               {courseTitle}
             </h4>
-            <span className="text-[11px] text-outline">
-              Kouç: <strong className="text-secondary font-medium">{activeCourse.instructor}</strong>
-            </span>
+            {activeCourse.instructor && (
+              <span className="text-[11px] text-outline">
+                Kouç: <strong className="text-secondary font-medium">{activeCourse.instructor}</strong>
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-4">
             <div className="hidden sm:flex items-center gap-2">

@@ -35,12 +35,12 @@ export default function AdminCoursesTab() {
   // Add Course State
   const [newCourseTitle, setNewCourseTitle] = useState('');
   const [newCourseInstructor, setNewCourseInstructor] = useState('');
-  const [newCoursePrice, setNewCoursePrice] = useState('₼ 450');
+  const [newCoursePrice, setNewCoursePrice] = useState('');
   const [newCourseCategory, setNewCourseCategory] = useState('psychology');
   const [newCourseDeadline, setNewCourseDeadline] = useState('');
-  const [newCourseDuration, setNewCourseDuration] = useState('8 Həftə');
-  const [newCourseMaxParticipants, setNewCourseMaxParticipants] = useState(30);
-  const [newCourseBadge, setNewCourseBadge] = useState('AKREDİTASİYALI');
+  const [newCourseDuration, setNewCourseDuration] = useState('');
+  const [newCourseMaxParticipants, setNewCourseMaxParticipants] = useState('');
+  const [newCourseBadge, setNewCourseBadge] = useState('');
   const [newCourseDesc, setNewCourseDesc] = useState('');
   const [newCourseTranslations, setNewCourseTranslations] = useState({});
   const [newCourseTransOpen, setNewCourseTransOpen] = useState(false);
@@ -202,8 +202,10 @@ export default function AdminCoursesTab() {
       return;
     }
 
-    const maxP = Math.max(1, Number(newCourseMaxParticipants) || 30);
-    const durationText = newCourseDeadline ? formatCourseDeadline(newCourseDeadline, 'az') : newCourseDuration;
+    const maxP = newCourseMaxParticipants !== '' && !isNaN(Number(newCourseMaxParticipants))
+      ? Math.max(1, Number(newCourseMaxParticipants))
+      : null;
+    const durationText = newCourseDeadline ? formatCourseDeadline(newCourseDeadline, 'az') : (newCourseDuration || '');
     const autoTrans = newCourseDeadline ? generateDeadlineTranslations(newCourseDeadline) : {};
 
     const mergedTranslations = {
@@ -211,33 +213,39 @@ export default function AdminCoursesTab() {
       az: {
         ...(newCourseTranslations.az || {}),
         title: newCourseTitle.trim(),
-        description: newCourseDesc || 'Praktiki dərslər, keyslər və beynəlxalq standartlara uyğun tədris planı.',
-        badge: newCourseBadge,
+        description: newCourseDesc.trim(),
+        badge: newCourseBadge.trim(),
         status: 'Qrup qəbulu aktivdir',
         duration: autoTrans.az?.duration || durationText
       },
-      en: { ...(newCourseTranslations.en || {}), duration: autoTrans.en?.duration || newCourseTranslations.en?.duration },
-      tr: { ...(newCourseTranslations.tr || {}), duration: autoTrans.tr?.duration || newCourseTranslations.tr?.duration },
-      ru: { ...(newCourseTranslations.ru || {}), duration: autoTrans.ru?.duration || newCourseTranslations.ru?.duration }
+      en: { ...(newCourseTranslations.en || {}), duration: autoTrans.en?.duration || newCourseTranslations.en?.duration || '' },
+      tr: { ...(newCourseTranslations.tr || {}), duration: autoTrans.tr?.duration || newCourseTranslations.tr?.duration || '' },
+      ru: { ...(newCourseTranslations.ru || {}), duration: autoTrans.ru?.duration || newCourseTranslations.ru?.duration || '' }
     };
 
     addCourse({
       title: newCourseTitle.trim(),
-      instructor: newCourseInstructor,
-      price: newCoursePrice,
+      instructor: newCourseInstructor.trim(),
+      price: newCoursePrice.trim(),
       category: newCourseCategory,
       deadline: newCourseDeadline || null,
       duration: durationText,
       maxParticipants: maxP,
       initialParticipants: 0,
       occupancy: 0,
-      badge: newCourseBadge,
+      badge: newCourseBadge.trim(),
       status: 'Qrup qəbulu aktivdir',
-      description: newCourseDesc || 'Praktiki dərslər, keyslər və beynəlxalq standartlara uyğun tədris planı.',
+      description: newCourseDesc.trim(),
       translations: mergedTranslations
     });
 
     setNewCourseTitle('');
+    setNewCoursePrice('');
+    setNewCourseInstructor('');
+    setNewCourseCategory('psychology');
+    setNewCourseDuration('');
+    setNewCourseMaxParticipants('');
+    setNewCourseBadge('');
     setNewCourseDesc('');
     setNewCourseDeadline('');
     setNewCourseTranslations({});
@@ -611,10 +619,10 @@ export default function AdminCoursesTab() {
               />
             </div>
             <div>
-              <label className="admin-label">Qiymət *</label>
+              <label className="admin-label">Qiymət</label>
               <input
                 type="text"
-                required
+                placeholder="Məs: ₼ 450 (boş buraxıla bilər)"
                 value={newCoursePrice}
                 onChange={(e) => setNewCoursePrice(e.target.value)}
                 className="admin-input"
@@ -681,12 +689,13 @@ export default function AdminCoursesTab() {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
             <div>
-              <label className="admin-label">Maksimum İştirakçı Tutumu *</label>
+              <label className="admin-label">Maksimum İştirakçı Tutumu</label>
               <input
                 type="number"
                 min="1"
+                placeholder="Məs: 30 (boş buraxıla bilər)"
                 value={newCourseMaxParticipants}
-                onChange={(e) => setNewCourseMaxParticipants(Math.max(1, parseInt(e.target.value) || 1))}
+                onChange={(e) => setNewCourseMaxParticipants(e.target.value === '' ? '' : Math.max(1, parseInt(e.target.value) || 1))}
                 className="admin-input"
               />
               <span style={{ fontSize: '10px', color: '#64748b', display: 'block', marginTop: '4px' }}>
@@ -829,36 +838,50 @@ export default function AdminCoursesTab() {
               <div key={c.id} className="admin-list-item" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
                 <div style={{ flex: 1, minWidth: '280px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
-                    <span className="admin-badge-gold">{c.badge || 'KURS'}</span>
-                    <span style={{ fontSize: '11px', color: '#64748b' }}>{c.duration}</span>
-                    <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '4px', background: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0' }}>
-                      {c.status}
-                    </span>
+                    {c.badge && <span className="admin-badge-gold">{c.badge}</span>}
+                    {c.duration && <span style={{ fontSize: '11px', color: '#64748b' }}>{c.duration}</span>}
+                    {c.status && (
+                      <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '4px', background: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0' }}>
+                        {c.status}
+                      </span>
+                    )}
                   </div>
                   <h5 style={{ fontSize: '15px', fontWeight: 700, fontFamily: "'Playfair Display',serif", color: '#0f172a', margin: '0 0 4px 0' }}>
                     {c.title}
                   </h5>
-                  <p style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.5, margin: '0 0 10px 0', maxWidth: '700px' }}>
-                    {c.description}
-                  </p>
+                  {c.description && (
+                    <p style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.5, margin: '0 0 10px 0', maxWidth: '700px' }}>
+                      {c.description}
+                    </p>
+                  )}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '11px', color: '#64748b', flexWrap: 'wrap' }}>
-                    <span>Kouç: <strong style={{ color: '#0f172a' }}>{c.instructor}</strong></span>
-                    <span>•</span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      Doluluq: <strong style={{ color: occupancy >= 100 ? '#ef4444' : '#b45309' }}>%{occupancy}</strong>
-                      <span style={{ color: '#94a3b8', fontSize: '10px' }}>({totalApps}/{maxP})</span>
-                      <span style={{ display: 'inline-block', width: '48px', height: '5px', background: '#e2e8f0', borderRadius: '10px', overflow: 'hidden' }}>
-                        <span style={{
-                          display: 'block',
-                          height: '100%',
-                          width: `${Math.min(occupancy, 100)}%`,
-                          background: occupancy >= 100 ? '#ef4444' : 'linear-gradient(90deg,#b45309,#d4af37)',
-                          borderRadius: '10px'
-                        }} />
-                      </span>
-                    </span>
-                    <span>•</span>
-                    <span>Qiymət: <strong style={{ color: '#b45309', fontFamily: "'Playfair Display',serif", fontSize: '13px' }}>{c.price}</strong></span>
+                    {c.instructor && (
+                      <>
+                        <span>Kouç: <strong style={{ color: '#0f172a' }}>{c.instructor}</strong></span>
+                        {(c.maxParticipants || c.price) && <span>•</span>}
+                      </>
+                    )}
+                    {c.maxParticipants ? (
+                      <>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          Doluluq: <strong style={{ color: occupancy >= 100 ? '#ef4444' : '#b45309' }}>%{occupancy}</strong>
+                          <span style={{ color: '#94a3b8', fontSize: '10px' }}>({totalApps}/{maxP})</span>
+                          <span style={{ display: 'inline-block', width: '48px', height: '5px', background: '#e2e8f0', borderRadius: '10px', overflow: 'hidden' }}>
+                            <span style={{
+                              display: 'block',
+                              height: '100%',
+                              width: `${Math.min(occupancy, 100)}%`,
+                              background: occupancy >= 100 ? '#ef4444' : 'linear-gradient(90deg,#b45309,#d4af37)',
+                              borderRadius: '10px'
+                            }} />
+                          </span>
+                        </span>
+                        {c.price && <span>•</span>}
+                      </>
+                    ) : null}
+                    {c.price && (
+                      <span>Qiymət: <strong style={{ color: '#b45309', fontFamily: "'Playfair Display',serif", fontSize: '13px' }}>{c.price}</strong></span>
+                    )}
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>

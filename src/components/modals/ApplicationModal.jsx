@@ -152,10 +152,10 @@ export default function ApplicationModal() {
             <h3 className="font-headline-sm text-lg sm:text-xl font-serif text-primary leading-snug">
               {activeApplicationTarget.title}
             </h3>
-            {(activeApplicationTarget.speaker || activeApplicationTarget.duration) && (
+            {(activeApplicationTarget.speaker || activeApplicationTarget.instructor || activeApplicationTarget.duration) && (
               <p className="text-xs text-on-surface-variant mt-1">
-                {activeApplicationTarget.speaker ? `Ekspert: ${activeApplicationTarget.speaker}` : ''}
-                {activeApplicationTarget.speaker && activeApplicationTarget.duration ? ' • ' : ''}
+                {activeApplicationTarget.instructor ? `Kouç: ${activeApplicationTarget.instructor}` : (activeApplicationTarget.speaker ? `Ekspert: ${activeApplicationTarget.speaker}` : '')}
+                {(activeApplicationTarget.instructor || activeApplicationTarget.speaker) && activeApplicationTarget.duration ? ' • ' : ''}
                 {activeApplicationTarget.duration || ''}
               </p>
             )}

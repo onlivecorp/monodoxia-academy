@@ -141,16 +141,20 @@ export default function Academy() {
                     {/* Top Meta Strip */}
                     <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className={`px-3 py-1 rounded-full ${c.badgeClass || 'bg-[#c5a059]/15 text-[#775a19] border border-[#c5a059]/30'} text-[11px] font-semibold tracking-wider uppercase font-sans`}>
-                          {courseBadge}
-                        </span>
+                        {courseBadge && (
+                          <span className={`px-3 py-1 rounded-full ${c.badgeClass || 'bg-[#c5a059]/15 text-[#775a19] border border-[#c5a059]/30'} text-[11px] font-semibold tracking-wider uppercase font-sans`}>
+                            {courseBadge}
+                          </span>
+                        )}
                         {c.category && (
                           <span className="px-2.5 py-1 rounded-full bg-[#fbf9f5] border border-[#e2d9c8]/70 text-slate-600 text-[11px] font-medium tracking-wide">
                             {getCategoryLabel(c.category, currentLang)}
                           </span>
                         )}
                       </div>
-                      <span className="text-xs font-mono text-slate-500 font-medium">{courseDuration}</span>
+                      {courseDuration && (
+                        <span className="text-xs font-mono text-slate-500 font-medium">{courseDuration}</span>
+                      )}
                     </div>
 
                     {/* Title */}
@@ -159,21 +163,29 @@ export default function Academy() {
                     </h3>
 
                     {/* Desc */}
-                    <p className="text-sm text-slate-600 leading-relaxed font-normal mb-6">
-                      {courseDesc}
-                    </p>
+                    {courseDesc && (
+                      <p className="text-sm text-slate-600 leading-relaxed font-normal mb-6">
+                        {courseDesc}
+                      </p>
+                    )}
                   </div>
 
                   {/* Card Footer & Action */}
                   <div className="space-y-4 pt-4 border-t border-[#e2d9c8]/60">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-600">
-                        Aparıcı Kouç: <strong className="text-[#070f1e] font-semibold">{c.instructor}</strong>
-                      </span>
-                      <span className="text-[#775a19] font-semibold px-2.5 py-0.5 rounded-full bg-[#c5a059]/10 border border-[#c5a059]/25">
-                        {courseStatus}
-                      </span>
-                    </div>
+                    {(c.instructor || courseStatus) && (
+                      <div className="flex items-center justify-between text-xs">
+                        {c.instructor ? (
+                          <span className="text-slate-600">
+                            Aparıcı Kouç: <strong className="text-[#070f1e] font-semibold">{c.instructor}</strong>
+                          </span>
+                        ) : <span />}
+                        {courseStatus && (
+                          <span className="text-[#775a19] font-semibold px-2.5 py-0.5 rounded-full bg-[#c5a059]/10 border border-[#c5a059]/25">
+                            {courseStatus}
+                          </span>
+                        )}
+                      </div>
+                    )}
 
                     {/* Progress indicator */}
                     <div>
@@ -187,7 +199,9 @@ export default function Academy() {
                     </div>
 
                     <div className="flex items-center justify-between pt-2">
-                      <span className="font-serif text-2xl font-bold text-[#070f1e]">{c.price}</span>
+                      {c.price ? (
+                        <span className="font-serif text-2xl font-bold text-[#070f1e]">{c.price}</span>
+                      ) : <span />}
                       {(() => {
                         const userApp = currentUser
                           ? applicationsList.find(a => a.userId === currentUser.id && a.targetId === c.id && !a.archived)

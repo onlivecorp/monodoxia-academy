@@ -2243,19 +2243,21 @@ if ($action === 'save_course' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
     $id = trim($input['id'] ?? ('course-' . round(microtime(true) * 1000)));
     $category = trim($input['category'] ?? 'psychology');
-    $badge = trim($input['badge'] ?? 'KURS');
+    $badge = trim($input['badge'] ?? '');
     $badge_class = trim($input['badgeClass'] ?? ($input['badge_class'] ?? 'bg-secondary/10 text-secondary'));
-    $duration = trim($input['duration'] ?? '8 Həftə');
+    $duration = trim($input['duration'] ?? '');
     $deadline = trim($input['deadline'] ?? '');
-    $max_participants = intval($input['maxParticipants'] ?? ($input['max_participants'] ?? 30));
+    $max_participants = isset($input['maxParticipants']) && $input['maxParticipants'] !== '' && $input['maxParticipants'] !== null
+        ? intval($input['maxParticipants'])
+        : (isset($input['max_participants']) && $input['max_participants'] !== '' && $input['max_participants'] !== null ? intval($input['max_participants']) : 0);
     $initial_participants = intval($input['initialParticipants'] ?? ($input['initial_participants'] ?? 0));
     $title = trim($input['title'] ?? '');
     $description = trim($input['description'] ?? '');
-    $instructor = trim($input['instructor'] ?? 'Monodoxia Mentor');
-    $instructor_role = trim($input['instructorRole'] ?? ($input['instructor_role'] ?? 'Kouç'));
+    $instructor = trim($input['instructor'] ?? '');
+    $instructor_role = trim($input['instructorRole'] ?? ($input['instructor_role'] ?? ''));
     $status = trim($input['status'] ?? 'Qrup qəbulu aktivdir');
     $occupancy = intval($input['occupancy'] ?? 0);
-    $price = trim($input['price'] ?? '0');
+    $price = trim($input['price'] ?? '');
     $featured = !empty($input['featured']) ? 1 : 0;
     $is_online = isset($input['isOnline']) ? ($input['isOnline'] ? 1 : 0) : (isset($input['is_online']) ? ($input['is_online'] ? 1 : 0) : 1);
 

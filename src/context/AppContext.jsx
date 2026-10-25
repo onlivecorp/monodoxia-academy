@@ -771,19 +771,21 @@ export function AppProvider({ children }) {
               return {
                 id: c.id,
                 category: c.category || 'psychology',
-                badge: c.badge || 'KURS',
+                badge: c.badge || '',
                 badgeClass: c.badge_class || c.badgeClass || 'bg-secondary/10 text-secondary',
-                duration: c.duration || '8 Həftə',
+                duration: c.duration || '',
                 deadline: c.deadline || null,
-                maxParticipants: Number(c.max_participants || c.maxParticipants) || 30,
+                maxParticipants: (c.max_participants !== undefined && c.max_participants !== null && c.max_participants !== '' && Number(c.max_participants) > 0)
+                  ? Number(c.max_participants)
+                  : (c.maxParticipants && Number(c.maxParticipants) > 0 ? Number(c.maxParticipants) : null),
                 initialParticipants: Number(c.initial_participants || c.initialParticipants) || 0,
                 title: c.title || '',
                 description: c.description || '',
                 instructor: c.instructor || '',
-                instructorRole: c.instructor_role || c.instructorRole || 'Kouç',
+                instructorRole: c.instructor_role || c.instructorRole || '',
                 status: c.status || 'Qrup qəbulu aktivdir',
                 occupancy: Number(c.occupancy) || 0,
-                price: c.price || '0',
+                price: c.price || '',
                 featured: Boolean(Number(c.featured)),
                 isOnline: c.is_online !== undefined ? Boolean(Number(c.is_online)) : true,
                 translations: parsedTranslations,
@@ -2821,28 +2823,30 @@ export function AppProvider({ children }) {
     const course = {
       id: courseId,
       category: newCourse.category || 'psychology',
-      badge: newCourse.badge || 'YENİ KURS',
+      badge: newCourse.badge || '',
       badgeClass: newCourse.badgeClass || 'bg-secondary/10 text-secondary',
-      duration: newCourse.duration || '8 Həftə',
+      duration: newCourse.duration || '',
       deadline: newCourse.deadline || null,
-      maxParticipants: Number(newCourse.maxParticipants) || 30,
+      maxParticipants: (newCourse.maxParticipants !== undefined && newCourse.maxParticipants !== null && newCourse.maxParticipants !== '')
+        ? Number(newCourse.maxParticipants)
+        : null,
       initialParticipants: Number(newCourse.initialParticipants) || 0,
       title: newCourse.title,
       description: newCourse.description || '',
       instructor: newCourse.instructor || '',
-      instructorRole: newCourse.instructorRole || 'Sertifikatlı Kouç',
+      instructorRole: newCourse.instructor ? (newCourse.instructorRole || 'Sertifikatlı Kouç') : '',
       status: newCourse.status || 'Qrup qəbulu aktivdir',
       occupancy: Number(newCourse.occupancy) || 0,
-      price: newCourse.price || '0',
+      price: newCourse.price || '',
       featured: Boolean(newCourse.featured),
       isOnline: newCourse.isOnline !== undefined ? Boolean(newCourse.isOnline) : true,
       translations: newCourse.translations || {
         az: {
           title: newCourse.title,
-          description: newCourse.description,
-          badge: newCourse.badge || 'YENİ KURS',
+          description: newCourse.description || '',
+          badge: newCourse.badge || '',
           status: newCourse.status || 'Qrup qəbulu aktivdir',
-          duration: newCourse.duration || '8 Həftə'
+          duration: newCourse.duration || ''
         }
       },
       modules: newCourse.modules || [

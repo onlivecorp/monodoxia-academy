@@ -121,7 +121,7 @@ export function performLocalSearch({
           id: c.id,
           type: 'courses',
           title,
-          subtitle: `${instructor}${c.instructor_role ? ' • ' + c.instructor_role : ''}`,
+          subtitle: [instructor, c.instructor_role || c.instructorRole].filter(Boolean).join(' • '),
           description: desc,
           category: cat,
           badge,

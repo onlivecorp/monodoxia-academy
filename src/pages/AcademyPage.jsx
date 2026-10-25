@@ -234,9 +234,11 @@ export default function AcademyPage() {
                       </h3>
 
                       {/* Description */}
-                      <p className="text-sm text-[#475569] leading-relaxed mb-6 font-light line-clamp-3">
-                        {courseDesc}
-                      </p>
+                      {courseDesc && (
+                        <p className="text-sm text-[#475569] leading-relaxed mb-6 font-light line-clamp-3">
+                          {courseDesc}
+                        </p>
+                      )}
 
                       {/* Syllabus Module Pills */}
                       {c.modules && c.modules.length > 0 && (
@@ -271,27 +273,33 @@ export default function AcademyPage() {
                     {/* Bottom Info & CTAs */}
                     <div className="p-7 sm:p-9 pt-0">
                       {/* Coach & Price Row */}
-                      <div className="flex items-center justify-between gap-4 py-4 border-t border-[#e2e8f0] mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#071326] to-[#0c2242] text-[#e5c57d] font-serif font-bold text-sm flex items-center justify-center shadow-sm shrink-0">
-                            {(c.instructor || 'M')[0]}
-                          </div>
-                          <div>
-                            <div className="text-xs text-[#64748b]">Aparıcı Kouç</div>
-                            <div className="text-sm font-semibold text-[#071326] leading-tight">{c.instructor}</div>
-                            {c.instructorRole && (
-                              <div className="text-[11px] text-[#775a19] font-medium">{c.instructorRole}</div>
-                            )}
-                          </div>
-                        </div>
+                      {(c.instructor || c.price) && (
+                        <div className="flex items-center justify-between gap-4 py-4 border-t border-[#e2e8f0] mb-4">
+                          {c.instructor ? (
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#071326] to-[#0c2242] text-[#e5c57d] font-serif font-bold text-sm flex items-center justify-center shadow-sm shrink-0">
+                                {c.instructor[0]}
+                              </div>
+                              <div>
+                                <div className="text-xs text-[#64748b]">Aparıcı Kouç</div>
+                                <div className="text-sm font-semibold text-[#071326] leading-tight">{c.instructor}</div>
+                                {c.instructorRole && (
+                                  <div className="text-[11px] text-[#775a19] font-medium">{c.instructorRole}</div>
+                                )}
+                              </div>
+                            </div>
+                          ) : <div />}
 
-                        <div className="text-right">
-                          <div className="text-xs text-[#64748b]">İnvestisiya</div>
-                          <div className="text-xl sm:text-2xl font-serif font-bold text-[#071326]">
-                            {c.price || 'Ödənişli'}
-                          </div>
+                          {c.price ? (
+                            <div className="text-right">
+                              <div className="text-xs text-[#64748b]">İnvestisiya</div>
+                              <div className="text-xl sm:text-2xl font-serif font-bold text-[#071326]">
+                                {c.price}
+                              </div>
+                            </div>
+                          ) : null}
                         </div>
-                      </div>
+                      )}
 
                       {/* Progress Bar if started */}
                       {prog > 0 && (
