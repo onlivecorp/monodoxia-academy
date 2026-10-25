@@ -40,6 +40,7 @@ export default function AdminCoursesTab() {
   const [newCourseDeadline, setNewCourseDeadline] = useState('');
   const [newCourseDuration, setNewCourseDuration] = useState('');
   const [newCourseMaxParticipants, setNewCourseMaxParticipants] = useState('');
+  const [newCourseDisableCapacity, setNewCourseDisableCapacity] = useState(false);
   const [newCourseBadge, setNewCourseBadge] = useState('');
   const [newCourseDesc, setNewCourseDesc] = useState('');
   const [newCourseTranslations, setNewCourseTranslations] = useState({});
@@ -202,7 +203,7 @@ export default function AdminCoursesTab() {
       return;
     }
 
-    const maxP = newCourseMaxParticipants !== '' && !isNaN(Number(newCourseMaxParticipants))
+    const maxP = (!newCourseDisableCapacity && newCourseMaxParticipants !== '' && !isNaN(Number(newCourseMaxParticipants)))
       ? Math.max(1, Number(newCourseMaxParticipants))
       : null;
     const durationText = newCourseDeadline ? formatCourseDeadline(newCourseDeadline, 'az') : (newCourseDuration || '');
@@ -245,6 +246,7 @@ export default function AdminCoursesTab() {
     setNewCourseCategory('psychology');
     setNewCourseDuration('');
     setNewCourseMaxParticipants('');
+    setNewCourseDisableCapacity(false);
     setNewCourseBadge('');
     setNewCourseDesc('');
     setNewCourseDeadline('');
@@ -258,6 +260,7 @@ export default function AdminCoursesTab() {
     if (!editingCourse) return;
 
     const computedOcc = getCourseComputedOccupancy(editingCourse);
+    const maxP = editingCourse.maxParticipants ? Math.max(1, Number(editingCourse.maxParticipants)) : null;
 
     updateCourse(editingCourse.id, {
       title: editingCourse.title,
@@ -266,7 +269,7 @@ export default function AdminCoursesTab() {
       category: editingCourse.category,
       deadline: editingCourse.deadline || null,
       duration: editingCourse.duration,
-      maxParticipants: Math.max(1, Number(editingCourse.maxParticipants) || 30),
+      maxParticipants: maxP,
       initialParticipants: editingCourse.initialParticipants,
       occupancy: computedOcc,
       badge: editingCourse.badge,
@@ -499,58 +502,99 @@ export default function AdminCoursesTab() {
                 </div>
 
                 <div>
-                  <label className="admin-label">Maksimum İştirakçı Tutumu (Yer Sayı) *</label>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <label className="admin-label" style={{ margin: 0 }}>Maksimum İştirakçı Tutumu</label>
+                    <label style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: '#64748b', cursor: 'pointer', userSelect: 'none' }}>
+                      <input
+                        type="checkbox"
+                        checked={!editingCourse.maxParticipants || editingCourse.maxParticipants === 0}
+                        onChange={(e) => setEditingCourse({
+                          ...editingCourse,
+                          maxParticipants: e.target.checked ? null : 30
+                        })}
+                        style={{ accentColor: '#c5a059', cursor: 'pointer' }}
+                      />
+                      <span style={{ fontWeight: (!editingCourse.maxParticipants) ? 600 : 400, color: (!editingCourse.maxParticipants) ? '#b45309' : '#64748b' }}>
+                        Deaktiv et (Limitsiz)
+                      </span>
+                    </label>
+                  </div>
                   <input
                     type="number"
                     min="1"
-                    value={editingCourse.maxParticipants || 30}
+                    disabled={!editingCourse.maxParticipants || editingCourse.maxParticipants === 0}
+                    placeholder={(!editingCourse.maxParticipants) ? "Tutum deaktiv edilib (Limitsiz)" : "Məs: 30"}
+                    value={editingCourse.maxParticipants || ''}
                     onChange={(e) => setEditingCourse({
                       ...editingCourse,
-                      maxParticipants: Math.max(1, parseInt(e.target.value) || 1)
+                      maxParticipants: e.target.value === '' ? '' : Math.max(1, parseInt(e.target.value) || 1)
                     })}
                     className="admin-input"
+                    style={{
+                      backgroundColor: (!editingCourse.maxParticipants) ? '#f1f5f9' : '#ffffff',
+                      color: (!editingCourse.maxParticipants) ? '#94a3b8' : 'inherit',
+                      cursor: (!editingCourse.maxParticipants) ? 'not-allowed' : 'text'
+                    }}
                   />
                 </div>
 
                 {/* Automatic Occupancy Readout Card */}
-                <div style={{
-                  gridColumn: 'span 2',
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
-                  padding: '12px 14px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '6px'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#b45309' }}>analytics</span>
-                      <span style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>
-                        Avtomatik Doluluq Hesabatı (Manual Deyil)
-                      </span>
+                {editingCourse.maxParticipants ? (
+                  <div style={{
+                    gridColumn: 'span 2',
+                    background: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    padding: '12px 14px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '6px'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#b45309' }}>analytics</span>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>
+                          Avtomatik Doluluq Hesabatı (Manual Deyil)
+                        </span>
+                      </div>
+                      <strong style={{ fontSize: '13px', color: computedOcc >= 100 ? '#ef4444' : '#b45309' }}>
+                        %{computedOcc} Doluluq ({totalApps} / {maxP} nəfər)
+                      </strong>
                     </div>
-                    <strong style={{ fontSize: '13px', color: computedOcc >= 100 ? '#ef4444' : '#b45309' }}>
-                      %{computedOcc} Doluluq ({totalApps} / {maxP} nəfər)
-                    </strong>
-                  </div>
 
-                  {/* Progress Bar */}
-                  <div style={{ height: '7px', background: '#e2e8f0', borderRadius: '10px', overflow: 'hidden' }}>
-                    <div style={{
-                      height: '100%',
-                      width: `${Math.min(100, computedOcc)}%`,
-                      background: computedOcc >= 100 ? '#ef4444' : 'linear-gradient(90deg, #b45309, #d4af37)',
-                      borderRadius: '10px',
-                      transition: 'width 0.3s ease'
-                    }} />
-                  </div>
+                    {/* Progress Bar */}
+                    <div style={{ height: '7px', background: '#e2e8f0', borderRadius: '10px', overflow: 'hidden' }}>
+                      <div style={{
+                        height: '100%',
+                        width: `${Math.min(100, computedOcc)}%`,
+                        background: computedOcc >= 100 ? '#ef4444' : 'linear-gradient(90deg, #b45309, #d4af37)',
+                        borderRadius: '10px',
+                        transition: 'width 0.3s ease'
+                      }} />
+                    </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '11px', color: '#64748b' }}>
-                    <span>Sistemdəki aktiv müraciətlər: <strong>{courseAppsCount} nəfər</strong></span>
-                    <span>Qalan boş yer: <strong>{Math.max(0, maxP - totalApps)} nəfər</strong></span>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '11px', color: '#64748b' }}>
+                      <span>Sistemdəki aktiv müraciətlər: <strong>{courseAppsCount} nəfər</strong></span>
+                      <span>Qalan boş yer: <strong>{Math.max(0, maxP - totalApps)} nəfər</strong></span>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div style={{
+                    gridColumn: 'span 2',
+                    background: '#f8fafc',
+                    border: '1px dashed #cbd5e1',
+                    borderRadius: '8px',
+                    padding: '10px 14px',
+                    fontSize: '11px',
+                    color: '#64748b',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#10b981' }}>all_inclusive</span>
+                    <span>İştirakçı tutumu deaktivdir (Limitsiz). Bu kursa limitsiz müraciət qəbul edilir.</span>
+                  </div>
+                )}
               </div>
 
               <div>
@@ -689,17 +733,41 @@ export default function AdminCoursesTab() {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
             <div>
-              <label className="admin-label">Maksimum İştirakçı Tutumu</label>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                <label className="admin-label" style={{ margin: 0 }}>Maksimum İştirakçı Tutumu</label>
+                <label style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: '#64748b', cursor: 'pointer', userSelect: 'none' }}>
+                  <input
+                    type="checkbox"
+                    checked={newCourseDisableCapacity}
+                    onChange={(e) => {
+                      setNewCourseDisableCapacity(e.target.checked);
+                      if (e.target.checked) setNewCourseMaxParticipants('');
+                    }}
+                    style={{ accentColor: '#c5a059', cursor: 'pointer' }}
+                  />
+                  <span style={{ fontWeight: newCourseDisableCapacity ? 600 : 400, color: newCourseDisableCapacity ? '#b45309' : '#64748b' }}>
+                    Deaktiv et (Limitsiz)
+                  </span>
+                </label>
+              </div>
               <input
                 type="number"
                 min="1"
-                placeholder="Məs: 30 (boş buraxıla bilər)"
-                value={newCourseMaxParticipants}
+                disabled={newCourseDisableCapacity}
+                placeholder={newCourseDisableCapacity ? "Tutum deaktiv edilib (Limitsiz qəbul)" : "Məs: 30 (boş buraxıla bilər)"}
+                value={newCourseDisableCapacity ? '' : newCourseMaxParticipants}
                 onChange={(e) => setNewCourseMaxParticipants(e.target.value === '' ? '' : Math.max(1, parseInt(e.target.value) || 1))}
                 className="admin-input"
+                style={{
+                  backgroundColor: newCourseDisableCapacity ? '#f1f5f9' : '#ffffff',
+                  color: newCourseDisableCapacity ? '#94a3b8' : 'inherit',
+                  cursor: newCourseDisableCapacity ? 'not-allowed' : 'text'
+                }}
               />
               <span style={{ fontSize: '10px', color: '#64748b', display: 'block', marginTop: '4px' }}>
-                Doluluq faizi daxil olan müraciətlərə görə avtomatik hesablanacaq.
+                {newCourseDisableCapacity
+                  ? "✓ Bu kurs üçün yer limiti tətbiq olunmayacaq."
+                  : "Doluluq faizi daxil olan müraciətlərə görə avtomatik hesablanacaq."}
               </span>
             </div>
           </div>
