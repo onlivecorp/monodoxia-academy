@@ -1,4 +1,4 @@
-﻿import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import {
   COURSES,
   COACHES,
@@ -33,7 +33,17 @@ import {
 } from '../utils/pageRouter';
 
 const INITIAL_USERS = [
-  { id: 'u7', name: 'Admin Baş Koordinator', email: 'admin@monodoxia.academy', role: 'Admin', tier: 'VIP', status: 'Aktiv', joinedDate: '2025-01-01' }
+  { id: 'u7', name: 'Admin Baş Koordinator', email: 'admin@monodoxia.academy', role: 'Admin', tier: 'VIP', status: 'Aktiv', joinedDate: '2025-01-01' },
+  { 
+    id: 'u-nargiz', 
+    name: 'Nərgiz Qasımova', 
+    email: 'nargiz.qasimova@monodoxia.academy', 
+    role: 'Kouç', 
+    tier: 'VIP', 
+    status: 'Aktiv', 
+    joinedDate: '2025-01-10',
+    avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuApho0mk-jt09_EKWhr9Kr-rV4ni1mNVZ9NMTTJnSr7Io_rS9AF4YMxdvwdvNBSQ5niLnit1PKeNozwDdDlqiBGbJTz1MOiuOo8yyY1b3AbDK33_Lc-ZOXlb5WzmwRuSsfZWSPYV7fmbNuRtSts2hYeTZFmwlHsu99rLvjRaczoStwMfhP4xbjxoLfdcfKKedG3I9Wsc86Mw84ULdwPbgpzWaz6dnC5ZnLFz2n5VuHMa6K1rX1itB96' 
+  }
 ];
 
 const INITIAL_SETTINGS = {
@@ -326,7 +336,12 @@ export function AppProvider({ children }) {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        return Array.isArray(parsed) ? parsed : INITIAL_USERS;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const existingIds = new Set(parsed.map(u => u.id));
+          const missing = INITIAL_USERS.filter(u => !existingIds.has(u.id));
+          return missing.length > 0 ? [...parsed, ...missing] : parsed;
+        }
+        return INITIAL_USERS;
       } catch (e) {
         return INITIAL_USERS;
       }
@@ -432,7 +447,9 @@ export function AppProvider({ children }) {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map(c => c.id === 'coach-nargiz' && !c.userId ? { ...c, userId: 'u-nargiz' } : c);
+        }
       } catch (e) {
         // fallback
       }

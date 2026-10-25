@@ -269,6 +269,28 @@ if ($action === 'get_all') {
     };
 
     $users = $safeQuery("SELECT id, name, email, role, tier, status, joined_date FROM mdx_users");
+    $hasNargiz = false;
+    foreach ($users as $u) {
+        if (($u['id'] ?? '') === 'u-nargiz' || strtolower($u['email'] ?? '') === 'nargiz.qasimova@monodoxia.academy') {
+            $hasNargiz = true;
+            break;
+        }
+    }
+    if (!$hasNargiz && isset($pdo)) {
+        try {
+            $insU = $pdo->prepare("INSERT IGNORE INTO mdx_users (id, name, email, password_hash, role, tier, status, joined_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            $insU->execute(['u-nargiz', 'Nərgiz Qasımova', 'nargiz.qasimova@monodoxia.academy', password_hash('coach123', PASSWORD_DEFAULT), 'Kouç', 'VIP', 'Aktiv', '2025-01-10']);
+            $users[] = [
+                'id' => 'u-nargiz',
+                'name' => 'Nərgiz Qasımova',
+                'email' => 'nargiz.qasimova@monodoxia.academy',
+                'role' => 'Kouç',
+                'tier' => 'VIP',
+                'status' => 'Aktiv',
+                'joined_date' => '2025-01-10'
+            ];
+        } catch (PDOException $e) {}
+    }
     $courses = $safeQuery("SELECT * FROM mdx_courses");
     $tiers = $safeQuery("SELECT * FROM mdx_club_tiers");
     $events = $safeQuery("SELECT * FROM mdx_events");

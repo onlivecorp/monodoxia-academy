@@ -1114,6 +1114,7 @@ export const COACHES = [
   },
   {
     id: "coach-nargiz",
+    userId: "u-nargiz",
     name: "Nərgiz Qasımova",
     title: "Münasibət Kouçu | Somatik Təlimçi",
     experience: "9+ il",
