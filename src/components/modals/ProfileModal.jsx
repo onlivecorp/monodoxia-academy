@@ -35,6 +35,7 @@ export default function ProfileModal() {
     coachesList = [],
     addCoachCertificate,
     deleteCoachCertificate,
+    updateCoach,
   } = useApp();
 
   const activeTab = activeProfileTab || 'profile';
@@ -69,6 +70,14 @@ export default function ProfileModal() {
   const [coachCertYear, setCoachCertYear] = useState(new Date().getFullYear().toString());
   const [coachCertId, setCoachCertId] = useState('');
   const [coachCertUrl, setCoachCertUrl] = useState('');
+
+  // Expert Profile Edit states
+  const [expertBio, setExpertBio] = useState('');
+  const [expertSpecialties, setExpertSpecialties] = useState('');
+  const [expertSlots, setExpertSlots] = useState([]);
+  const [expertNewSlot, setExpertNewSlot] = useState('');
+  const [expertProfileSaved, setExpertProfileSaved] = useState(false);
+  const [expertProfileInited, setExpertProfileInited] = useState(false);
 
   useEffect(() => {
     if (currentUser) {
@@ -372,6 +381,39 @@ export default function ProfileModal() {
               <span>Sertifikatlarım</span>
               {(() => { const n = certificatesList.filter(c => String(c.userId) === String(currentUser?.id) && c.status === 'Yayında').length; return n > 0 ? <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">{n}</span> : null; })()}
             </button>
+
+            {/* Expert Profile Tab - only for Kouç/Admin */}
+            {(currentUser?.role === 'Kouç' || currentUser?.role === 'Admin') && (() => {
+              const myCoachProfile = coachesList.find(
+                c => (c.userId && String(c.userId) === String(currentUser?.id)) ||
+                     (c.name && currentUser?.name && c.name.toLowerCase().trim() === currentUser?.name.toLowerCase().trim())
+              );
+              if (!myCoachProfile) return null;
+              return (
+                <button
+                  onClick={() => {
+                    setActiveTab('expert_profile');
+                    if (!expertProfileInited) {
+                      setExpertBio(myCoachProfile.bio || myCoachProfile.experience || '');
+                      const specs = Array.isArray(myCoachProfile.specialties)
+                        ? myCoachProfile.specialties.join(', ')
+                        : (myCoachProfile.specialties || '');
+                      setExpertSpecialties(specs);
+                      setExpertSlots(Array.isArray(myCoachProfile.availableSlots) ? myCoachProfile.availableSlots : (Array.isArray(myCoachProfile.available_slots) ? myCoachProfile.available_slots : []));
+                      setExpertProfileInited(true);
+                    }
+                  }}
+                  className={`pb-3.5 px-3.5 font-semibold transition-all border-b-2 flex items-center gap-1.5 whitespace-nowrap text-xs ${
+                    activeTab === 'expert_profile'
+                      ? 'border-amber-600 text-amber-800'
+                      : 'border-transparent text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-[17px]">manage_accounts</span>
+                  <span>Ekspert Profilim</span>
+                </button>
+              );
+            })()}
 
             <button
               onClick={() => setActiveTab('membership')}
@@ -1136,6 +1178,167 @@ export default function ProfileModal() {
               </div>
             </div>
           )}
+
+          {/* TAB: EXPERT PROFILE EDIT */}
+          {activeTab === 'expert_profile' && (() => {
+            const myCoachProfile = coachesList.find(
+              c => (c.userId && String(c.userId) === String(currentUser?.id)) ||
+                   (c.name && currentUser?.name && c.name.toLowerCase().trim() === currentUser?.name.toLowerCase().trim())
+            );
+            if (!myCoachProfile) return null;
+
+            const handleSaveExpertProfile = (e) => {
+              e.preventDefault();
+              const specsArr = expertSpecialties
+                .split(',')
+                .map(s => s.trim())
+                .filter(Boolean);
+              updateCoach(myCoachProfile.id, {
+                bio: expertBio.trim(),
+                experience: expertBio.trim(),
+                specialties: specsArr,
+                availableSlots: expertSlots
+              });
+              setExpertProfileSaved(true);
+              setTimeout(() => setExpertProfileSaved(false), 3000);
+            };
+
+            const handleAddSlot = () => {
+              const val = expertNewSlot.trim();
+              if (!val) return;
+              setExpertSlots(prev => [...prev, val]);
+              setExpertNewSlot('');
+            };
+
+            const handleRemoveSlot = (idx) => {
+              setExpertSlots(prev => prev.filter((_, i) => i !== idx));
+            };
+
+            return (
+              <div className="space-y-6">
+                <div>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1.5 font-mono">
+                    <span className="material-symbols-outlined text-[16px]">manage_accounts</span>
+                    Ekspert Profil Məlumatlarınızı Redaktə Edin
+                  </h4>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Profilinizin "Profil &amp; Haqqında" bölməsindəki məlumatlar
+                  </p>
+                </div>
+
+                {expertProfileSaved && (
+                  <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                    Ekspert profil məlumatlarınız uğurla yadda saxlanıldı!
+                  </div>
+                )}
+
+                <form onSubmit={handleSaveExpertProfile} className="space-y-5">
+                  {/* Bio / Metodologiya */}
+                  <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-[15px] text-amber-600">psychology</span>
+                        Metodologiya və Təcrübə (Bio)
+                      </label>
+                      <p className="text-[11px] text-slate-400 mb-2">Profilinizin əsas haqqında mətni. Müştərilərin ilk gördüyü məlumatdır.</p>
+                      <textarea
+                        rows={5}
+                        value={expertBio}
+                        onChange={e => setExpertBio(e.target.value)}
+                        placeholder="Özünüz, metodologiyanız, təhsiliniz və təcrübəniz barədə yazın..."
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 text-xs focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors resize-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Specialties */}
+                  <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3">
+                    <label className="block text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[15px] text-amber-600">category</span>
+                      İxtisaslaşdığı Sahələr
+                    </label>
+                    <p className="text-[11px] text-slate-400">Vergüllə ayırın. Məs: <span className="font-mono">Fərdi İnkişaf, Psixologiya, Liderlik</span></p>
+                    <input
+                      type="text"
+                      value={expertSpecialties}
+                      onChange={e => setExpertSpecialties(e.target.value)}
+                      placeholder="Fərdi İnkişaf, Psixologiya, Liderlik"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 text-xs focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
+                    />
+                    {expertSpecialties && (
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {expertSpecialties.split(',').map(s => s.trim()).filter(Boolean).map((sp, i) => (
+                          <span key={i} className="px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-medium">{sp}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Available Slots */}
+                  <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3">
+                    <label className="block text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[15px] text-amber-600">schedule</span>
+                      Yaxın Tarixlər üçün Mövcud Saatlar
+                    </label>
+                    <p className="text-[11px] text-slate-400">Müştərilərə göstəriləcək boş sessiya saatlarınız. Məs: <span className="font-mono">Sabah 15:00</span></p>
+
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={expertNewSlot}
+                        onChange={e => setExpertNewSlot(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddSlot(); }}}
+                        placeholder="Məs: Çərşənbə 14:00"
+                        className="flex-1 px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 text-xs focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddSlot}
+                        className="px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">add</span>
+                      </button>
+                    </div>
+
+                    {expertSlots.length === 0 ? (
+                      <p className="text-[11px] text-slate-400 italic">Hələ mövcud saat əlavə edilməyib.</p>
+                    ) : (
+                      <div className="flex flex-wrap gap-2">
+                        {expertSlots.map((slot, idx) => (
+                          <span
+                            key={idx}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold"
+                          >
+                            <span className="material-symbols-outlined text-[13px]">event_available</span>
+                            <span>{slot}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveSlot(idx)}
+                              className="text-emerald-600 hover:text-red-500 ml-0.5 cursor-pointer transition-colors"
+                              title="Sil"
+                            >
+                              <span className="material-symbols-outlined text-[14px]">close</span>
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex justify-end">
+                    <button
+                      type="submit"
+                      className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold shadow-md shadow-amber-500/20 flex items-center gap-1.5 transition-all cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">save</span>
+                      <span>Ekspert Profilimi Yenilə</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+            );
+          })()}
 
           {/* TAB: CERTIFICATES */}
           {activeTab === 'certificates' && (() => {
