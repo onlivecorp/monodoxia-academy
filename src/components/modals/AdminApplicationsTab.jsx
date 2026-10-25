@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../i18n/LanguageContext';
 import {
@@ -352,7 +352,7 @@ export default function AdminApplicationsTab() {
               >
                 <option value="all">Bütün Kateqoriyalar</option>
                 <option value="course">Akademiya Kursları</option>
-                <option value="club">Coaching Club</option>
+                <option value="club">Zənginlər Klubu</option>
                 <option value="event">Tədbirlər</option>
                 <option value="webinar">Vebinarlar</option>
                 <option value="community">İcma və Forumlar</option>
@@ -1016,7 +1016,7 @@ export default function AdminApplicationsTab() {
                   >
                     <option value="all">Bütün Müraciətlər (Hamısı)</option>
                     <option value="course">Yalnız Kurslar</option>
-                    <option value="club">Yalnız Coaching Club</option>
+                    <option value="club">Yalnız Zənginlər Klubu</option>
                     <option value="event">Yalnız Tədbirlər</option>
                     <option value="webinar">Yalnız Vebinarlar</option>
                     <option value="community">Yalnız İcma və Forum</option>

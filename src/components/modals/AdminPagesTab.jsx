@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, createContext } from 'react';
+﻿import React, { useState, useEffect, useContext, createContext } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { getHeroMediaStyles, getAboutMediaStyles, parseVideoUrl } from '../../utils/heroMediaHelper';
@@ -510,7 +510,7 @@ export default function AdminPagesTab() {
   const PAGES_CONFIG = [
     { id: 'akademiya', label: 'Akademiya', icon: 'school', route: 'akademiya', desc: 'Kurs kataloqu, LMS modulları, tədris zəmanəti' },
     { id: 'koucinq', label: 'Kouçinq', icon: 'psychology', route: 'koucinq', desc: 'Ekspert koçlar, fərdi seans rezervasiyası, ICF metodologiyası' },
-    { id: 'club', label: 'Coaching Club', icon: 'card_membership', route: 'club', desc: 'Rezidentlik paketləri, imtiyazlar, qapalı icma üzvlüyü' },
+    { id: 'club', label: 'Zənginlər Klubu', icon: 'card_membership', route: 'club', desc: 'Rezidentlik paketləri, imtiyazlar, qapalı icma üzvlüyü' },
     { id: 'tedbirler', label: 'Tədbirlər', icon: 'event', route: 'tedbirler', desc: 'Canlı təqvim, vebinarlar, oflayn görüşlər, spikerlik' },
     { id: 'icma', label: 'İcma', icon: 'forum', route: 'icma', desc: 'İntellektual forum, həftəlik mövzu, icma etikası qaydaları' },
     { id: 'haqqimizda', label: 'Haqqımızda', icon: 'auto_stories', route: 'haqqimizda', desc: 'Akademiyanın məramı, sol media (şəkil/video), 4 dəyər kartı, 8 sahə' },
@@ -1190,7 +1190,7 @@ export default function AdminPagesTab() {
           </div>
         )}
 
-        {/* 3. COACHING CLUB SƏHİFƏSİ REDAKTƏ PANELİ */}
+        {/* 3. Zənginlər Klubu Səhifəsi REDAKTƏ PANELİ */}
         {selectedPage === 'club' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
@@ -1198,7 +1198,7 @@ export default function AdminPagesTab() {
                 <div>
                   <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#c5a059' }}>card_membership</span>
-                    <span>Coaching Club Səhifəsi (#club) — Əsas Başlıq & İmtiyazlar</span>
+                    <span>Zənginlər Klubu Səhifəsi (#club) — Əsas Başlıq & İmtiyazlar</span>
                   </h5>
                   <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0' }}>Klubun fəlsəfəsi, imtiyaz bəndləri və üzvlük çağırışı</p>
                 </div>
@@ -1227,7 +1227,7 @@ export default function AdminPagesTab() {
               <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>1. Hero Başlığı və Təsviri</span>
                 <PageField label="Üst Etiket (Badge)" block={clubData} setBlock={setClubData} fieldKey="badge" placeholder="Məs: QAPALI İCMA ÜZVLÜYÜ" />
-                <PageField label="Klub Başlığı (Title)" block={clubData} setBlock={setClubData} fieldKey="title" placeholder="Məs: Monodoxia Coaching Club — Həmfikirlərin Seçilmiş Məkanı" />
+                <PageField label="Klub Başlığı (Title)" block={clubData} setBlock={setClubData} fieldKey="title" placeholder="Məs: Monodoxia Zənginlər Klubu — Həmfikirlərin Seçilmiş Məkanı" />
                 <PageField label="Klub Təsviri (Desc)" block={clubData} setBlock={setClubData} fieldKey="desc" multiline rows={3} />
               </div>
 
@@ -1258,7 +1258,7 @@ export default function AdminPagesTab() {
                 <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>3. Klub İmtiyazları Bölməsi Başlıqları</span>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
                   <PageField label="Bölmə Üst Etiketi" block={clubData} setBlock={setClubData} fieldKey="perksBadge" placeholder="Klub İmtiyazları" />
-                  <PageField label="Bölmə Başlığı" block={clubData} setBlock={setClubData} fieldKey="perksTitle" placeholder="Coaching Club Rezidentlərinə Nələr Təqdim Olunur?" />
+                  <PageField label="Bölmə Başlığı" block={clubData} setBlock={setClubData} fieldKey="perksTitle" placeholder="Zənginlər Klubu Rezidentlərinə Nələr Təqdim Olunur?" />
                 </div>
                 <PageField label="Bölmə İzahı" block={clubData} setBlock={setClubData} fieldKey="perksDesc" multiline rows={2} />
                 <PageField
@@ -1291,7 +1291,7 @@ export default function AdminPagesTab() {
             {/* Club Premium Tier Card Editor */}
             <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0', margin: 0 }}>
-                Coaching Club — Rezidentlik Paket Kartı Mətnləri
+                Zənginlər Klubu — Rezidentlik Paket Kartı Mətnləri
               </h5>
               
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
@@ -1325,7 +1325,7 @@ export default function AdminPagesTab() {
                   style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>save</span>
-                  <span>Coaching Club Səhifəsinin Bütün Məlumatlarını Yadda Saxla</span>
+                  <span>Zənginlər Klubu Səhifəsinin Bütün Məlumatlarını Yadda Saxla</span>
                 </button>
               </div>
             </div>
@@ -1675,7 +1675,7 @@ export default function AdminPagesTab() {
                 <PageField label="Manifest İzahı" block={aboutData} setBlock={setAboutData} fieldKey="manifestoDesc" multiline rows={2} />
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
                   <PageField label="1-ci Düymə Mətni (Akademiya)" block={aboutData} setBlock={setAboutData} fieldKey="manifestoBtn1Text" placeholder="Akademiyanı Kəşf Et" />
-                  <PageField label="2-ci Düymə Mətni (Club)" block={aboutData} setBlock={setAboutData} fieldKey="manifestoBtn2Text" placeholder="Coaching Club-a Qoşul" />
+                  <PageField label="2-ci Düymə Mətni (Club)" block={aboutData} setBlock={setAboutData} fieldKey="manifestoBtn2Text" placeholder="Zənginlər Klubuna Qoşul" />
                 </div>
               </div>
 
@@ -1824,7 +1824,7 @@ export default function AdminPagesTab() {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
               <PageField label="1-ci CTA Düymə Mətni" block={heroData} setBlock={setHeroData} fieldKey="btnPrimaryText" placeholder="Akademiyanı kəşf et" />
-              <PageField label="2-ci CTA Düymə Mətni" block={heroData} setBlock={setHeroData} fieldKey="btnSecondaryText" placeholder="Coaching Club ilə tanış ol" />
+              <PageField label="2-ci CTA Düymə Mətni" block={heroData} setBlock={setHeroData} fieldKey="btnSecondaryText" placeholder="Zənginlər Klubu ilə tanış ol" />
             </div>
 
             {/* Stats */}

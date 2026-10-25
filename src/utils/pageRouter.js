@@ -1,4 +1,4 @@
-export const DEFAULT_PAGE_SLUGS = {
+﻿export const DEFAULT_PAGE_SLUGS = {
   home: '',
   akademiya: 'akademiya',
   koucinq: 'koucinq',
@@ -13,7 +13,7 @@ export const DEFAULT_PAGE_SLUGS = {
 export const PAGE_DEFINITIONS = [
   { id: 'akademiya', label: 'Akademiya (Kurslar)', defaultSlug: 'akademiya', icon: 'school', desc: 'Kurs kataloqu, LMS modulları, tədris zəmanəti' },
   { id: 'koucinq', label: 'Fərdi Kouçinq', defaultSlug: 'koucinq', icon: 'psychology', desc: 'Ekspert koçlar, fərdi seans rezervasiyası, ICF metodologiyası' },
-  { id: 'club', label: 'Coaching Club', defaultSlug: 'club', icon: 'card_membership', desc: 'Rezidentlik paketləri, imtiyazlar, qapalı icma üzvlüyü' },
+  { id: 'club', label: 'Zənginlər Klubu', defaultSlug: 'club', icon: 'card_membership', desc: 'Rezidentlik paketləri, imtiyazlar, qapalı icma üzvlüyü' },
   { id: 'tedbirler', label: 'Tədbirlər & Masterklaslar', defaultSlug: 'tedbirler', icon: 'event', desc: 'Canlı təqvim, vebinarlar, oflayn görüşlər, spikerlik' },
   { id: 'icma', label: 'İcma & Müzakirə Forumu', defaultSlug: 'icma', icon: 'forum', desc: 'İntellektual forum, həftəlik mövzu, icma etikası qaydaları' },
   { id: 'haqqimizda', label: 'Haqqımızda', defaultSlug: 'haqqimizda', icon: 'auto_stories', desc: 'Akademiyanın məramı, dəyərlər, sahələr və manifest' },

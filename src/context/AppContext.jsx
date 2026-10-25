@@ -137,28 +137,28 @@ const INITIAL_CLUB_TIERS = [
     name: "Basic Rezident",
     price: "45",
     period: "/ aylıq",
-    features: ["Coaching Club standart müzakirə platforması", "20+ saatlıq səsli meditasiya kitabxanası", "Kurslara 10% daimi tələbə endirimi", "Ayda 1 canlı sual-cavab sessiyası"],
+    features: ["Zənginlər Klubu standart müzakirə platforması", "20+ saatlıq səsli meditasiya kitabxanası", "Kurslara 10% daimi tələbə endirimi", "Ayda 1 canlı sual-cavab sessiyası"],
     active: true,
     translations: {
       az: {
         name: "Basic Rezident",
         period: "/ aylıq",
-        features: ["Coaching Club standart müzakirə platforması", "20+ saatlıq səsli meditasiya kitabxanası", "Kurslara 10% daimi tələbə endirimi", "Ayda 1 canlı sual-cavab sessiyası"]
+        features: ["Zənginlər Klubu standart müzakirə platforması", "20+ saatlıq səsli meditasiya kitabxanası", "Kurslara 10% daimi tələbə endirimi", "Ayda 1 canlı sual-cavab sessiyası"]
       },
       en: {
         name: "Basic Resident",
         period: "/ monthly",
-        features: ["Coaching Club standard discussion platform", "20+ hours of audio meditation library", "10% permanent student discount on courses", "1 live Q&A session per month"]
+        features: ["Zənginlər Klubu standard discussion platform", "20+ hours of audio meditation library", "10% permanent student discount on courses", "1 live Q&A session per month"]
       },
       tr: {
         name: "Basic Üye",
         period: "/ aylık",
-        features: ["Coaching Club standart tartışma platformu", "20+ saatlik sesli meditasyon kütüphanesi", "Kurslarda %10 sürekli öğrenci indirimi", "Ayda 1 canlı soru-cevap oturumu"]
+        features: ["Zənginlər Klubu standart tartışma platformu", "20+ saatlik sesli meditasyon kütüphanesi", "Kurslarda %10 sürekli öğrenci indirimi", "Ayda 1 canlı soru-cevap oturumu"]
       },
       ru: {
         name: "Базовый резидент",
         period: "/ месяц",
-        features: ["Стандартная дискуссионная платформа Coaching Club", "20+ часов аудиомедитаций в библиотеке", "Постоянная скидка 10% на курсы", "1 живая сессия вопросов и ответов в месяц"]
+        features: ["Стандартная дискуссионная платформа Zənginlər Klubu", "20+ часов аудиомедитаций в библиотеке", "Постоянная скидка 10% на курсы", "1 живая сессия вопросов и ответов в месяц"]
       }
     }
   },

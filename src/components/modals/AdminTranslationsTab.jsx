@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+﻿import React, { useState, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { MultiLangEditor, LocalizedArrayField } from '../../i18n/TranslationComponents';
@@ -41,7 +41,7 @@ export default function AdminTranslationsTab() {
 
   const entities = [
     { id: 'roles', label: 'Rollar & Səlahiyyətlər (RBAC)', count: rolesList.length },
-    { id: 'club', label: 'Coaching Club Tiers', count: clubTiersList.length },
+    { id: 'club', label: 'Zənginlər Klubu Paketləri', count: clubTiersList.length },
     { id: 'users', label: 'İstifadəçilər & Profillər', count: usersList.length },
     { id: 'courses', label: 'Kurslar & LMS', count: coursesList.length },
     { id: 'events', label: 'Tədbirlər & Vebinarlar', count: eventsList.length },

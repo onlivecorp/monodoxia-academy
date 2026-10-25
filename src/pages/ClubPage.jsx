@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { getLocalized } from '../i18n/localize';
 import { useApp } from '../context/AppContext';
@@ -24,9 +24,9 @@ export default function ClubPage() {
       {/* Editorial Page Hero */}
       <PageHero
         badge={getLocalized(club, 'badge', currentLang, defaultLang) || 'Qapalı İcma Üzvliyi'}
-        title={getLocalized(club, 'title', currentLang, defaultLang) || 'Monodoxia Coaching Club'}
+        title={getLocalized(club, 'title', currentLang, defaultLang) || 'Monodoxia Zənginlər Klubu'}
         description={getLocalized(club, 'desc', currentLang, defaultLang) || 'Davamlı inkişaf fərdi bir hadisə deyil, doğru mühitin bəhrəsidir. Dərin suallar verən seçkin şəxslərin qapalı ekosistemi.'}
-        breadcrumbs={[{ label: 'Coaching Club' }]}
+        breadcrumbs={[{ label: 'Zənginlər Klubu' }]}
         adminCmsBlock="club"
       >
         <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-8 pt-6 border-t border-[#c5a059]/20">
@@ -227,7 +227,7 @@ export default function ClubPage() {
                 <span>{getLocalized(club, 'perksBadge', currentLang, defaultLang) || 'Klub İmtiyazları'}</span>
               </div>
               <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl font-medium text-[#071326] tracking-tight mb-3">
-                {getLocalized(club, 'perksTitle', currentLang, defaultLang) || 'Coaching Club Rezidentlərinə Nələr Təqdim Olunur?'}
+                {getLocalized(club, 'perksTitle', currentLang, defaultLang) || 'Zənginlər Klubu Rezidentlərinə Nələr Təqdim Olunur?'}
               </h2>
               <p className="text-sm sm:text-base text-[#64748b] font-light leading-relaxed">
                 {getLocalized(club, 'perksDesc', currentLang, defaultLang) || 'Klubumuz sadəcə qrup deyil, hər bir üzvünün zehni, emosional və peşəkar təkamülünü sürətləndirən intellektual ailədir.'}
@@ -291,7 +291,7 @@ export default function ClubPage() {
             </div>
 
             <button
-              onClick={() => openApplication({ id: 'club-resident', title: 'Coaching Club Rezidentlik Müraciəti' }, 'club')}
+              onClick={() => openApplication({ id: 'club-resident', title: 'Zənginlər Klubu Rezidentlik Müraciəti' }, 'club')}
               className="relative z-10 px-8 py-4 rounded-xl bg-gradient-to-r from-[#c5a059] via-[#e5c57d] to-[#b38f46] text-[#071326] font-semibold text-xs sm:text-sm tracking-wider uppercase shadow-lg shadow-[#c5a059]/20 hover:shadow-xl hover:shadow-[#c5a059]/35 hover:scale-[1.02] active:scale-[0.98] transition-all shrink-0 cursor-pointer"
             >
               {getLocalized(club, 'noticeBtnText', currentLang, defaultLang) || 'Müraciət Ərizəsi Göndər'}

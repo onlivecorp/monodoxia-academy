@@ -1,4 +1,4 @@
-// Monodoxia Academy - Domain Seed Data for React App
+﻿// Monodoxia Academy - Domain Seed Data for React App
 
 export const AREAS = [
   {
@@ -1565,23 +1565,23 @@ export const INITIAL_FAQS = [
   },
   {
     id: "faq-4",
-    question: "Monodoxia Coaching Club üzvlüyünə kimlər qəbul edilir?",
+    question: "Monodoxia Zənginlər Klubu üzvlüyünə kimlər qəbul edilir?",
     answer: "Klubumuz daxili mədəniyyətini və etik təhlükəsizliyini qorumaq məqsədilə hər bir namizədlə qısa tanışlıq sorğusu keçirir. İntellektual inkişafa və konstruktiv dialoqa açıq hər bir fərd üzv ola bilər.",
     translations: {
       az: {
-        question: "Monodoxia Coaching Club üzvlüyünə kimlər qəbul edilir?",
+        question: "Monodoxia Zənginlər Klubu üzvlüyünə kimlər qəbul edilir?",
         answer: "Klubumuz daxili mədəniyyətini və etik təhlükəsizliyini qorumaq məqsədilə hər bir namizədlə qısa tanışlıq sorğusu keçirir. İntellektual inkişafa və konstruktiv dialoqa açıq hər bir fərd üzv ola bilər."
       },
       en: {
-        question: "Who is accepted into Monodoxia Coaching Club membership?",
+        question: "Who is accepted into Monodoxia Zənginlər Klubu membership?",
         answer: "To maintain internal culture and ethical safety, our club conducts a brief onboarding survey with each applicant. Anyone open to intellectual growth and constructive dialogue can join."
       },
       tr: {
-        question: "Monodoxia Coaching Club üyeliğine kimler kabul ediliyor?",
+        question: "Monodoxia Zənginlər Klubu üyeliğine kimler kabul ediliyor?",
         answer: "Kulübümüz iç kültürünü ve etik güvenliğini korumak amacıyla her adayla kısa bir tanışma anketi uygular. Entelektüel gelişime ve yapıcı diyaloğa açık herkes üye olabilir."
       },
       ru: {
-        question: "Кто принимается в членство Monodoxia Coaching Club?",
+        question: "Кто принимается в членство Monodoxia Zənginlər Klubu?",
         answer: "Для защиты внутренней культуры и этической безопасности клуб проводит короткое вводное анкетирование с каждым кандидатом. Присоединиться может каждый, кто открыт к развитию и диалогу."
       }
     }
@@ -1591,7 +1591,7 @@ export const INITIAL_FAQS = [
 export const DEFAULT_NAVBAR_ITEMS = [
   { id: 'akademiya', pageId: 'akademiya', label: 'Akademiya', labelKey: 'nav_academy', type: 'internal', href: '/akademiya', icon: 'school', visible: true, openInNewTab: false, order: 1, translations: { az: 'Akademiya', en: 'Academy', tr: 'Akademi', ru: 'Академия' } },
   { id: 'koucinq', pageId: 'koucinq', label: 'Kouçinq', labelKey: 'nav_coaching', type: 'internal', href: '/koucinq', icon: 'psychology', visible: true, openInNewTab: false, order: 2, translations: { az: 'Kouçinq', en: 'Coaching', tr: 'Koçluk', ru: 'Коучинг' } },
-  { id: 'club', pageId: 'club', label: 'Coaching Club', labelKey: 'nav_club', type: 'internal', href: '/club', icon: 'diamond', visible: true, openInNewTab: false, order: 3, translations: { az: 'Coaching Club', en: 'Coaching Club', tr: 'Coaching Club', ru: 'Coaching Club' } },
+  { id: 'club', pageId: 'club', label: 'Zənginlər Klubu', labelKey: 'nav_club', type: 'internal', href: '/club', icon: 'diamond', visible: true, openInNewTab: false, order: 3, translations: { az: 'Zənginlər Klubu', en: 'Zənginlər Klubu', tr: 'Zənginlər Klubu', ru: 'Zənginlər Klubu' } },
   { id: 'tedbirler', pageId: 'tedbirler', label: 'Tədbirlər', labelKey: 'nav_events', type: 'internal', href: '/tedbirler', icon: 'event', visible: true, openInNewTab: false, order: 4, translations: { az: 'Tədbirlər', en: 'Events', tr: 'Etkinlikler', ru: 'Мероприятия' } },
   { id: 'icma', pageId: 'icma', label: 'İcma', labelKey: 'nav_community', type: 'internal', href: '/icma', icon: 'forum', visible: true, openInNewTab: false, order: 5, translations: { az: 'İcma', en: 'Community', tr: 'Topluluk', ru: 'Сообщество' } },
   { id: 'haqqimizda', pageId: 'haqqimizda', label: 'Haqqımızda', labelKey: 'nav_about', type: 'internal', href: '/haqqimizda', icon: 'info', visible: true, openInNewTab: false, order: 6, translations: { az: 'Haqqımızda', en: 'About Us', tr: 'Hakkımızda', ru: 'О нас' } }
@@ -1610,7 +1610,7 @@ export const INITIAL_HOME_CONTENT = {
     desc: "Monodoxia Academy — akademik psixoloji tədqiqatları, qədim daxili müdrikliyi və müasir fərdi kouçinq metodologiyasını bir araya gətirən elit inkişaf ekosistemidir. Şüurlu fərqindəlik və dayanıqlı daxili sülh üçün təhlükəsiz intellektual liman.",
     btnPrimaryText: "Akademiyanı kəşf et",
     btnPrimaryLink: "#akademiya",
-    btnSecondaryText: "Coaching Club ilə tanış ol",
+    btnSecondaryText: "Zənginlər Klubu ilə tanış ol",
     btnSecondaryLink: "#club",
     stat1Num: "12,000+",
     stat1Label: "Fərdi Tələbə",
@@ -1654,7 +1654,7 @@ export const INITIAL_HOME_CONTENT = {
         title3: "Həyatını dəyiş.",
         desc: "Monodoxia Academy — akademik psixoloji tədqiqatları, qədim daxili müdrikliyi və müasir fərdi kouçinq metodologiyasını bir araya gətirən elit inkişaf ekosistemidir. Şüurlu fərqindəlik və dayanıqlı daxili sülh üçün təhlükəsiz intellektual liman.",
         btnPrimaryText: "Akademiyanı kəşf et",
-        btnSecondaryText: "Coaching Club ilə tanış ol",
+        btnSecondaryText: "Zənginlər Klubu ilə tanış ol",
         stat1Label: "Fərdi Tələbə",
         stat2Label: "Məmnuniyyət",
         stat3Label: "Sertifikatlı Kouçlar",
@@ -1670,7 +1670,7 @@ export const INITIAL_HOME_CONTENT = {
         title3: "Transform your life.",
         desc: "Monodoxia Academy is an elite growth ecosystem combining academic psychological research, ancient inner wisdom, and modern coaching methodologies. A safe intellectual haven for conscious awareness and enduring inner peace.",
         btnPrimaryText: "Discover the Academy",
-        btnSecondaryText: "Explore Coaching Club",
+        btnSecondaryText: "Zənginlər Klubunu Kəşfet",
         stat1Label: "Individual Students",
         stat2Label: "Satisfaction Rate",
         stat3Label: "Certified Coaches",
@@ -1686,7 +1686,7 @@ export const INITIAL_HOME_CONTENT = {
         title3: "Hayatını dönüştür.",
         desc: "Monodoxia Academy — akademik psikoloji araştırmalarını, kadim içsel bilgeliği ve modern koçluk metodolojilerini bir araya getiren seçkin bir gelişim ekosistemidir. Bilinçli farkındalık ve kalıcı iç huzuru için güvenli entelektüel liman.",
         btnPrimaryText: "Akademiyi Keşfet",
-        btnSecondaryText: "Coaching Club'ı Tanı",
+        btnSecondaryText: "Zənginlər Klubunu Tanı",
         stat1Label: "Bireysel Öğrenci",
         stat2Label: "Memnuniyet Oranı",
         stat3Label: "Sertifikalı Koçlar",
@@ -1702,7 +1702,7 @@ export const INITIAL_HOME_CONTENT = {
         title3: "Измени жизнь.",
         desc: "Monodoxia Academy — элитная экосистема развития, объединяющая академические психологические исследования, древнюю внутреннюю мудрость и современные методики коучинга. Безопасная интеллектуальная гавань для осознанности и душевного покоя.",
         btnPrimaryText: "Исследовать Академию",
-        btnSecondaryText: "Узнать о Coaching Club",
+        btnSecondaryText: "Zənginlər Klubu haqqında",
         stat1Label: "Студентов",
         stat2Label: "Удовлетворенность",
         stat3Label: "Сертифицированные коучи",
@@ -1736,7 +1736,7 @@ export const INITIAL_HOME_CONTENT = {
     manifestoTenet3Icon: "workspace_premium",
     manifestoTenet3Text: "Transformasiya Zəmanəti",
     manifestoBtn1Text: "Akademiyanı Kəşf Et",
-    manifestoBtn2Text: "Coaching Club-a Qoşul",
+    manifestoBtn2Text: "Zənginlər Klubuna Qoşul",
     translations: {
       az: {
         badge: "Akademiyanın Məramı",
@@ -1754,7 +1754,7 @@ export const INITIAL_HOME_CONTENT = {
         manifestoTenet2Text: "Mütləq Məxfilik",
         manifestoTenet3Text: "Transformasiya Zəmanəti",
         manifestoBtn1Text: "Akademiyanı Kəşf Et",
-        manifestoBtn2Text: "Coaching Club-a Qoşul"
+        manifestoBtn2Text: "Zənginlər Klubuna Qoşul"
       },
       en: {
         badge: "Academy Mission",
@@ -1772,7 +1772,7 @@ export const INITIAL_HOME_CONTENT = {
         manifestoTenet2Text: "Absolute Confidentiality",
         manifestoTenet3Text: "Transformation Guarantee",
         manifestoBtn1Text: "Explore Academy",
-        manifestoBtn2Text: "Join Coaching Club"
+        manifestoBtn2Text: "Zənginlər Klubuna Qoşul"
       },
       tr: {
         badge: "Akademinin Misyonu",
@@ -1790,7 +1790,7 @@ export const INITIAL_HOME_CONTENT = {
         manifestoTenet2Text: "Mutlak Gizlilik",
         manifestoTenet3Text: "Dönüşüm Garantisi",
         manifestoBtn1Text: "Akademiyi Keşfet",
-        manifestoBtn2Text: "Coaching Club'a Katıl"
+        manifestoBtn2Text: "Zənginlər Klubuna Katıl"
       },
       ru: {
         badge: "Миссия Академии",
@@ -1808,7 +1808,7 @@ export const INITIAL_HOME_CONTENT = {
         manifestoTenet2Text: "Абсолютная конфиденциальность",
         manifestoTenet3Text: "Гарантия трансформации",
         manifestoBtn1Text: "Открыть Академию",
-        manifestoBtn2Text: "Вступить в Coaching Club"
+        manifestoBtn2Text: "Вступить в Zənginlər Klubu"
       }
     }
   },
@@ -1921,8 +1921,8 @@ export const INITIAL_HOME_CONTENT = {
   },
   club: {
     badge: "QAPALI İCMA ÜZVLÜYÜ",
-    title: "Monodoxia Coaching Club — Həmfikirlərin Seçilmiş Məkanı",
-    desc: "Davamlı inkişaf fərdi bir hadisə deyil, doğru mühitin bəhrəsidir. Coaching Club — dərin suallar verən, səthilikdən uzaq, bir-birinin təkamülünə töhfə verən seçkin şəxslərin qapalı ekosistemidir.",
+    title: "Monodoxia Zənginlər Klubu — Həmfikirlərin Seçilmiş Məkanı",
+    desc: "Davamlı inkişaf fərdi bir hadisə deyil, doğru mühitin bəhrəsidir. Zənginlər Klubu — dərin suallar verən, səthilikdən uzaq, bir-birinin təkamülünə töhfə verən seçkin şəxslərin qapalı ekosistemidir.",
     perks: [
       "Həftəlik canlı mentorluq və mastermind sessiyaları: Təcrübəli mentorlarla birbaşa dialoq.",
       "Özəl meditasiya və təcrübə arxivi: 100+ saatlıq audio və video bələdçilər.",
@@ -1954,8 +1954,8 @@ export const INITIAL_HOME_CONTENT = {
     translations: {
       az: {
         badge: "QAPALI İCMA ÜZVLÜYÜ",
-        title: "Monodoxia Coaching Club — Həmfikirlərin Seçilmiş Məkanı",
-        desc: "Davamlı inkişaf fərdi bir hadisə deyil, doğru mühitin bəhrəsidir. Coaching Club — dərin suallar verən, səthilikdən uzaq, bir-birinin təkamülünə töhfə verən seçkin şəxslərin qapalı ekosistemidir.",
+        title: "Monodoxia Zənginlər Klubu — Həmfikirlərin Seçilmiş Məkanı",
+        desc: "Davamlı inkişaf fərdi bir hadisə deyil, doğru mühitin bəhrəsidir. Zənginlər Klubu — dərin suallar verən, səthilikdən uzaq, bir-birinin təkamülünə töhfə verən seçkin şəxslərin qapalı ekosistemidir.",
         perks: [
           "Həftəlik canlı mentorluq və mastermind sessiyaları: Təcrübəli mentorlarla birbaşa dialoq.",
           "Özəl meditasiya və təcrübə arxivi: 100+ saatlıq audio və video bələdçilər.",
@@ -1987,8 +1987,8 @@ export const INITIAL_HOME_CONTENT = {
       },
       en: {
         badge: "EXCLUSIVE RESIDENCY",
-        title: "Monodoxia Coaching Club — Sanctuary for Like Minds",
-        desc: "Sustainable development is the fruit of the right ecosystem. Coaching Club is an exclusive sanctuary for individuals who value intellectual depth and mutual evolution.",
+        title: "Monodoxia Zənginlər Klubu — Sanctuary for Like Minds",
+        desc: "Sustainable development is the fruit of the right ecosystem. Zənginlər Klubu is an exclusive sanctuary for individuals who value intellectual depth and mutual evolution.",
         perks: [
           "Weekly live mentoring and mastermind sessions: Direct dialogue with experienced mentors.",
           "Exclusive meditation and practice archive: 100+ hours of audio and video guides.",
@@ -2020,8 +2020,8 @@ export const INITIAL_HOME_CONTENT = {
       },
       tr: {
         badge: "ÖZEL ÜYELİK",
-        title: "Monodoxia Coaching Club — Ortak Zihinlerin Buluşma Noktası",
-        desc: "Sürdürülebilir gelişim doğru çevrenin eseridir. Coaching Club, derin sorular soran ve birbirinin gelişimine katkı sağlayan seçkin bireylerin kapalı alanıdır.",
+        title: "Monodoxia Zənginlər Klubu — Ortak Zihinlerin Buluşma Noktası",
+        desc: "Sürdürülebilir gelişim doğru çevrenin eseridir. Zənginlər Klubu, derin sorular soran ve birbirinin gelişimine katkı sağlayan seçkin bireylerin kapalı alanıdır.",
         perks: [
           "Haftalık canlı mentorluk ve mastermind oturumları: Deneyimli mentorlarla doğrudan diyalog.",
           "Özel meditasyon ve pratik arşivi: 100+ saatlik sesli ve görüntülü rehberler.",
@@ -2053,7 +2053,7 @@ export const INITIAL_HOME_CONTENT = {
       },
       ru: {
         badge: "ЗАКРЫТОЕ ЧЛЕНСТВО",
-        title: "Monodoxia Coaching Club — Пространство Единомышленников",
+        title: "Monodoxia Zənginlər Klubu — Пространство Единомышленников",
         desc: "Устойчивое развитие — результат правильного окружения. Закрытый клуб для глубоких личностей, ориентированных на рост.",
         perks: [
           "Еженедельные живые сессии менторства и мастермайнды: Прямой диалог с опытными наставниками.",

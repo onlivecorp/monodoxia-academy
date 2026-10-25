@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../i18n/LanguageContext';
 import AdminInlineTranslator from './AdminInlineTranslator';
@@ -627,7 +627,7 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
               required
               value={newTierFeatures}
               onChange={(e) => setNewTierFeatures(e.target.value)}
-              placeholder="Coaching Club eksklüziv platforması&#10;Həftəlik praktiki meditasiyalar&#10;Bütün kurslara 15% endirim"
+              placeholder="Zənginlər Klubu eksklüziv platforması&#10;Həftəlik praktiki meditasiyalar&#10;Bütün kurslara 15% endirim"
               className="admin-input"
               style={{ fontFamily: 'monospace', fontSize: '11px' }}
             />

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+﻿import React, { useEffect } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { getLocalized } from '../i18n/localize';
 import { useApp } from '../context/AppContext';
@@ -147,7 +147,7 @@ export default function AboutPage() {
                   className="w-full sm:w-auto px-8 py-4 rounded-xl border border-[#c5a059]/50 text-[#e5c57d] hover:bg-[#c5a059]/15 font-semibold text-xs sm:text-sm tracking-wider uppercase transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[17px]">diamond</span>
-                  <span>{getLocalized(about, 'manifestoBtn2Text', currentLang, defaultLang) || 'Coaching Club-a Qoşul'}</span>
+                  <span>{getLocalized(about, 'manifestoBtn2Text', currentLang, defaultLang) || 'Zənginlər Klubuna Qoşul'}</span>
                 </button>
               </div>
 

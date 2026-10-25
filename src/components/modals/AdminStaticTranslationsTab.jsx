@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+﻿import React, { useState, useMemo } from 'react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { useApp } from '../../context/AppContext';
 
@@ -9,7 +9,7 @@ const CATEGORIES = [
   { id: 'about', label: 'Haqqımızda & Dəyərlər', prefix: ['about_', 'pillar_'] },
   { id: 'areas', label: 'İnkişaf Sahələri', prefix: 'area' },
   { id: 'academy', label: 'Kurslar & Akademiya', prefix: ['academy_', 'filter_', 'course_'] },
-  { id: 'club', label: 'Coaching Club', prefix: 'club_' },
+  { id: 'club', label: 'Zənginlər Klubu', prefix: 'club_' },
   { id: 'experts', label: 'Ekspertlər & Kouçlar', prefix: ['expert', 'experts_'] },
   { id: 'community', label: 'İcma & Forum', prefix: 'community_' },
   { id: 'events', label: 'Tədbirlər & Vebinarlar', prefix: ['event', 'events_'] },

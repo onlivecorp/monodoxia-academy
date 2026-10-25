@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useApp } from '../context/AppContext';
 import FlagIcon from './common/FlagIcon';
@@ -42,7 +42,7 @@ export default function Header() {
   const DEFAULT_FALLBACK_LINKS = [
     { id: 'akademiya', pageId: 'akademiya', label: 'Akademiya', labelKey: 'nav_academy', type: 'internal', href: '/akademiya', icon: 'school', visible: true, openInNewTab: false, order: 1 },
     { id: 'koucinq', pageId: 'koucinq', label: 'Kouçinq', labelKey: 'nav_coaching', type: 'internal', href: '/koucinq', icon: 'psychology', visible: true, openInNewTab: false, order: 2 },
-    { id: 'club', pageId: 'club', label: 'Coaching Club', labelKey: 'nav_club', type: 'internal', href: '/club', icon: 'diamond', visible: true, openInNewTab: false, order: 3 },
+    { id: 'club', pageId: 'club', label: 'Zənginlər Klubu', labelKey: 'nav_club', type: 'internal', href: '/club', icon: 'diamond', visible: true, openInNewTab: false, order: 3 },
     { id: 'tedbirler', pageId: 'tedbirler', label: 'Tədbirlər', labelKey: 'nav_events', type: 'internal', href: '/tedbirler', icon: 'event', visible: true, openInNewTab: false, order: 4 },
     { id: 'icma', pageId: 'icma', label: 'İcma', labelKey: 'nav_community', type: 'internal', href: '/icma', icon: 'forum', visible: true, openInNewTab: false, order: 5 },
     { id: 'haqqimizda', pageId: 'haqqimizda', label: 'Haqqımızda', labelKey: 'nav_about', type: 'internal', href: '/haqqimizda', icon: 'info', visible: true, openInNewTab: false, order: 6 },

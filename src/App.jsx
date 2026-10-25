@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense, lazy } from 'react';
+﻿import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { LanguageProvider } from './i18n/LanguageContext';
 import { AppProvider, useApp } from './context/AppContext';
 
@@ -68,7 +68,7 @@ function AppContent() {
       home: platformSettings?.siteTitle ? `${platformSettings.siteTitle} — ${platformSettings.subtitle || 'Fərdi İnkişaf və Psixologiya Mərkəzi'}` : 'Monodoxia Academy',
       akademiya: 'Akademiya və Kurslar | Monodoxia Academy',
       koucinq: 'Fərdi Kouçinq | Monodoxia Academy',
-      club: 'Coaching Club | Monodoxia Academy',
+      club: 'Zənginlər Klubu | Monodoxia Academy',
       tedbirler: 'Tədbirlər və Masterklaslar | Monodoxia Academy',
       icma: 'İcma və Forum | Monodoxia Academy',
       haqqimizda: 'Haqqımızda | Monodoxia Academy',

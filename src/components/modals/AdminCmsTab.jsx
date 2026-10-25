@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, createContext } from 'react';
+﻿import React, { useState, useEffect, useContext, createContext } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../i18n/LanguageContext';
 import AdminConfirmModal from './AdminConfirmModal';
@@ -414,7 +414,7 @@ export default function AdminCmsTab() {
     { id: 'hero', label: 'Ana Səhifə — Hero Bölməsi' },
     { id: 'academy', label: '📄 Akademiya Səhifəsi' },
     { id: 'coaches', label: '📄 Kouçinq Səhifəsi & Mentorlar' },
-    { id: 'club', label: '📄 Coaching Club Səhifəsi' },
+    { id: 'club', label: '📄 Zənginlər Klubu Səhifəsi' },
     { id: 'events', label: '📄 Tədbirlər Səhifəsi' },
     { id: 'community', label: '📄 İcma Səhifəsi' },
     { id: 'about', label: '📄 Haqqımızda (Məram & Sol Media)' },
@@ -438,8 +438,8 @@ export default function AdminCmsTab() {
 
   const defaultClubData = {
     badge: "QAPALI İCMA ÜZVLÜYÜ",
-    title: "Monodoxia Coaching Club — Həmfikirlərin Seçilmiş Məkanı",
-    desc: "Davamlı inkişaf fərdi bir hadisə deyil, doğru mühitin bəhrəsidir. Coaching Club — dərin suallar verən, səthilikdən uzaq, bir-birinin təkamülünə töhfə verən seçkin şəxslərin qapalı ekosistemidir.",
+    title: "Monodoxia Zənginlər Klubu — Həmfikirlərin Seçilmiş Məkanı",
+    desc: "Davamlı inkişaf fərdi bir hadisə deyil, doğru mühitin bəhrəsidir. Zənginlər Klubu — dərin suallar verən, səthilikdən uzaq, bir-birinin təkamülünə töhfə verən seçkin şəxslərin qapalı ekosistemidir.",
     perks: [
       "Həftəlik canlı mentorluq və mastermind sessiyaları: Təcrübəli mentorlarla birbaşa dialoq.",
       "Özəl meditasiya və təcrübə arxivi: 100+ saatlıq audio və video bələdçilər.",
@@ -471,8 +471,8 @@ export default function AdminCmsTab() {
     translations: {
       az: {
         badge: "QAPALI İCMA ÜZVLÜYÜ",
-        title: "Monodoxia Coaching Club — Həmfikirlərin Seçilmiş Məkanı",
-        desc: "Davamlı inkişaf fərdi bir hadisə deyil, doğru mühitin bəhrəsidir. Coaching Club — dərin suallar verən, səthilikdən uzaq, bir-birinin təkamülünə töhfə verən seçkin şəxslərin qapalı ekosistemidir.",
+        title: "Monodoxia Zənginlər Klubu — Həmfikirlərin Seçilmiş Məkanı",
+        desc: "Davamlı inkişaf fərdi bir hadisə deyil, doğru mühitin bəhrəsidir. Zənginlər Klubu — dərin suallar verən, səthilikdən uzaq, bir-birinin təkamülünə töhfə verən seçkin şəxslərin qapalı ekosistemidir.",
         perks: [
           "Həftəlik canlı mentorluq və mastermind sessiyaları: Təcrübəli mentorlarla birbaşa dialoq.",
           "Özəl meditasiya və təcrübə arxivi: 100+ saatlıq audio və video bələdçilər.",
@@ -504,8 +504,8 @@ export default function AdminCmsTab() {
       },
       en: {
         badge: "EXCLUSIVE RESIDENCY",
-        title: "Monodoxia Coaching Club — Sanctuary for Like Minds",
-        desc: "Sustainable development is the fruit of the right ecosystem. Coaching Club is an exclusive sanctuary for individuals who value intellectual depth and mutual evolution.",
+        title: "Monodoxia Zənginlər Klubu — Sanctuary for Like Minds",
+        desc: "Sustainable development is the fruit of the right ecosystem. Zənginlər Klubu is an exclusive sanctuary for individuals who value intellectual depth and mutual evolution.",
         perks: [
           "Weekly live mentoring and mastermind sessions: Direct dialogue with experienced mentors.",
           "Exclusive meditation and practice archive: 100+ hours of audio and video guides.",
@@ -537,8 +537,8 @@ export default function AdminCmsTab() {
       },
       tr: {
         badge: "ÖZEL ÜYELİK",
-        title: "Monodoxia Coaching Club — Ortak Zihinlerin Buluşma Noktası",
-        desc: "Sürdürülebilir gelişim doğru çevrenin eseridir. Coaching Club, derin sorular soran ve birbirinin gelişimine katkı sağlayan seçkin bireylerin kapalı alanıdır.",
+        title: "Monodoxia Zənginlər Klubu — Ortak Zihinlerin Buluşma Noktası",
+        desc: "Sürdürülebilir gelişim doğru çevrenin eseridir. Zənginlər Klubu, derin sorular soran ve birbirinin gelişimine katkı sağlayan seçkin bireylerin kapalı alanıdır.",
         perks: [
           "Haftalık canlı mentorluk ve mastermind oturumları: Deneyimli mentorlarla doğrudan diyalog.",
           "Özel meditasyon ve pratik arşivi: 100+ saatlik sesli ve görüntülü rehberler.",
@@ -570,7 +570,7 @@ export default function AdminCmsTab() {
       },
       ru: {
         badge: "ЗАКРЫТОЕ ЧЛЕНСТВО",
-        title: "Monodoxia Coaching Club — Пространство Единомышленников",
+        title: "Monodoxia Zənginlər Klubu — Пространство Единомышленников",
         desc: "Устойчивое развитие — результат правильного окружения. Закрытый клуб для глубоких личностей, ориентированных на рост.",
         perks: [
           "Еженедельные живые сессии менторства и мастермайнды: Прямой диалог с опытными наставниками.",
@@ -912,7 +912,7 @@ export default function AdminCmsTab() {
     manifestoTenet3Icon: "workspace_premium",
     manifestoTenet3Text: "Transformasiya Zəmanəti",
     manifestoBtn1Text: "Akademiyanı Kəşf Et",
-    manifestoBtn2Text: "Coaching Club-a Qoşul",
+    manifestoBtn2Text: "Zənginlər Klubuna Qoşul",
     translations: {
       az: {
         badge: "Akademiyanın Məramı",
@@ -928,7 +928,7 @@ export default function AdminCmsTab() {
         manifestoTenet2Text: "Mütləq Məxfilik",
         manifestoTenet3Text: "Transformasiya Zəmanəti",
         manifestoBtn1Text: "Akademiyanı Kəşf Et",
-        manifestoBtn2Text: "Coaching Club-a Qoşul"
+        manifestoBtn2Text: "Zənginlər Klubuna Qoşul"
       }
     }
   };
@@ -1772,7 +1772,7 @@ export default function AdminCmsTab() {
                       border: cmsHero.btnSecondaryStyle === 'outline' ? '2px solid #c5a059' : '1px solid rgba(197, 160, 89, 0.6)',
                       boxShadow: '0 2px 6px rgba(0,0,0,0.04)'
                     }}>
-                      <span>{cmsHero.translations?.[cmsLang]?.btnSecondaryText || cmsHero.btnSecondaryText || 'Coaching Club ilə tanış ol'}</span>
+                      <span>{cmsHero.translations?.[cmsLang]?.btnSecondaryText || cmsHero.btnSecondaryText || 'Zənginlər Klubu ilə tanış ol'}</span>
                       {cmsHero.btnSecondaryShowIcon !== false && (
                         <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#775a19' }}>
                           {cmsHero.btnSecondaryIcon || 'arrow_forward'}
@@ -2573,7 +2573,7 @@ export default function AdminCmsTab() {
                 {cmsHero.showBtnSecondary !== false && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
-                      <Field label="2-ci Düymə Mətni" block={cmsHero} setBlock={setCmsHero} fieldKey="btnSecondaryText" placeholder="Coaching Club ilə tanış ol" />
+                      <Field label="2-ci Düymə Mətni" block={cmsHero} setBlock={setCmsHero} fieldKey="btnSecondaryText" placeholder="Zənginlər Klubu ilə tanış ol" />
                       <Field label="Keçid Linki (Səhifə ID və ya URL)" block={cmsHero} setBlock={setCmsHero} fieldKey="btnSecondaryLink" placeholder="/club və ya club" />
                     </div>
 
@@ -4332,7 +4332,7 @@ export default function AdminCmsTab() {
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
                 <Field label="1-ci Düymə Mətni (Akademiya)" block={cmsAbout} setBlock={setCmsAbout} fieldKey="manifestoBtn1Text" placeholder="Akademiyanı Kəşf Et" />
-                <Field label="2-ci Düymə Mətni (Coaching Club)" block={cmsAbout} setBlock={setCmsAbout} fieldKey="manifestoBtn2Text" placeholder="Coaching Club-a Qoşul" />
+                <Field label="2-ci Düymə Mətni (Zənginlər Klubu)" block={cmsAbout} setBlock={setCmsAbout} fieldKey="manifestoBtn2Text" placeholder="Zənginlər Klubuna Qoşul" />
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '6px' }}>

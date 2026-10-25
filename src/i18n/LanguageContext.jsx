@@ -1,11 +1,11 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+﻿import React, { createContext, useContext, useState, useEffect } from 'react';
 import { INITIAL_SUPPORTED_LANGUAGES, DEFAULT_LANGUAGE } from './languages';
 
 const translations = {
   az: {
     nav_academy: "Akademiya",
     nav_coaching: "Kouçinq",
-    nav_club: "Coaching Club",
+    nav_club: "Zənginlər Klubu",
     nav_events: "Tədbirlər",
     nav_community: "İcma",
     nav_about: "Haqqımızda",
@@ -20,7 +20,7 @@ const translations = {
     hero_title_3: "Həyatını dəyiş.",
     hero_desc: "Monodoxia Academy — akademik psixoloji tədqiqatları, qədim daxili müdrikliyi və müasir fərdi kouçinq metodologiyasını bir araya gətirən elit inkişaf ekosistemidir. Şüurlu fərqindəlik və dayanıqlı daxili sülh üçün təhlükəsiz intellektual liman.",
     hero_cta_primary: "Akademiyanı kəşf et",
-    hero_cta_secondary: "Coaching Club ilə tanış ol",
+    hero_cta_secondary: "Zənginlər Klubu ilə tanış ol",
     hero_students: "12,000+ Fərdi Tələbə",
     hero_satisfaction: "98% Məmnuniyyət",
     hero_coaches: "ICF & PhD Sertifikatlı Kouçlar",
@@ -55,8 +55,8 @@ const translations = {
     course_continue: "Davam et",
 
     club_badge: "QAPALI İCMA ÜZVLÜYÜ",
-    club_title: "Monodoxia Coaching Club — Həmfikirlərin Seçilmiş Məkanı",
-    club_desc: "Davamlı inkişaf fərdi bir hadisə deyil, doğru mühitin bəhrəsidir. Coaching Club — dərin suallar verən, səthilikdən uzaq, bir-birinin təkamülünə töhfə verən seçkin şəxslərin qapalı ekosistemidir.",
+    club_title: "Monodoxia Zənginlər Klubu — Həmfikirlərin Seçilmiş Məkanı",
+    club_desc: "Davamlı inkişaf fərdi bir hadisə deyil, doğru mühitin bəhrəsidir. Zənginlər Klubu — dərin suallar verən, səthilikdən uzaq, bir-birinin təkamülünə töhfə verən seçkin şəxslərin qapalı ekosistemidir.",
     club_join_btn: "Kluba qoşul",
     club_limited: "Məhdud sayda yer: Aylıq qəbul",
     club_tier_title: "Klub Rezidentliyi",
@@ -100,7 +100,7 @@ const translations = {
   en: {
     nav_academy: "Academy",
     nav_coaching: "Coaching",
-    nav_club: "Coaching Club",
+    nav_club: "Zənginlər Klubu",
     nav_events: "Events",
     nav_community: "Community",
     nav_about: "About Us",
@@ -115,7 +115,7 @@ const translations = {
     hero_title_3: "Transform your life.",
     hero_desc: "Monodoxia Academy is an elite development ecosystem uniting academic psychological research, ancient wisdom, and contemporary coaching methodology. A safe sanctuary for conscious awareness and inner peace.",
     hero_cta_primary: "Explore Academy",
-    hero_cta_secondary: "Discover Coaching Club",
+    hero_cta_secondary: "Zənginlər Klubunu Kəşfet",
     hero_students: "12,000+ Active Students",
     hero_satisfaction: "98% Satisfaction",
     hero_coaches: "ICF & PhD Certified Coaches",
@@ -150,8 +150,8 @@ const translations = {
     course_continue: "Continue",
 
     club_badge: "EXCLUSIVE RESIDENCY",
-    club_title: "Monodoxia Coaching Club — Sanctuary for Like Minds",
-    club_desc: "Sustainable development is the fruit of the right ecosystem. Coaching Club is an exclusive sanctuary for individuals who value intellectual depth and mutual evolution.",
+    club_title: "Monodoxia Zənginlər Klubu — Sanctuary for Like Minds",
+    club_desc: "Sustainable development is the fruit of the right ecosystem. Zənginlər Klubu is an exclusive sanctuary for individuals who value intellectual depth and mutual evolution.",
     club_join_btn: "Join the Club",
     club_limited: "Limited availability: Monthly cohorts",
     club_tier_title: "Club Residency",
@@ -195,7 +195,7 @@ const translations = {
   ru: {
     nav_academy: "Академия",
     nav_coaching: "Коучинг",
-    nav_club: "Coaching Club",
+    nav_club: "Zənginlər Klubu",
     nav_events: "Мероприятия",
     nav_community: "Сообщество",
     nav_about: "О нас",
@@ -210,7 +210,7 @@ const translations = {
     hero_title_3: "Измени жизнь.",
     hero_desc: "Monodoxia Academy — премиальная экосистема, объединяющая академическую психологию, глубинную мудрость и современные методы коучинга для осознанности и устойчивого внутреннего мира.",
     hero_cta_primary: "Исследовать Академию",
-    hero_cta_secondary: "Узнать о Coaching Club",
+    hero_cta_secondary: "Zənginlər Klubu haqqında",
     hero_students: "12,000+ Студентов",
     hero_satisfaction: "98% Довольства",
     hero_coaches: "Сертификация ICF & PhD",
@@ -245,7 +245,7 @@ const translations = {
     course_continue: "Продолжить",
 
     club_badge: "ЗАКРЫТОЕ ЧЛЕНСТВО",
-    club_title: "Monodoxia Coaching Club — Пространство Единомышленников",
+    club_title: "Monodoxia Zənginlər Klubu — Пространство Единомышленников",
     club_desc: "Устойчивое развитие — результат правильного окружения. Закрытый клуб для глубоких личностей, ориентированных на рост.",
     club_join_btn: "Вступить в клуб",
     club_limited: "Ограниченное количество мест: Ежемесячный набор",
@@ -290,7 +290,7 @@ const translations = {
   tr: {
     nav_academy: "Akademi",
     nav_coaching: "Koçluk",
-    nav_club: "Coaching Club",
+    nav_club: "Zənginlər Klubu",
     nav_events: "Etkinlikler",
     nav_community: "Topluluk",
     nav_about: "Hakkımızda",
@@ -305,7 +305,7 @@ const translations = {
     hero_title_3: "Hayatını dönüştür.",
     hero_desc: "Monodoxia Academy — akademik psikolojik araştırmaları, kadim içsel bilgeliği ve modern koçluk metodolojisini buluşturan elit gelişim ekosistemidir. Bilinçli farkındalık ve kalıcı iç huzur için güvenli liman.",
     hero_cta_primary: "Akademiyi Keşfet",
-    hero_cta_secondary: "Coaching Club'ı Tanı",
+    hero_cta_secondary: "Zənginlər Klubunu Tanı",
     hero_students: "12,000+ Öğrenci",
     hero_satisfaction: "%98 Memnuniyet",
     hero_coaches: "ICF & PhD Sertifikalı Koçlar",
@@ -340,8 +340,8 @@ const translations = {
     course_continue: "Devam Et",
 
     club_badge: "ÖZEL ÜYELİK",
-    club_title: "Monodoxia Coaching Club — Ortak Zihinlerin Buluşma Noktası",
-    club_desc: "Sürdürülebilir gelişim doğru çevrenin eseridir. Coaching Club, derin sorular soran ve birbirinin gelişimine katkı sağlayan seçkin bireylerin kapalı alanıdır.",
+    club_title: "Monodoxia Zənginlər Klubu — Ortak Zihinlerin Buluşma Noktası",
+    club_desc: "Sürdürülebilir gelişim doğru çevrenin eseridir. Zənginlər Klubu, derin sorular soran ve birbirinin gelişimine katkı sağlayan seçkin bireylerin kapalı alanıdır.",
     club_join_btn: "Kulübe Katıl",
     club_limited: "Kontenjan sınırlı: Aylık kabul",
     club_tier_title: "Kulüp Rezidansı",
