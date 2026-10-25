@@ -319,18 +319,10 @@ export default function AcademyPage() {
 
                       {/* CTA Buttons */}
                       <div className="flex items-center gap-3 pt-1">
-                        <button
-                          onClick={() => openPlayer(c)}
-                          className="flex-1 py-3 px-5 rounded-xl bg-gradient-to-r from-[#071326] to-[#0c2242] text-white hover:text-[#e5c57d] text-xs font-semibold tracking-wider uppercase shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer group/btn"
-                        >
-                          <span className="material-symbols-outlined text-[18px] text-[#e5c57d] group-hover/btn:scale-110 transition-transform">play_circle</span>
-                          <span>{prog > 0 ? 'Davam et' : 'Dərslərə Bax'}</span>
-                        </button>
-
                         {userApp ? (
                           <button
                             onClick={() => openApplication(c, 'course')}
-                            className="py-3 px-4 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100 transition-colors flex items-center gap-1.5 cursor-pointer"
+                            className="w-full py-3 px-4 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                           >
                             <span className="material-symbols-outlined text-[16px] text-emerald-600">check_circle</span>
                             <span>{userApp.status}</span>
@@ -338,7 +330,7 @@ export default function AcademyPage() {
                         ) : (
                           <button
                             onClick={() => openApplication(c, 'course')}
-                            className="py-3 px-5 rounded-xl border border-[#c5a059] text-[#775a19] hover:bg-[#c5a059]/10 text-xs font-semibold tracking-wider uppercase transition-all flex items-center gap-1.5 cursor-pointer"
+                            className="w-full py-3 px-5 rounded-xl border border-[#c5a059] bg-[#c5a059]/10 text-[#775a19] hover:bg-[#c5a059] hover:text-white text-xs font-semibold tracking-wider uppercase transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm hover:shadow"
                           >
                             <span className="material-symbols-outlined text-[16px]">how_to_reg</span>
                             <span>Qeydiyyat</span>
