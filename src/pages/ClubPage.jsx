@@ -157,7 +157,7 @@ export default function ClubPage() {
                       </div>
                       {billingCycle === 'annual' && rawPrice > 0 && (
                         <span className="text-[11px] text-emerald-500 font-medium block mt-1.5">
-                          Aylıq cəmi ~₼ {Math.round(displayPrice / 12)} (qənaət: 2 ay)
+                          Aylıq cəmi ~₼ {Math.round(displayPrice / 12)}
                         </span>
                       )}
                     </div>
