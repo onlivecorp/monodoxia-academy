@@ -55,78 +55,76 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
   const [certCredentialId, setCertCredentialId] = useState('');
   const [certCredentialUrl, setCertCredentialUrl] = useState('');
 
-  if (!isOpen || !coach) return null;
-
   // Real-time coach reference from coachesList
-  const liveCoach = coachesList.find(c => c.id === coach.id) || coach;
+  const liveCoach = coach ? (coachesList.find(c => c.id === coach.id) || coach) : null;
 
-  const matchedUser = (usersList || []).find(u => 
+  const matchedUser = liveCoach ? ((usersList || []).find(u => 
     (liveCoach.userId && String(u.id) === String(liveCoach.userId)) ||
     (liveCoach.name && u.name && u.name.toLowerCase().trim() === liveCoach.name.toLowerCase().trim()) ||
     (liveCoach.email && u.email && u.email.toLowerCase().trim() === liveCoach.email.toLowerCase().trim())
   ) || (currentUser && (
     (liveCoach.userId && String(currentUser.id) === String(liveCoach.userId)) ||
     (liveCoach.name && currentUser.name && liveCoach.name.toLowerCase().trim() === currentUser.name.toLowerCase().trim())
-  ) ? currentUser : null);
+  ) ? currentUser : null)) : null;
 
-  let coachDisplayImage = liveCoach.image || liveCoach.avatar || matchedUser?.avatar || matchedUser?.image || '';
-  if (!coachDisplayImage) {
+  let coachDisplayImage = liveCoach?.image || liveCoach?.avatar || matchedUser?.avatar || matchedUser?.image || '';
+  if (!coachDisplayImage && liveCoach) {
     try {
       const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
       if (imgStore[liveCoach.id]) coachDisplayImage = imgStore[liveCoach.id];
     } catch (e) {}
   }
 
-  const coachTitle = getLocalized(liveCoach, 'title', currentLang, defaultLang) || liveCoach.title || 'Kouç & Ekspert';
-  const coachBio = getLocalized(liveCoach, 'bio', currentLang, defaultLang) || liveCoach.bio || '';
-  const coachExp = getLocalized(liveCoach, 'experience', currentLang, defaultLang) || liveCoach.experience || '';
-  const rawSpecialties = getLocalizedArray(liveCoach, 'specialties', currentLang, defaultLang);
+  const coachTitle = liveCoach ? (getLocalized(liveCoach, 'title', currentLang, defaultLang) || liveCoach.title || 'Kouç & Ekspert') : '';
+  const coachBio = liveCoach ? (getLocalized(liveCoach, 'bio', currentLang, defaultLang) || liveCoach.bio || '') : '';
+  const coachExp = liveCoach ? (getLocalized(liveCoach, 'experience', currentLang, defaultLang) || liveCoach.experience || '') : '';
+  const rawSpecialties = liveCoach ? getLocalizedArray(liveCoach, 'specialties', currentLang, defaultLang) : [];
   const specialties = rawSpecialties.length > 0
     ? rawSpecialties
-    : (Array.isArray(liveCoach.specialties) ? liveCoach.specialties : (liveCoach.specialties || '').split(',').map(s => s.trim()).filter(Boolean));
+    : (Array.isArray(liveCoach?.specialties) ? liveCoach.specialties : (liveCoach?.specialties || '').split(',').map(s => s.trim()).filter(Boolean));
 
-  const availableSlots = (Array.isArray(liveCoach.availableSlots)
+  const availableSlots = (Array.isArray(liveCoach?.availableSlots)
     ? liveCoach.availableSlots
-    : (Array.isArray(liveCoach.available_slots) ? liveCoach.available_slots : [])
+    : (Array.isArray(liveCoach?.available_slots) ? liveCoach.available_slots : [])
   ).filter(s => s !== 'Sabah 15:00' && s !== 'Cümə 18:00');
 
-  const scheduleSlots = (Array.isArray(liveCoach.scheduleSlots) ? liveCoach.scheduleSlots : []).filter(s => {
+  const scheduleSlots = (Array.isArray(liveCoach?.scheduleSlots) ? liveCoach.scheduleSlots : []).filter(s => {
     const lbl = typeof s === 'string' ? s : s?.label;
     return lbl !== 'Sabah 15:00' && lbl !== 'Cümə 18:00';
   });
 
   // Filter reviews for this coach
-  const expertReviews = (coachReviews || []).filter(r => r.coachId === liveCoach.id);
-  const totalReviewsCount = expertReviews.length || liveCoach.reviewsCount || liveCoach.reviews_count || 0;
+  const expertReviews = liveCoach ? (coachReviews || []).filter(r => r.coachId === liveCoach.id) : [];
+  const totalReviewsCount = expertReviews.length || liveCoach?.reviewsCount || liveCoach?.reviews_count || 0;
   const currentRating = expertReviews.length > 0
     ? (expertReviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0) / expertReviews.length).toFixed(1)
-    : (liveCoach.rating || '5.0');
+    : (liveCoach?.rating || '5.0');
 
   // Certificates: Admin Issued (from certificatesList)
-  const adminIssuedCerts = (certificatesList || []).filter(c => {
+  const adminIssuedCerts = liveCoach ? (certificatesList || []).filter(c => {
     if (c.status === 'Silindi') return false;
     const matchUserId = liveCoach.userId && String(c.userId) === String(liveCoach.userId);
     const matchName = c.userName && liveCoach.name && c.userName.toLowerCase().trim() === liveCoach.name.toLowerCase().trim();
     const matchField = c.fields?.recipientName && liveCoach.name && c.fields.recipientName.toLowerCase().trim() === liveCoach.name.toLowerCase().trim();
     return matchUserId || matchName || matchField;
-  });
+  }) : [];
 
   // Certificates: Self-added by coach
-  const customCerts = Array.isArray(liveCoach.customCertificates) ? liveCoach.customCertificates : [];
+  const customCerts = Array.isArray(liveCoach?.customCertificates) ? liveCoach.customCertificates : [];
 
   // Incoming booking requests for this coach
-  const coachIncomingBookings = (bookings || []).filter(b => {
+  const coachIncomingBookings = liveCoach ? (bookings || []).filter(b => {
     const matchId = (b.coachId && b.coachId === liveCoach.id) || (b.coach_id && b.coach_id === liveCoach.id);
     const matchName = b.coachName && liveCoach.name && b.coachName.toLowerCase().trim() === liveCoach.name.toLowerCase().trim();
     return matchId || matchName;
-  });
+  }) : [];
   const pendingBookingsCount = coachIncomingBookings.filter(b => b.status === 'Gözləyir').length;
   const filteredBookings = coachIncomingBookings.filter(b => {
     if (bookingFilter === 'all') return true;
     return b.status === bookingFilter;
   });
 
-  // Keep modalSchedule in sync with liveCoach schedule
+  // Keep modalSchedule in sync with liveCoach schedule (hook unconditionally called)
   useEffect(() => {
     if (liveCoach) {
       const sched = Array.isArray(liveCoach.scheduleSlots) && liveCoach.scheduleSlots.length > 0
@@ -145,6 +143,8 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
       setModalSchedule(sched);
     }
   }, [liveCoach?.id, liveCoach?.scheduleSlots]);
+
+  if (!isOpen || !coach || !liveCoach) return null;
 
   // Check if current logged-in user is this expert or an Admin
   const isExpertSelf = currentUser && (
