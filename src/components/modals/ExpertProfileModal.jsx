@@ -1,38 +1,132 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { getLocalized, getLocalizedArray } from '../../i18n/localize';
 import { useApp } from '../../context/AppContext';
 
 export default function ExpertProfileModal({ coach, isOpen, onClose }) {
   const { currentLang, defaultLang } = useLanguage();
-  const { openBooking } = useApp();
+  const {
+    openBooking,
+    currentUser,
+    coachesList,
+    certificatesList,
+    coachReviews,
+    addCoachReview,
+    addCoachCertificate,
+    deleteCoachCertificate,
+    setActiveCertView,
+    setCertViewModalOpen
+  } = useApp();
+
+  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'certificates' | 'reviews'
+  
+  // Review form state
+  const [userRating, setUserRating] = useState(5);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState('');
+  const [reviewerName, setReviewerName] = useState('');
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+
+  // Custom certificate form state (for coach or admin)
+  const [showAddCertModal, setShowAddCertModal] = useState(false);
+  const [certTitle, setCertTitle] = useState('');
+  const [certIssuer, setCertIssuer] = useState('');
+  const [certYear, setCertYear] = useState(new Date().getFullYear().toString());
+  const [certCredentialId, setCertCredentialId] = useState('');
+  const [certCredentialUrl, setCertCredentialUrl] = useState('');
 
   if (!isOpen || !coach) return null;
 
-  const coachTitle = getLocalized(coach, 'title', currentLang, defaultLang) || coach.title || 'Kouç & Ekspert';
-  const coachBio = getLocalized(coach, 'bio', currentLang, defaultLang) || coach.bio || '';
-  const coachExp = getLocalized(coach, 'experience', currentLang, defaultLang) || coach.experience || '';
-  const rawSpecialties = getLocalizedArray(coach, 'specialties', currentLang, defaultLang);
+  // Real-time coach reference from coachesList
+  const liveCoach = coachesList.find(c => c.id === coach.id) || coach;
+
+  const coachTitle = getLocalized(liveCoach, 'title', currentLang, defaultLang) || liveCoach.title || 'Kouç & Ekspert';
+  const coachBio = getLocalized(liveCoach, 'bio', currentLang, defaultLang) || liveCoach.bio || '';
+  const coachExp = getLocalized(liveCoach, 'experience', currentLang, defaultLang) || liveCoach.experience || '';
+  const rawSpecialties = getLocalizedArray(liveCoach, 'specialties', currentLang, defaultLang);
   const specialties = rawSpecialties.length > 0
     ? rawSpecialties
-    : (Array.isArray(coach.specialties) ? coach.specialties : (coach.specialties || '').split(',').map(s => s.trim()).filter(Boolean));
+    : (Array.isArray(liveCoach.specialties) ? liveCoach.specialties : (liveCoach.specialties || '').split(',').map(s => s.trim()).filter(Boolean));
 
-  const availableSlots = Array.isArray(coach.availableSlots)
-    ? coach.availableSlots
-    : (Array.isArray(coach.available_slots) ? coach.available_slots : []);
+  const availableSlots = Array.isArray(liveCoach.availableSlots)
+    ? liveCoach.availableSlots
+    : (Array.isArray(liveCoach.available_slots) ? liveCoach.available_slots : []);
+
+  // Filter reviews for this coach
+  const expertReviews = (coachReviews || []).filter(r => r.coachId === liveCoach.id);
+  const totalReviewsCount = expertReviews.length || liveCoach.reviewsCount || liveCoach.reviews_count || 0;
+  const currentRating = expertReviews.length > 0
+    ? (expertReviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0) / expertReviews.length).toFixed(1)
+    : (liveCoach.rating || '5.0');
+
+  // Certificates: Admin Issued (from certificatesList)
+  const adminIssuedCerts = (certificatesList || []).filter(c => {
+    if (c.status === 'Silindi') return false;
+    const matchUserId = liveCoach.userId && String(c.userId) === String(liveCoach.userId);
+    const matchName = c.userName && liveCoach.name && c.userName.toLowerCase().trim() === liveCoach.name.toLowerCase().trim();
+    const matchField = c.fields?.recipientName && liveCoach.name && c.fields.recipientName.toLowerCase().trim() === liveCoach.name.toLowerCase().trim();
+    return matchUserId || matchName || matchField;
+  });
+
+  // Certificates: Self-added by coach
+  const customCerts = Array.isArray(liveCoach.customCertificates) ? liveCoach.customCertificates : [];
+
+  // Check if current logged-in user is this expert or an Admin
+  const isExpertSelf = currentUser && (
+    (liveCoach.userId && String(currentUser.id) === String(liveCoach.userId)) ||
+    (currentUser.email && liveCoach.email && currentUser.email.toLowerCase() === liveCoach.email.toLowerCase()) ||
+    (currentUser.name && liveCoach.name && currentUser.name.toLowerCase().trim() === liveCoach.name.toLowerCase().trim()) ||
+    currentUser.role === 'Admin'
+  );
 
   const handleBook = () => {
     onClose();
     if (openBooking) {
-      openBooking(coach.id);
+      openBooking(liveCoach.id);
     }
+  };
+
+  const handleReviewSubmit = (e) => {
+    e.preventDefault();
+    if (!reviewComment.trim()) return;
+    setIsSubmittingReview(true);
+    try {
+      addCoachReview(liveCoach.id, {
+        rating: userRating,
+        comment: reviewComment.trim(),
+        userName: reviewerName.trim() || currentUser?.name || 'İstifadəçi'
+      });
+      setReviewComment('');
+      setReviewerName('');
+      setUserRating(5);
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
+
+  const handleAddCustomCert = (e) => {
+    e.preventDefault();
+    if (!certTitle.trim() || !certIssuer.trim()) return;
+    addCoachCertificate(liveCoach.id, {
+      title: certTitle.trim(),
+      issuer: certIssuer.trim(),
+      issueDate: certYear.trim(),
+      credentialId: certCredentialId.trim(),
+      credentialUrl: certCredentialUrl.trim()
+    });
+    setCertTitle('');
+    setCertIssuer('');
+    setCertYear(new Date().getFullYear().toString());
+    setCertCredentialId('');
+    setCertCredentialUrl('');
+    setShowAddCertModal(false);
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
       {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-[#070f1e]/75 backdrop-blur-md transition-opacity animate-fadeIn" 
+        className="fixed inset-0 bg-[#070f1e]/80 backdrop-blur-md transition-opacity animate-fadeIn" 
         onClick={onClose} 
       />
 
@@ -41,7 +135,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="expert-profile-title"
-        className="relative bg-white border border-[#c5a059]/40 rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden z-10 animate-scaleUp text-[#071326] my-8"
+        className="relative bg-white border border-[#c5a059]/40 rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden z-10 animate-scaleUp text-[#071326] my-6"
       >
         {/* Top Gold Gradient Bar */}
         <div className="h-2 w-full bg-gradient-to-r from-[#c5a059] via-[#e5c57d] to-[#775a19]" />
@@ -59,15 +153,15 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
           {/* Header with Avatar and Basic Info */}
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 pb-6 border-b border-[#e2e8f0]">
             <div className="relative shrink-0">
-              {coach.avatar || coach.image ? (
+              {liveCoach.avatar || liveCoach.image ? (
                 <img
-                  src={coach.avatar || coach.image}
-                  alt={coach.name}
+                  src={liveCoach.avatar || liveCoach.image}
+                  alt={liveCoach.name}
                   className="w-24 h-24 rounded-2xl object-cover border-2 border-[#c5a059]/40 shadow-md"
                 />
               ) : (
                 <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-[#071326] to-[#0c2242] text-[#e5c57d] font-serif font-bold text-3xl flex items-center justify-center border-2 border-[#c5a059]/40 shadow-md">
-                  {(coach.name || 'E')[0]}
+                  {(liveCoach.name || 'E')[0]}
                 </div>
               )}
               <span 
@@ -92,102 +186,600 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
               </div>
 
               <h2 id="expert-profile-title" className="font-serif text-2xl sm:text-3xl font-medium text-[#071326] mt-2 mb-1">
-                {coach.name}
+                {liveCoach.name}
               </h2>
               <p className="text-xs sm:text-sm text-[#775a19] font-semibold tracking-wide">
                 {coachTitle}
               </p>
 
-              {/* Rating & Reviews */}
-              <div className="flex items-center justify-center sm:justify-start gap-3 mt-3 text-xs text-[#475569]">
-                <div className="flex items-center gap-1 text-amber-500 font-bold">
+              {/* Rating & Reviews overview */}
+              <div className="flex items-center justify-center sm:justify-start gap-3 mt-3 text-xs text-[#475569] flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('reviews')}
+                  className="flex items-center gap-1.5 text-amber-500 font-bold bg-amber-50 hover:bg-amber-100 border border-amber-200/60 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
+                >
                   <span className="material-symbols-outlined text-[16px]">star</span>
-                  <span>{coach.rating || '5.0'}</span>
-                </div>
+                  <span className="text-sm">{currentRating}</span>
+                  <span className="text-slate-500 font-normal">({totalReviewsCount} rəy)</span>
+                </button>
                 <span>•</span>
-                <span>{coach.reviewsCount || coach.reviews_count || 18}+ müsbət rəy</span>
-                <span>•</span>
-                <span className="text-emerald-700 font-medium">ICF Sertifikatlı</span>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('certificates')}
+                  className="flex items-center gap-1 text-emerald-700 hover:text-emerald-800 font-medium cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[16px] text-emerald-600">workspace_premium</span>
+                  <span>{adminIssuedCerts.length + customCerts.length} Sertifikat</span>
+                </button>
               </div>
             </div>
           </div>
 
-          {/* Full Bio */}
-          <div className="py-6 border-b border-[#e2e8f0]">
-            <h3 className="text-xs uppercase tracking-wider font-bold text-[#775a19] mb-3 flex items-center gap-1.5">
+          {/* Navigation Tabs */}
+          <div className="flex items-center gap-2 border-b border-[#e2e8f0] pt-4 pb-2">
+            <button
+              type="button"
+              onClick={() => setActiveTab('overview')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === 'overview'
+                  ? 'bg-[#071326] text-[#e5c57d] shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-100'
+              }`}
+            >
               <span className="material-symbols-outlined text-[16px]">person</span>
-              <span>Haqqında & Metodologiya</span>
-            </h3>
-            <p className="text-sm text-[#334155] leading-relaxed font-light whitespace-pre-line">
-              {coachBio}
-            </p>
+              <span>Profil & Haqqında</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('certificates')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === 'certificates'
+                  ? 'bg-[#071326] text-[#e5c57d] shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[16px]">workspace_premium</span>
+              <span>Sertifikatlar</span>
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-[#c5a059]/20 text-[#775a19]">
+                {adminIssuedCerts.length + customCerts.length}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('reviews')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === 'reviews'
+                  ? 'bg-[#071326] text-[#e5c57d] shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[16px]">star</span>
+              <span>Ulduzlar & Rəylər</span>
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
+                {totalReviewsCount}
+              </span>
+            </button>
           </div>
 
-          {/* Specialties */}
-          {specialties.length > 0 && (
-            <div className="py-5 border-b border-[#e2e8f0]">
-              <h3 className="text-xs uppercase tracking-wider font-bold text-[#775a19] mb-3 flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[16px]">psychology</span>
-                <span>İxtisaslaşdığı Sahələr</span>
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {specialties.map((spec, idx) => (
-                  <span
-                    key={idx}
-                    className="px-3 py-1.5 rounded-xl bg-[#faf8f5] text-[#1e293b] border border-[#c5a059]/20 text-xs font-medium"
+          {/* TAB 1: OVERVIEW */}
+          {activeTab === 'overview' && (
+            <div className="space-y-6 pt-5">
+              {/* Full Bio */}
+              <div>
+                <h3 className="text-xs uppercase tracking-wider font-bold text-[#775a19] mb-2 flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-[16px]">psychology</span>
+                  <span>Metodologiya və Təcrübə</span>
+                </h3>
+                <p className="text-sm text-[#334155] leading-relaxed font-light whitespace-pre-line">
+                  {coachBio}
+                </p>
+              </div>
+
+              {/* Specialties */}
+              {specialties.length > 0 && (
+                <div>
+                  <h3 className="text-xs uppercase tracking-wider font-bold text-[#775a19] mb-2.5 flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[16px]">category</span>
+                    <span>İxtisaslaşdığı Sahələr</span>
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {specialties.map((spec, idx) => (
+                      <span
+                        key={idx}
+                        className="px-3 py-1.5 rounded-xl bg-[#faf8f5] text-[#1e293b] border border-[#c5a059]/20 text-xs font-medium"
+                      >
+                        {spec}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Session Details */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="p-4 rounded-2xl bg-[#faf8f5] border border-[#e2e8f0]">
+                  <div className="text-[11px] text-[#64748b] uppercase tracking-wider font-semibold mb-1">
+                    Seans Müddəti
+                  </div>
+                  <div className="text-sm font-bold text-[#071326] flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[17px] text-[#775a19]">timer</span>
+                    <span>{liveCoach.sessionDuration || liveCoach.session_duration || '60 dəqiqə'}</span>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-[#faf8f5] border border-[#e2e8f0]">
+                  <div className="text-[11px] text-[#64748b] uppercase tracking-wider font-semibold mb-1">
+                    İnteraktiv Format
+                  </div>
+                  <div className="text-sm font-bold text-[#071326] flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[17px] text-[#775a19]">videocam</span>
+                    <span>Onlayn (Təhlükəsiz Video Otaq)</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Available Slots */}
+              {availableSlots.length > 0 && (
+                <div>
+                  <h3 className="text-xs uppercase tracking-wider font-bold text-[#775a19] mb-2 flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[16px]">schedule</span>
+                    <span>Yaxın Tarixlər üçün Mövcud Saatlar</span>
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {availableSlots.map((slot, sIdx) => (
+                      <span
+                        key={sIdx}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold"
+                      >
+                        <span className="material-symbols-outlined text-[14px]">event_available</span>
+                        <span>{slot}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB 2: CERTIFICATES */}
+          {activeTab === 'certificates' && (
+            <div className="space-y-6 pt-5">
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div>
+                  <h3 className="text-sm font-bold text-[#071326] flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[20px] text-[#c5a059]">verified</span>
+                    <span>Sertifikatlar və Lisenziyalar</span>
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Admin tərəfindən verilən rəsmi və ekspertin şəxsi peşəkar sertifikatları
+                  </p>
+                </div>
+
+                {isExpertSelf && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAddCertModal(true)}
+                    className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#071326] to-[#0c2242] text-[#e5c57d] hover:text-white text-xs font-bold flex items-center gap-1.5 shadow-md cursor-pointer transition-all"
                   >
-                    {spec}
+                    <span className="material-symbols-outlined text-[16px]">add</span>
+                    <span>Sertifikat Əlavə Et</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Add Custom Certificate Modal/Form */}
+              {showAddCertModal && (
+                <div className="p-5 rounded-2xl bg-amber-50/70 border border-amber-200 shadow-sm animate-fadeIn">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-amber-900 flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[16px]">add_task</span>
+                      <span>Yeni Sertifikat Əlavə Et</span>
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={() => setShowAddCertModal(false)}
+                      className="text-slate-400 hover:text-slate-600 text-xs"
+                    >
+                      Bağla
+                    </button>
+                  </div>
+                  <form onSubmit={handleAddCustomCert} className="space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Sertifikatın Adı *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={certTitle}
+                          onChange={(e) => setCertTitle(e.target.value)}
+                          placeholder="Məs: ICF PCC / Somatik Təlim Sertifikatı"
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#c5a059] bg-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Verən Təşkilat / İnstitut *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={certIssuer}
+                          onChange={(e) => setCertIssuer(e.target.value)}
+                          placeholder="Məs: International Coaching Federation"
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#c5a059] bg-white"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          İl / Tarix
+                        </label>
+                        <input
+                          type="text"
+                          value={certYear}
+                          onChange={(e) => setCertYear(e.target.value)}
+                          placeholder="Məs: 2023"
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#c5a059] bg-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Sertifikat Nömrəsi (ID)
+                        </label>
+                        <input
+                          type="text"
+                          value={certCredentialId}
+                          onChange={(e) => setCertCredentialId(e.target.value)}
+                          placeholder="Məs: ICF-992144"
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#c5a059] bg-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Yoxlama Linki (URL)
+                        </label>
+                        <input
+                          type="url"
+                          value={certCredentialUrl}
+                          onChange={(e) => setCertCredentialUrl(e.target.value)}
+                          placeholder="https://..."
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#c5a059] bg-white"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => setShowAddCertModal(false)}
+                        className="px-3 py-1.5 text-xs rounded-lg text-slate-600 hover:bg-slate-200/60"
+                      >
+                        Ləğv et
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-4 py-1.5 text-xs rounded-lg bg-[#c5a059] hover:bg-[#b08d47] text-white font-bold shadow"
+                      >
+                        Yadda Saxla
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
+
+              {/* Section A: Admin-Issued Certificates */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="material-symbols-outlined text-[18px] text-[#c5a059]">verified_user</span>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#071326]">
+                    Monodoxia Rəsmi Sertifikatları ({adminIssuedCerts.length})
+                  </h4>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                    Akademiya Tərəfindən Təsdiqlənmiş
                   </span>
-                ))}
+                </div>
+
+                {adminIssuedCerts.length === 0 ? (
+                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-500 italic">
+                    Hələlik bu ekspert üçün akademiya daxili verilmiş rəsmi sertifikat yoxdur.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-3">
+                    {adminIssuedCerts.map(cert => (
+                      <div
+                        key={cert.id}
+                        className="p-4 rounded-2xl bg-gradient-to-r from-[#faf8f5] to-white border border-[#c5a059]/40 shadow-sm flex items-start gap-4 hover:shadow-md transition-shadow"
+                      >
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#071326] to-[#0c2242] flex items-center justify-center shrink-0 shadow">
+                          <span className="material-symbols-outlined text-[24px] text-[#e5c57d]">workspace_premium</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-mono text-[11px] font-bold text-[#c5a059]">{cert.number}</span>
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                              ✓ Doğrulanmış
+                            </span>
+                            <span className="text-[11px] text-slate-500">
+                              {cert.fields?.dateValue || cert.issuedAt}
+                            </span>
+                          </div>
+                          <h5 className="font-serif text-sm font-bold text-[#071326] mt-1">
+                            {cert.fields?.courseName || 'Monodoxia Sertifikatı'}
+                          </h5>
+                          <p className="text-[11px] text-slate-600 mt-0.5">
+                            Verildi: <span className="font-semibold text-slate-800">{cert.userName || cert.fields?.recipientName}</span>
+                          </p>
+                        </div>
+                        <div className="shrink-0 flex items-center gap-1.5 self-center">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (setActiveCertView && setCertViewModalOpen) {
+                                setActiveCertView(cert);
+                                setCertViewModalOpen(true);
+                              }
+                            }}
+                            className="px-3 py-1.5 rounded-lg bg-[#071326] hover:bg-[#0c2242] text-[#e5c57d] text-xs font-semibold flex items-center gap-1 cursor-pointer shadow-sm transition-colors"
+                          >
+                            <span className="material-symbols-outlined text-[14px]">visibility</span>
+                            <span>Bax</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Section B: Expert Custom / Professional Certificates */}
+              <div className="pt-2">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="material-symbols-outlined text-[18px] text-[#775a19]">school</span>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#071326]">
+                    Beynəlxalq və Peşəkar Sertifikatlar ({customCerts.length})
+                  </h4>
+                </div>
+
+                {customCerts.length === 0 ? (
+                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-500 italic">
+                    Ekspert tərəfindən əlavə edilmiş digər sertifikat tapılmadı.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {customCerts.map(cert => (
+                      <div
+                        key={cert.id}
+                        className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col justify-between hover:border-[#c5a059]/40 transition-colors relative group"
+                      >
+                        {isExpertSelf && (
+                          <button
+                            type="button"
+                            onClick={() => deleteCoachCertificate(liveCoach.id, cert.id)}
+                            className="absolute top-3 right-3 text-slate-400 hover:text-red-500 p-1 rounded transition-colors"
+                            title="Sertifikatı sil"
+                          >
+                            <span className="material-symbols-outlined text-[16px]">delete</span>
+                          </button>
+                        )}
+                        <div>
+                          <div className="flex items-center gap-1.5 text-[#775a19] text-[11px] font-bold uppercase tracking-wider mb-1">
+                            <span className="material-symbols-outlined text-[15px]">badge</span>
+                            <span>{cert.issuer}</span>
+                          </div>
+                          <h5 className="font-serif text-sm font-bold text-[#071326] leading-snug">
+                            {cert.title}
+                          </h5>
+                          {cert.credentialId && (
+                            <p className="text-[11px] text-slate-500 font-mono mt-1">
+                              ID: {cert.credentialId}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="flex items-center justify-between pt-3 mt-2 border-t border-slate-100 text-[11px] text-slate-500">
+                          <span>{cert.issueDate ? `${cert.issueDate} ili` : 'Təsdiqlənmiş'}</span>
+                          {cert.credentialUrl && (
+                            <a
+                              href={cert.credentialUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[#c5a059] hover:text-[#775a19] font-semibold flex items-center gap-0.5"
+                            >
+                              <span>Doğrula</span>
+                              <span className="material-symbols-outlined text-[13px]">open_in_new</span>
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
 
-          {/* Session Details & Available Slots */}
-          <div className="py-5 border-b border-[#e2e8f0] grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="p-4 rounded-2xl bg-[#faf8f5] border border-[#e2e8f0]">
-              <div className="text-[11px] text-[#64748b] uppercase tracking-wider font-semibold mb-1">
-                Seans Müddəti
-              </div>
-              <div className="text-sm font-bold text-[#071326] flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[17px] text-[#775a19]">timer</span>
-                <span>{coach.sessionDuration || coach.session_duration || '60 dəqiqə'}</span>
-              </div>
-            </div>
+          {/* TAB 3: REVIEWS & RATINGS */}
+          {activeTab === 'reviews' && (
+            <div className="space-y-6 pt-5">
+              {/* Rating Summary Card */}
+              <div className="p-5 rounded-2xl bg-gradient-to-br from-[#faf8f5] to-white border border-[#c5a059]/30 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-5">
+                <div className="flex items-center gap-4 text-center sm:text-left">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#071326] to-[#0c2242] flex flex-col items-center justify-center text-[#e5c57d] shadow-md shrink-0">
+                    <span className="text-2xl font-serif font-bold leading-none">{currentRating}</span>
+                    <span className="text-[10px] text-amber-200 mt-0.5">/ 5.0</span>
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-center sm:justify-start gap-1 text-amber-500">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <span key={star} className="material-symbols-outlined text-[20px]">
+                          {star <= Math.round(Number(currentRating)) ? 'star' : 'star_border'}
+                        </span>
+                      ))}
+                    </div>
+                    <p className="text-xs text-slate-600 mt-1 font-medium">
+                      Ümumi <strong className="text-slate-900">{totalReviewsCount}</strong> istifadəçi rəyi əsasında
+                    </p>
+                  </div>
+                </div>
 
-            <div className="p-4 rounded-2xl bg-[#faf8f5] border border-[#e2e8f0]">
-              <div className="text-[11px] text-[#64748b] uppercase tracking-wider font-semibold mb-1">
-                İnteraktiv Format
-              </div>
-              <div className="text-sm font-bold text-[#071326] flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[17px] text-[#775a19]">videocam</span>
-                <span>Onlayn (Təhlükəsiz Video Otaq)</span>
-              </div>
-            </div>
-          </div>
-
-          {availableSlots.length > 0 && (
-            <div className="py-5">
-              <h3 className="text-xs uppercase tracking-wider font-bold text-[#775a19] mb-3 flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[16px]">schedule</span>
-                <span>Yaxın Tarixlər üçün Mövcud Saatlar</span>
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {availableSlots.map((slot, sIdx) => (
-                  <span
-                    key={sIdx}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold"
-                  >
-                    <span className="material-symbols-outlined text-[14px]">event_available</span>
-                    <span>{slot}</span>
+                <div className="text-center sm:text-right">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold">
+                    <span className="material-symbols-outlined text-[15px] text-emerald-600">verified</span>
+                    <span>100% Müsbət Təcrübə</span>
                   </span>
-                ))}
+                </div>
+              </div>
+
+              {/* Review Submission Form */}
+              <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[#071326] mb-3 flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-[16px] text-amber-500">rate_review</span>
+                  <span>Ekspertə Ulduz Ver və Rəy Yaz</span>
+                </h4>
+
+                <form onSubmit={handleReviewSubmit} className="space-y-3">
+                  {/* Star rating selector */}
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      Qiymətləndirməniz:
+                    </label>
+                    <div className="flex items-center gap-1.5">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          onMouseEnter={() => setHoverRating(s)}
+                          onMouseLeave={() => setHoverRating(0)}
+                          onClick={() => setUserRating(s)}
+                          className="p-1 cursor-pointer transition-transform hover:scale-110 focus:outline-none"
+                          aria-label={`${s} ulduz`}
+                        >
+                          <span
+                            className={`material-symbols-outlined text-[28px] ${
+                              s <= (hoverRating || userRating) ? 'text-amber-500' : 'text-slate-300'
+                            }`}
+                          >
+                            star
+                          </span>
+                        </button>
+                      ))}
+                      <span className="text-xs font-bold text-amber-600 ml-2">
+                        {userRating === 5 ? 'Əla (5/5)' : userRating === 4 ? 'Çox Yaxşı (4/5)' : userRating === 3 ? 'Yaxşı (3/5)' : `${userRating} Ulduz`}
+                      </span>
+                    </div>
+                  </div>
+
+                  {!currentUser && (
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                        Adınız və Soyadınız
+                      </label>
+                      <input
+                        type="text"
+                        value={reviewerName}
+                        onChange={(e) => setReviewerName(e.target.value)}
+                        placeholder="Məs: Aysel Məmmədova"
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#c5a059]"
+                      />
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      Rəyiniz və Təəssüratınız *
+                    </label>
+                    <textarea
+                      required
+                      rows={3}
+                      value={reviewComment}
+                      onChange={(e) => setReviewComment(e.target.value)}
+                      placeholder="Ekspertlə seans təcrübəniz, əldə etdiyiniz nəticələr və tövsiyələriniz barədə yazın..."
+                      className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#c5a059] resize-none"
+                    />
+                  </div>
+
+                  <div className="flex justify-end">
+                    <button
+                      type="submit"
+                      disabled={isSubmittingReview || !reviewComment.trim()}
+                      className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#071326] to-[#0c2242] text-white hover:text-[#e5c57d] text-xs font-bold tracking-wider uppercase shadow-md transition-all flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-[16px] text-[#e5c57d]">send</span>
+                      <span>Rəyi Paylaş</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              {/* Reviews List */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  İstifadəçi Rəyləri ({expertReviews.length})
+                </h4>
+
+                {expertReviews.length === 0 ? (
+                  <div className="p-8 rounded-2xl bg-[#faf8f5] border border-slate-200 text-center">
+                    <span className="material-symbols-outlined text-[36px] text-amber-300">chat</span>
+                    <p className="text-xs text-slate-500 mt-2">
+                      İlk rəy yazan siz olun! Yuxarıdakı form vasitəsilə təəssüratlarınızı bölüşün.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {expertReviews.map((rev) => (
+                      <div
+                        key={rev.id}
+                        className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm"
+                      >
+                        <div className="flex items-start justify-between gap-3 mb-2">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 text-[#071326] font-bold text-xs flex items-center justify-center">
+                              {(rev.userName || 'İ')[0]}
+                            </div>
+                            <div>
+                              <div className="text-xs font-bold text-[#071326] flex items-center gap-1.5">
+                                <span>{rev.userName}</span>
+                                {rev.userRole && (
+                                  <span className="text-[10px] font-semibold text-[#775a19] bg-[#c5a059]/15 px-1.5 py-0.2 rounded">
+                                    {rev.userRole}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-[10px] text-slate-400">
+                                {rev.createdAt ? new Date(rev.createdAt).toLocaleDateString('az-AZ') : 'Yaxın zamanda'}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-0.5 text-amber-500">
+                            {[1, 2, 3, 4, 5].map((st) => (
+                              <span key={st} className="material-symbols-outlined text-[16px]">
+                                {st <= rev.rating ? 'star' : 'star_border'}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        <p className="text-xs text-[#334155] leading-relaxed pl-10">
+                          {rev.comment}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
 
           {/* Action CTAs */}
-          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="pt-6 mt-6 border-t border-[#e2e8f0] flex flex-col sm:flex-row items-center justify-between gap-4">
             <button
               type="button"
               onClick={onClose}

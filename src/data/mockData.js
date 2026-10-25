@@ -1049,6 +1049,23 @@ export const COACHES = [
     image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCn9ZjfxW-PL-o_xZ9Me83EiOB9x_aaIbuIEYtOce00950-vB-hL99E3BUxNBeJriyWWNWGGDlnTJRCJGRwkjlEPSCAIQYPacFkDcUc0Gx7SG3u_LdP-yJ9ZvAxESWMhqm8PQ0_Jjk2lpNGCZW3k-pFcnjQ873cYwWNg72N95sYxMH-w5fpXfjJZfJo1LZC2K5AStfFo8Xfl-GQ968CVb_yfDTaqIDcMiTxISBiZMVtj4d_vRd_K_L3",
     specialties: ["Travma terapiyası", "Şüuraltı inanc dəyişimi", "Mindfulness"],
     availableSlots: ["Sabah 11:00", "Sabah 15:30", "Cümə 18:00"],
+    customCertificates: [
+      {
+        id: "cc-leyla-1",
+        title: "ICF Professional Certified Coach (PCC)",
+        issuer: "International Coaching Federation",
+        issueDate: "2021",
+        credentialId: "ICF-PCC-882190",
+        credentialUrl: "https://coachingfederation.org"
+      },
+      {
+        id: "cc-leyla-2",
+        title: "Advanced Cognitive Behavioral Therapy Practitioner",
+        issuer: "Beck Institute",
+        issueDate: "2019",
+        credentialId: "BI-CBT-4412"
+      }
+    ],
     translations: {
       az: {
         title: "PhD Psixologiya | ICF PCC",
@@ -1085,6 +1102,22 @@ export const COACHES = [
     image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBdkVIgrGvOaJjxAlQWP_tOgF6MLIc1W_hVcrzQBsdy3Nmj3_bg1aNTtm-J7ngXIQHCb_HUk8Wgmb1fcNip_lsrL-Gmar-UetvxkeR45_vSt4q1wmYr827ItSKFD3KvdecV_H8wq93ilFYULT8I6h79AaRYC4hHvZXNqnITSxTBQyhdlEbyKM6jmxqnqbhzDwzEMCBH3hkOs9Ek7d1JxL4eWrgGao9MIfgwjA76wbSTi5zJlsf9FF_w",
     specialties: ["EQ Liderlik", "Karyera sıçrayışı", "Stres menecmenti"],
     availableSlots: ["Bazar ertəsi 14:00", "Çərşənbə 16:30", "Şənbə 12:00"],
+    customCertificates: [
+      {
+        id: "cc-farid-1",
+        title: "ICF Master Certified Coach (MCC)",
+        issuer: "International Coaching Federation",
+        issueDate: "2023",
+        credentialId: "ICF-MCC-019482"
+      },
+      {
+        id: "cc-farid-2",
+        title: "Emotional Intelligence Master Trainer",
+        issuer: "Six Seconds EQ Network",
+        issueDate: "2020",
+        credentialId: "EQ-TR-9902"
+      }
+    ],
     translations: {
       az: {
         title: "ICF MCC Kouç | EQ Master",
@@ -1122,6 +1155,22 @@ export const COACHES = [
     image: "https://lh3.googleusercontent.com/aida-public/AB6AXuApho0mk-jt09_EKWhr9Kr-rV4ni1mNVZ9NMTTJnSr7Io_rS9AF4YMxdvwdvNBSQ5niLnit1PKeNozwDdDlqiBGbJTz1MOiuOo8yyY1b3AbDK33_Lc-ZOXlb5WzmwRuSsfZWSPYV7fmbNuRtSts2hYeTZFmwlHsu99rLvjRaczoStwMfhP4xbjxoLfdcfKKedG3I9Wsc86Mw84ULdwPbgpzWaz6dnC5ZnLFz2n5VuHMa6K1rX1itB96",
     specialties: ["Münasibətlər", "Bədən-zihin harmoniyası", "Özünü bağışlama"],
     availableSlots: ["Sabah 17:00", "Cümə axşamı 19:00", "Şənbə 15:00"],
+    customCertificates: [
+      {
+        id: "cc-nargiz-1",
+        title: "Somatic Experiencing Practitioner (SEP)",
+        issuer: "Somatic Experiencing International",
+        issueDate: "2022",
+        credentialId: "SEP-AZ-2022-77"
+      },
+      {
+        id: "cc-nargiz-2",
+        title: "Certified Relationship & Family Coach",
+        issuer: "Erickson Coaching International",
+        issueDate: "2020",
+        credentialId: "ECI-RFC-55102"
+      }
+    ],
     translations: {
       az: {
         title: "Münasibət Kouçu | Somatik Təlimçi",
@@ -1148,6 +1197,49 @@ export const COACHES = [
         specialties: ["Отношения", "Гармония разума и тела", "Прощение себя"]
       }
     }
+  }
+];
+
+export const INITIAL_COACH_REVIEWS = [
+  {
+    id: "cr-1",
+    coachId: "coach-nargiz",
+    userId: "u-anon-1",
+    userName: "Aysel M.",
+    userRole: "Üzv",
+    rating: 5,
+    comment: "Nərgiz xanımla keçdiyimiz somatik seanslar münasibətlərimdəki blokları tamamilə aradan qaldırdı. Yanaşması və diqqəti heyranedicidir!",
+    createdAt: "2025-02-14T10:30:00Z"
+  },
+  {
+    id: "cr-2",
+    coachId: "coach-nargiz",
+    userId: "u-anon-2",
+    userName: "Rəşad Quliyev",
+    userRole: "Üzv",
+    rating: 5,
+    comment: "Ailə daxili ünsiyyəti bərpa etməkdə ən böyük dəstəkçimiz oldu. Dərin təcrübəsi hər dəqiqədə hiss olunur.",
+    createdAt: "2025-02-18T14:15:00Z"
+  },
+  {
+    id: "cr-3",
+    coachId: "coach-leyla",
+    userId: "u-anon-3",
+    userName: "Kamran S.",
+    userRole: "VIP Üzv",
+    rating: 5,
+    comment: "Dr. Leyla xanımın koqnitiv terapiya və şüuraltı texnikaları inanılmaz nəticə verdi. İllərdir davam edən təşvişimi aradan qaldırdı.",
+    createdAt: "2025-02-10T09:00:00Z"
+  },
+  {
+    id: "cr-4",
+    coachId: "coach-farid",
+    userId: "u-anon-4",
+    userName: "Elnur Vəliyev",
+    userRole: "Biznes Sahibi",
+    rating: 5,
+    comment: "Fərid bəylə ekzekyutiv kouçinq komandamızı və şirkətimin böhran idarəçiliyini növbəti səviyyəyə qaldırdı.",
+    createdAt: "2025-02-12T16:45:00Z"
   }
 ];
 

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { APPLICATION_STATUSES, TARGET_TYPE_MAP, INITIAL_FORM_FIELDS } from '../../data/applicationData';
 import { useLanguage } from '../../i18n/LanguageContext';
@@ -32,6 +32,9 @@ export default function ProfileModal() {
     certificatesList = [],
     setCertViewModalOpen,
     setActiveCertView,
+    coachesList = [],
+    addCoachCertificate,
+    deleteCoachCertificate,
   } = useApp();
 
   const activeTab = activeProfileTab || 'profile';
@@ -58,6 +61,14 @@ export default function ProfileModal() {
   });
   const [passwordStatus, setPasswordStatus] = useState(null);
   const [expandedAppId, setExpandedAppId] = useState(null);
+
+  // Coach custom certificate states
+  const [showCoachCertForm, setShowCoachCertForm] = useState(false);
+  const [coachCertTitle, setCoachCertTitle] = useState('');
+  const [coachCertIssuer, setCoachCertIssuer] = useState('');
+  const [coachCertYear, setCoachCertYear] = useState(new Date().getFullYear().toString());
+  const [coachCertId, setCoachCertId] = useState('');
+  const [coachCertUrl, setCoachCertUrl] = useState('');
 
   useEffect(() => {
     if (currentUser) {
@@ -1225,6 +1236,176 @@ export default function ProfileModal() {
                     })}
                   </div>
                 )}
+
+                {/* Coach Section: My Professional & External Certificates */}
+                {(() => {
+                  const myCoachProfile = coachesList.find(
+                    c => (c.userId && String(c.userId) === String(currentUser?.id)) ||
+                         (c.name && currentUser?.name && c.name.toLowerCase().trim() === currentUser?.name.toLowerCase().trim())
+                  );
+                  if (!myCoachProfile && currentUser?.role !== 'Kouç' && currentUser?.role !== 'Admin') return null;
+
+                  const coachId = myCoachProfile ? myCoachProfile.id : 'coach-nargiz';
+                  const myCustomCerts = myCoachProfile?.customCertificates || [];
+
+                  const handleSaveCoachCert = (e) => {
+                    e.preventDefault();
+                    if (!coachCertTitle.trim() || !coachCertIssuer.trim()) return;
+                    addCoachCertificate(coachId, {
+                      title: coachCertTitle.trim(),
+                      issuer: coachCertIssuer.trim(),
+                      issueDate: coachCertYear.trim(),
+                      credentialId: coachCertId.trim(),
+                      credentialUrl: coachCertUrl.trim()
+                    });
+                    setCoachCertTitle('');
+                    setCoachCertIssuer('');
+                    setCoachCertYear(new Date().getFullYear().toString());
+                    setCoachCertId('');
+                    setCoachCertUrl('');
+                    setShowCoachCertForm(false);
+                  };
+
+                  return (
+                    <div className="pt-6 border-t border-slate-200 space-y-4">
+                      <div className="flex items-center justify-between flex-wrap gap-2">
+                        <div>
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5 font-mono">
+                            <span className="material-symbols-outlined text-[16px] text-amber-600">verified</span>
+                            Ekspert Sertifikatlarım ({myCustomCerts.length})
+                          </h4>
+                          <p className="text-[11px] text-slate-500">
+                            Profilinizdə və ekspert kartınızda görünəcək peşəkar akkreditasiyalarınız
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setShowCoachCertForm(!showCoachCertForm)}
+                          className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#071326] to-[#0c2242] text-[#e5c57d] hover:text-white text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer transition-all"
+                        >
+                          <span className="material-symbols-outlined text-[15px]">
+                            {showCoachCertForm ? 'close' : 'add'}
+                          </span>
+                          <span>{showCoachCertForm ? 'Bağla' : '+ Sertifikat Əlavə Et'}</span>
+                        </button>
+                      </div>
+
+                      {showCoachCertForm && (
+                        <form onSubmit={handleSaveCoachCert} className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-3 animate-fadeIn">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                                Sertifikatın Adı *
+                              </label>
+                              <input
+                                type="text"
+                                required
+                                value={coachCertTitle}
+                                onChange={(e) => setCoachCertTitle(e.target.value)}
+                                placeholder="Məs: ICF ACC / EMCC Kouç Sertifikatı"
+                                className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                                Təşkilat / İnstitut *
+                              </label>
+                              <input
+                                type="text"
+                                required
+                                value={coachCertIssuer}
+                                onChange={(e) => setCoachCertIssuer(e.target.value)}
+                                placeholder="Məs: International Coaching Federation"
+                                className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                              <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                                Verilmə Tarixi / İli
+                              </label>
+                              <input
+                                type="text"
+                                value={coachCertYear}
+                                onChange={(e) => setCoachCertYear(e.target.value)}
+                                placeholder="2024"
+                                className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                                Qeydiyyat Nömrəsi (ID)
+                              </label>
+                              <input
+                                type="text"
+                                value={coachCertId}
+                                onChange={(e) => setCoachCertId(e.target.value)}
+                                placeholder="Məs: ID-77881"
+                                className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                                Onlayn Təsdiq Linki
+                              </label>
+                              <input
+                                type="url"
+                                value={coachCertUrl}
+                                onChange={(e) => setCoachCertUrl(e.target.value)}
+                                placeholder="https://..."
+                                className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="flex justify-end gap-2 pt-1">
+                            <button
+                              type="button"
+                              onClick={() => setShowCoachCertForm(false)}
+                              className="px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-200/60 rounded-lg cursor-pointer"
+                            >
+                              Ləğv et
+                            </button>
+                            <button
+                              type="submit"
+                              className="px-4 py-1.5 text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 rounded-lg shadow-sm cursor-pointer"
+                            >
+                              Yadda Saxla
+                            </button>
+                          </div>
+                        </form>
+                      )}
+
+                      {myCustomCerts.length === 0 ? (
+                        <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-500 italic">
+                          Hələlik peşəkar sertifikat əlavə edilməyib.
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {myCustomCerts.map(cc => (
+                            <div key={cc.id} className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-start justify-between gap-3">
+                              <div className="min-w-0 flex-1">
+                                <div className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">{cc.issuer}</div>
+                                <div className="text-xs font-bold text-slate-900 truncate mt-0.5">{cc.title}</div>
+                                <div className="text-[10px] text-slate-400 mt-0.5">{cc.issueDate} {cc.credentialId && `· ID: ${cc.credentialId}`}</div>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => deleteCoachCertificate(coachId, cc.id)}
+                                className="text-slate-400 hover:text-red-600 p-1 rounded transition-colors cursor-pointer"
+                                title="Sil"
+                              >
+                                <span className="material-symbols-outlined text-[16px]">delete</span>
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
             );
           })()}

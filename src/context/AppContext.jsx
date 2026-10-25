@@ -9,7 +9,8 @@ import {
   INITIAL_TESTIMONIALS,
   INITIAL_FAQS,
   INITIAL_HOME_CONTENT,
-  DEFAULT_NAVBAR_ITEMS
+  DEFAULT_NAVBAR_ITEMS,
+  INITIAL_COACH_REVIEWS
 } from '../data/mockData';
 import {
   INITIAL_APPLICATIONS,
@@ -448,7 +449,17 @@ export function AppProvider({ children }) {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.map(c => c.id === 'coach-nargiz' && !c.userId ? { ...c, userId: 'u-nargiz' } : c);
+          return parsed.map(c => {
+            const seed = COACHES.find(sc => sc.id === c.id);
+            const mergedCustomCerts = (c.customCertificates && c.customCertificates.length > 0) 
+              ? c.customCertificates 
+              : (seed?.customCertificates || []);
+            return {
+              ...c,
+              userId: (c.id === 'coach-nargiz' && !c.userId) ? 'u-nargiz' : (c.userId || seed?.userId),
+              customCertificates: mergedCustomCerts
+            };
+          });
         }
       } catch (e) {
         // fallback
@@ -456,6 +467,21 @@ export function AppProvider({ children }) {
     }
     return COACHES;
   });
+
+  // Coach Reviews State (Ratings & Reviews for Experts)
+  const [coachReviews, setCoachReviews] = useState(() => {
+    try {
+      const saved = localStorage.getItem('monodoxia_coach_reviews');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return INITIAL_COACH_REVIEWS;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('monodoxia_coach_reviews', JSON.stringify(coachReviews));
+    } catch (e) {}
+  }, [coachReviews]);
 
   const [testimonialsList, setTestimonialsList] = useState(() => {
     const saved = localStorage.getItem('monodoxia_testimonials');
@@ -554,9 +580,35 @@ export function AppProvider({ children }) {
   const [certificatesList, setCertificatesList] = useState(() => {
     try {
       const saved = localStorage.getItem('monodoxia_certificates_v2');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
     } catch (e) {}
-    return [];
+    // Seed verified admin certificate for coach Nərgiz Qasımova
+    return [
+      {
+        id: 'cert-seed-nargiz',
+        publicId: 'cert-monodoxia-nargiz-01',
+        number: 'MA-000001',
+        userId: 'u-nargiz',
+        userName: 'Nərgiz Qasımova',
+        status: 'Yayında',
+        fields: {
+          recipientName: 'Nərgiz Qasımova',
+          courseName: 'Münasibət Dinamikası və Somatik Kouçinq Master Proqramı',
+          certNumber: 'MA-000001',
+          dateValue: '2025-01-15',
+          directorTitle: 'Akademiya Rəhbəri & Baş Təlimçi',
+          directorName: 'Monodoxia İdarə Heyəti'
+        },
+        version: 1,
+        issuedAt: '2025-01-15',
+        createdBy: 'u7',
+        createdAt: '2025-01-15T12:00:00Z',
+        updatedAt: '2025-01-15T12:00:00Z'
+      }
+    ];
   });
 
   // Atomic counter for certificate numbers (MA-000001, MA-000002, ...)
@@ -3554,6 +3606,99 @@ export function AppProvider({ children }) {
     showToast('Kouç silindi', 'info');
   };
 
+  // Expert Reviews & Star Ratings
+  const addCoachReview = (coachId, reviewData) => {
+    const newReview = {
+      id: 'cr-' + Date.now(),
+      coachId,
+      userId: currentUser?.id || 'u-guest-' + Date.now(),
+      userName: currentUser?.name || reviewData.userName || 'İstifadəçi',
+      userRole: currentUser?.role || 'Üzv',
+      rating: Number(reviewData.rating) || 5,
+      comment: reviewData.comment || '',
+      createdAt: new Date().toISOString()
+    };
+
+    setCoachReviews(prev => [newReview, ...prev]);
+
+    // Recalculate coach's rating and reviewsCount
+    setCoachesList(prev => {
+      const nextList = prev.map(c => {
+        if (c.id === coachId) {
+          const coachAllReviews = [newReview, ...coachReviews.filter(r => r.coachId === coachId)];
+          const avg = (coachAllReviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0) / coachAllReviews.length).toFixed(1);
+          return {
+            ...c,
+            rating: avg,
+            reviewsCount: coachAllReviews.length
+          };
+        }
+        return c;
+      });
+      try {
+        localStorage.setItem('monodoxia_coaches', JSON.stringify(nextList));
+      } catch (e) {}
+      return nextList;
+    });
+
+    showToast('Rəyiniz və qiymətləndirməniz uğurla əlavə edildi!', 'success');
+    return newReview;
+  };
+
+  // Expert Self-Added Certificates
+  const addCoachCertificate = (coachId, certData) => {
+    const newCustomCert = {
+      id: 'cc-' + Date.now(),
+      title: certData.title,
+      issuer: certData.issuer || 'Akkreditasiya Təşkilatı',
+      issueDate: certData.issueDate || new Date().getFullYear().toString(),
+      credentialId: certData.credentialId || '',
+      credentialUrl: certData.credentialUrl || '',
+      createdAt: new Date().toISOString()
+    };
+
+    setCoachesList(prev => {
+      const nextList = prev.map(c => {
+        if (c.id === coachId) {
+          const currentCerts = Array.isArray(c.customCertificates) ? c.customCertificates : [];
+          return {
+            ...c,
+            customCertificates: [...currentCerts, newCustomCert]
+          };
+        }
+        return c;
+      });
+      try {
+        localStorage.setItem('monodoxia_coaches', JSON.stringify(nextList));
+      } catch (e) {}
+      return nextList;
+    });
+
+    showToast('Peşəkar sertifikat profilinizə əlavə edildi!', 'success');
+    return newCustomCert;
+  };
+
+  const deleteCoachCertificate = (coachId, certId) => {
+    setCoachesList(prev => {
+      const nextList = prev.map(c => {
+        if (c.id === coachId) {
+          const currentCerts = Array.isArray(c.customCertificates) ? c.customCertificates : [];
+          return {
+            ...c,
+            customCertificates: currentCerts.filter(cc => cc.id !== certId)
+          };
+        }
+        return c;
+      });
+      try {
+        localStorage.setItem('monodoxia_coaches', JSON.stringify(nextList));
+      } catch (e) {}
+      return nextList;
+    });
+
+    showToast('Sertifikat silindi', 'info');
+  };
+
   const syncAllLocalDataToDatabase = async () => {
     showToast('Bütün lokal məlumatlar MySQL bazasına sinxronlaşdırılır...', 'info');
     const payload = {
@@ -3843,6 +3988,10 @@ export function AppProvider({ children }) {
       addCoach,
       updateCoach,
       deleteCoach,
+      coachReviews,
+      addCoachReview,
+      addCoachCertificate,
+      deleteCoachCertificate,
       testimonialsList,
       addTestimonial,
       updateTestimonial,
