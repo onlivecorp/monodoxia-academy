@@ -82,15 +82,18 @@ export default function ClubPage() {
                 }`}
               >
                 <span>İllik Abunəlik</span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-[#c5a059] to-[#775a19] text-[#071326] tracking-wider uppercase shadow-sm">
-                  2 AY HƏDİYYƏ
-                </span>
+                {!club.annualBadgeDisabled && (
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-[#c5a059] to-[#775a19] text-[#071326] tracking-wider uppercase shadow-sm">
+                    {getLocalized(club, 'annualBadgeText', currentLang, defaultLang) || '2 AY HƏDİYYƏ'}
+                  </span>
+                )}
               </button>
             </div>
             <p className="text-xs text-[#64748b] mt-3 font-light">
               İllik ödənişdə 2 ay pulsuz və bütün qapalı tədbirlərə prioritet qeydiyyat haqqı verilir.
             </p>
           </div>
+
 
           {/* Membership Tiers Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20 items-stretch">

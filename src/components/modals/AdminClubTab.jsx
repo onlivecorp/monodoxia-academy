@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
+import { useLanguage } from '../../i18n/LanguageContext';
 import AdminInlineTranslator from './AdminInlineTranslator';
 import AdminConfirmModal from './AdminConfirmModal';
 import AdminPopupModal from './AdminPopupModal';
@@ -52,6 +53,8 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
     addClubTier,
     updateClubTier,
     deleteClubTier,
+    homeContent,
+    updateHomeBlock,
     showToast
   } = useApp();
 
@@ -91,6 +94,33 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
 
   // Delete Confirmation State
   const [tierToDelete, setTierToDelete] = useState(null);
+
+  // Annual Badge Config State
+  const clubCms = homeContent?.club || {};
+  const [badgeText, setBadgeText] = useState(() => clubCms.annualBadgeText || '2 AY HƏDİYYƏ');
+  const [badgeDisabled, setBadgeDisabled] = useState(() => Boolean(clubCms.annualBadgeDisabled));
+  const [badgeTrans, setBadgeTrans] = useState(() => ({
+    az: clubCms.translations?.az?.annualBadgeText || '',
+    en: clubCms.translations?.en?.annualBadgeText || '',
+    tr: clubCms.translations?.tr?.annualBadgeText || '',
+    ru: clubCms.translations?.ru?.annualBadgeText || ''
+  }));
+
+  const handleSaveBadge = () => {
+    const existingTrans = clubCms.translations || {};
+    updateHomeBlock('club', {
+      ...clubCms,
+      annualBadgeText: badgeText.trim() || '2 AY HƏDİYYƏ',
+      annualBadgeDisabled: badgeDisabled,
+      translations: {
+        ...existingTrans,
+        az: { ...(existingTrans.az || {}), annualBadgeText: badgeTrans.az || badgeText.trim() || '2 AY HƏDİYYƏ' },
+        en: { ...(existingTrans.en || {}), annualBadgeText: badgeTrans.en || '' },
+        tr: { ...(existingTrans.tr || {}), annualBadgeText: badgeTrans.tr || '' },
+        ru: { ...(existingTrans.ru || {}), annualBadgeText: badgeTrans.ru || '' }
+      }
+    });
+  };
 
   const filteredTiers = useMemo(() => {
     return clubTiersList.filter(t => {
@@ -234,6 +264,112 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
           >
             <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>add_circle</span>
             <span>Yeni Paket</span>
+          </button>
+        </div>
+      </div>
+
+      {/* ─── Annual Badge Config ─── */}
+      <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '10px', padding: '16px 20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', marginBottom: '14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#92400e' }}>local_offer</span>
+            <div>
+              <p style={{ fontSize: '12px', fontWeight: 700, color: '#78350f', margin: 0 }}>İllik Abunəlik Badge</p>
+              <p style={{ fontSize: '10px', color: '#a16207', margin: 0, marginTop: '2px' }}>«İllik Abunəlik» düyməsindəki badge mətni və görünüşü</p>
+            </div>
+          </div>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 600, color: '#64748b', cursor: 'pointer', userSelect: 'none' }}>
+            <input
+              type="checkbox"
+              checked={badgeDisabled}
+              onChange={(e) => setBadgeDisabled(e.target.checked)}
+              style={{ cursor: 'pointer', accentColor: '#c5a059', width: '15px', height: '15px' }}
+            />
+            <span>Badge-i deaktiv et (Gizlət)</span>
+          </label>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px', opacity: badgeDisabled ? 0.45 : 1, pointerEvents: badgeDisabled ? 'none' : 'auto' }}>
+          {/* AZ */}
+          <div>
+            <label className="admin-label" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ fontSize: '9px', background: '#c5a059', color: '#fff', borderRadius: '3px', padding: '1px 5px', fontWeight: 700 }}>AZ</span>
+              Badge Mətni (Azərbaycan)
+            </label>
+            <input
+              type="text"
+              value={badgeText}
+              onChange={(e) => { setBadgeText(e.target.value); setBadgeTrans(p => ({ ...p, az: e.target.value })); }}
+              placeholder="2 AY HƏDİYYƏ"
+              className="admin-input"
+              style={{ fontWeight: 700, fontSize: '11px', textTransform: 'uppercase' }}
+            />
+          </div>
+          {/* EN */}
+          <div>
+            <label className="admin-label" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ fontSize: '9px', background: '#3b82f6', color: '#fff', borderRadius: '3px', padding: '1px 5px', fontWeight: 700 }}>EN</span>
+              Badge Text (English)
+            </label>
+            <input
+              type="text"
+              value={badgeTrans.en}
+              onChange={(e) => setBadgeTrans(p => ({ ...p, en: e.target.value }))}
+              placeholder="2 MONTHS FREE"
+              className="admin-input"
+              style={{ fontWeight: 700, fontSize: '11px', textTransform: 'uppercase' }}
+            />
+          </div>
+          {/* TR */}
+          <div>
+            <label className="admin-label" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ fontSize: '9px', background: '#ef4444', color: '#fff', borderRadius: '3px', padding: '1px 5px', fontWeight: 700 }}>TR</span>
+              Rozet Metni (Türkçe)
+            </label>
+            <input
+              type="text"
+              value={badgeTrans.tr}
+              onChange={(e) => setBadgeTrans(p => ({ ...p, tr: e.target.value }))}
+              placeholder="2 AY HEDİYE"
+              className="admin-input"
+              style={{ fontWeight: 700, fontSize: '11px', textTransform: 'uppercase' }}
+            />
+          </div>
+          {/* RU */}
+          <div>
+            <label className="admin-label" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ fontSize: '9px', background: '#8b5cf6', color: '#fff', borderRadius: '3px', padding: '1px 5px', fontWeight: 700 }}>RU</span>
+              Текст значка (Русский)
+            </label>
+            <input
+              type="text"
+              value={badgeTrans.ru}
+              onChange={(e) => setBadgeTrans(p => ({ ...p, ru: e.target.value }))}
+              placeholder="2 МЕСЯЦА В ПОДАРОК"
+              className="admin-input"
+              style={{ fontWeight: 700, fontSize: '11px', textTransform: 'uppercase' }}
+            />
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '14px', paddingTop: '12px', borderTop: '1px solid #fde68a' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '10px', color: '#92400e' }}>Önizləmə:</span>
+            {!badgeDisabled && (
+              <span style={{ display: 'inline-block', padding: '2px 10px', borderRadius: '999px', fontSize: '10px', fontWeight: 700, background: 'linear-gradient(to right, #c5a059, #775a19)', color: '#071326', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                {badgeText || '2 AY HƏDİYYƏ'}
+              </span>
+            )}
+            {badgeDisabled && <span style={{ fontSize: '10px', color: '#94a3b8', fontStyle: 'italic' }}>Gizlədilmiş</span>}
+          </div>
+          <button
+            type="button"
+            onClick={handleSaveBadge}
+            className="admin-btn-primary"
+            style={{ fontSize: '11px', padding: '7px 16px' }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>save</span>
+            <span>Yadda Saxla</span>
           </button>
         </div>
       </div>
