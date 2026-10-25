@@ -85,6 +85,7 @@ export default function ProfileModal() {
   const [newSlotNote, setNewSlotNote] = useState('');
   const [expertProfileSaved, setExpertProfileSaved] = useState(false);
   const [expertProfileInited, setExpertProfileInited] = useState(false);
+  const [expertImage, setExpertImage] = useState('');
 
   useEffect(() => {
     if (currentUser) {
@@ -429,6 +430,7 @@ export default function ProfileModal() {
                           }));
                       setExpertSchedule(initialSched);
                       setExpertProfileInited(true);
+                      setExpertImage(myCoachProfile.image || myCoachProfile.avatar || '');
                     }
                   }}
                   className={`pb-3.5 px-3.5 font-semibold transition-all border-b-2 flex items-center gap-1.5 whitespace-nowrap text-xs ${
@@ -1289,7 +1291,8 @@ export default function ProfileModal() {
                 specialties: specsArr,
                 scheduleSlots: expertSchedule,
                 bookedSlots: bookedList,
-                availableSlots: availableList.length > 0 ? availableList : expertSlots
+                availableSlots: availableList.length > 0 ? availableList : expertSlots,
+                image: expertImage || myCoachProfile.image || ''
               });
               setExpertProfileSaved(true);
               setTimeout(() => setExpertProfileSaved(false), 3000);
@@ -1560,7 +1563,57 @@ export default function ProfileModal() {
                     </div>
                   </div>
 
-                  {/* 3. SECTION: METODOLOGİYA VƏ TƏCRÜBƏ */}
+                  {/* 3. SECTION: PROFİL ŞƏKLİ */}
+                  <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3">
+                    <label className="block text-xs font-bold text-slate-700 flex items-center gap-1.5 font-mono uppercase tracking-wider">
+                      <span className="material-symbols-outlined text-[16px] text-amber-600">photo_camera</span>
+                      Profil Şəkli
+                    </label>
+                    <p className="text-[11px] text-slate-400">URL daxil edin və ya fayl yükləyin. Şəkil ekspert kartında görünəcək.</p>
+                    <div className="flex items-center gap-3 flex-wrap">
+                      {/* Preview */}
+                      <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-amber-200 bg-amber-50 flex items-center justify-center shrink-0">
+                        {expertImage ? (
+                          <img src={expertImage} alt="Profil" className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="material-symbols-outlined text-[32px] text-amber-300">person</span>
+                        )}
+                      </div>
+                      <div className="flex-1 space-y-2 min-w-0">
+                        <input
+                          type="text"
+                          value={expertImage}
+                          onChange={e => setExpertImage(e.target.value)}
+                          placeholder="https://... şəkil URL-i"
+                          className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 text-xs focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
+                        />
+                        <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold cursor-pointer transition-colors">
+                          <span className="material-symbols-outlined text-[15px]">upload</span>
+                          <span>Fayl Yüklə</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={e => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              if (file.size > 5 * 1024 * 1024) { showToast('Şəkil 5MB-dan böyük ola bilməz', 'error'); return; }
+                              const reader = new FileReader();
+                              reader.onload = ev => setExpertImage(ev.target.result);
+                              reader.readAsDataURL(file);
+                            }}
+                          />
+                        </label>
+                        {expertImage && (
+                          <button type="button" onClick={() => setExpertImage('')} className="text-[11px] text-rose-500 hover:text-rose-700 underline cursor-pointer">
+                            Şəkli sil
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 4. SECTION: METODOLOGİYA VƏ TƏCRÜBƏ */}
                   <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3">
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5 font-mono uppercase tracking-wider">
