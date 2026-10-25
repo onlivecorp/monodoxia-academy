@@ -701,28 +701,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                     </div>
                   )}
 
-                  {/* Session Details */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="p-4 rounded-2xl bg-[#faf8f5] border border-[#e2e8f0]">
-                      <div className="text-[11px] text-[#64748b] uppercase tracking-wider font-semibold mb-1">
-                        Seans Müddəti
-                      </div>
-                      <div className="text-sm font-bold text-[#071326] flex items-center gap-1.5">
-                        <span className="material-symbols-outlined text-[17px] text-[#775a19]">timer</span>
-                        <span>{liveCoach.sessionDuration || liveCoach.session_duration || '60 dəqiqə'}</span>
-                      </div>
-                    </div>
 
-                    <div className="p-4 rounded-2xl bg-[#faf8f5] border border-[#e2e8f0]">
-                      <div className="text-[11px] text-[#64748b] uppercase tracking-wider font-semibold mb-1">
-                        İnteraktiv Format
-                      </div>
-                      <div className="text-sm font-bold text-[#071326] flex items-center gap-1.5">
-                        <span className="material-symbols-outlined text-[17px] text-[#775a19]">videocam</span>
-                        <span>Onlayn (Təhlükəsiz Video Otaq)</span>
-                      </div>
-                    </div>
-                  </div>
 
                   {/* Available / Scheduled Slots Display */}
                   {(scheduleSlots.length > 0 || availableSlots.length > 0) && (
