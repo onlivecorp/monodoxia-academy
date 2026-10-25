@@ -1565,23 +1565,23 @@ export const INITIAL_FAQS = [
   },
   {
     id: "faq-4",
-    question: "Monodoxia Zənginlər Klubu üzvlüyünə kimlər qəbul edilir?",
+    question: "Zənginlər Klubu üzvlüyünə kimlər qəbul edilir?",
     answer: "Klubumuz daxili mədəniyyətini və etik təhlükəsizliyini qorumaq məqsədilə hər bir namizədlə qısa tanışlıq sorğusu keçirir. İntellektual inkişafa və konstruktiv dialoqa açıq hər bir fərd üzv ola bilər.",
     translations: {
       az: {
-        question: "Monodoxia Zənginlər Klubu üzvlüyünə kimlər qəbul edilir?",
+        question: "Zənginlər Klubu üzvlüyünə kimlər qəbul edilir?",
         answer: "Klubumuz daxili mədəniyyətini və etik təhlükəsizliyini qorumaq məqsədilə hər bir namizədlə qısa tanışlıq sorğusu keçirir. İntellektual inkişafa və konstruktiv dialoqa açıq hər bir fərd üzv ola bilər."
       },
       en: {
-        question: "Who is accepted into Monodoxia Zənginlər Klubu membership?",
+        question: "Who is accepted into Zənginlər Klubu membership?",
         answer: "To maintain internal culture and ethical safety, our club conducts a brief onboarding survey with each applicant. Anyone open to intellectual growth and constructive dialogue can join."
       },
       tr: {
-        question: "Monodoxia Zənginlər Klubu üyeliğine kimler kabul ediliyor?",
+        question: "Zənginlər Klubu üyeliğine kimler kabul ediliyor?",
         answer: "Kulübümüz iç kültürünü ve etik güvenliğini korumak amacıyla her adayla kısa bir tanışma anketi uygular. Entelektüel gelişime ve yapıcı diyaloğa açık herkes üye olabilir."
       },
       ru: {
-        question: "Кто принимается в членство Monodoxia Zənginlər Klubu?",
+        question: "Кто принимается в членство Zənginlər Klubu?",
         answer: "Для защиты внутренней культуры и этической безопасности клуб проводит короткое вводное анкетирование с каждым кандидатом. Присоединиться может каждый, кто открыт к развитию и диалогу."
       }
     }
@@ -1921,7 +1921,7 @@ export const INITIAL_HOME_CONTENT = {
   },
   club: {
     badge: "QAPALI İCMA ÜZVLÜYÜ",
-    title: "Monodoxia Zənginlər Klubu — Həmfikirlərin Seçilmiş Məkanı",
+    title: "Zənginlər Klubu — Həmfikirlərin Seçilmiş Məkanı",
     desc: "Davamlı inkişaf fərdi bir hadisə deyil, doğru mühitin bəhrəsidir. Zənginlər Klubu — dərin suallar verən, səthilikdən uzaq, bir-birinin təkamülünə töhfə verən seçkin şəxslərin qapalı ekosistemidir.",
     perks: [
       "Həftəlik canlı mentorluq və mastermind sessiyaları: Təcrübəli mentorlarla birbaşa dialoq.",
@@ -1954,7 +1954,7 @@ export const INITIAL_HOME_CONTENT = {
     translations: {
       az: {
         badge: "QAPALI İCMA ÜZVLÜYÜ",
-        title: "Monodoxia Zənginlər Klubu — Həmfikirlərin Seçilmiş Məkanı",
+        title: "Zənginlər Klubu — Həmfikirlərin Seçilmiş Məkanı",
         desc: "Davamlı inkişaf fərdi bir hadisə deyil, doğru mühitin bəhrəsidir. Zənginlər Klubu — dərin suallar verən, səthilikdən uzaq, bir-birinin təkamülünə töhfə verən seçkin şəxslərin qapalı ekosistemidir.",
         perks: [
           "Həftəlik canlı mentorluq və mastermind sessiyaları: Təcrübəli mentorlarla birbaşa dialoq.",
@@ -1987,7 +1987,7 @@ export const INITIAL_HOME_CONTENT = {
       },
       en: {
         badge: "EXCLUSIVE RESIDENCY",
-        title: "Monodoxia Zənginlər Klubu — Sanctuary for Like Minds",
+        title: "Zənginlər Klubu — Sanctuary for Like Minds",
         desc: "Sustainable development is the fruit of the right ecosystem. Zənginlər Klubu is an exclusive sanctuary for individuals who value intellectual depth and mutual evolution.",
         perks: [
           "Weekly live mentoring and mastermind sessions: Direct dialogue with experienced mentors.",
@@ -2020,7 +2020,7 @@ export const INITIAL_HOME_CONTENT = {
       },
       tr: {
         badge: "ÖZEL ÜYELİK",
-        title: "Monodoxia Zənginlər Klubu — Ortak Zihinlerin Buluşma Noktası",
+        title: "Zənginlər Klubu — Ortak Zihinlerin Buluşma Noktası",
         desc: "Sürdürülebilir gelişim doğru çevrenin eseridir. Zənginlər Klubu, derin sorular soran ve birbirinin gelişimine katkı sağlayan seçkin bireylerin kapalı alanıdır.",
         perks: [
           "Haftalık canlı mentorluk ve mastermind oturumları: Deneyimli mentorlarla doğrudan diyalog.",
@@ -2053,7 +2053,7 @@ export const INITIAL_HOME_CONTENT = {
       },
       ru: {
         badge: "ЗАКРЫТОЕ ЧЛЕНСТВО",
-        title: "Monodoxia Zənginlər Klubu — Пространство Единомышленников",
+        title: "Zənginlər Klubu — Пространство Единомышленников",
         desc: "Устойчивое развитие — результат правильного окружения. Закрытый клуб для глубоких личностей, ориентированных на рост.",
         perks: [
           "Еженедельные живые сессии менторства и мастермайнды: Прямой диалог с опытными наставниками.",

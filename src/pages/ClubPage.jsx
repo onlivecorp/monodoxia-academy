@@ -24,7 +24,7 @@ export default function ClubPage() {
       {/* Editorial Page Hero */}
       <PageHero
         badge={getLocalized(club, 'badge', currentLang, defaultLang) || 'Qapalı İcma Üzvlüyü'}
-        title={getLocalized(club, 'title', currentLang, defaultLang) || 'Monodoxia Zənginlər Klubu'}
+        title={getLocalized(club, 'title', currentLang, defaultLang) || 'Zənginlər Klubu'}
         description={getLocalized(club, 'desc', currentLang, defaultLang) || 'Davamlı inkişaf fərdi bir hadisə deyil, doğru mühitin bəhrəsidir. Dərin suallar verən seçkin şəxslərin qapalı ekosistemi.'}
         breadcrumbs={[{ label: 'Zənginlər Klubu' }]}
         adminCmsBlock="club"

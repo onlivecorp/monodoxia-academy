@@ -438,7 +438,7 @@ export default function AdminCmsTab() {
 
   const defaultClubData = {
     badge: "QAPALI İCMA ÜZVLÜYÜ",
-    title: "Monodoxia Zənginlər Klubu — Həmfikirlərin Seçilmiş Məkanı",
+    title: "Zənginlər Klubu — Həmfikirlərin Seçilmiş Məkanı",
     desc: "Davamlı inkişaf fərdi bir hadisə deyil, doğru mühitin bəhrəsidir. Zənginlər Klubu — dərin suallar verən, səthilikdən uzaq, bir-birinin təkamülünə töhfə verən seçkin şəxslərin qapalı ekosistemidir.",
     perks: [
       "Həftəlik canlı mentorluq və mastermind sessiyaları: Təcrübəli mentorlarla birbaşa dialoq.",
@@ -471,7 +471,7 @@ export default function AdminCmsTab() {
     translations: {
       az: {
         badge: "QAPALI İCMA ÜZVLÜYÜ",
-        title: "Monodoxia Zənginlər Klubu — Həmfikirlərin Seçilmiş Məkanı",
+        title: "Zənginlər Klubu — Həmfikirlərin Seçilmiş Məkanı",
         desc: "Davamlı inkişaf fərdi bir hadisə deyil, doğru mühitin bəhrəsidir. Zənginlər Klubu — dərin suallar verən, səthilikdən uzaq, bir-birinin təkamülünə töhfə verən seçkin şəxslərin qapalı ekosistemidir.",
         perks: [
           "Həftəlik canlı mentorluq və mastermind sessiyaları: Təcrübəli mentorlarla birbaşa dialoq.",
@@ -504,7 +504,7 @@ export default function AdminCmsTab() {
       },
       en: {
         badge: "EXCLUSIVE RESIDENCY",
-        title: "Monodoxia Zənginlər Klubu — Sanctuary for Like Minds",
+        title: "Zənginlər Klubu — Sanctuary for Like Minds",
         desc: "Sustainable development is the fruit of the right ecosystem. Zənginlər Klubu is an exclusive sanctuary for individuals who value intellectual depth and mutual evolution.",
         perks: [
           "Weekly live mentoring and mastermind sessions: Direct dialogue with experienced mentors.",
@@ -537,7 +537,7 @@ export default function AdminCmsTab() {
       },
       tr: {
         badge: "ÖZEL ÜYELİK",
-        title: "Monodoxia Zənginlər Klubu — Ortak Zihinlerin Buluşma Noktası",
+        title: "Zənginlər Klubu — Ortak Zihinlerin Buluşma Noktası",
         desc: "Sürdürülebilir gelişim doğru çevrenin eseridir. Zənginlər Klubu, derin sorular soran ve birbirinin gelişimine katkı sağlayan seçkin bireylerin kapalı alanıdır.",
         perks: [
           "Haftalık canlı mentorluk ve mastermind oturumları: Deneyimli mentorlarla doğrudan diyalog.",
@@ -570,7 +570,7 @@ export default function AdminCmsTab() {
       },
       ru: {
         badge: "ЗАКРЫТОЕ ЧЛЕНСТВО",
-        title: "Monodoxia Zənginlər Klubu — Пространство Единомышленников",
+        title: "Zənginlər Klubu — Пространство Единомышленников",
         desc: "Устойчивое развитие — результат правильного окружения. Закрытый клуб для глубоких личностей, ориентированных на рост.",
         perks: [
           "Еженедельные живые сессии менторства и мастермайнды: Прямой диалог с опытными наставниками.",

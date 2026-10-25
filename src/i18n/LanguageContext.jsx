@@ -55,7 +55,7 @@ const translations = {
     course_continue: "Davam et",
 
     club_badge: "QAPALI İCMA ÜZVLÜYÜ",
-    club_title: "Monodoxia Zənginlər Klubu — Həmfikirlərin Seçilmiş Məkanı",
+    club_title: "Zənginlər Klubu — Həmfikirlərin Seçilmiş Məkanı",
     club_desc: "Davamlı inkişaf fərdi bir hadisə deyil, doğru mühitin bəhrəsidir. Zənginlər Klubu — dərin suallar verən, səthilikdən uzaq, bir-birinin təkamülünə töhfə verən seçkin şəxslərin qapalı ekosistemidir.",
     club_join_btn: "Kluba qoşul",
     club_limited: "Məhdud sayda yer: Aylıq qəbul",
@@ -150,7 +150,7 @@ const translations = {
     course_continue: "Continue",
 
     club_badge: "EXCLUSIVE RESIDENCY",
-    club_title: "Monodoxia Zənginlər Klubu — Sanctuary for Like Minds",
+    club_title: "Zənginlər Klubu — Sanctuary for Like Minds",
     club_desc: "Sustainable development is the fruit of the right ecosystem. Zənginlər Klubu is an exclusive sanctuary for individuals who value intellectual depth and mutual evolution.",
     club_join_btn: "Join the Club",
     club_limited: "Limited availability: Monthly cohorts",
@@ -245,7 +245,7 @@ const translations = {
     course_continue: "Продолжить",
 
     club_badge: "ЗАКРЫТОЕ ЧЛЕНСТВО",
-    club_title: "Monodoxia Zənginlər Klubu — Пространство Единомышленников",
+    club_title: "Zənginlər Klubu — Пространство Единомышленников",
     club_desc: "Устойчивое развитие — результат правильного окружения. Закрытый клуб для глубоких личностей, ориентированных на рост.",
     club_join_btn: "Вступить в клуб",
     club_limited: "Ограниченное количество мест: Ежемесячный набор",
@@ -340,7 +340,7 @@ const translations = {
     course_continue: "Devam Et",
 
     club_badge: "ÖZEL ÜYELİK",
-    club_title: "Monodoxia Zənginlər Klubu — Ortak Zihinlerin Buluşma Noktası",
+    club_title: "Zənginlər Klubu — Ortak Zihinlerin Buluşma Noktası",
     club_desc: "Sürdürülebilir gelişim doğru çevrenin eseridir. Zənginlər Klubu, derin sorular soran ve birbirinin gelişimine katkı sağlayan seçkin bireylerin kapalı alanıdır.",
     club_join_btn: "Kulübe Katıl",
     club_limited: "Kontenjan sınırlı: Aylık kabul",

@@ -1227,7 +1227,7 @@ export default function AdminPagesTab() {
               <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>1. Hero Başlığı və Təsviri</span>
                 <PageField label="Üst Etiket (Badge)" block={clubData} setBlock={setClubData} fieldKey="badge" placeholder="Məs: QAPALI İCMA ÜZVLÜYÜ" />
-                <PageField label="Klub Başlığı (Title)" block={clubData} setBlock={setClubData} fieldKey="title" placeholder="Məs: Monodoxia Zənginlər Klubu — Həmfikirlərin Seçilmiş Məkanı" />
+                <PageField label="Klub Başlığı (Title)" block={clubData} setBlock={setClubData} fieldKey="title" placeholder="Məs: Zənginlər Klubu — Həmfikirlərin Seçilmiş Məkanı" />
                 <PageField label="Klub Təsviri (Desc)" block={clubData} setBlock={setClubData} fieldKey="desc" multiline rows={3} />
               </div>
 
