@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 
 export default function AdminDatabaseTab() {
@@ -341,7 +341,7 @@ export default function AdminDatabaseTab() {
             { name: `${dbForm?.tablePrefix || 'mdx_'}applications`, count: `${(applicationsList || []).length} sətir`, desc: 'Kurs və tədbir müraciətləri' },
             { name: `${dbForm?.tablePrefix || 'mdx_'}categories`, count: `${(categoriesList || []).length} sətir`, desc: 'Kurs və məqalə kateqoriyaları' },
             { name: `${dbForm?.tablePrefix || 'mdx_'}testimonials`, count: `${(testimonialsList || []).length} sətir`, desc: 'Müştəri və tələbə rəyləri' },
-            { name: `${dbForm?.tablePrefix || 'mdx_'}club_tiers`, count: `${(clubTiersList || []).length} sətir`, desc: 'Rezidentlik paketləri' },
+            { name: `${dbForm?.tablePrefix || 'mdx_'}club_tiers`, count: `${(clubTiersList || []).length} sətir`, desc: 'Üzvlük paketləri' },
             { name: `${dbForm?.tablePrefix || 'mdx_'}events`, count: `${(eventsList || []).length} sətir`, desc: 'Vebinarlar və qeydiyyatlar' },
             { name: `${dbForm?.tablePrefix || 'mdx_'}community_posts`, count: `${(communityTopics || []).length} sətir`, desc: 'İcma mövzuları və şərhlər' },
           ].map(table => (

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+﻿import React, { createContext, useContext, useState, useEffect } from 'react';
 import {
   COURSES,
   COACHES,
@@ -134,14 +134,14 @@ const INITIAL_CLUB_TIERS = [
   },
   {
     id: "basic",
-    name: "Basic Rezident",
+    name: "Basic Üzv",
     price: "45",
     period: "/ aylıq",
     features: ["Zənginlər Klubu standart müzakirə platforması", "20+ saatlıq səsli meditasiya kitabxanası", "Kurslara 10% daimi tələbə endirimi", "Ayda 1 canlı sual-cavab sessiyası"],
     active: true,
     translations: {
       az: {
-        name: "Basic Rezident",
+        name: "Basic Üzv",
         period: "/ aylıq",
         features: ["Zənginlər Klubu standart müzakirə platforması", "20+ saatlıq səsli meditasiya kitabxanası", "Kurslara 10% daimi tələbə endirimi", "Ayda 1 canlı sual-cavab sessiyası"]
       },
@@ -164,7 +164,7 @@ const INITIAL_CLUB_TIERS = [
   },
   {
     id: "premium",
-    name: "Premium Rezident",
+    name: "Premium Üzv",
     price: "95",
     period: "/ aylıq",
     popular: true,
@@ -172,7 +172,7 @@ const INITIAL_CLUB_TIERS = [
     active: true,
     translations: {
       az: {
-        name: "Premium Rezident",
+        name: "Premium Üzv",
         period: "/ aylıq",
         features: ["Bütün canlı klub tədbirləri və masterklaslar", "Telegram VIP məxfi müzakirə otağı", "Kurslara 25% fərdi endirim", "Aylıq 1 fərdi diaqnostik orientasiya", "Tam 100+ saatlıq meditasiya və video arxivi"]
       },
@@ -864,7 +864,7 @@ export function AppProvider({ children }) {
                 content: p.content || (defaultMatch?.content) || p.snippet || '',
                 desc: p.snippet || p.content || '',
                 author: p.author,
-                authorRole: p.author_role || (defaultMatch?.authorRole) || 'Rezident',
+                authorRole: p.author_role || (defaultMatch?.authorRole) || 'Üzv',
                 time: p.time_ago || 'İndicə',
                 likes: Number(p.likes) || (defaultMatch?.likes) || 0,
                 likedBy: parsedLikedBy,
@@ -1819,7 +1819,7 @@ export function AppProvider({ children }) {
       snippet: content,
       content,
       desc: content,
-      author: author || (currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : "Rezident"),
+      author: author || (currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : "Üzv"),
       authorRole: currentUser?.role || "Klub Üzvü",
       likes: 1,
       likedBy: currentUser?.id ? [currentUser.id] : ['guest'],
@@ -2104,7 +2104,7 @@ export function AppProvider({ children }) {
     const newApp = {
       id: 'APP-' + Math.floor(1000 + Math.random() * 9000),
       userId: currentUser.id,
-      userName: `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim() || currentUser.name || 'Rezident',
+      userName: `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim() || currentUser.name || 'Üzv',
       userEmail: currentUser.email || '',
       userPhone: currentUser.phone || '',
       targetType: 'community',
@@ -2312,7 +2312,7 @@ export function AppProvider({ children }) {
         const topicTitle = updatedApp.targetTitle || updatedApp.formResponses?.fld_topic_title || 'İcma Müzakirəsi';
         const topicContent = updatedApp.userNote || updatedApp.formResponses?.fld_topic_content || '';
         const topicBadge = updatedApp.formResponses?.fld_badge || 'İcma Müzakirəsi';
-        const topicAuthor = updatedApp.userName || 'Rezident';
+        const topicAuthor = updatedApp.userName || 'Üzv';
         const isPinned = Boolean(updatedApp.isPinned ?? updatedApp.pinned ?? false);
         const allowComments = updatedApp.allowComments !== undefined ? Boolean(updatedApp.allowComments) : true;
 
@@ -2326,7 +2326,7 @@ export function AppProvider({ children }) {
           content: topicContent,
           desc: topicContent,
           author: topicAuthor,
-          authorRole: 'Rezident',
+          authorRole: 'Üzv',
           likes: 1,
           repliesCount: 0,
           pinned: isPinned,

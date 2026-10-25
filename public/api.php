@@ -1934,13 +1934,13 @@ if ($action === 'update_application_status' && $_SERVER['REQUEST_METHOD'] === 'P
                 $topicTitle = $app['target_title'] ?: ($formResp['fld_topic_title'] ?? 'İcma Müzakirəsi');
                 $topicContent = $app['user_note'] ?: ($formResp['fld_topic_content'] ?? '');
                 $topicBadge = $formResp['fld_badge'] ?? 'İcma Müzakirəsi';
-                $topicAuthor = $app['user_name'] ?: 'Rezident';
+                $topicAuthor = $app['user_name'] ?: 'Üzv';
                 $isPinned = !empty($input['is_pinned']) ? 1 : 0;
                 $allowComments = isset($input['allow_comments']) ? intval($input['allow_comments']) : 1;
 
                 $cpStmt = $pdo->prepare("
                     INSERT INTO mdx_community_posts (id, badge, title, snippet, content, author, author_role, author_avatar, time_ago, likes, replies, pinned, allow_comments, category, translations_json)
-                    VALUES (?, ?, ?, ?, ?, ?, 'Rezident', '', 'İndicə', 1, 0, ?, ?, 'general', '{}')
+                    VALUES (?, ?, ?, ?, ?, ?, 'Üzv', '', 'İndicə', 1, 0, ?, ?, 'general', '{}')
                     ON DUPLICATE KEY UPDATE
                         badge = VALUES(badge),
                         title = VALUES(title),
@@ -2488,13 +2488,13 @@ if ($action === 'save_community_post' && $_SERVER['REQUEST_METHOD'] === 'POST') 
     $snippet = trim($input['snippet'] ?? ($input['content'] ?? ($input['desc'] ?? '')));
     $content = trim($input['content'] ?? ($input['snippet'] ?? $snippet));
     $badge = trim($input['badge'] ?? 'İcma Müzakirəsi');
-    $author = trim($input['author'] ?? ($authUser ? $authUser['name'] : 'Monodoxia Rezident'));
+    $author = trim($input['author'] ?? ($authUser ? $authUser['name'] : 'Monodoxia Üzv'));
     $time_ago = trim($input['time'] ?? ($input['time_ago'] ?? 'İndicə'));
     $pinned = !empty($input['pinned']) ? 1 : 0;
     $allow_comments = isset($input['allowComments']) ? ($input['allowComments'] ? 1 : 0) : (isset($input['allow_comments']) ? intval($input['allow_comments']) : 1);
     $likes = intval($input['likes'] ?? 0);
     $replies = intval($input['repliesCount'] ?? ($input['replies'] ?? 0));
-    $author_role = trim($input['authorRole'] ?? ($input['author_role'] ?? ($authUser ? $authUser['role'] : 'Rezident')));
+    $author_role = trim($input['authorRole'] ?? ($input['author_role'] ?? ($authUser ? $authUser['role'] : 'Üzv')));
     $author_avatar = trim($input['authorAvatar'] ?? ($input['author_avatar'] ?? ''));
     $category = trim($input['category'] ?? 'general');
 
@@ -2962,7 +2962,7 @@ if ($action === 'sync_all_local_data' && $_SERVER['REQUEST_METHOD'] === 'POST') 
             $cpStmt->execute([
                 $p['id'], $p['badge'] ?? 'İcma Müzakirəsi', $p['title'] ?? '',
                 $p['snippet'] ?? '', $p['content'] ?? ($p['snippet'] ?? ''),
-                $p['author'] ?? 'Rezident', $p['time'] ?? ($p['time_ago'] ?? 'İndicə'),
+                $p['author'] ?? 'Üzv', $p['time'] ?? ($p['time_ago'] ?? 'İndicə'),
                 intval($p['likes'] ?? 0), intval($p['repliesCount'] ?? ($p['replies'] ?? 0)),
                 !empty($p['pinned']) ? 1 : 0,
                 json_encode($p['translations'] ?? [], JSON_UNESCAPED_UNICODE)

@@ -510,7 +510,7 @@ export default function AdminPagesTab() {
   const PAGES_CONFIG = [
     { id: 'akademiya', label: 'Akademiya', icon: 'school', route: 'akademiya', desc: 'Kurs kataloqu, LMS modulları, tədris zəmanəti' },
     { id: 'koucinq', label: 'Kouçinq', icon: 'psychology', route: 'koucinq', desc: 'Ekspert koçlar, fərdi seans rezervasiyası, ICF metodologiyası' },
-    { id: 'club', label: 'Zənginlər Klubu', icon: 'card_membership', route: 'club', desc: 'Rezidentlik paketləri, imtiyazlar, qapalı icma üzvlüyü' },
+    { id: 'club', label: 'Zənginlər Klubu', icon: 'card_membership', route: 'club', desc: 'Üzvlük paketləri, imtiyazlar, qapalı icma üzvlüyü' },
     { id: 'tedbirler', label: 'Tədbirlər', icon: 'event', route: 'tedbirler', desc: 'Canlı təqvim, vebinarlar, oflayn görüşlər, spikerlik' },
     { id: 'icma', label: 'İcma', icon: 'forum', route: 'icma', desc: 'İntellektual forum, həftəlik mövzu, icma etikası qaydaları' },
     { id: 'haqqimizda', label: 'Haqqımızda', icon: 'auto_stories', route: 'haqqimizda', desc: 'Akademiyanın məramı, sol media (şəkil/video), 4 dəyər kartı, 8 sahə' },
@@ -1258,7 +1258,7 @@ export default function AdminPagesTab() {
                 <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>3. Klub İmtiyazları Bölməsi Başlıqları</span>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
                   <PageField label="Bölmə Üst Etiketi" block={clubData} setBlock={setClubData} fieldKey="perksBadge" placeholder="Klub İmtiyazları" />
-                  <PageField label="Bölmə Başlığı" block={clubData} setBlock={setClubData} fieldKey="perksTitle" placeholder="Zənginlər Klubu Rezidentlərinə Nələr Təqdim Olunur?" />
+                  <PageField label="Bölmə Başlığı" block={clubData} setBlock={setClubData} fieldKey="perksTitle" placeholder="Zənginlər Klubu Üzvlərinə Nələr Təqdim Olunur?" />
                 </div>
                 <PageField label="Bölmə İzahı" block={clubData} setBlock={setClubData} fieldKey="perksDesc" multiline rows={2} />
                 <PageField
@@ -1283,7 +1283,7 @@ export default function AdminPagesTab() {
                   </div>
                   <PageField label="Xəbərdarlıq Başlığı" block={clubData} setBlock={setClubData} fieldKey="noticeTitle" placeholder="Məhdud Sayda Qəbul Siyasəti" />
                 </div>
-                <PageField label="Xəbərdarlıq Mətni" block={clubData} setBlock={setClubData} fieldKey="noticeDesc" multiline rows={2} placeholder="Daxili intellektual təhlükəsizliyi və məxfiliyi qorumaq üçün hər ay yalnız 25 yeni rezident qəbul edilir." />
+                <PageField label="Xəbərdarlıq Mətni" block={clubData} setBlock={setClubData} fieldKey="noticeDesc" multiline rows={2} placeholder="Daxili intellektual təhlükəsizliyi və məxfiliyi qorumaq üçün hər ay yalnız 25 yeni Üzv qəbul edilir." />
                 <PageField label="Düymə Mətni (CTA)" block={clubData} setBlock={setClubData} fieldKey="noticeBtnText" placeholder="Müraciət Ərizəsi Göndər" />
               </div>
             </div>
@@ -1291,12 +1291,12 @@ export default function AdminPagesTab() {
             {/* Club Premium Tier Card Editor */}
             <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0', margin: 0 }}>
-                Zənginlər Klubu — Rezidentlik Paket Kartı Mətnləri
+                Zənginlər Klubu — Üzvlük paket Kartı Mətnləri
               </h5>
               
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
-                <PageField label="Kart Üst Etiketi" block={clubData} setBlock={setClubData} fieldKey="tierBadge" placeholder="PREMIUM REZİDENT" />
-                <PageField label="Paket Başlığı" block={clubData} setBlock={setClubData} fieldKey="tierTitle" placeholder="Premium Rezident" />
+                <PageField label="Kart Üst Etiketi" block={clubData} setBlock={setClubData} fieldKey="tierBadge" placeholder="PREMIUM Üzv" />
+                <PageField label="Paket Başlığı" block={clubData} setBlock={setClubData} fieldKey="tierTitle" placeholder="Premium Üzv" />
               </div>
 
               <PageField label="Paket İzahı (Alt başlıq)" block={clubData} setBlock={setClubData} fieldKey="tierSubtitle" placeholder="Aylıq və ya illik daxil olma paketi" />

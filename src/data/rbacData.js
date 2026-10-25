@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Monodoxia Academy - Role-Based Access Control (RBAC) System
  * Granular Permissions Taxonomy & Built-in System Roles
  */
@@ -93,7 +93,7 @@ export const PERMISSION_MODULES = [
     id: 'club',
     name: 'Club Tiers & Abunəliklər',
     icon: 'card_membership',
-    description: 'Rezidentlik səviyyələri və imtiyaz paketləri',
+    description: 'Üzvlük səviyyələri və imtiyaz paketləri',
     permissions: [
       { id: 'club.view', name: 'Abunəliklərə baxış', description: 'Klub səviyyələrini və qiymətlərini görmək' },
       { id: 'club.create', name: 'Yeni paket əlavə etmə', description: 'Yeni klub paketi yaratmaq' },
@@ -117,7 +117,7 @@ export const PERMISSION_MODULES = [
     id: 'community',
     name: 'İcma & Forum',
     icon: 'forum',
-    description: 'Rezident müzakirələri, postlar və şərhlər',
+    description: 'Üzv müzakirələri, postlar və şərhlər',
     permissions: [
       { id: 'community.view', name: 'Foruma baxış', description: 'İcma müzakirələrinə baxmaq' },
       { id: 'community.create', name: 'Mövzu yaratma', description: 'İcmada rəsmi mövzu açmaq' },

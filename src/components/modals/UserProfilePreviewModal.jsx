@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 
 export default function UserProfilePreviewModal({ user, isOpen, onClose }) {
   if (!isOpen || !user) return null;
@@ -76,7 +76,7 @@ export default function UserProfilePreviewModal({ user, isOpen, onClose }) {
               {role}
             </span>
             <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${getTierBadgeClass(tier)}`}>
-              {tier} Rezident
+              {tier} Üzv
             </span>
           </div>
 

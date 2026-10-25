@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { useApp } from '../../context/AppContext';
 
 export default function AdminOverviewTab({ setActiveTab, onQuickCreate }) {
@@ -40,9 +40,9 @@ export default function AdminOverviewTab({ setActiveTab, onQuickCreate }) {
       icon: 'group'
     },
     {
-      label: 'Klub Rezidentləri',
+      label: 'Klub Üzvləri',
       value: activeResidents,
-      trend: 'Aktiv rezidentlik',
+      trend: 'Aktiv Üzvlük',
       trendColor: '#b45309',
       icon: 'card_membership'
     },

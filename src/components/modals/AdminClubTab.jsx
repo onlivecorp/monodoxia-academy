@@ -252,7 +252,7 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <h4 className="admin-section-title">Zənginlər Klubu Paketləri</h4>
-          <p className="admin-section-subtitle">Zənginlər Klubu rezidentlik paketlərini, aylıq/illik qiymətləri və xüsusi təklifləri tənzimləyin</p>
+          <p className="admin-section-subtitle">Zənginlər Klubu Üzvlük paketlərini, aylıq/illik qiymətləri və xüsusi təklifləri tənzimləyin</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span className="admin-count-badge">Cəmi: {clubTiersList.length} paket</span>
@@ -536,7 +536,7 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
               <input
                 type="text"
                 required
-                placeholder="məsələn: Mastermind Rezident"
+                placeholder="məsələn: Mastermind Üzv"
                 value={newTierName}
                 onChange={(e) => setNewTierName(e.target.value)}
                 className="admin-input"

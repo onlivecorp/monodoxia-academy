@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { getLocalized } from '../i18n/localize';
 import { useApp } from '../context/AppContext';
@@ -96,7 +96,7 @@ export default function CommunityPage() {
       <PageHero
         badge={getLocalized(community, 'badge', currentLang, defaultLang) || 'İntellektual Şəbəkə'}
         title={getLocalized(community, 'title', currentLang, defaultLang) || 'Düşüncə və Təcrübə Mübadiləsi'}
-        description={getLocalized(community, 'desc', currentLang, defaultLang) || 'Akademiyamızın tələbələri və klub rezidentləri üçün gündəlik fəlsəfi dialoq, dərin suallar və daxili kəşflər sahəsi.'}
+        description={getLocalized(community, 'desc', currentLang, defaultLang) || 'Akademiyamızın tələbələri və klub Üzvləri üçün gündəlik fəlsəfi dialoq, dərin suallar və daxili kəşflər sahəsi.'}
         breadcrumbs={[{ label: 'İcma' }]}
         adminCmsBlock="community"
       >
@@ -228,7 +228,7 @@ export default function CommunityPage() {
                             {topic.author?.charAt(0) || 'R'}
                           </div>
                           <div>
-                            <span className="font-semibold text-xs sm:text-sm text-[#071326] block leading-tight">{topic.author || 'Rezident'}</span>
+                            <span className="font-semibold text-xs sm:text-sm text-[#071326] block leading-tight">{topic.author || 'Üzv'}</span>
                             <span className="text-[11px] text-[#64748b] block">{topic.time || topic.time_ago || topic.date || 'İndicə'}</span>
                           </div>
                         </div>

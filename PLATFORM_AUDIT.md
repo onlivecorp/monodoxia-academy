@@ -38,7 +38,7 @@ Monodoxia Academy akademik psixologiya, qədim daxili fəlsəfə və müasir fə
 * **Alt Səhifələr (Multi-Page Hash Routing):**
   * `/akademiya`: Bütün kurslar, modullar, dərslər və kateqoriya filtri.
   * `/koucinq`: Ekspert mentorlar heyəti, ixtisas filtri və fərdi seans rezervasiyası.
-  * `/club`: Rezidentlik paketləri (Free, Basic, Premium, VIP), aylıq/illik ödəniş dövrü filtri.
+  * `/club`: Üzvlük paketləri (Free, Basic, Premium, VIP), aylıq/illik ödəniş dövrü filtri.
   * `/tedbirler`: Təqvim cədvəli, onlayn/oflayn tədbirlər və iştirakçı qeydiyyatı.
   * `/icma`: İntellektual müzakirə mövzuları, axtarış və yeni mövzu açmaq.
   * `/haqqimizda`: Monodoxia manifesti, missiya və dəyərlər.

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { APPLICATION_STATUSES, TARGET_TYPE_MAP, INITIAL_FORM_FIELDS } from '../../data/applicationData';
 import { useLanguage } from '../../i18n/LanguageContext';
@@ -241,7 +241,7 @@ export default function ProfileModal() {
                     {currentUser.firstName || currentUser.name} {currentUser.lastName || ''}
                   </h3>
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300 tracking-wide uppercase">
-                    {userTier || currentUser.tier || 'Free'} Rezident
+                    {userTier || currentUser.tier || 'Free'} Üzv
                   </span>
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
                     {currentUser.role || 'Tələbə'}
@@ -371,7 +371,7 @@ export default function ProfileModal() {
               }`}
             >
               <span className="material-symbols-outlined text-[17px]">card_membership</span>
-              <span>Rezidentlik (Paket)</span>
+              <span>Üzvlük (Paket)</span>
             </button>
           </div>
         </div>
@@ -1090,7 +1090,7 @@ export default function ProfileModal() {
               <div>
                 <h4 className="text-xs font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1.5 font-mono">
                   <span className="material-symbols-outlined text-[16px]">card_membership</span>
-                  Rezidentlik Səviyyəsi və Üzvlük
+                  Üzvlük Səviyyəsi və Üzvlük
                 </h4>
                 <p className="text-[11px] text-slate-500 mt-0.5">
                   Monodoxia Academy cəmiyyətindəki cari statusunuz və əlavə imkanlar
@@ -1102,7 +1102,7 @@ export default function ProfileModal() {
                 <div className="relative z-10">
                   <span className="text-[10px] uppercase font-bold font-mono tracking-widest text-amber-800 block mb-1">Cari Status</span>
                   <h3 className="font-serif text-2xl sm:text-3xl font-bold text-slate-900 leading-tight">
-                    {userTier || currentUser.tier || 'Free'} Rezident
+                    {userTier || currentUser.tier || 'Free'} Üzv
                   </h3>
                   <p className="text-xs text-slate-600 mt-2 max-w-md leading-relaxed">
                     {userTier === 'VIP' ? 'Bütün qapalı klub tədbirlərinə, mentor sessiyalarına və VIP arxivinə tam limitsiz giriş.' :

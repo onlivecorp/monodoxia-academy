@@ -23,7 +23,7 @@ export default function ClubPage() {
     <div className="min-h-screen bg-[#faf8f5] text-[#071326]">
       {/* Editorial Page Hero */}
       <PageHero
-        badge={getLocalized(club, 'badge', currentLang, defaultLang) || 'Qapalı İcma Üzvliyi'}
+        badge={getLocalized(club, 'badge', currentLang, defaultLang) || 'Qapalı İcma Üzvlüyü'}
         title={getLocalized(club, 'title', currentLang, defaultLang) || 'Monodoxia Zənginlər Klubu'}
         description={getLocalized(club, 'desc', currentLang, defaultLang) || 'Davamlı inkişaf fərdi bir hadisə deyil, doğru mühitin bəhrəsidir. Dərin suallar verən seçkin şəxslərin qapalı ekosistemi.'}
         breadcrumbs={[{ label: 'Zənginlər Klubu' }]}
@@ -107,7 +107,7 @@ export default function ClubPage() {
                 ? (customAnnual && customAnnual > 0 ? customAnnual : Math.round(rawPrice * 10))
                 : rawPrice;
               const periodText = billingCycle === 'annual' && rawPrice > 0 ? '/ illik' : (tier.period || '/ aylıq');
-              const tierName = getLocalized(tier, 'name', currentLang, defaultLang) || tier.name || tier.id || 'Klub Rezidentliyi';
+              const tierName = getLocalized(tier, 'name', currentLang, defaultLang) || tier.name || tier.id || 'Klub Üzvlüyü';
               const userTierApp = currentUser && Array.isArray(applicationsList)
                 ? applicationsList.find(a => a.userId === currentUser.id && a.targetId === tier.id && !a.archived)
                 : null;
@@ -188,7 +188,7 @@ export default function ClubPage() {
                         className="w-full py-3 px-4 rounded-xl bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-300 flex items-center justify-center gap-2 shadow-sm"
                       >
                         <span className="material-symbols-outlined text-[17px] text-emerald-600">verified</span>
-                        <span>Cari Rezidentliyiniz</span>
+                        <span>Cari Üzvlüyünüz</span>
                       </button>
                     ) : userTierApp && userTierApp.status !== 'Ləğv edildi' && userTierApp.status !== 'Rədd edildi' ? (
                       <button
@@ -210,7 +210,7 @@ export default function ClubPage() {
                         <span className="material-symbols-outlined text-[17px] group-hover/btn:scale-110 transition-transform">
                           {isPopular ? 'auto_awesome' : 'stars'}
                         </span>
-                        <span>{tier.id === 'free' ? 'Qoşul (Ödənişsiz)' : 'Rezident Ol'}</span>
+                        <span>{tier.id === 'free' ? 'Qoşul (Ödənişsiz)' : 'Üzv ol'}</span>
                       </button>
                     )}
                   </div>
@@ -227,7 +227,7 @@ export default function ClubPage() {
                 <span>{getLocalized(club, 'perksBadge', currentLang, defaultLang) || 'Klub İmtiyazları'}</span>
               </div>
               <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl font-medium text-[#071326] tracking-tight mb-3">
-                {getLocalized(club, 'perksTitle', currentLang, defaultLang) || 'Zənginlər Klubu Rezidentlərinə Nələr Təqdim Olunur?'}
+                {getLocalized(club, 'perksTitle', currentLang, defaultLang) || 'Zənginlər Klubu Üzvlərinə Nələr Təqdim Olunur?'}
               </h2>
               <p className="text-sm sm:text-base text-[#64748b] font-light leading-relaxed">
                 {getLocalized(club, 'perksDesc', currentLang, defaultLang) || 'Klubumuz sadəcə qrup deyil, hər bir üzvünün zehni, emosional və peşəkar təkamülünü sürətləndirən intellektual ailədir.'}
@@ -285,13 +285,13 @@ export default function ClubPage() {
                   {getLocalized(club, 'noticeTitle', currentLang, defaultLang) || 'Məhdud Sayda Qəbul Siyasəti'}
                 </h4>
                 <p className="text-xs sm:text-sm text-[#cbd5e1] font-light max-w-xl leading-relaxed">
-                  {getLocalized(club, 'noticeDesc', currentLang, defaultLang) || 'Daxili intellektual təhlükəsizliyi və məxfiliyi qorumaq üçün hər ay yalnız 25 yeni rezident qəbul edilir.'}
+                  {getLocalized(club, 'noticeDesc', currentLang, defaultLang) || 'Daxili intellektual təhlükəsizliyi və məxfiliyi qorumaq üçün hər ay yalnız 25 yeni Üzv qəbul edilir.'}
                 </p>
               </div>
             </div>
 
             <button
-              onClick={() => openApplication({ id: 'club-resident', title: 'Zənginlər Klubu Rezidentlik Müraciəti' }, 'club')}
+              onClick={() => openApplication({ id: 'club-resident', title: 'Zənginlər Klubu Üzvlük Müraciəti' }, 'club')}
               className="relative z-10 px-8 py-4 rounded-xl bg-gradient-to-r from-[#c5a059] via-[#e5c57d] to-[#b38f46] text-[#071326] font-semibold text-xs sm:text-sm tracking-wider uppercase shadow-lg shadow-[#c5a059]/20 hover:shadow-xl hover:shadow-[#c5a059]/35 hover:scale-[1.02] active:scale-[0.98] transition-all shrink-0 cursor-pointer"
             >
               {getLocalized(club, 'noticeBtnText', currentLang, defaultLang) || 'Müraciət Ərizəsi Göndər'}

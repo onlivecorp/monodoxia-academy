@@ -108,7 +108,7 @@ INSERT INTO `mdx_courses` (`id`, `category`, `badge`, `badge_class`, `duration`,
 ('course-4', 'spiritual', 'MASTERKLAS SİKLİ', 'bg-secondary/10 text-secondary', '10 Həftə | 20 Dərs', 'Məna Axtarışı və Daxili Gücün Oyanışı', 'Ekzistensial böhranlardan çıxış yolları, daxili potensialın kəşfi və həyat missiyasını dəqiq təyin etmə metodologiyası.', 'Dr. Leyla Əliyeva & Fərid Məmmədov', 'Aparıcı Mentorlar', 'Qrup formalaşır', 45, '₼ 520', 0);
 
 -- --------------------------------------------------------
--- Cədvəl: mdx_club_tiers (Klub Rezidentlik Paketləri)
+-- Cədvəl: mdx_club_tiers (Klub �zvlik Paketləri)
 -- --------------------------------------------------------
 DROP TABLE IF EXISTS `mdx_club_tiers`;
 CREATE TABLE `mdx_club_tiers` (
@@ -125,8 +125,8 @@ CREATE TABLE `mdx_club_tiers` (
 
 INSERT INTO `mdx_club_tiers` (`id`, `name`, `price`, `period`, `popular`, `features_json`, `active`) VALUES
 ('free', 'Giriş (Free)', '0', 'Ömürlük', 0, '[\"Açıq bloq yazılarına və ictimai müzakirələrə giriş\", \"Aylıq ümumi vebinarlara dinləyici qismində qatılmaq\", \"Bülleten və psixoloji bələdçi bildirişləri\"]', 1),
-('basic', 'Basic Rezident', '45', '/ aylıq', 0, '[\"Coaching Club standart müzakirə platforması\", \"20+ saatlıq səsli meditasiya kitabxanası\", \"Kurslara 10% daimi tələbə endirimi\", \"Ayda 1 canlı sual-cavab sessiyası\"]', 1),
-('premium', 'Premium Rezident', '95', '/ aylıq', 1, '[\"Bütün canlı klub tədbirləri və masterklaslar\", \"Telegram VIP məxfi müzakirə otağı\", \"Kurslara 25% fərdi endirim\", \"Aylıq 1 fərdi diaqnostik orientasiya\", \"Tam 100+ saatlıq meditasiya və video arxivi\"]', 1),
+('basic', 'Basic �zv', '45', '/ aylıq', 0, '[\"Coaching Club standart müzakirə platforması\", \"20+ saatlıq səsli meditasiya kitabxanası\", \"Kurslara 10% daimi tələbə endirimi\", \"Ayda 1 canlı sual-cavab sessiyası\"]', 1),
+('premium', 'Premium �zv', '95', '/ aylıq', 1, '[\"Bütün canlı klub tədbirləri və masterklaslar\", \"Telegram VIP məxfi müzakirə otağı\", \"Kurslara 25% fərdi endirim\", \"Aylıq 1 fərdi diaqnostik orientasiya\", \"Tam 100+ saatlıq meditasiya və video arxivi\"]', 1),
 ('vip', 'VIP Salon', '250', '/ aylıq', 0, '[\"Bütün Premium imtiyazlar daxil\", \"Hər ay 2 fərdi ICF kouçinq sessiyası\", \"Oflayn illik retreat və düşərgələrə prioritet giriş\", \"Şəxsi inkişaf mentoru və 24/7 dəstək xətti\"]', 1);
 
 -- --------------------------------------------------------
@@ -459,5 +459,6 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
 
 

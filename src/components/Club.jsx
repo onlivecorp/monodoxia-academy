@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { getLocalized, getLocalizedArray } from '../i18n/localize';
 import { useApp } from '../context/AppContext';
@@ -50,7 +50,7 @@ export default function Club() {
 
   // Left button text & link
   const leftBtnText = isResident
-    ? (getLocalized(club, 'ctaBtnActiveText', currentLang, defaultLang) || club.ctaBtnActiveText || 'Rezident Statusunuz Aktivdir')
+    ? (getLocalized(club, 'ctaBtnActiveText', currentLang, defaultLang) || club.ctaBtnActiveText || 'Üzv Statusunuz Aktivdir')
     : (userClubApp 
         ? `Müraciət: ${userClubApp.status}` 
         : (getLocalized(club, 'ctaBtnText', currentLang, defaultLang) || club.ctaBtnText || t('club_join_btn') || 'Kluba qoşul'));
@@ -82,7 +82,7 @@ export default function Club() {
 
   // Right card button text & link
   const rightBtnText = isResident
-    ? (getLocalized(club, 'tierCtaActiveText', currentLang, defaultLang) || club.tierCtaActiveText || 'Aktiv Rezident')
+    ? (getLocalized(club, 'tierCtaActiveText', currentLang, defaultLang) || club.tierCtaActiveText || 'Aktiv Üzv')
     : (userClubApp 
         ? `Müraciət Statusu: ${userClubApp.status}` 
         : (getLocalized(club, 'tierCtaText', currentLang, defaultLang) || club.tierCtaText || tierCtaText || 'PAKETİ SEÇİN'));

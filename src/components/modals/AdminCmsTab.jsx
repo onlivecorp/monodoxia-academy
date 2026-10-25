@@ -448,11 +448,11 @@ export default function AdminCmsTab() {
     ],
     ctaBtnText: "Kluba qoşul",
     ctaBtnLink: "",
-    ctaBtnActiveText: "Rezident Statusunuz Aktivdir",
+    ctaBtnActiveText: "Üzv Statusunuz Aktivdir",
     ctaBtnActiveLink: "",
     limitedText: "Məhdud sayda yer: Aylıq qəbul",
-    tierBadge: "PREMIUM REZİDENT",
-    tierTitle: "Premium Rezident",
+    tierBadge: "PREMIUM Üzv",
+    tierTitle: "Premium Üzv",
     tierSubtitle: "Aylıq və ya illik daxil olma paketi",
     tierPrice: "95",
     tierPeriod: "/ aylıq",
@@ -464,9 +464,9 @@ export default function AdminCmsTab() {
       "Aylıq 1 fərdi diaqnostik orientasiya",
       "Tam 100+ saatlıq meditasiya və video arxivi"
     ],
-    tierCtaText: "REZİDENT OL",
+    tierCtaText: "Üzv ol",
     tierCtaLink: "",
-    tierCtaActiveText: "Aktiv Rezident",
+    tierCtaActiveText: "Aktiv Üzv",
     tierCtaActiveLink: "",
     translations: {
       az: {
@@ -481,11 +481,11 @@ export default function AdminCmsTab() {
         ],
         ctaBtnText: "Kluba qoşul",
         ctaBtnLink: "",
-        ctaBtnActiveText: "Rezident Statusunuz Aktivdir",
+        ctaBtnActiveText: "Üzv Statusunuz Aktivdir",
         ctaBtnActiveLink: "",
         limitedText: "Məhdud sayda yer: Aylıq qəbul",
-        tierBadge: "PREMIUM REZİDENT",
-        tierTitle: "Premium Rezident",
+        tierBadge: "PREMIUM Üzv",
+        tierTitle: "Premium Üzv",
         tierSubtitle: "Aylıq və ya illik daxil olma paketi",
         tierPrice: "95",
         tierPeriod: "/ aylıq",
@@ -497,9 +497,9 @@ export default function AdminCmsTab() {
           "Aylıq 1 fərdi diaqnostik orientasiya",
           "Tam 100+ saatlıq meditasiya və video arxivi"
         ],
-        tierCtaText: "REZİDENT OL",
+        tierCtaText: "Üzv ol",
         tierCtaLink: "",
-        tierCtaActiveText: "Aktiv Rezident",
+        tierCtaActiveText: "Aktiv Üzv",
         tierCtaActiveLink: ""
       },
       en: {
@@ -563,7 +563,7 @@ export default function AdminCmsTab() {
           "Ayda 1 bireysel diagnostik oryantasyon",
           "Tam 100+ saatlik meditasyon ve video arşivi"
         ],
-        tierCtaText: "REZİDENT OL",
+        tierCtaText: "Üzv ol",
         tierCtaLink: "",
         tierCtaActiveText: "Aktif Rezidans",
         tierCtaActiveLink: ""
@@ -833,7 +833,7 @@ export default function AdminCmsTab() {
   const defaultCommunityData = INITIAL_HOME_CONTENT?.community || {
     badge: "İntellektual Şəbəkə",
     title: "Düşüncə və Təcrübə Mübadiləsi",
-    desc: "Akademiyamızın tələbələri və klub rezidentləri üçün gündəlik fəlsəfi dialoq və daxili kəşflər sahəsi.",
+    desc: "Akademiyamızın tələbələri və klub Üzvləri üçün gündəlik fəlsəfi dialoq və daxili kəşflər sahəsi.",
     bullets: [
       "Konfidensiallıq və qarşılıqlı hörmət etikası",
       "Hər həftə yeni fəlsəfi və psixoloji mövzu müzakirəsi"
@@ -4807,7 +4807,7 @@ export default function AdminCmsTab() {
                   setBlock={setCmsClub}
                   fieldKey="ctaBtnText"
                   placeholder="Məs: Kluba qoşul"
-                  helpText="İstifadəçi aktiv rezident deyilsə görünən mətn"
+                  helpText="İstifadəçi aktiv Üzv deyilsə görünən mətn"
                 />
                 <Field
                   label="Düymə Keçid Linki (Normal)"
@@ -4821,20 +4821,20 @@ export default function AdminCmsTab() {
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
                 <Field
-                  label="Düymə Mətni (Aktiv Rezident Üçün)"
+                  label="Düymə Mətni (Aktiv Üzv Üçün)"
                   block={cmsClub}
                   setBlock={setCmsClub}
                   fieldKey="ctaBtnActiveText"
-                  placeholder="Məs: Rezident Statusunuz Aktivdir"
-                  helpText="İstifadəçi aktiv rezident olduqda görünən mətn"
+                  placeholder="Məs: Üzv Statusunuz Aktivdir"
+                  helpText="İstifadəçi aktiv Üzv olduqda görünən mətn"
                 />
                 <Field
-                  label="Düymə Keçid Linki (Aktiv Rezident)"
+                  label="Düymə Keçid Linki (Aktiv Üzv)"
                   block={cmsClub}
                   setBlock={setCmsClub}
                   fieldKey="ctaBtnActiveLink"
                   placeholder="Məs: /club, /profile və ya link"
-                  helpText="Aktiv rezident düyməyə kliklədikdə açılacaq səhifə və ya URL"
+                  helpText="Aktiv Üzv düyməyə kliklədikdə açılacaq səhifə və ya URL"
                 />
               </div>
 
@@ -4846,15 +4846,15 @@ export default function AdminCmsTab() {
           <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0' }}>
               <div>
-                <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Klub — Rezidentlik / Paket Kartı (Sağ Hissə)</h5>
+                <h5 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Klub — Üzvlük / Paket Kartı (Sağ Hissə)</h5>
                 <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0' }}>Sağ tərəfdəki ağ kart: etiket, paket adı, alt başlıq, qiymət, daxil olan xüsusiyyətlər və düymə</p>
               </div>
               <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: '#ecfdf5', color: '#047857' }}>Sağ Kart</span>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
-              <Field label="Kart Üst Etiketi (Badge)" block={cmsClub} setBlock={setCmsClub} fieldKey="tierBadge" placeholder="Məs: PREMIUM REZİDENT" />
-              <Field label="Paket Adı / Başlığı" block={cmsClub} setBlock={setCmsClub} fieldKey="tierTitle" placeholder="Məs: Premium Rezident" />
+              <Field label="Kart Üst Etiketi (Badge)" block={cmsClub} setBlock={setCmsClub} fieldKey="tierBadge" placeholder="Məs: PREMIUM Üzv" />
+              <Field label="Paket Adı / Başlığı" block={cmsClub} setBlock={setCmsClub} fieldKey="tierTitle" placeholder="Məs: Premium Üzv" />
             </div>
 
             <Field label="Paket İzahı (Alt Başlıq)" block={cmsClub} setBlock={setCmsClub} fieldKey="tierSubtitle" placeholder="Məs: Aylıq və ya illik daxil olma paketi" />
@@ -4892,7 +4892,7 @@ export default function AdminCmsTab() {
                   block={cmsClub}
                   setBlock={setCmsClub}
                   fieldKey="tierCtaText"
-                  placeholder="Məs: REZİDENT OL"
+                  placeholder="Məs: Üzv ol"
                   helpText="Qonaqlar üçün kartın altındakı əsas düymə mətni"
                 />
                 <Field
@@ -4907,20 +4907,20 @@ export default function AdminCmsTab() {
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
                 <Field
-                  label="Kart Düymə Mətni (Aktiv Rezident Üçün)"
+                  label="Kart Düymə Mətni (Aktiv Üzv Üçün)"
                   block={cmsClub}
                   setBlock={setCmsClub}
                   fieldKey="tierCtaActiveText"
-                  placeholder="Məs: Aktiv Rezident"
-                  helpText="İstifadəçi aktiv rezident olduqda kartda görünən mətn"
+                  placeholder="Məs: Aktiv Üzv"
+                  helpText="İstifadəçi aktiv Üzv olduqda kartda görünən mətn"
                 />
                 <Field
-                  label="Kart Düymə Keçid Linki (Aktiv Rezident)"
+                  label="Kart Düymə Keçid Linki (Aktiv Üzv)"
                   block={cmsClub}
                   setBlock={setCmsClub}
                   fieldKey="tierCtaActiveLink"
                   placeholder="Məs: /club, /profile və ya link"
-                  helpText="Aktiv rezident kliklədikdə açılacaq səhifə və ya URL"
+                  helpText="Aktiv Üzv kliklədikdə açılacaq səhifə və ya URL"
                 />
               </div>
             </div>

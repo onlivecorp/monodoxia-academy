@@ -1175,7 +1175,7 @@ export const COMMUNITY_TOPICS = [
       {
         id: "c-102",
         author: "Günay Rəhimova",
-        authorRole: "Rezident",
+        authorRole: "Üzv",
         text: "Təşəkkürlər Dr. Leyla xanım! Xüsusilə iş mühitində bu perfeksionizm çox vaxt prokrastinasiyaya səbəb olur.",
         time: "10 dəq əvvəl"
       },
@@ -1197,7 +1197,7 @@ export const COMMUNITY_TOPICS = [
     snippet: "İcma üzvü Elmir Həsənli özünün 30 günlük meditasiya və gündəlik tutma qeydlərini bölüşür.",
     content: "Hər səhər günə 20 dəqiqəlik tam sükutla başlamaq qərarına gəldim: telefon yox, musiqi yox, planlaşdırma yox. İlk 10 gün zehin daimi narahatlıq və tələskənlik siqnalları göndərirdi. Lakin 2-ci həftədən sonra reaksiyalarımda heyrətamiz sakitlik, diqqət fokusunda dərinləşmə hiss etdim. Təcrübə edənlər varmı?",
     author: "Elmir Həsənli",
-    authorRole: "Klub Rezidenti",
+    authorRole: "Klub Üzvü",
     likes: 88,
     likedBy: [],
     repliesCount: 2,
@@ -1235,7 +1235,7 @@ export const COMMUNITY_TOPICS = [
       {
         id: "c-301",
         author: "Aysel Qurbanova",
-        authorRole: "Rezident",
+        authorRole: "Üzv",
         text: "Franklın dediyi 'Məqsədi olan insan istənilən çətinliyə tab gətirər' fikri hər çətin gündə kompasım olur.",
         time: "Dünən"
       },
@@ -1447,11 +1447,11 @@ export const INITIAL_TESTIMONIALS = [
     id: "t2",
     quote: "Liderlikdə emosional intellektin nə qədər həlledici olduğunu burada kəşf etdim. Komandama və ailəmə yanaşmam büsbütün müdrikləşdi.",
     author: "Tural İsmayılov",
-    role: "Şirkət Təsisçisi & Klub Rezidenti",
+    role: "Şirkət Təsisçisi & Klub Üzvü",
     translations: {
       az: {
         quote: "Liderlikdə emosional intellektin nə qədər həlledici olduğunu burada kəşf etdim. Komandama və ailəmə yanaşmam büsbütün müdrikləşdi.",
-        role: "Şirkət Təsisçisi & Klub Rezidenti"
+        role: "Şirkət Təsisçisi & Klub Üzvü"
       },
       en: {
         quote: "I discovered here how crucial emotional intelligence is in leadership. My approach to my team and family became profoundly wiser.",
@@ -1931,11 +1931,11 @@ export const INITIAL_HOME_CONTENT = {
     ],
     ctaBtnText: "Kluba qoşul",
     ctaBtnLink: "",
-    ctaBtnActiveText: "Rezident Statusunuz Aktivdir",
+    ctaBtnActiveText: "Üzv Statusunuz Aktivdir",
     ctaBtnActiveLink: "",
     limitedText: "Məhdud sayda yer: Aylıq qəbul",
-    tierBadge: "PREMIUM REZİDENT",
-    tierTitle: "Premium Rezident",
+    tierBadge: "PREMIUM Üzv",
+    tierTitle: "Premium Üzv",
     tierSubtitle: "Aylıq və ya illik daxil olma paketi",
     tierPrice: "95",
     tierPeriod: "/ aylıq",
@@ -1947,9 +1947,9 @@ export const INITIAL_HOME_CONTENT = {
       "Aylıq 1 fərdi diaqnostik orientasiya",
       "Tam 100+ saatlıq meditasiya və video arxivi"
     ],
-    tierCtaText: "REZİDENT OL",
+    tierCtaText: "Üzv ol",
     tierCtaLink: "",
-    tierCtaActiveText: "Aktiv Rezident",
+    tierCtaActiveText: "Aktiv Üzv",
     tierCtaActiveLink: "",
     translations: {
       az: {
@@ -1964,11 +1964,11 @@ export const INITIAL_HOME_CONTENT = {
         ],
         ctaBtnText: "Kluba qoşul",
         ctaBtnLink: "",
-        ctaBtnActiveText: "Rezident Statusunuz Aktivdir",
+        ctaBtnActiveText: "Üzv Statusunuz Aktivdir",
         ctaBtnActiveLink: "",
         limitedText: "Məhdud sayda yer: Aylıq qəbul",
-        tierBadge: "PREMIUM REZİDENT",
-        tierTitle: "Premium Rezident",
+        tierBadge: "PREMIUM Üzv",
+        tierTitle: "Premium Üzv",
         tierSubtitle: "Aylıq və ya illik daxil olma paketi",
         tierPrice: "95",
         tierPeriod: "/ aylıq",
@@ -1980,9 +1980,9 @@ export const INITIAL_HOME_CONTENT = {
           "Aylıq 1 fərdi diaqnostik orientasiya",
           "Tam 100+ saatlıq meditasiya və video arxivi"
         ],
-        tierCtaText: "REZİDENT OL",
+        tierCtaText: "Üzv ol",
         tierCtaLink: "",
-        tierCtaActiveText: "Aktiv Rezident",
+        tierCtaActiveText: "Aktiv Üzv",
         tierCtaActiveLink: ""
       },
       en: {
@@ -2046,7 +2046,7 @@ export const INITIAL_HOME_CONTENT = {
           "Ayda 1 bireysel diagnostik oryantasyon",
           "Tam 100+ saatlik meditasyon ve video arşivi"
         ],
-        tierCtaText: "REZİDENT OL",
+        tierCtaText: "Üzv ol",
         tierCtaLink: "",
         tierCtaActiveText: "Aktif Rezidans",
         tierCtaActiveLink: ""
@@ -2204,7 +2204,7 @@ export const INITIAL_HOME_CONTENT = {
   community: {
     badge: "İntellektual Şəbəkə",
     title: "Düşüncə və Təcrübə Mübadiləsi",
-    desc: "Akademiyamızın tələbələri və klub rezidentləri üçün gündəlik fəlsəfi dialoq və daxili kəşflər sahəsi.",
+    desc: "Akademiyamızın tələbələri və klub Üzvləri üçün gündəlik fəlsəfi dialoq və daxili kəşflər sahəsi.",
     bullets: [
       "Konfidensiallıq və qarşılıqlı hörmət etikası",
       "Hər həftə yeni fəlsəfi və psixoloji mövzu müzakirəsi"
@@ -2231,7 +2231,7 @@ export const INITIAL_HOME_CONTENT = {
       az: {
         badge: "İntellektual Şəbəkə",
         title: "Düşüncə və Təcrübə Mübadiləsi",
-        desc: "Akademiyamızın tələbələri və klub rezidentləri üçün gündəlik fəlsəfi dialoq və daxili kəşflər sahəsi.",
+        desc: "Akademiyamızın tələbələri və klub Üzvləri üçün gündəlik fəlsəfi dialoq və daxili kəşflər sahəsi.",
         newTopicBtnText: "Yeni Mövzu Başlat",
         heroBadge1Text: "Təhlükəsiz Məkan",
         heroBadge2Text: "Fəlsəfi Dialoq",
@@ -2382,9 +2382,9 @@ export const INITIAL_HOME_CONTENT = {
   },
   testimonials: {
     badge: "İnam və Nəticə",
-    title: "Məzunlarımızın və Rezidentlərimizin Təcrübəsi",
+    title: "Məzunlarımızın və Üzvlərimizin Təcrübəsi",
     translations: {
-      az: { badge: "İnam və Nəticə", title: "Məzunlarımızın və Rezidentlərimizin Təcrübəsi" },
+      az: { badge: "İnam və Nəticə", title: "Məzunlarımızın və Üzvlərimizin Təcrübəsi" },
       en: { badge: "Trust & Results", title: "Experiences of Our Graduates & Residents" },
       tr: { badge: "Güven ve Sonuç", title: "Mezunlarımızın ve Üyelerimizin Deneyimleri" },
       ru: { badge: "Доверие и результаты", title: "Опыт наших выпускников и резидентов" }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 
 // Tab Components
@@ -280,7 +280,7 @@ export default function AdminModal() {
                       <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#b45309' }}>card_membership</span>
                       <div>
                         <div style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>Abunəlik Paketi (Tier)</div>
-                        <div style={{ fontSize: '10px', color: '#64748b' }}>Rezidentlik tarifi & imtiyazlar</div>
+                        <div style={{ fontSize: '10px', color: '#64748b' }}>Üzvlük tarifi & imtiyazlar</div>
                       </div>
                     </button>
 

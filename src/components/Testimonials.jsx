@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { getLocalized } from '../i18n/localize';
 import { useApp } from '../context/AppContext';
@@ -124,7 +124,7 @@ export default function Testimonials() {
               </span>
               <h3 className="font-serif text-2xl font-bold text-[#070f1e]">Tələbə Təcrübələri</h3>
               <p className="text-sm text-slate-600 mt-2 max-w-md mx-auto leading-relaxed font-normal">
-                Monodoxia Academy məzunlarının və klub rezidentlərinin yeni təcrübə paylaşımları tezliklə əlavə olunacaqdır.
+                Monodoxia Academy məzunlarının və klub Üzvlərinin yeni təcrübə paylaşımları tezliklə əlavə olunacaqdır.
               </p>
             </div>
           </div>
