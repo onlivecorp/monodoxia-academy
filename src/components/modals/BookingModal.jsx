@@ -11,8 +11,6 @@ export default function BookingModal() {
   const [type, setType] = useState('Online (Təhlükəsiz Video Otaq)');
   const [notes, setNotes] = useState('');
 
-  if (!bookingModalOpen || !activeCoach) return null;
-
   // Confirmed bookings for this coach from database
   const confirmedCoachBookings = useMemo(() => {
     return bookings.filter(b => {
@@ -81,6 +79,8 @@ export default function BookingModal() {
     const found = allSlots.find(s => s.label === currentSlot);
     return found ? found.isBooked : false;
   }, [useCustomTime, customDate, customStartTime, customEndTime, currentSlot, allSlots, confirmedCoachBookings]);
+
+  if (!bookingModalOpen || !activeCoach) return null;
 
   const handleSubmit = (e) => {
     e.preventDefault();
