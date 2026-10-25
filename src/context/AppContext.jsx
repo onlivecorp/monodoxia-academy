@@ -481,7 +481,14 @@ export function AppProvider({ children }) {
         // fallback
       }
     }
-    return COACHES;
+    return COACHES.map(c => {
+      let coachImage = c.image || c.avatar || '';
+      try {
+        const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
+        if (imgStore[c.id]) coachImage = imgStore[c.id];
+      } catch (e) {}
+      return { ...c, image: coachImage };
+    });
   });
 
   // Coach Reviews State (Ratings & Reviews for Experts)
@@ -2713,15 +2720,36 @@ export function AppProvider({ children }) {
     });
     // Sync usersList in a separate synchronous setState call (safe — React batches these)
     setUsersList(uList => {
-      // We need current user id — read it from the functional closure via currentUser ref
-      // currentUser is captured in closure; fine since we only need its .id
       if (!currentUser) return uList;
       const updatedName = `${updates.firstName || currentUser.firstName || ''} ${updates.lastName || currentUser.lastName || ''}`.trim();
       return uList.map(u => u.id === currentUser.id
-        ? { ...u, name: updatedName || u.name, email: updates.email || u.email }
+        ? { ...u, ...updates, name: updatedName || u.name, email: updates.email || u.email }
         : u
       );
     });
+
+    // If avatar / image is updated and user is a coach or matches a coach profile, sync to coachesList!
+    const newAvatar = updates.avatar || updates.image;
+    if (newAvatar && currentUser) {
+      setCoachesList(cList => {
+        const nextList = cList.map(c => {
+          const matchUser = (c.userId && String(c.userId) === String(currentUser.id)) ||
+            (c.name && currentUser.name && c.name.toLowerCase().trim() === currentUser.name.toLowerCase().trim()) ||
+            (c.email && currentUser.email && c.email.toLowerCase().trim() === currentUser.email.toLowerCase().trim());
+          if (matchUser) {
+            try {
+              const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
+              imgStore[c.id] = newAvatar;
+              localStorage.setItem('monodoxia_coach_images', JSON.stringify(imgStore));
+            } catch (e) {}
+            return { ...c, image: newAvatar, avatar: newAvatar };
+          }
+          return c;
+        });
+        return nextList;
+      });
+    }
+
     showToast('Profil məlumatları yeniləndi', 'success');
   };
 
@@ -3669,7 +3697,7 @@ export function AppProvider({ children }) {
 
     // Store image separately to avoid localStorage quota issues
     const imageToSave = updates.image || existing.image || '';
-    if (imageToSave && imageToSave.startsWith('data:')) {
+    if (imageToSave) {
       try {
         const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
         imgStore[id] = imageToSave;

@@ -8,6 +8,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
   const {
     openBooking,
     currentUser,
+    usersList = [],
     coachesList,
     certificatesList,
     coachReviews,
@@ -16,7 +17,8 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
     deleteCoachCertificate,
     updateCoach,
     setActiveCertView,
-    setCertViewModalOpen
+    setCertViewModalOpen,
+    showToast
   } = useApp();
 
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'certificates' | 'reviews'
@@ -24,6 +26,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
   // Expert profile edit state (for self or admin)
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editBio, setEditBio] = useState('');
+  const [editImage, setEditImage] = useState('');
   const [editSpecialties, setEditSpecialties] = useState('');
   const [modalSchedule, setModalSchedule] = useState([]);
   const [modalSlotDate, setModalSlotDate] = useState(() => new Date().toISOString().split('T')[0]);
@@ -52,6 +55,23 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
 
   // Real-time coach reference from coachesList
   const liveCoach = coachesList.find(c => c.id === coach.id) || coach;
+
+  const matchedUser = (usersList || []).find(u => 
+    (liveCoach.userId && String(u.id) === String(liveCoach.userId)) ||
+    (liveCoach.name && u.name && u.name.toLowerCase().trim() === liveCoach.name.toLowerCase().trim()) ||
+    (liveCoach.email && u.email && u.email.toLowerCase().trim() === liveCoach.email.toLowerCase().trim())
+  ) || (currentUser && (
+    (liveCoach.userId && String(currentUser.id) === String(liveCoach.userId)) ||
+    (liveCoach.name && currentUser.name && liveCoach.name.toLowerCase().trim() === currentUser.name.toLowerCase().trim())
+  ) ? currentUser : null);
+
+  let coachDisplayImage = liveCoach.image || liveCoach.avatar || matchedUser?.avatar || matchedUser?.image || '';
+  if (!coachDisplayImage) {
+    try {
+      const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
+      if (imgStore[liveCoach.id]) coachDisplayImage = imgStore[liveCoach.id];
+    } catch (e) {}
+  }
 
   const coachTitle = getLocalized(liveCoach, 'title', currentLang, defaultLang) || liveCoach.title || 'Kouç & Ekspert';
   const coachBio = getLocalized(liveCoach, 'bio', currentLang, defaultLang) || liveCoach.bio || '';
@@ -107,6 +127,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
 
   const handleStartEdit = () => {
     setEditBio(liveCoach.bio || liveCoach.experience || '');
+    setEditImage(coachDisplayImage || '');
     const currentSpecs = Array.isArray(liveCoach.specialties)
       ? liveCoach.specialties.join(', ')
       : (liveCoach.specialties || '');
@@ -178,6 +199,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
         bio: editBio.trim(),
         experience: editBio.trim(),
         specialties: specsArr,
+        image: editImage || coachDisplayImage || '',
         scheduleSlots: modalSchedule,
         bookedSlots: bookedList,
         availableSlots: availList.length > 0 ? availList : availableSlots
@@ -255,9 +277,9 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
           {/* Header with Avatar and Basic Info */}
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 pb-6 border-b border-[#e2e8f0]">
             <div className="relative shrink-0">
-              {liveCoach.avatar || liveCoach.image ? (
+              {coachDisplayImage ? (
                 <img
-                  src={liveCoach.avatar || liveCoach.image}
+                  src={coachDisplayImage}
                   alt={liveCoach.name}
                   className="w-24 h-24 rounded-2xl object-cover border-2 border-[#c5a059]/40 shadow-md"
                 />
@@ -406,6 +428,79 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                       <span className="material-symbols-outlined text-[16px]">close</span>
                       Ləğv et
                     </button>
+                  </div>
+
+                  {/* 0. Profil Şəkli */}
+                  <div className="p-3 bg-white rounded-xl border border-amber-200/80 space-y-2">
+                    <label className="block text-xs font-bold text-[#775a19] flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[15px]">photo_camera</span>
+                      Profil Şəkli
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <div className="w-14 h-14 rounded-xl border-2 border-amber-500/40 overflow-hidden shrink-0 bg-slate-100 flex items-center justify-center">
+                        {editImage ? (
+                          <img src={editImage} alt="Önizləmə" className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-xs text-slate-400 font-bold">Şəkil yoxdur</span>
+                        )}
+                      </div>
+                      <div className="flex-1 space-y-1.5 min-w-0">
+                        <input
+                          type="text"
+                          value={editImage}
+                          onChange={e => setEditImage(e.target.value)}
+                          placeholder="https://... şəkil linki"
+                          className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-800 text-xs focus:outline-none focus:ring-1 focus:ring-amber-500"
+                        />
+                        <div className="flex items-center gap-2">
+                          <label className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-bold cursor-pointer transition-colors shadow-xs">
+                            <span className="material-symbols-outlined text-[14px]">upload</span>
+                            <span>Fayl Yüklə</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={e => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                if (file.size > 10 * 1024 * 1024) {
+                                  if (showToast) showToast('Şəkil 10MB-dan böyük ola bilməz', 'error');
+                                  return;
+                                }
+                                const reader = new FileReader();
+                                reader.onload = ev => {
+                                  const img = new window.Image();
+                                  img.onload = () => {
+                                    const MAX = 400;
+                                    const scale = Math.min(MAX / img.width, MAX / img.height, 1);
+                                    const w = Math.round(img.width * scale);
+                                    const h = Math.round(img.height * scale);
+                                    const canvas = document.createElement('canvas');
+                                    canvas.width = w;
+                                    canvas.height = h;
+                                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                                    const compressed = canvas.toDataURL('image/jpeg', 0.75);
+                                    setEditImage(compressed);
+                                    if (showToast) showToast('Şəkil hazırlandı!', 'success');
+                                  };
+                                  img.src = ev.target.result;
+                                };
+                                reader.readAsDataURL(file);
+                              }}
+                            />
+                          </label>
+                          {editImage && (
+                            <button
+                              type="button"
+                              onClick={() => setEditImage('')}
+                              className="text-[11px] text-rose-500 hover:text-rose-700 underline cursor-pointer"
+                            >
+                              Sil
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   {/* 1. Bio / Metodologiya */}

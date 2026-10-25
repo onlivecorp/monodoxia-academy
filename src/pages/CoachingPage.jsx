@@ -11,7 +11,9 @@ export default function CoachingPage() {
     coachesList,
     homeContent,
     openBooking,
-    testimonialsList
+    testimonialsList,
+    usersList = [],
+    currentUser
   } = useApp();
 
   const coachesCms = homeContent?.coaches || {};
@@ -144,17 +146,33 @@ export default function CoachingPage() {
                     {/* Coach Avatar & Role */}
                     <div className="flex items-center gap-4 mb-6">
                       <div className="relative shrink-0">
-                        {c.image ? (
-                          <img
-                            src={c.image}
-                            alt={c.name}
-                            className="w-16 h-16 rounded-2xl object-cover border-2 border-[#c5a059]/40 shadow-sm group-hover:scale-105 transition-transform duration-300"
-                          />
-                        ) : (
-                          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#071326] to-[#0c2242] text-[#e5c57d] font-serif font-bold text-xl flex items-center justify-center border-2 border-[#c5a059]/40 shadow-sm">
-                            {(c.name || 'M')[0]}
-                          </div>
-                        )}
+                        {(() => {
+                          let coachImg = c.image || c.avatar;
+                          if (!coachImg) {
+                            const matchedUser = (usersList || []).find(u => 
+                              (c.userId && String(u.id) === String(c.userId)) || 
+                              (c.name && u.name && u.name.toLowerCase().trim() === c.name.toLowerCase().trim())
+                            ) || (currentUser && ((c.userId && String(currentUser.id) === String(c.userId)) || (c.name && currentUser.name && c.name.toLowerCase().trim() === currentUser.name.toLowerCase().trim())) ? currentUser : null);
+                            coachImg = matchedUser?.avatar || matchedUser?.image || '';
+                          }
+                          if (!coachImg) {
+                            try {
+                              const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
+                              if (imgStore[c.id]) coachImg = imgStore[c.id];
+                            } catch (e) {}
+                          }
+                          return coachImg ? (
+                            <img
+                              src={coachImg}
+                              alt={c.name}
+                              className="w-16 h-16 rounded-2xl object-cover border-2 border-[#c5a059]/40 shadow-sm group-hover:scale-105 transition-transform duration-300"
+                            />
+                          ) : (
+                            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#071326] to-[#0c2242] text-[#e5c57d] font-serif font-bold text-xl flex items-center justify-center border-2 border-[#c5a059]/40 shadow-sm">
+                              {(c.name || 'M')[0]}
+                            </div>
+                          );
+                        })()}
                         <span 
                           className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white shadow-sm flex items-center justify-center" 
                           title="Aktiv Qəbul"

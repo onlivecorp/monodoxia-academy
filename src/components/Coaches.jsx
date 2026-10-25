@@ -6,7 +6,7 @@ import ExpertProfileModal from './modals/ExpertProfileModal';
 
 export default function Coaches() {
   const { t, currentLang, defaultLang } = useLanguage();
-  const { openBooking, coachesList, homeContent } = useApp();
+  const { openBooking, coachesList, homeContent, usersList = [], currentUser } = useApp();
   const coaches = homeContent?.coaches || {};
   const [selectedCoach, setSelectedCoach] = useState(null);
 
@@ -74,17 +74,33 @@ export default function Coaches() {
                   >
                     {/* PHOTO CONTAINER */}
                     <div className="relative aspect-[4/4] bg-[#f5f3ef] overflow-hidden flex items-center justify-center">
-                      {c.image ? (
-                        <img
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                          src={c.image}
-                          alt={c.name}
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-[#070f1e] to-[#112240] flex items-center justify-center">
-                          <span className="material-symbols-outlined text-[64px] text-[#c5a059]/40">person</span>
-                        </div>
-                      )}
+                      {(() => {
+                        let coachImg = c.image || c.avatar;
+                        if (!coachImg) {
+                          const matchedUser = (usersList || []).find(u => 
+                            (c.userId && String(u.id) === String(c.userId)) || 
+                            (c.name && u.name && u.name.toLowerCase().trim() === c.name.toLowerCase().trim())
+                          ) || (currentUser && ((c.userId && String(currentUser.id) === String(c.userId)) || (c.name && currentUser.name && c.name.toLowerCase().trim() === currentUser.name.toLowerCase().trim())) ? currentUser : null);
+                          coachImg = matchedUser?.avatar || matchedUser?.image || '';
+                        }
+                        if (!coachImg) {
+                          try {
+                            const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
+                            if (imgStore[c.id]) coachImg = imgStore[c.id];
+                          } catch (e) {}
+                        }
+                        return coachImg ? (
+                          <img
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                            src={coachImg}
+                            alt={c.name}
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-[#070f1e] to-[#112240] flex items-center justify-center">
+                            <span className="material-symbols-outlined text-[64px] text-[#c5a059]/40">person</span>
+                          </div>
+                        );
+                      })()}
 
                       {/* Floating Verification Tag */}
                       <div className="absolute top-3.5 right-3.5 px-3 py-1 rounded-full bg-[#070f1e]/85 backdrop-blur-md border border-[#c5a059]/40 text-white text-[10px] font-semibold tracking-wider uppercase flex items-center gap-1 shadow-md">

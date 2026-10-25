@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 
 export default function BookingModal() {
-  const { bookingModalOpen, setBookingModalOpen, activeCoach, confirmBooking, currentUser, bookings = [], bookingPreselectedSlot, setBookingPreselectedSlot } = useApp();
+  const { bookingModalOpen, setBookingModalOpen, activeCoach, confirmBooking, currentUser, usersList = [], bookings = [], bookingPreselectedSlot, setBookingPreselectedSlot } = useApp();
   const [slot, setSlot] = useState('');
   const [useCustomTime, setUseCustomTime] = useState(false);
   const [customDate, setCustomDate] = useState(() => new Date().toISOString().split('T')[0]);
@@ -128,17 +128,33 @@ export default function BookingModal() {
 
         <div className="flex items-center gap-3.5 mb-5 pb-4 border-b border-slate-200">
           <div className="w-14 h-14 rounded-2xl overflow-hidden border-2 border-amber-500/30 shrink-0 bg-amber-50 flex items-center justify-center shadow-xs">
-            {activeCoach.image ? (
-              <img
-                src={activeCoach.image}
-                alt={activeCoach.name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-xl">
-                {activeCoach.name?.[0] || 'K'}
-              </div>
-            )}
+            {(() => {
+              let coachImg = activeCoach.image || activeCoach.avatar;
+              if (!coachImg) {
+                const matchedUser = (usersList || []).find(u => 
+                  (activeCoach.userId && String(u.id) === String(activeCoach.userId)) || 
+                  (activeCoach.name && u.name && u.name.toLowerCase().trim() === activeCoach.name.toLowerCase().trim())
+                ) || (currentUser && ((activeCoach.userId && String(currentUser.id) === String(activeCoach.userId)) || (activeCoach.name && currentUser.name && activeCoach.name.toLowerCase().trim() === currentUser.name.toLowerCase().trim())) ? currentUser : null);
+                coachImg = matchedUser?.avatar || matchedUser?.image || '';
+              }
+              if (!coachImg) {
+                try {
+                  const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
+                  if (imgStore[activeCoach.id]) coachImg = imgStore[activeCoach.id];
+                } catch (e) {}
+              }
+              return coachImg ? (
+                <img
+                  src={coachImg}
+                  alt={activeCoach.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-xl">
+                  {activeCoach.name?.[0] || 'K'}
+                </div>
+              );
+            })()}
           </div>
           <div>
             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 tracking-wider uppercase border border-amber-300">
