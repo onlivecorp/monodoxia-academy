@@ -554,6 +554,7 @@ export default function AdminUsersTab() {
                               title: editingUser.role === 'Kouç' ? 'Sertifikatlı Kouç' : 'Kouç & Ekspert',
                               experience: '5+ il təcrübə',
                               bio: `${editingUser.name} — Monodoxia Academy fərdi inkişaf və kouçinq ekspertidir.`,
+                              image: editingUser.avatar || editingUser.image || '',
                               specialties: ['Fərdi İnkişaf', 'Psixologiya'],
                               availableSlots: []
                             });
@@ -983,6 +984,7 @@ export default function AdminUsersTab() {
                               title: u.role === 'Kouç' ? 'Sertifikatlı Kouç' : 'Kouç & Ekspert',
                               experience: '5+ il təcrübə',
                               bio: `${u.name} — Monodoxia Academy fərdi inkişaf və kouçinq ekspertidir.`,
+                              image: u.avatar || u.image || '',
                               specialties: ['Fərdi İnkişaf', 'Psixologiya'],
                               availableSlots: []
                             });

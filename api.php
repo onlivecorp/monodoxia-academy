@@ -3342,12 +3342,15 @@ if ($action === 'migrate' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             `languages_json` text DEFAULT NULL,
             `available_slots_json` longtext DEFAULT NULL,
             `translations_json` longtext DEFAULT NULL,
-            `avatar_url` varchar(255) DEFAULT NULL,
+            `avatar_url` longtext DEFAULT NULL,
             `is_active` tinyint(1) NOT NULL DEFAULT 1,
             `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
             PRIMARY KEY (`id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
+    try {
+        $pdo->exec("ALTER TABLE `mdx_coaches` MODIFY `avatar_url` LONGTEXT DEFAULT NULL");
+    } catch (Exception $e) {}
     $results[] = 'mdx_coaches';
 
     // 14. mdx_cms_blocks

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useContext, createContext } from 'react';
+import React, { useState, useEffect, useContext, createContext } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../i18n/LanguageContext';
 import AdminConfirmModal from './AdminConfirmModal';
@@ -312,14 +312,27 @@ function ImageField({ label, value, onChange }) {
     const handleFileChange = (e) => {
       const file = e.target.files?.[0];
       if (!file) return;
-      if (file.size > 5 * 1024 * 1024) {
-        showToast('Şəkil ölçüsü 5MB-dan çox ola bilməz', 'error');
+      if (file.size > 10 * 1024 * 1024) {
+        showToast('Şəkil ölçüsü 10MB-dan çox ola bilməz', 'error');
         return;
       }
       const reader = new FileReader();
       reader.onload = (event) => {
-        onChange(event.target.result);
-        showToast('Şəkil uğurla yükləndi!', 'success');
+        const img = new window.Image();
+        img.onload = () => {
+          const MAX = 400;
+          const scale = Math.min(MAX / img.width, MAX / img.height, 1);
+          const w = Math.round(img.width * scale);
+          const h = Math.round(img.height * scale);
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          const compressed = canvas.toDataURL('image/jpeg', 0.8);
+          onChange(compressed);
+          showToast('Şəkil uğurla yükləndi!', 'success');
+        };
+        img.src = event.target.result;
       };
       reader.readAsDataURL(file);
     };
@@ -5214,11 +5227,30 @@ export default function AdminCmsTab() {
                   ) : (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
-                        <img
-                          src={c.image || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'}
-                          alt={c.name}
-                          style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '1px solid #e2e8f0', flexShrink: 0 }}
-                        />
+                        {(() => {
+                          let coachImg = c.image || c.avatar;
+                          if (!coachImg) {
+                            const u = (usersList || []).find(usr => (c.userId && String(usr.id) === String(c.userId)) || (c.name && usr.name && usr.name.toLowerCase().trim() === c.name.toLowerCase().trim()));
+                            coachImg = u?.avatar || u?.image || '';
+                          }
+                          if (!coachImg) {
+                            try {
+                              const store = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
+                              if (store[c.id]) coachImg = store[c.id];
+                            } catch (e) {}
+                          }
+                          return coachImg ? (
+                            <img
+                              src={coachImg}
+                              alt={c.name}
+                              style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '1px solid #e2e8f0', flexShrink: 0 }}
+                            />
+                          ) : (
+                            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#0f172a', color: '#c5a059', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px', flexShrink: 0 }}>
+                              {c.name ? c.name[0] : 'K'}
+                            </div>
+                          );
+                        })()}
                         <div style={{ minWidth: 0 }}>
                           <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>{c.name}</div>
                           <div style={{ fontSize: '11px', color: '#64748b' }}>{c.title}</div>
@@ -5260,6 +5292,9 @@ export default function AdminCmsTab() {
                       setNewCoachTitle(foundUser.role === 'Kouç' ? 'Sertifikatlı Kouç' : 'Kouç & Ekspert');
                       setNewCoachBio(`${foundUser.name} — Monodoxia Academy fərdi inkişaf və kouçinq ekspertidir.`);
                       setNewCoachSpecialties('Fərdi İnkişaf, Şüurlu Fərqindəlik');
+                      if (foundUser.avatar || foundUser.image) {
+                        setNewCoachImage(foundUser.avatar || foundUser.image);
+                      }
                     }
                   }}
                   className="admin-select"
@@ -5289,12 +5324,14 @@ export default function AdminCmsTab() {
                       showToast('Zəhmət olmasa koçun adını qeyd edin', 'warning');
                       return;
                     }
+                    const targetUser = usersList.find(u => u.id === newCoachUserId);
+                    const finalImage = newCoachImage || targetUser?.avatar || targetUser?.image || '';
                     addCoach({
                       userId: newCoachUserId || null,
                       name: newCoachName.trim(),
                       title: newCoachTitle || 'Kouç & Ekspert',
                       bio: newCoachBio || `${newCoachName} — Monodoxia Academy ekspertidir.`,
-                      image: newCoachImage,
+                      image: finalImage,
                       specialties: newCoachSpecialties.split(',').map(s => s.trim()).filter(Boolean)
                     });
                     setNewCoachUserId('');

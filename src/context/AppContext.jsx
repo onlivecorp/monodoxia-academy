@@ -3670,14 +3670,27 @@ export function AppProvider({ children }) {
 
   // Coaches Operations
   const addCoach = (coach) => {
+    let coachImg = coach.image || '';
+    if (!coachImg) {
+      const u = (usersList || []).find(usr => (coach.userId && String(usr.id) === String(coach.userId)) || (coach.name && usr.name && usr.name.toLowerCase().trim() === coach.name.toLowerCase().trim()));
+      coachImg = u?.avatar || u?.image || '';
+    }
+    const newCoachId = coach.id || ('coach-' + Date.now());
+    if (coachImg) {
+      try {
+        const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
+        imgStore[newCoachId] = coachImg;
+        localStorage.setItem('monodoxia_coach_images', JSON.stringify(imgStore));
+      } catch (e) {}
+    }
     const newCoach = {
-      id: coach.id || ('coach-' + Date.now()),
+      id: newCoachId,
       userId: coach.userId || null,
       name: coach.name,
       title: coach.title || 'Sertifikatlı Kouç & Ekspert',
       experience: coach.experience || '5+ il təcrübə',
       bio: coach.bio || coach.experience || '',
-      image: coach.image || '',
+      image: coachImg,
       specialties: Array.isArray(coach.specialties) ? coach.specialties : (coach.specialties ? coach.specialties.split(',').map(s => s.trim()).filter(Boolean) : ['Fərdi İnkişaf']),
       availableSlots: coach.availableSlots || []
     };
