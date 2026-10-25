@@ -2886,6 +2886,27 @@ if ($action === 'save_booking' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $notes = trim($input['notes'] ?? '');
     $status = trim($input['status'] ?? 'Gözləyir');
 
+    // Server-side Collision Protection: prevent booking a slot already confirmed for this coach
+    if ($slot && ($coach_id || $coach_name)) {
+        $conflictQuery = $pdo->prepare("
+            SELECT id, slot FROM mdx_bookings
+            WHERE (coach_id = ? OR (coach_name = ? AND coach_name != ''))
+              AND slot = ?
+              AND status = 'Təsdiqləndi'
+              AND id != ?
+            LIMIT 1
+        ");
+        $conflictQuery->execute([$coach_id, $coach_name, $slot, $id]);
+        if ($conflictQuery->fetch()) {
+            http_response_code(409);
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Bu tarix və saat aralığı artıq təsdiqlənmiş başqa bir rezervasiya tərəfindən tutulub. Zəhmət olmasa başqa vaxt seçin.'
+            ], JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+    }
+
     $stmt = $pdo->prepare("
         INSERT INTO mdx_bookings (id, user_id, coach_id, coach_name, slot, format, notes, status)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -2913,6 +2934,33 @@ if ($action === 'update_booking_status' && $_SERVER['REQUEST_METHOD'] === 'POST'
         echo json_encode(['status' => 'error', 'message' => 'ID tapılmadı'], JSON_UNESCAPED_UNICODE);
         exit();
     }
+
+    // Server-side collision check when approving
+    if ($status === 'Təsdiqləndi') {
+        $curStmt = $pdo->prepare("SELECT * FROM mdx_bookings WHERE id = ?");
+        $curStmt->execute([$id]);
+        $curBooking = $curStmt->fetch();
+        if ($curBooking && !empty($curBooking['slot'])) {
+            $confChk = $pdo->prepare("
+                SELECT id FROM mdx_bookings 
+                WHERE (coach_id = ? OR (coach_name = ? AND coach_name != ''))
+                  AND slot = ?
+                  AND status = 'Təsdiqləndi'
+                  AND id != ?
+                LIMIT 1
+            ");
+            $confChk->execute([$curBooking['coach_id'], $curBooking['coach_name'], $curBooking['slot'], $id]);
+            if ($confChk->fetch()) {
+                http_response_code(409);
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Toqquşma xətası: Bu saat aralığında artıq başqa bir təsdiqlənmiş rezervasiya mövcuddur.'
+                ], JSON_UNESCAPED_UNICODE);
+                exit();
+            }
+        }
+    }
+
     $stmt = $pdo->prepare("UPDATE mdx_bookings SET status = ? WHERE id = ?");
     $stmt->execute([$status, $id]);
     echo json_encode(['status' => 'success', 'message' => 'Status yeniləndi', 'id' => $id, 'status' => $status], JSON_UNESCAPED_UNICODE);

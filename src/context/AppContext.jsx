@@ -1692,14 +1692,41 @@ export function AppProvider({ children }) {
   };
 
   const confirmBooking = (bookingData) => {
+    const coachId = activeCoach?.id || bookingData.coachId || '';
+    const coachName = activeCoach?.name || bookingData.coachName || '';
+    const slot = bookingData.slot || '';
+    const selectedDate = bookingData.selectedDate || '';
+    const startTime = bookingData.startTime || '';
+    const endTime = bookingData.endTime || '';
+
+    // Collision check: prevent overlapping booking with already confirmed bookings
+    const hasConflict = bookings.some(b => {
+      const matchCoach = (b.coachId && b.coachId === coachId) || (b.coachName && coachName && b.coachName.toLowerCase().trim() === coachName.toLowerCase().trim());
+      if (!matchCoach || b.status !== 'Təsdiqləndi') return false;
+      if (b.slot && slot && b.slot.trim() === slot.trim()) return true;
+      if (selectedDate && b.selectedDate === selectedDate && startTime && b.startTime) {
+        const bStart = b.startTime;
+        const bEnd = b.endTime || b.startTime;
+        const nStart = startTime;
+        const nEnd = endTime || startTime;
+        if (nStart < bEnd && nEnd > bStart) return true;
+      }
+      return false;
+    });
+
+    if (hasConflict) {
+      showToast('Bu tarix və saat aralığı artıq başqa bir təsdiqlənmiş rezervasiya tərəfindən tutulub. Zəhmət olmasa başqa vaxt seçin.', 'error');
+      return false;
+    }
+
     const newBooking = {
       id: 'BK-' + Date.now(),
-      coachId: activeCoach?.id || bookingData.coachId || '',
-      coachName: activeCoach?.name || bookingData.coachName || '',
-      slot: bookingData.slot || '',
-      selectedDate: bookingData.selectedDate || '',
-      startTime: bookingData.startTime || '',
-      endTime: bookingData.endTime || '',
+      coachId,
+      coachName,
+      slot,
+      selectedDate,
+      startTime,
+      endTime,
       format: bookingData.type || bookingData.format || 'Online (Google Meet)',
       notes: bookingData.notes || '',
       userName: currentUser?.name || bookingData.userName || 'Qonaq İstifadəçi',
@@ -1713,10 +1740,39 @@ export function AppProvider({ children }) {
     setBookingModalOpen(false);
     apiCall('save_booking', newBooking);
     showToast(`Sessiya müraciəti göndərildi: ${newBooking.coachName}`, 'success');
+    return true;
   };
 
   const updateBookingStatus = (bookingId, newStatus) => {
     let targetBooking = null;
+
+    // Check collision if approving
+    if (newStatus === 'Təsdiqləndi') {
+      const existingToConfirm = bookings.find(b => b.id === bookingId);
+      if (existingToConfirm) {
+        const isCollision = bookings.some(b => {
+          if (b.id === bookingId || b.status !== 'Təsdiqləndi') return false;
+          const matchCoach = (b.coachId && b.coachId === existingToConfirm.coachId) ||
+                             (b.coachName && existingToConfirm.coachName && b.coachName.toLowerCase().trim() === existingToConfirm.coachName.toLowerCase().trim());
+          if (!matchCoach) return false;
+          if (b.slot && existingToConfirm.slot && b.slot.trim() === existingToConfirm.slot.trim()) return true;
+          if (b.selectedDate && existingToConfirm.selectedDate && b.selectedDate === existingToConfirm.selectedDate && b.startTime && existingToConfirm.startTime) {
+            const bStart = b.startTime;
+            const bEnd = b.endTime || b.startTime;
+            const nStart = existingToConfirm.startTime;
+            const nEnd = existingToConfirm.endTime || existingToConfirm.startTime;
+            return nStart < bEnd && nEnd > bStart;
+          }
+          return false;
+        });
+
+        if (isCollision) {
+          showToast('Xəta: Bu saat aralığında artıq başqa bir təsdiqlənmiş rezervasiya mövcuddur! Toqquşmanın qarşısı alındı.', 'error');
+          return;
+        }
+      }
+    }
+
     setBookings(prev => {
       const next = prev.map(b => {
         if (b.id === bookingId) {
@@ -1755,18 +1811,19 @@ export function AppProvider({ children }) {
               label: bSlot,
               isBooked: true,
               clientName: targetBooking.userName || 'İstifadəçi',
-              note: `Saytdan rezervasiya (#${targetBooking.id})`
+              note: `Saytdan rezervasiya (#${targetBooking.id})`,
+              bookingId: targetBooking.id
             };
 
-            const alreadyInSchedule = currentSchedule.some(s => s.label === bSlot || (s.date === newSlotEntry.date && s.startTime === newSlotEntry.startTime));
+            const alreadyInSchedule = currentSchedule.some(s => s.label === bSlot || s.bookingId === targetBooking.id || (s.date === newSlotEntry.date && s.startTime === newSlotEntry.startTime));
             const updatedSchedule = alreadyInSchedule
-              ? currentSchedule.map(s => (s.label === bSlot ? { ...s, isBooked: true, clientName: targetBooking.userName } : s))
+              ? currentSchedule.map(s => ((s.label === bSlot || s.bookingId === targetBooking.id || (s.date === newSlotEntry.date && s.startTime === newSlotEntry.startTime)) ? { ...s, isBooked: true, clientName: targetBooking.userName, bookingId: targetBooking.id } : s))
               : [...currentSchedule, newSlotEntry];
 
-            const alreadyInBooked = currentBooked.some(bs => (typeof bs === 'string' && bs === bSlot) || (bs.slot && bs.slot === bSlot));
+            const alreadyInBooked = currentBooked.some(bs => (typeof bs === 'string' && bs === bSlot) || (bs.slot && bs.slot === bSlot) || bs.bookingId === targetBooking.id);
             const updatedBooked = alreadyInBooked
-              ? currentBooked
-              : [...currentBooked, { id: 'bs-' + Date.now(), slot: bSlot, date: newSlotEntry.date, isBooked: true, clientName: targetBooking.userName }];
+              ? currentBooked.map(bs => (typeof bs === 'object' && (bs.slot === bSlot || bs.bookingId === targetBooking.id) ? { ...bs, isBooked: true, bookingId: targetBooking.id } : bs))
+              : [...currentBooked, { id: 'bs-' + targetBooking.id, slot: bSlot, date: newSlotEntry.date, isBooked: true, clientName: targetBooking.userName, bookingId: targetBooking.id }];
 
             const updatedCoach = {
               ...c,
@@ -1785,9 +1842,58 @@ export function AppProvider({ children }) {
         return nextCoaches;
       });
 
-      showToast('Müraciət qəbul edildi və saat aralığı avtomatik rezerv (dolu) olaraq qeyd edildi!', 'success');
-    } else if (newStatus === 'Ləğv edildi') {
-      showToast('Müraciət ləğv edildi', 'info');
+      showToast('Müraciət qəbul edildi və saat aralığı təqvimdə avtomatik dolu (rezerv) edildi!', 'success');
+    } else if (newStatus === 'Ləğv edildi' && targetBooking) {
+      const bSlot = targetBooking.slot || `${targetBooking.selectedDate || ''} ${targetBooking.startTime || ''}-${targetBooking.endTime || ''}`.trim();
+      const bCoachId = targetBooking.coachId;
+      const bCoachName = targetBooking.coachName;
+
+      setCoachesList(prevCoaches => {
+        const nextCoaches = prevCoaches.map(c => {
+          const matchId = bCoachId && c.id === bCoachId;
+          const matchName = bCoachName && c.name && c.name.toLowerCase().trim() === bCoachName.toLowerCase().trim();
+          if (matchId || matchName) {
+            const currentSchedule = Array.isArray(c.scheduleSlots) ? [...c.scheduleSlots] : [];
+            const currentBooked = Array.isArray(c.bookedSlots) ? [...c.bookedSlots] : [];
+
+            // Unmark schedule slot
+            const updatedSchedule = currentSchedule.map(s => {
+              const match = s.bookingId === targetBooking.id || s.label === bSlot ||
+                (s.note && s.note.includes(targetBooking.id)) ||
+                (s.date && targetBooking.selectedDate && s.date === targetBooking.selectedDate && s.startTime === targetBooking.startTime);
+              if (match) {
+                return { ...s, isBooked: false, clientName: '', note: '', bookingId: null };
+              }
+              return s;
+            });
+
+            // Remove from bookedSlots
+            const updatedBooked = currentBooked.filter(bs => {
+              if (typeof bs === 'string') return bs !== bSlot;
+              if (bs.bookingId && bs.bookingId === targetBooking.id) return false;
+              if (bs.id === 'bs-' + targetBooking.id) return false;
+              if (bs.slot && bs.slot === bSlot) return false;
+              return true;
+            });
+
+            const updatedCoach = {
+              ...c,
+              scheduleSlots: updatedSchedule,
+              bookedSlots: updatedBooked
+            };
+            apiCall('save_coach', updatedCoach);
+            return updatedCoach;
+          }
+          return c;
+        });
+
+        try {
+          localStorage.setItem('monodoxia_coaches', JSON.stringify(nextCoaches));
+        } catch (e) {}
+        return nextCoaches;
+      });
+
+      showToast('Rezervasiya ləğv edildi və saat aralığı təqvimdə yenidən boşaldıldı (mövcud oldu).', 'info');
     } else {
       showToast(`Müraciət statusu: ${newStatus}`, 'success');
     }

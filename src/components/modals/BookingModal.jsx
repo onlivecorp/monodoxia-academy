@@ -77,12 +77,40 @@ export default function BookingModal() {
   const currentSlot = slot || firstAvailable || (allSlots[0]?.label || 'Fərdi razılaşma ilə');
 
   // Check if selected slot or custom time is booked
+  // Check if selected slot or custom time is booked
   const isSelectedSlotBooked = useMemo(() => {
     if (useCustomTime) {
+      if (customStartTime >= customEndTime) return true;
       const formattedDate = customDate.split('-').reverse().join('.');
-      const customLabel = `${formattedDate} ${customStartTime} - ${customEndTime}`.trim();
-      return allSlots.some(s => s.isBooked && (s.label.includes(customLabel) || (s.date === customDate && s.startTime === customStartTime))) ||
-             confirmedCoachBookings.some(cb => cb.slot?.includes(customLabel));
+      
+      const matchSchedule = allSlots.some(s => {
+        if (!s.isBooked) return false;
+        if (s.date && s.date === customDate && s.startTime && s.endTime) {
+          return customStartTime < s.endTime && customEndTime > s.startTime;
+        }
+        if (s.label && s.label.includes(formattedDate)) {
+          const match = s.label.match(/(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/);
+          if (match) return customStartTime < match[2] && customEndTime > match[1];
+          return true;
+        }
+        return false;
+      });
+
+      const matchConfirmed = confirmedCoachBookings.some(cb => {
+        if (cb.selectedDate && cb.selectedDate === customDate && cb.startTime) {
+          const bStart = cb.startTime;
+          const bEnd = cb.endTime || cb.startTime;
+          return customStartTime < bEnd && customEndTime > bStart;
+        }
+        if (cb.slot && cb.slot.includes(formattedDate)) {
+          const match = cb.slot.match(/(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/);
+          if (match) return customStartTime < match[2] && customEndTime > match[1];
+          return true;
+        }
+        return false;
+      });
+
+      return matchSchedule || matchConfirmed;
     }
     const found = allSlots.find(s => s.label === currentSlot);
     return found ? found.isBooked : false;

@@ -18,8 +18,12 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
     updateCoach,
     setActiveCertView,
     setCertViewModalOpen,
-    showToast
+    showToast,
+    bookings = [],
+    updateBookingStatus
   } = useApp();
+
+  const [bookingFilter, setBookingFilter] = useState('all'); // 'all' | 'Gözləyir' | 'Təsdiqləndi' | 'Ləğv edildi'
 
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'certificates' | 'reviews'
 
@@ -110,6 +114,38 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
   // Certificates: Self-added by coach
   const customCerts = Array.isArray(liveCoach.customCertificates) ? liveCoach.customCertificates : [];
 
+  // Incoming booking requests for this coach
+  const coachIncomingBookings = (bookings || []).filter(b => {
+    const matchId = (b.coachId && b.coachId === liveCoach.id) || (b.coach_id && b.coach_id === liveCoach.id);
+    const matchName = b.coachName && liveCoach.name && b.coachName.toLowerCase().trim() === liveCoach.name.toLowerCase().trim();
+    return matchId || matchName;
+  });
+  const pendingBookingsCount = coachIncomingBookings.filter(b => b.status === 'Gözləyir').length;
+  const filteredBookings = coachIncomingBookings.filter(b => {
+    if (bookingFilter === 'all') return true;
+    return b.status === bookingFilter;
+  });
+
+  // Keep modalSchedule in sync with liveCoach schedule
+  useEffect(() => {
+    if (liveCoach) {
+      const sched = Array.isArray(liveCoach.scheduleSlots) && liveCoach.scheduleSlots.length > 0
+        ? liveCoach.scheduleSlots
+        : (Array.isArray(availableSlots)
+            ? availableSlots.map((s, idx) => ({
+                id: 'mslot-' + idx,
+                label: typeof s === 'string' ? s : (s.label || s.slot || 'Saat'),
+                date: '',
+                startTime: '',
+                endTime: '',
+                isBooked: false,
+                note: ''
+              }))
+            : []);
+      setModalSchedule(sched);
+    }
+  }, [liveCoach?.id, liveCoach?.scheduleSlots]);
+
   // Check if current logged-in user is this expert or an Admin
   const isExpertSelf = currentUser && (
     (liveCoach.userId && String(currentUser.id) === String(liveCoach.userId)) ||
@@ -153,8 +189,18 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
   const handleAddModalScheduleSlot = (e) => {
     e?.preventDefault();
     if (!modalSlotStart || !modalSlotEnd) return;
+    if (modalSlotStart >= modalSlotEnd) {
+      if (showToast) showToast('Bitmə saatı başlama saatından sonra olmalıdır!', 'warning');
+      return;
+    }
     const formattedDate = modalSlotDate ? modalSlotDate.split('-').reverse().join('.') : '';
     const label = `${formattedDate ? formattedDate + ' ' : ''}${modalSlotStart} - ${modalSlotEnd}`.trim();
+
+    if (modalSchedule.some(s => s.label === label || (s.date === modalSlotDate && s.startTime === modalSlotStart && s.endTime === modalSlotEnd))) {
+      if (showToast) showToast('Bu saat aralığı artıq cədvələ əlavə edilib!', 'warning');
+      return;
+    }
+
     const newEntry = {
       id: 'slot-' + Date.now(),
       date: modalSlotDate,
@@ -164,16 +210,76 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
       isBooked: modalSlotStatus === 'Dolu',
       note: modalSlotNote.trim()
     };
-    setModalSchedule(prev => [...prev, newEntry]);
+    const updated = [...modalSchedule, newEntry];
+    setModalSchedule(updated);
     setModalSlotNote('');
+
+    if (updateCoach) {
+      const availList = updated.filter(s => !s.isBooked).map(s => s.label);
+      const bookedList = updated.filter(s => s.isBooked).map(s => ({
+        id: s.id,
+        slot: s.label,
+        date: s.date,
+        startTime: s.startTime,
+        endTime: s.endTime,
+        note: s.note,
+        isBooked: true,
+        clientName: s.clientName
+      }));
+      updateCoach(liveCoach.id, {
+        scheduleSlots: updated,
+        bookedSlots: bookedList,
+        availableSlots: availList.length > 0 ? availList : availableSlots
+      });
+    }
+    if (showToast) showToast('Yeni saat aralığı cədvələ əlavə edildi!', 'success');
   };
 
   const handleToggleModalSlot = (slotId) => {
-    setModalSchedule(prev => prev.map(s => (s.id === slotId ? { ...s, isBooked: !s.isBooked } : s)));
+    const updated = modalSchedule.map(s => (s.id === slotId ? { ...s, isBooked: !s.isBooked } : s));
+    setModalSchedule(updated);
+    if (updateCoach) {
+      const availList = updated.filter(s => !s.isBooked).map(s => s.label);
+      const bookedList = updated.filter(s => s.isBooked).map(s => ({
+        id: s.id,
+        slot: s.label,
+        date: s.date,
+        startTime: s.startTime,
+        endTime: s.endTime,
+        note: s.note,
+        isBooked: true,
+        clientName: s.clientName
+      }));
+      updateCoach(liveCoach.id, {
+        scheduleSlots: updated,
+        bookedSlots: bookedList,
+        availableSlots: availList.length > 0 ? availList : availableSlots
+      });
+    }
   };
 
   const handleRemoveModalSlot = (slotId) => {
-    setModalSchedule(prev => prev.filter(s => s.id !== slotId));
+    const updated = modalSchedule.filter(s => s.id !== slotId);
+    setModalSchedule(updated);
+    if (updateCoach) {
+      const availList = updated.filter(s => !s.isBooked).map(s => s.label);
+      const bookedList = updated.filter(s => s.isBooked).map(s => ({
+        id: s.id,
+        slot: s.label,
+        date: s.date,
+        startTime: s.startTime,
+        endTime: s.endTime,
+        note: s.note,
+        isBooked: true,
+        clientName: s.clientName
+      }));
+      updateCoach(liveCoach.id, {
+        scheduleSlots: updated,
+        bookedSlots: bookedList,
+        availableSlots: availList.length > 0 ? availList : availableSlots
+      });
+    }
+    if (showToast) showToast('Saat aralığı cədvəldən silindi', 'info');
   };
 
   const handleSaveProfile = (e) => {
@@ -386,6 +492,26 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                 {totalReviewsCount}
               </span>
             </button>
+
+            {isExpertSelf && (
+              <button
+                type="button"
+                onClick={() => setActiveTab('calendar')}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  activeTab === 'calendar'
+                    ? 'bg-[#071326] text-[#e5c57d] shadow-sm'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <span className="material-symbols-outlined text-[16px]">calendar_month</span>
+                <span>Təqvim & Rezervasiyalar</span>
+                {pendingBookingsCount > 0 && (
+                  <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-500 text-white animate-pulse">
+                    {pendingBookingsCount}
+                  </span>
+                )}
+              </button>
+            )}
           </div>
 
           {/* TAB 1: OVERVIEW */}
@@ -1026,7 +1152,290 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
             </div>
           )}
 
-          {/* TAB 3: REVIEWS & RATINGS */}
+          {/* TAB 4: CALENDAR & BOOKINGS MANAGEMENT (EXPERT PERSONAL CALENDAR) */}
+          {activeTab === 'calendar' && isExpertSelf && (
+            <div className="space-y-6 pt-5">
+              {/* Calendar Stats Summary */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm text-center">
+                  <div className="text-xl font-serif font-bold text-[#071326]">{modalSchedule.length}</div>
+                  <div className="text-[10px] uppercase tracking-wider font-semibold text-slate-500 mt-0.5">Ümumi Saatlar</div>
+                </div>
+                <div className="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200 shadow-sm text-center">
+                  <div className="text-xl font-serif font-bold text-emerald-800">
+                    {modalSchedule.filter(s => !s.isBooked).length}
+                  </div>
+                  <div className="text-[10px] uppercase tracking-wider font-semibold text-emerald-700 mt-0.5">🟢 Mövcud (Boş)</div>
+                </div>
+                <div className="p-3.5 rounded-2xl bg-rose-50/70 border border-rose-200 shadow-sm text-center">
+                  <div className="text-xl font-serif font-bold text-rose-800">
+                    {modalSchedule.filter(s => s.isBooked).length}
+                  </div>
+                  <div className="text-[10px] uppercase tracking-wider font-semibold text-rose-700 mt-0.5">🔴 Dolu (Rezerv)</div>
+                </div>
+                <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200 shadow-sm text-center">
+                  <div className="text-xl font-serif font-bold text-amber-900">{pendingBookingsCount}</div>
+                  <div className="text-[10px] uppercase tracking-wider font-semibold text-amber-800 mt-0.5">⏳ Gözləyən Rezervasiya</div>
+                </div>
+              </div>
+
+              {/* 1. SECTION: GƏLƏN REZERVASİYA MÜRACİƏTLƏRİ */}
+              <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                  <div>
+                    <h4 className="text-sm font-bold text-[#071326] flex items-center gap-1.5 font-mono uppercase tracking-wider">
+                      <span className="material-symbols-outlined text-[18px] text-amber-600">inbox</span>
+                      Gələn Rezervasiya Müraciətləri
+                    </h4>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      Sayt üzərindən sizin adınıza edilmiş rezervasiyalar. Qəbul etdikdə saat təqvimdə avtomatik <strong>dolu</strong> olur.
+                    </p>
+                  </div>
+
+                  {/* Filter Pills */}
+                  <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs self-start">
+                    {['all', 'Gözləyir', 'Təsdiqləndi', 'Ləğv edildi'].map(st => (
+                      <button
+                        key={st}
+                        type="button"
+                        onClick={() => setBookingFilter(st)}
+                        className={`px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer text-[11px] ${
+                          bookingFilter === st
+                            ? 'bg-white text-slate-900 shadow-xs font-bold'
+                            : 'text-slate-500 hover:text-slate-900'
+                        }`}
+                      >
+                        {st === 'all' ? 'Hamısı' : st}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {filteredBookings.length === 0 ? (
+                  <div className="p-6 text-center text-xs text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                    <span className="material-symbols-outlined text-3xl block text-slate-300 mb-1">event_busy</span>
+                    Bu kateqoriyada heç bir rezervasiya müraciəti yoxdur.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {filteredBookings.map(b => (
+                      <div
+                        key={b.id}
+                        className={`p-4 rounded-xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                          b.status === 'Təsdiqləndi' ? 'bg-emerald-50/30 border-emerald-200' :
+                          b.status === 'Ləğv edildi' ? 'bg-rose-50/20 border-rose-200 opacity-75' :
+                          'bg-amber-50/40 border-amber-200'
+                        }`}
+                      >
+                        <div className="space-y-1.5 min-w-0 flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-bold text-xs text-[#071326]">{b.userName}</span>
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                              b.status === 'Təsdiqləndi' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' :
+                              b.status === 'Ləğv edildi' ? 'bg-rose-100 text-rose-800 border border-rose-300' :
+                              'bg-amber-100 text-amber-800 border border-amber-300'
+                            }`}>
+                              {b.status || 'Gözləyir'}
+                            </span>
+                            <span className="text-[10px] text-slate-400 font-mono">#{b.id}</span>
+                          </div>
+
+                          <div className="text-xs text-slate-700 flex items-center gap-2 flex-wrap">
+                            <span className="font-semibold text-amber-900 bg-amber-100/70 px-2 py-0.5 rounded border border-amber-200 flex items-center gap-1">
+                              <span className="material-symbols-outlined text-[13px]">schedule</span>
+                              {b.slot || `${b.selectedDate || ''} ${b.startTime || ''}-${b.endTime || ''}`}
+                            </span>
+                            <span className="text-slate-500">• {b.format}</span>
+                            {b.userEmail && <span className="text-slate-500 text-[11px]">({b.userEmail})</span>}
+                            {b.userPhone && <span className="text-slate-500 text-[11px]">Tel: {b.userPhone}</span>}
+                          </div>
+
+                          {b.notes && (
+                            <p className="text-[11px] text-slate-600 italic bg-white p-2 rounded border border-slate-200 mt-1">
+                              "{b.notes}"
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                          {b.status !== 'Təsdiqləndi' && (
+                            <button
+                              type="button"
+                              onClick={() => updateBookingStatus(b.id, 'Təsdiqləndi')}
+                              className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer transition-colors"
+                              title="Rezervasiyanı qəbul et və təqvimdə avtomatik məşğul (dolu) et"
+                            >
+                              <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                              <span>Qəbul Et & Rezervlə</span>
+                            </button>
+                          )}
+                          {b.status !== 'Ləğv edildi' && (
+                            <button
+                              type="button"
+                              onClick={() => updateBookingStatus(b.id, 'Ləğv edildi')}
+                              className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 text-xs font-medium flex items-center gap-1 cursor-pointer transition-colors"
+                              title="Ləğv et və saatı yenidən boşalt"
+                            >
+                              <span className="material-symbols-outlined text-[15px]">close</span>
+                              <span>Ləğv Et & Saatı Boşalt</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* 2. SECTION: ŞƏXSİ TƏQVİM VƏ İŞ QRAFİKİ */}
+              <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-4">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-100 flex-wrap gap-2">
+                  <div>
+                    <h4 className="text-sm font-bold text-[#071326] flex items-center gap-1.5 font-mono uppercase tracking-wider">
+                      <span className="material-symbols-outlined text-[18px] text-[#775a19]">calendar_month</span>
+                      Şəxsi Təqvim və Saat Cədvəlinin İdarə Edilməsi
+                    </h4>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      Tarix və saat aralıqlarını qeyd edin. Dolu olanlar saytda müştərilərə deaktiv görünür, mövcud olanlara rezervasiya verilə bilir.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Form to Add New Slot */}
+                <div className="p-4 rounded-2xl bg-amber-50/40 border border-amber-200/80 space-y-3">
+                  <span className="text-[11px] font-bold text-[#775a19] uppercase tracking-wider block">
+                    + Yeni Saat Aralığı Əlavə Et
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Tarix</label>
+                      <input
+                        type="date"
+                        min={new Date().toISOString().split('T')[0]}
+                        value={modalSlotDate}
+                        onChange={e => setModalSlotDate(e.target.value)}
+                        className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Başlama Saatı</label>
+                      <input
+                        type="time"
+                        value={modalSlotStart}
+                        onChange={e => setModalSlotStart(e.target.value)}
+                        className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Bitmə Saatı</label>
+                      <input
+                        type="time"
+                        value={modalSlotEnd}
+                        onChange={e => setModalSlotEnd(e.target.value)}
+                        className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Saat Vəziyyəti</label>
+                      <select
+                        value={modalSlotStatus}
+                        onChange={e => setModalSlotStatus(e.target.value)}
+                        className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-bold"
+                      >
+                        <option value="Dolu">🔴 Dolu / Məşğul</option>
+                        <option value="Mövcud">🟢 Mövcud / Boş</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row items-center gap-2">
+                    <input
+                      type="text"
+                      value={modalSlotNote}
+                      onChange={e => setModalSlotNote(e.target.value)}
+                      placeholder="Qeyd (məs: Şəxsi görüş, Fərdi seans və s. - istəyə bağlı)"
+                      className="flex-1 w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-800"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddModalScheduleSlot}
+                      className="w-full sm:w-auto px-4 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold flex items-center justify-center gap-1 cursor-pointer transition-colors shrink-0 shadow-xs"
+                    >
+                      <span className="material-symbols-outlined text-[15px]">add_circle</span>
+                      <span>+ Cədvələ Əlavə Et</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Slots List */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+                    <span>Mövcud Saat Aralıqları ({modalSchedule.length})</span>
+                    <span className="text-[10px] font-normal text-slate-400">Dəyişikliklər avtomatik yadda saxlanılır</span>
+                  </div>
+
+                  {modalSchedule.length === 0 ? (
+                    <p className="text-xs text-slate-400 italic py-2">Hələ heç bir saat aralığı təyin edilməyib.</p>
+                  ) : (
+                    <div className="space-y-1.5 max-h-72 overflow-y-auto pr-1">
+                      {modalSchedule.map(s => (
+                        <div
+                          key={s.id}
+                          className={`p-2.5 rounded-xl border flex items-center justify-between gap-2 transition-all ${
+                            s.isBooked
+                              ? 'bg-rose-50/70 border-rose-200 text-slate-700'
+                              : 'bg-emerald-50/70 border-emerald-200 text-slate-800'
+                          }`}
+                        >
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-bold text-xs">{s.label}</span>
+                              <span className={`px-2 py-0.2 rounded-full text-[9px] font-bold uppercase tracking-wider ${
+                                s.isBooked
+                                  ? 'bg-rose-200 text-rose-900 border border-rose-300'
+                                  : 'bg-emerald-200 text-emerald-900 border border-emerald-300'
+                              }`}>
+                                {s.isBooked ? 'Dolu / Rezerv' : 'Mövcud / Boş'}
+                              </span>
+                            </div>
+                            {(s.note || s.clientName) && (
+                              <div className="text-[11px] text-slate-500 truncate mt-0.5">
+                                {s.clientName && <span className="font-semibold text-slate-700">{s.clientName} · </span>}
+                                {s.note}
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => handleToggleModalSlot(s.id)}
+                              className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-colors cursor-pointer ${
+                                s.isBooked
+                                  ? 'bg-white hover:bg-emerald-50 text-emerald-700 border-emerald-300'
+                                  : 'bg-white hover:bg-rose-50 text-rose-700 border-rose-300'
+                              }`}
+                              title="Vəziyyəti dəyiş"
+                            >
+                              {s.isBooked ? 'Boş et' : 'Dolu et'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveModalSlot(s.id)}
+                              className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-white transition-colors cursor-pointer"
+                              title="Sil"
+                            >
+                              <span className="material-symbols-outlined text-[16px]">delete</span>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
           {activeTab === 'reviews' && (
             <div className="space-y-6 pt-5">
               {/* Rating Summary Card */}
