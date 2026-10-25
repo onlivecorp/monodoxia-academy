@@ -108,7 +108,7 @@ export default function AcademyPage() {
             </div>
 
             {/* Category Filter Tabs */}
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-stretch w-full gap-2 p-1.5 rounded-2xl bg-white/80 border border-[#e2d9c8]/80 shadow-sm">
               {[
                 { id: 'all', label: t('filter_all') || 'Bütün Kurslar' },
                 ...courseCategories.map(cat => ({
@@ -121,7 +121,7 @@ export default function AcademyPage() {
                   <button
                     key={tab.id}
                     onClick={() => setFilter(tab.id)}
-                    className={`px-4 py-2 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer ${
+                    className={`flex-1 min-w-[130px] sm:min-w-[150px] px-4 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer text-center flex items-center justify-center ${
                       isActive
                         ? 'bg-gradient-to-r from-[#071326] to-[#0c2242] text-[#e5c57d] shadow-md border border-[#c5a059]/40'
                         : 'bg-[#faf8f5] text-[#475569] hover:text-[#071326] hover:bg-white border border-[#e2e8f0]'
