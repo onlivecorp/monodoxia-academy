@@ -1986,9 +1986,13 @@ export function AppProvider({ children }) {
 
     let title = targetItem.title || targetItem.name || 'Proqram';
     let rawPrice = (targetItem.price !== undefined && targetItem.price !== null) ? String(targetItem.price).trim() : '';
-    let price = 'Pulsuz';
-    if (rawPrice && rawPrice !== '0' && !['pulsuz', 'ödənişsiz', 'free'].includes(rawPrice.toLowerCase())) {
-      price = (rawPrice.startsWith('₼') || rawPrice.endsWith('AZN') || rawPrice.endsWith('₼')) ? rawPrice : `${rawPrice} AZN`;
+    let price = '';
+    if (rawPrice && rawPrice !== '0') {
+      if (['pulsuz', 'ödənişsiz', 'free'].includes(rawPrice.toLowerCase())) {
+        price = 'Pulsuz';
+      } else {
+        price = (rawPrice.startsWith('₼') || rawPrice.endsWith('AZN') || rawPrice.endsWith('₼')) ? rawPrice : `${rawPrice} AZN`;
+      }
     }
 
     setActiveApplicationTarget({

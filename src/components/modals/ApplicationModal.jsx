@@ -39,10 +39,36 @@ export default function ApplicationModal() {
   // Relevant dynamic fields
   const relevantFields = useMemo(() => {
     if (!activeApplicationTarget) return [];
-    return formFieldsList
+    const fields = formFieldsList
       .filter(f => (f.isActive !== false && f.is_active !== 0) &&
         (f.targetType === 'all' || f.target_type === 'all' || f.targetType === activeApplicationTarget.type || f.target_type === activeApplicationTarget.type))
       .sort((a, b) => (a.sortOrder || a.sort_order || 0) - (b.sortOrder || b.sort_order || 0));
+
+    // Kursa müraciət üçün yalnız WhatsApp / Əlaqə nömrəsi tələb olunur
+    if (activeApplicationTarget.type === 'course') {
+      const phoneField = fields.find(f => f.id === 'fld_phone' || f.fieldType === 'tel' || /tel|phone|whatsapp/i.test(f.label));
+      if (phoneField) {
+        return [phoneField];
+      }
+      return [{
+        id: 'fld_phone',
+        targetType: 'all',
+        label: 'Əlaqə Nömrəsi (WhatsApp)',
+        fieldType: 'tel',
+        placeholder: '+994 50 000 00 00',
+        isRequired: true,
+        isActive: true,
+        sortOrder: 1,
+        translations: {
+          az: { label: 'Əlaqə Nömrəsi (WhatsApp)', placeholder: '+994 50 000 00 00' },
+          en: { label: 'Contact Number (WhatsApp)', placeholder: '+994 50 000 00 00' },
+          tr: { label: 'İletişim Numarası (WhatsApp)', placeholder: '+994 50 000 00 00' },
+          ru: { label: 'Контактный Номер (WhatsApp)', placeholder: '+994 50 000 00 00' }
+        }
+      }];
+    }
+
+    return fields;
   }, [formFieldsList, activeApplicationTarget]);
 
 
@@ -143,7 +169,7 @@ export default function ApplicationModal() {
                 <span className="material-symbols-outlined text-[15px]">{targetMeta.icon}</span>
                 {targetMeta.label} Müraciəti
               </span>
-              {activeApplicationTarget.price && (
+              {activeApplicationTarget.price && String(activeApplicationTarget.price).trim() !== '' && (
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-secondary/10 text-secondary border border-secondary/20">
                   {activeApplicationTarget.price}
                 </span>
@@ -378,18 +404,20 @@ export default function ApplicationModal() {
               })}
 
               {/* Optional User Note */}
-              <div>
-                <label className="block text-xs font-semibold text-primary mb-1">
-                  Əlavə Qeyd və ya Mentor üçün Sual (Könüllü)
-                </label>
-                <textarea
-                  rows={2}
-                  value={userNote}
-                  onChange={(e) => setUserNote(e.target.value)}
-                  placeholder="Spesifik bir istəyiniz və ya sualınız varsa qeyd edə bilərsiniz..."
-                  className="w-full px-3 py-2 rounded border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
-                />
-              </div>
+              {activeApplicationTarget.type !== 'course' && (
+                <div>
+                  <label className="block text-xs font-semibold text-primary mb-1">
+                    Əlavə Qeyd və ya Mentor üçün Sual (Könüllü)
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={userNote}
+                    onChange={(e) => setUserNote(e.target.value)}
+                    placeholder="Spesifik bir istəyiniz və ya sualınız varsa qeyd edə bilərsiniz..."
+                    className="w-full px-3 py-2 rounded border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
+                  />
+                </div>
+              )}
 
               {/* Agreement */}
               <div>
