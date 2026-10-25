@@ -187,16 +187,7 @@ export default function Academy() {
                       </div>
                     )}
 
-                    {/* Progress indicator */}
-                    <div>
-                      <div className="flex justify-between text-[11px] text-slate-500 mb-1.5 font-medium">
-                        <span>Tələbə tərəqqisi</span>
-                        <span>{prog}% tamamlandı</span>
-                      </div>
-                      <div className="w-full bg-[#f5f3ef] h-1.5 rounded-full overflow-hidden border border-[#e2d9c8]/40">
-                        <div className="bg-gradient-to-r from-[#9e782f] to-[#c5a059] h-full rounded-full transition-all duration-500" style={{ width: `${prog}%` }}></div>
-                      </div>
-                    </div>
+
 
                     <div className="flex items-center justify-between pt-2">
                       {c.price ? (
