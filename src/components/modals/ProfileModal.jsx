@@ -36,6 +36,7 @@ export default function ProfileModal() {
     addCoachCertificate,
     deleteCoachCertificate,
     updateCoach,
+    updateBookingStatus,
   } = useApp();
 
   const activeTab = activeProfileTab || 'profile';
@@ -76,6 +77,12 @@ export default function ProfileModal() {
   const [expertSpecialties, setExpertSpecialties] = useState('');
   const [expertSlots, setExpertSlots] = useState([]);
   const [expertNewSlot, setExpertNewSlot] = useState('');
+  const [expertSchedule, setExpertSchedule] = useState([]);
+  const [newSlotDate, setNewSlotDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [newSlotStart, setNewSlotStart] = useState('14:00');
+  const [newSlotEnd, setNewSlotEnd] = useState('15:00');
+  const [newSlotStatus, setNewSlotStatus] = useState('Dolu'); // 'Dolu' | 'Mövcud'
+  const [newSlotNote, setNewSlotNote] = useState('');
   const [expertProfileSaved, setExpertProfileSaved] = useState(false);
   const [expertProfileInited, setExpertProfileInited] = useState(false);
 
@@ -400,6 +407,21 @@ export default function ProfileModal() {
                         : (myCoachProfile.specialties || '');
                       setExpertSpecialties(specs);
                       setExpertSlots(Array.isArray(myCoachProfile.availableSlots) ? myCoachProfile.availableSlots : (Array.isArray(myCoachProfile.available_slots) ? myCoachProfile.available_slots : []));
+
+                      const initialSched = Array.isArray(myCoachProfile.scheduleSlots) && myCoachProfile.scheduleSlots.length > 0
+                        ? myCoachProfile.scheduleSlots
+                        : (Array.isArray(myCoachProfile.availableSlots)
+                            ? myCoachProfile.availableSlots.map((s, idx) => ({
+                                id: 'slot-init-' + idx,
+                                label: typeof s === 'string' ? s : (s.label || s.slot || 'Saat'),
+                                date: '',
+                                startTime: '',
+                                endTime: '',
+                                isBooked: false,
+                                note: ''
+                              }))
+                            : []);
+                      setExpertSchedule(initialSched);
                       setExpertProfileInited(true);
                     }
                   }}
@@ -1187,31 +1209,84 @@ export default function ProfileModal() {
             );
             if (!myCoachProfile) return null;
 
+            // Incoming booking requests for this coach
+            const coachIncomingBookings = (bookings || []).filter(b => {
+              const matchId = (b.coachId && b.coachId === myCoachProfile.id) || (b.coach_id && b.coach_id === myCoachProfile.id);
+              const matchName = b.coachName && myCoachProfile.name && b.coachName.toLowerCase().trim() === myCoachProfile.name.toLowerCase().trim();
+              return matchId || matchName;
+            });
+
+            const handleAddNewScheduleSlot = (e) => {
+              e?.preventDefault();
+              if (!newSlotStart || !newSlotEnd) {
+                showToast('Başlama və bitmə saatını seçin', 'error');
+                return;
+              }
+              const formattedDate = newSlotDate ? newSlotDate.split('-').reverse().join('.') : '';
+              const label = `${formattedDate ? formattedDate + ' ' : ''}${newSlotStart} - ${newSlotEnd}`.trim();
+              
+              const newEntry = {
+                id: 'slot-' + Date.now(),
+                date: newSlotDate,
+                startTime: newSlotStart,
+                endTime: newSlotEnd,
+                label,
+                isBooked: newSlotStatus === 'Dolu',
+                note: newSlotNote.trim()
+              };
+
+              setExpertSchedule(prev => [...prev, newEntry]);
+              setNewSlotNote('');
+              showToast(`${label} (${newSlotStatus === 'Dolu' ? 'Dolu / Rezerv' : 'Mövcud / Boş'}) əlavə edildi`, 'success');
+            };
+
+            const handleToggleSlotStatus = (slotId) => {
+              setExpertSchedule(prev => prev.map(s => {
+                if (s.id === slotId) {
+                  return { ...s, isBooked: !s.isBooked };
+                }
+                return s;
+              }));
+            };
+
+            const handleRemoveScheduleSlot = (slotId) => {
+              setExpertSchedule(prev => prev.filter(s => s.id !== slotId));
+            };
+
             const handleSaveExpertProfile = (e) => {
               e.preventDefault();
               const specsArr = expertSpecialties
                 .split(',')
                 .map(s => s.trim())
                 .filter(Boolean);
+
+              // Quick available slots: only non-booked slots
+              const availableList = expertSchedule
+                .filter(s => !s.isBooked)
+                .map(s => s.label);
+
+              const bookedList = expertSchedule
+                .filter(s => s.isBooked)
+                .map(s => ({
+                  id: s.id,
+                  slot: s.label,
+                  date: s.date,
+                  startTime: s.startTime,
+                  endTime: s.endTime,
+                  note: s.note,
+                  isBooked: true
+                }));
+
               updateCoach(myCoachProfile.id, {
                 bio: expertBio.trim(),
                 experience: expertBio.trim(),
                 specialties: specsArr,
-                availableSlots: expertSlots
+                scheduleSlots: expertSchedule,
+                bookedSlots: bookedList,
+                availableSlots: availableList.length > 0 ? availableList : expertSlots
               });
               setExpertProfileSaved(true);
               setTimeout(() => setExpertProfileSaved(false), 3000);
-            };
-
-            const handleAddSlot = () => {
-              const val = expertNewSlot.trim();
-              if (!val) return;
-              setExpertSlots(prev => [...prev, val]);
-              setExpertNewSlot('');
-            };
-
-            const handleRemoveSlot = (idx) => {
-              setExpertSlots(prev => prev.filter((_, i) => i !== idx));
             };
 
             return (
@@ -1219,31 +1294,276 @@ export default function ProfileModal() {
                 <div>
                   <h4 className="text-xs font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1.5 font-mono">
                     <span className="material-symbols-outlined text-[16px]">manage_accounts</span>
-                    Ekspert Profil Məlumatlarınızı Redaktə Edin
+                    Ekspert Profil və Cədvəl İdarəetməsi
                   </h4>
                   <p className="text-[11px] text-slate-500 mt-0.5">
-                    Profilinizin "Profil &amp; Haqqında" bölməsindəki məlumatlar
+                    Metodologiyanız, ixtisaslarınız, təqviminiz və saytdan gələn seans müraciətləri
                   </p>
                 </div>
 
                 {expertProfileSaved && (
-                  <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[16px]">check_circle</span>
-                    Ekspert profil məlumatlarınız uğurla yadda saxlanıldı!
+                  <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2 animate-fadeIn">
+                    <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                    Ekspert profil məlumatlarınız və təqvim saatlarınız uğurla yadda saxlanıldı!
                   </div>
                 )}
 
+                {/* 1. SECTION: GƏLƏN REZERVASIYA MÜRACİƏTLƏRİ (SAYTDAN GƏLƏNLƏR) */}
+                <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3">
+                  <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-slate-100">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-900 flex items-center gap-1.5 font-mono uppercase tracking-wider">
+                        <span className="material-symbols-outlined text-[17px] text-amber-600">inbox</span>
+                        Saytdan Gələn Rezervasiya Müraciətləri ({coachIncomingBookings.length})
+                      </label>
+                      <p className="text-[11px] text-slate-500 mt-0.5">
+                        Müraciəti "Qəbul Et" kliklədikdə həmin saat avtomatik olaraq təqvimdə <strong>DOLU / REZERV OLUNMUŞ</strong> kimi qeyd edilir.
+                      </p>
+                    </div>
+                  </div>
+
+                  {coachIncomingBookings.length === 0 ? (
+                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-500 italic">
+                      Hələlik saytdan daxil olan seans müraciəti yoxdur.
+                    </div>
+                  ) : (
+                    <div className="space-y-2.5">
+                      {coachIncomingBookings.map(b => (
+                        <div
+                          key={b.id}
+                          className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-white transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs"
+                        >
+                          <div className="space-y-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-xs font-bold text-slate-900">{b.userName || b.user_name || 'İstifadəçi'}</span>
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                b.status === 'Təsdiqləndi' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' :
+                                b.status === 'Ləğv edildi' ? 'bg-rose-100 text-rose-800 border border-rose-300' :
+                                'bg-amber-100 text-amber-800 border border-amber-300'
+                              }`}>
+                                {b.status || 'Gözləyir'}
+                              </span>
+                              <span className="text-[11px] text-slate-400 font-mono">#{b.id}</span>
+                            </div>
+
+                            <div className="text-xs text-slate-700 flex items-center gap-2 flex-wrap">
+                              <span className="font-semibold text-amber-900 bg-amber-100/70 px-2 py-0.5 rounded border border-amber-200 flex items-center gap-1">
+                                <span className="material-symbols-outlined text-[13px]">schedule</span>
+                                {b.slot || `${b.selectedDate || ''} ${b.startTime || ''}-${b.endTime || ''}`}
+                              </span>
+                              <span className="text-slate-500">• {b.format}</span>
+                              {b.userEmail && <span className="text-slate-400 font-mono text-[11px]">({b.userEmail})</span>}
+                            </div>
+
+                            {b.notes && (
+                              <p className="text-[11px] text-slate-600 italic bg-white p-1.5 rounded border border-slate-200/80 mt-1">
+                                "{b.notes}"
+                              </p>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                            {b.status !== 'Təsdiqləndi' && (
+                              <button
+                                type="button"
+                                onClick={() => updateBookingStatus(b.id, 'Təsdiqləndi')}
+                                className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer transition-colors"
+                                title="Qəbul et və təqvimdə avtomatik dolu/rezerv olunmuş et"
+                              >
+                                <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                                <span>Qəbul Et & Rezervlə</span>
+                              </button>
+                            )}
+                            {b.status !== 'Ləğv edildi' && (
+                              <button
+                                type="button"
+                                onClick={() => updateBookingStatus(b.id, 'Ləğv edildi')}
+                                className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 text-xs font-medium flex items-center gap-1 cursor-pointer transition-colors"
+                                title="Ləğv et"
+                              >
+                                <span className="material-symbols-outlined text-[15px]">close</span>
+                                <span>Ləğv Et</span>
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 <form onSubmit={handleSaveExpertProfile} className="space-y-5">
-                  {/* Bio / Metodologiya */}
+                  {/* 2. SECTION: TƏQVİM VƏ DOLU / BOŞ SAATLARIN QEYDİ */}
+                  <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-4">
+                    <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-slate-100">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-900 flex items-center gap-1.5 font-mono uppercase tracking-wider">
+                          <span className="material-symbols-outlined text-[17px] text-amber-600">calendar_month</span>
+                          Təqvim: Dolu / Rezerv Olunmuş və Mövcud Saatlar
+                        </label>
+                        <p className="text-[11px] text-slate-500 mt-0.5">
+                          Tarix və saat aralığını (neçədən neçəyə) seçərək <strong>Dolu / Rezerv</strong> və ya <strong>Mövcud / Boş</strong> kimi qeyd edin. Dolu olan saatlar müştərilərə deaktiv görünür, digərləri rezerv edilə bilir.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* New Slot Creator Form */}
+                    <div className="p-4 rounded-2xl bg-amber-50/40 border border-amber-200/80 space-y-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[13px] text-amber-700">calendar_today</span>
+                            Tarix
+                          </label>
+                          <input
+                            type="date"
+                            min={new Date().toISOString().split('T')[0]}
+                            value={newSlotDate}
+                            onChange={e => setNewSlotDate(e.target.value)}
+                            className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                            Başlama Saatı
+                          </label>
+                          <input
+                            type="time"
+                            value={newSlotStart}
+                            onChange={e => setNewSlotStart(e.target.value)}
+                            className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                            Bitmə Saatı
+                          </label>
+                          <input
+                            type="time"
+                            value={newSlotEnd}
+                            onChange={e => setNewSlotEnd(e.target.value)}
+                            className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                            Saat Vəziyyəti
+                          </label>
+                          <select
+                            value={newSlotStatus}
+                            onChange={e => setNewSlotStatus(e.target.value)}
+                            className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                          >
+                            <option value="Dolu">🔴 Dolu / Rezerv edilib</option>
+                            <option value="Mövcud">🟢 Mövcud / Boşdur</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row items-center gap-2">
+                        <input
+                          type="text"
+                          value={newSlotNote}
+                          onChange={e => setNewSlotNote(e.target.value)}
+                          placeholder="Qeyd (məs: Şəxsi görüş, Fərdi seans və s. - istəyə bağlı)"
+                          className="flex-1 w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleAddNewScheduleSlot}
+                          className="w-full sm:w-auto px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm cursor-pointer transition-colors shrink-0"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">add_circle</span>
+                          <span>+ Saat Aralığını Əlavə Et</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Schedule Slots List */}
+                    <div className="space-y-2">
+                      <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
+                        <span>Cədvəldə Qeyd Edilən Saatlar ({expertSchedule.length})</span>
+                        <span className="text-[10px] font-normal lowercase">
+                          {expertSchedule.filter(s => s.isBooked).length} dolu, {expertSchedule.filter(s => !s.isBooked).length} boş
+                        </span>
+                      </div>
+
+                      {expertSchedule.length === 0 ? (
+                        <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-500 italic">
+                          Hələlik cədvələ heç bir saat aralığı əlavə edilməyib. Yuxarıdakı form vasitəsilə dolu və ya boş vaxtlarınızı qeyd edin.
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                          {expertSchedule.map(s => (
+                            <div
+                              key={s.id}
+                              className={`p-3 rounded-xl border flex items-center justify-between gap-2.5 transition-all ${
+                                s.isBooked
+                                  ? 'bg-rose-50/70 border-rose-200 text-slate-800'
+                                  : 'bg-emerald-50/70 border-emerald-200 text-slate-800'
+                              }`}
+                            >
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <span className="font-bold text-xs">{s.label}</span>
+                                  <span className={`px-2 py-0.2 rounded-full text-[9px] font-bold uppercase tracking-wider ${
+                                    s.isBooked
+                                      ? 'bg-rose-200 text-rose-900 border border-rose-300'
+                                      : 'bg-emerald-200 text-emerald-900 border border-emerald-300'
+                                  }`}>
+                                    {s.isBooked ? 'Dolu / Rezerv' : 'Mövcud'}
+                                  </span>
+                                </div>
+                                {(s.note || s.clientName) && (
+                                  <div className="text-[11px] text-slate-500 truncate mt-0.5">
+                                    {s.clientName && <span className="font-semibold text-slate-700">{s.clientName} · </span>}
+                                    {s.note}
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="flex items-center gap-1 shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={() => handleToggleSlotStatus(s.id)}
+                                  className={`px-2 py-1 rounded-lg text-[10px] font-bold border transition-colors cursor-pointer ${
+                                    s.isBooked
+                                      ? 'bg-white hover:bg-emerald-50 text-emerald-700 border-emerald-300'
+                                      : 'bg-white hover:bg-rose-50 text-rose-700 border-rose-300'
+                                  }`}
+                                  title="Vəziyyəti dəyiş"
+                                >
+                                  {s.isBooked ? 'Boş et' : 'Dolu et'}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveScheduleSlot(s.id)}
+                                  className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-white transition-colors cursor-pointer"
+                                  title="Sil"
+                                >
+                                  <span className="material-symbols-outlined text-[16px]">delete</span>
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 3. SECTION: METODOLOGİYA VƏ TƏCRÜBƏ */}
                   <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
-                        <span className="material-symbols-outlined text-[15px] text-amber-600">psychology</span>
-                        Metodologiya və Təcrübə (Bio)
+                      <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5 font-mono uppercase tracking-wider">
+                        <span className="material-symbols-outlined text-[16px] text-amber-600">psychology</span>
+                        Metodologiya və Təcrübə (Haqqında Mətni)
                       </label>
                       <p className="text-[11px] text-slate-400 mb-2">Profilinizin əsas haqqında mətni. Müştərilərin ilk gördüyü məlumatdır.</p>
                       <textarea
-                        rows={5}
+                        rows={4}
                         value={expertBio}
                         onChange={e => setExpertBio(e.target.value)}
                         placeholder="Özünüz, metodologiyanız, təhsiliniz və təcrübəniz barədə yazın..."
@@ -1252,10 +1572,10 @@ export default function ProfileModal() {
                     </div>
                   </div>
 
-                  {/* Specialties */}
+                  {/* 4. SECTION: İXTİSASLAŞDIĞI SAHƏLƏR */}
                   <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3">
-                    <label className="block text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-[15px] text-amber-600">category</span>
+                    <label className="block text-xs font-bold text-slate-700 flex items-center gap-1.5 font-mono uppercase tracking-wider">
+                      <span className="material-symbols-outlined text-[16px] text-amber-600">category</span>
                       İxtisaslaşdığı Sahələr
                     </label>
                     <p className="text-[11px] text-slate-400">Vergüllə ayırın. Məs: <span className="font-mono">Fərdi İnkişaf, Psixologiya, Liderlik</span></p>
@@ -1275,64 +1595,13 @@ export default function ProfileModal() {
                     )}
                   </div>
 
-                  {/* Available Slots */}
-                  <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3">
-                    <label className="block text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-[15px] text-amber-600">schedule</span>
-                      Yaxın Tarixlər üçün Mövcud Saatlar
-                    </label>
-                    <p className="text-[11px] text-slate-400">Müştərilərə göstəriləcək boş sessiya saatlarınız. Məs: <span className="font-mono">Sabah 15:00</span></p>
-
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={expertNewSlot}
-                        onChange={e => setExpertNewSlot(e.target.value)}
-                        onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddSlot(); }}}
-                        placeholder="Məs: Çərşənbə 14:00"
-                        className="flex-1 px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 text-xs focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
-                      />
-                      <button
-                        type="button"
-                        onClick={handleAddSlot}
-                        className="px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">add</span>
-                      </button>
-                    </div>
-
-                    {expertSlots.length === 0 ? (
-                      <p className="text-[11px] text-slate-400 italic">Hələ mövcud saat əlavə edilməyib.</p>
-                    ) : (
-                      <div className="flex flex-wrap gap-2">
-                        {expertSlots.map((slot, idx) => (
-                          <span
-                            key={idx}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold"
-                          >
-                            <span className="material-symbols-outlined text-[13px]">event_available</span>
-                            <span>{slot}</span>
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveSlot(idx)}
-                              className="text-emerald-600 hover:text-red-500 ml-0.5 cursor-pointer transition-colors"
-                              title="Sil"
-                            >
-                              <span className="material-symbols-outlined text-[14px]">close</span>
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex justify-end">
+                  <div className="flex justify-end pt-2">
                     <button
                       type="submit"
                       className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold shadow-md shadow-amber-500/20 flex items-center gap-1.5 transition-all cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-[16px]">save</span>
-                      <span>Ekspert Profilimi Yenilə</span>
+                      <span>Bütün Dəyişiklikləri Yadda Saxla</span>
                     </button>
                   </div>
                 </form>

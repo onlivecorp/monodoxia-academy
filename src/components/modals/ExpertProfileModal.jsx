@@ -25,8 +25,12 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editBio, setEditBio] = useState('');
   const [editSpecialties, setEditSpecialties] = useState('');
-  const [editSlots, setEditSlots] = useState([]);
-  const [newSlotInput, setNewSlotInput] = useState('');
+  const [modalSchedule, setModalSchedule] = useState([]);
+  const [modalSlotDate, setModalSlotDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [modalSlotStart, setModalSlotStart] = useState('14:00');
+  const [modalSlotEnd, setModalSlotEnd] = useState('15:00');
+  const [modalSlotStatus, setModalSlotStatus] = useState('Dolu');
+  const [modalSlotNote, setModalSlotNote] = useState('');
   const [saveSuccess, setSaveSuccess] = useState(false);
   
   // Review form state
@@ -101,19 +105,48 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
       ? liveCoach.specialties.join(', ')
       : (liveCoach.specialties || '');
     setEditSpecialties(currentSpecs);
-    setEditSlots(Array.isArray(availableSlots) ? [...availableSlots] : []);
+
+    const sched = Array.isArray(liveCoach.scheduleSlots) && liveCoach.scheduleSlots.length > 0
+      ? liveCoach.scheduleSlots
+      : (Array.isArray(availableSlots)
+          ? availableSlots.map((s, idx) => ({
+              id: 'mslot-' + idx,
+              label: typeof s === 'string' ? s : (s.label || s.slot || 'Saat'),
+              date: '',
+              startTime: '',
+              endTime: '',
+              isBooked: false,
+              note: ''
+            }))
+          : []);
+    setModalSchedule(sched);
     setIsEditingProfile(true);
   };
 
-  const handleAddSlot = () => {
-    const val = newSlotInput.trim();
-    if (!val) return;
-    setEditSlots(prev => [...prev, val]);
-    setNewSlotInput('');
+  const handleAddModalScheduleSlot = (e) => {
+    e?.preventDefault();
+    if (!modalSlotStart || !modalSlotEnd) return;
+    const formattedDate = modalSlotDate ? modalSlotDate.split('-').reverse().join('.') : '';
+    const label = `${formattedDate ? formattedDate + ' ' : ''}${modalSlotStart} - ${modalSlotEnd}`.trim();
+    const newEntry = {
+      id: 'slot-' + Date.now(),
+      date: modalSlotDate,
+      startTime: modalSlotStart,
+      endTime: modalSlotEnd,
+      label,
+      isBooked: modalSlotStatus === 'Dolu',
+      note: modalSlotNote.trim()
+    };
+    setModalSchedule(prev => [...prev, newEntry]);
+    setModalSlotNote('');
   };
 
-  const handleRemoveSlot = (idx) => {
-    setEditSlots(prev => prev.filter((_, i) => i !== idx));
+  const handleToggleModalSlot = (slotId) => {
+    setModalSchedule(prev => prev.map(s => (s.id === slotId ? { ...s, isBooked: !s.isBooked } : s)));
+  };
+
+  const handleRemoveModalSlot = (slotId) => {
+    setModalSchedule(prev => prev.filter(s => s.id !== slotId));
   };
 
   const handleSaveProfile = (e) => {
@@ -122,12 +155,26 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
       .split(',')
       .map(s => s.trim())
       .filter(Boolean);
+
+    const availList = modalSchedule.filter(s => !s.isBooked).map(s => s.label);
+    const bookedList = modalSchedule.filter(s => s.isBooked).map(s => ({
+      id: s.id,
+      slot: s.label,
+      date: s.date,
+      startTime: s.startTime,
+      endTime: s.endTime,
+      note: s.note,
+      isBooked: true
+    }));
+
     if (updateCoach) {
       updateCoach(liveCoach.id, {
         bio: editBio.trim(),
         experience: editBio.trim(),
         specialties: specsArr,
-        availableSlots: editSlots
+        scheduleSlots: modalSchedule,
+        bookedSlots: bookedList,
+        availableSlots: availList.length > 0 ? availList : availableSlots
       });
     }
     setSaveSuccess(true);
@@ -394,49 +441,110 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                     )}
                   </div>
 
-                  {/* 3. Available Slots */}
-                  <div>
-                    <label className="block text-xs font-bold text-[#775a19] mb-1 flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-[15px]">schedule</span>
-                      Yaxın Tarixlər üçün Mövcud Saatlar
+                  {/* 3. Schedule & Available/Booked Slots */}
+                  <div className="space-y-3 pt-2 border-t border-amber-200/60">
+                    <label className="block text-xs font-bold text-[#775a19] flex items-center gap-1.5 font-mono uppercase tracking-wider">
+                      <span className="material-symbols-outlined text-[16px]">calendar_month</span>
+                      Təqvim: Dolu / Rezerv Olunmuş və Mövcud Saatlar
                     </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={newSlotInput}
-                        onChange={e => setNewSlotInput(e.target.value)}
-                        onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddSlot(); }}}
-                        placeholder="Məs: Sabah 15:00 və ya Cümə 18:00"
-                        className="flex-1 px-3 py-2 rounded-xl border border-slate-300 bg-white text-slate-800 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all"
-                      />
-                      <button
-                        type="button"
-                        onClick={handleAddSlot}
-                        className="px-3 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">add</span>
-                        Əlavə et
-                      </button>
-                    </div>
+                    <p className="text-[11px] text-slate-500">
+                      Tarix və saat aralığı (neçədən-neçəyə) seçərək Dolu və ya Mövcud kimi qeyd edin. Dolu olanlar saytda seçilə bilməz.
+                    </p>
 
-                    <div className="flex flex-wrap gap-2 pt-2">
-                      {editSlots.map((slot, idx) => (
-                        <span
-                          key={idx}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold"
-                        >
-                          <span className="material-symbols-outlined text-[13px]">event_available</span>
-                          <span>{slot}</span>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveSlot(idx)}
-                            className="text-emerald-700 hover:text-red-600 ml-1 cursor-pointer transition-colors"
-                            title="Sil"
+                    <div className="p-3.5 rounded-2xl bg-white border border-amber-200 space-y-2.5">
+                      <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Tarix</label>
+                          <input
+                            type="date"
+                            min={new Date().toISOString().split('T')[0]}
+                            value={modalSlotDate}
+                            onChange={e => setModalSlotDate(e.target.value)}
+                            className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Başlama Saatı</label>
+                          <input
+                            type="time"
+                            value={modalSlotStart}
+                            onChange={e => setModalSlotStart(e.target.value)}
+                            className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Bitmə Saatı</label>
+                          <input
+                            type="time"
+                            value={modalSlotEnd}
+                            onChange={e => setModalSlotEnd(e.target.value)}
+                            className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Vəziyyət</label>
+                          <select
+                            value={modalSlotStatus}
+                            onChange={e => setModalSlotStatus(e.target.value)}
+                            className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold"
                           >
-                            <span className="material-symbols-outlined text-[14px]">close</span>
-                          </button>
-                        </span>
-                      ))}
+                            <option value="Dolu">🔴 Dolu / Rezerv</option>
+                            <option value="Mövcud">🟢 Mövcud / Boş</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={modalSlotNote}
+                          onChange={e => setModalSlotNote(e.target.value)}
+                          placeholder="Qeyd (istəyə bağlı)..."
+                          className="flex-1 px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleAddModalScheduleSlot}
+                          className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold flex items-center gap-1 cursor-pointer shrink-0"
+                        >
+                          <span className="material-symbols-outlined text-[15px]">add</span>
+                          Əlavə et
+                        </button>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 pt-1 max-h-40 overflow-y-auto">
+                        {modalSchedule.map(s => (
+                          <span
+                            key={s.id}
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border ${
+                              s.isBooked
+                                ? 'bg-rose-50 text-rose-800 border-rose-200'
+                                : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                            }`}
+                          >
+                            <span>{s.label}</span>
+                            <span className="text-[10px] opacity-75 font-normal">
+                              ({s.isBooked ? 'Dolu' : 'Boş'})
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleToggleModalSlot(s.id)}
+                              className="text-[10px] underline ml-1 hover:text-amber-900 cursor-pointer"
+                              title="Vəziyyəti dəyiş"
+                            >
+                              Dəyiş
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveModalSlot(s.id)}
+                              className="text-slate-400 hover:text-red-600 ml-0.5 cursor-pointer"
+                              title="Sil"
+                            >
+                              <span className="material-symbols-outlined text-[13px]">close</span>
+                            </button>
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </div>
 
@@ -515,23 +623,48 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                     </div>
                   </div>
 
-                  {/* Available Slots */}
-                  {availableSlots.length > 0 && (
+                  {/* Available / Scheduled Slots Display */}
+                  {((Array.isArray(liveCoach.scheduleSlots) && liveCoach.scheduleSlots.length > 0) || availableSlots.length > 0) && (
                     <div>
-                      <h3 className="text-xs uppercase tracking-wider font-bold text-[#775a19] mb-2 flex items-center gap-1.5">
-                        <span className="material-symbols-outlined text-[16px]">schedule</span>
-                        <span>Yaxın Tarixlər üçün Mövcud Saatlar</span>
+                      <h3 className="text-xs uppercase tracking-wider font-bold text-[#775a19] mb-2 flex items-center justify-between">
+                        <span className="flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-[16px]">schedule</span>
+                          <span>Yaxın Tarixlər üçün Saat Cədvəli</span>
+                        </span>
                       </h3>
                       <div className="flex flex-wrap gap-2">
-                        {availableSlots.map((slot, sIdx) => (
-                          <span
-                            key={sIdx}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold"
-                          >
-                            <span className="material-symbols-outlined text-[14px]">event_available</span>
-                            <span>{slot}</span>
-                          </span>
-                        ))}
+                        {Array.isArray(liveCoach.scheduleSlots) && liveCoach.scheduleSlots.length > 0 ? (
+                          liveCoach.scheduleSlots.map(s => (
+                            <span
+                              key={s.id}
+                              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold ${
+                                s.isBooked
+                                  ? 'bg-rose-50 text-rose-800 border-rose-200'
+                                  : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                              }`}
+                            >
+                              <span className="material-symbols-outlined text-[14px]">
+                                {s.isBooked ? 'event_busy' : 'event_available'}
+                              </span>
+                              <span>{s.label}</span>
+                              <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded ${
+                                s.isBooked ? 'bg-rose-200/60 text-rose-900' : 'bg-emerald-200/60 text-emerald-900'
+                              }`}>
+                                {s.isBooked ? 'Dolu' : 'Boş'}
+                              </span>
+                            </span>
+                          ))
+                        ) : (
+                          availableSlots.map((slot, sIdx) => (
+                            <span
+                              key={sIdx}
+                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold"
+                            >
+                              <span className="material-symbols-outlined text-[14px]">event_available</span>
+                              <span>{slot}</span>
+                            </span>
+                          ))
+                        )}
                       </div>
                     </div>
                   )}
