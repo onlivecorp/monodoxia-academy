@@ -1286,6 +1286,21 @@ export default function AdminPagesTab() {
                 <PageField label="Xəbərdarlıq Mətni" block={clubData} setBlock={setClubData} fieldKey="noticeDesc" multiline rows={2} placeholder="Daxili intellektual təhlükəsizliyi və məxfiliyi qorumaq üçün hər ay yalnız 25 yeni Üzv qəbul edilir." />
                 <PageField label="Düymə Mətni (CTA)" block={clubData} setBlock={setClubData} fieldKey="noticeBtnText" placeholder="Bizimlə Əlaqə" />
               </div>
+
+              {/* 5. İllik Abunəlik İzah Qeydi */}
+              <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>5. İllik Abunəlik İzah Qeydi (Keçid Düyməsinin Altı)</span>
+                <PageField
+                  label="İllik Abunəlik Qeyd Mətni"
+                  block={clubData}
+                  setBlock={setClubData}
+                  fieldKey="annualNoteText"
+                  multiline={true}
+                  rows={2}
+                  placeholder="İllik ödənişdə 2 ay pulsuz və bütün qapalı tədbirlərə prioritet qeydiyyat haqqı verilir."
+                  helpText="İllik / Aylıq keçid düymələrinin dərhal altında göstərilən izah mətni. Bütün dillərə tərcümə dəstəklənir."
+                />
+              </div>
             </div>
 
             {/* Club Premium Tier Card Editor */}

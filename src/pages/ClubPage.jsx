@@ -90,7 +90,7 @@ export default function ClubPage() {
               </button>
             </div>
             <p className="text-xs text-[#64748b] mt-3 font-light">
-              İllik ödənişdə 2 ay pulsuz və bütün qapalı tədbirlərə prioritet qeydiyyat haqqı verilir.
+              {getLocalized(club, 'annualNoteText', currentLang, defaultLang) || club.annualNoteText || 'İllik ödənişdə 2 ay pulsuz və bütün qapalı tədbirlərə prioritet qeydiyyat haqqı verilir.'}
             </p>
           </div>
 

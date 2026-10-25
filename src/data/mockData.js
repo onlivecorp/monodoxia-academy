@@ -1952,6 +1952,7 @@ export const INITIAL_HOME_CONTENT = {
     tierCtaActiveText: "Aktiv Üzv",
     tierCtaActiveLink: "",
     noticeBtnText: "Bizimlə Əlaqə",
+    annualNoteText: "İllik ödənişdə 2 ay pulsuz və bütün qapalı tədbirlərə prioritet qeydiyyat haqqı verilir.",
     translations: {
       az: {
         badge: "QAPALI İCMA ÜZVLÜYÜ",
@@ -1985,7 +1986,8 @@ export const INITIAL_HOME_CONTENT = {
         tierCtaLink: "",
         tierCtaActiveText: "Aktiv Üzv",
         tierCtaActiveLink: "",
-        noticeBtnText: "Bizimlə Əlaqə"
+        noticeBtnText: "Bizimlə Əlaqə",
+        annualNoteText: "İllik ödənişdə 2 ay pulsuz və bütün qapalı tədbirlərə prioritet qeydiyyat haqqı verilir."
       },
       en: {
         badge: "EXCLUSIVE RESIDENCY",
@@ -2018,7 +2020,8 @@ export const INITIAL_HOME_CONTENT = {
         tierCtaText: "BECOME A RESIDENT",
         tierCtaLink: "",
         tierCtaActiveText: "Active Resident",
-        tierCtaActiveLink: ""
+        tierCtaActiveLink: "",
+        annualNoteText: "2 months free with annual billing and priority registration for all exclusive events."
       },
       tr: {
         badge: "ÖZEL ÜYELİK",
@@ -2051,7 +2054,8 @@ export const INITIAL_HOME_CONTENT = {
         tierCtaText: "Üzv ol",
         tierCtaLink: "",
         tierCtaActiveText: "Aktif Rezidans",
-        tierCtaActiveLink: ""
+        tierCtaActiveLink: "",
+        annualNoteText: "Yıllık ödemede 2 ay ücretsiz ve tüm kapalı etkinliklere öncelikli kayıt hakkı."
       },
       ru: {
         badge: "ЗАКРЫТОЕ ЧЛЕНСТВО",
@@ -2084,7 +2088,8 @@ export const INITIAL_HOME_CONTENT = {
         tierCtaText: "СТАТЬ РЕЗИДЕНТОМ",
         tierCtaLink: "",
         tierCtaActiveText: "Активный Резидент",
-        tierCtaActiveLink: ""
+        tierCtaActiveLink: "",
+        annualNoteText: "2 месяца в подарок при годовой оплате и приоритетная регистрация на все закрытые мероприятия."
       }
     }
   },
