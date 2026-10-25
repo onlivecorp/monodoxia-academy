@@ -8,8 +8,9 @@ export default function Club() {
   const { clubTiersList, homeContent, openApplication, currentUser, applicationsList, userTier, navigateTo } = useApp();
   const club = homeContent?.club || {};
 
-  const premiumTier = clubTiersList.find(t => t.id === 'premium') || clubTiersList[2];
-  const userClubApp = currentUser ? applicationsList.find(a => a.userId === currentUser.id && a.targetId === (premiumTier?.id || 'premium') && !a.archived) : null;
+  // Ana səhifədə görünəcək paket: Admin Panel > Club Tiers-də "Popular" seçilən paket
+  const activePopularTier = (clubTiersList || []).find(t => Boolean(t.popular)) || (clubTiersList || []).find(t => t.id === 'premium') || clubTiersList[0];
+  const userClubApp = currentUser ? applicationsList.find(a => a.userId === currentUser.id && a.targetId === (activePopularTier?.id || 'premium') && !a.archived) : null;
 
   const defaultPerks = [
     "Həftəlik canlı mentorluq və mastermind sessiyaları: Təcrübəli mentorlarla birbaşa dialoq.",
@@ -20,18 +21,19 @@ export default function Club() {
   const clubPerks = getLocalizedArray(club, 'perks', currentLang, defaultLang);
   const perks = clubPerks && clubPerks.length > 0 ? clubPerks : (club.perks && club.perks.length > 0 ? club.perks : defaultPerks);
 
-  const tierBadge = getLocalized(club, 'tierBadge', currentLang, defaultLang) || 'PREMIUM REZİDENT';
-  const tierName = getLocalized(club, 'tierTitle', currentLang, defaultLang) || (premiumTier ? getLocalized(premiumTier, 'name', currentLang, defaultLang) : t('club_tier_title'));
-  const tierSubtitle = getLocalized(club, 'tierSubtitle', currentLang, defaultLang) || t('club_tier_sub');
-  const tierPrice = (club.tierPrice !== undefined && club.tierPrice !== null && String(club.tierPrice).trim() !== '') ? club.tierPrice : (premiumTier ? premiumTier.price : '95');
-  const tierPeriod = getLocalized(club, 'tierPeriod', currentLang, defaultLang) || (premiumTier ? getLocalized(premiumTier, 'period', currentLang, defaultLang) : (t('club_tier_period') || '/ aylıq'));
-  const tierOffer = getLocalized(club, 'tierOffer', currentLang, defaultLang) || t('club_tier_offer');
+  const tierBadge = getLocalized(club, 'tierBadge', currentLang, defaultLang) || 'XÜSUSİ TƏKLİF';
+  const tierName = activePopularTier ? getLocalized(activePopularTier, 'name', currentLang, defaultLang) : (getLocalized(club, 'tierTitle', currentLang, defaultLang) || t('club_tier_title'));
+  const tierSubtitle = getLocalized(club, 'tierSubtitle', currentLang, defaultLang) || 'Aylıq və ya illik ödəniş əsasında';
+  const tierPrice = activePopularTier ? activePopularTier.price : ((club.tierPrice !== undefined && club.tierPrice !== null && String(club.tierPrice).trim() !== '') ? club.tierPrice : '75');
+  const tierPeriod = activePopularTier ? getLocalized(activePopularTier, 'period', currentLang, defaultLang) : (getLocalized(club, 'tierPeriod', currentLang, defaultLang) || (t('club_tier_period') || '/ aylıq'));
+  const tierOffer = getLocalized(club, 'tierOffer', currentLang, defaultLang) || 'İlk ödənişə 2 ay HƏDİYYƏ';
   
+  const popularFeatures = activePopularTier ? getLocalizedArray(activePopularTier, 'features', currentLang, defaultLang) : [];
   const clubFeatures = getLocalizedArray(club, 'tierFeatures', currentLang, defaultLang);
-  const tierFeatures = clubFeatures && clubFeatures.length > 0
-    ? clubFeatures
-    : (premiumTier ? getLocalizedArray(premiumTier, 'features', currentLang, defaultLang) : []);
-  const tierCtaText = getLocalized(club, 'tierCtaText', currentLang, defaultLang) || t('club_tier_cta');
+  const tierFeatures = (popularFeatures && popularFeatures.length > 0)
+    ? popularFeatures
+    : (clubFeatures && clubFeatures.length > 0 ? clubFeatures : []);
+  const tierCtaText = getLocalized(club, 'tierCtaText', currentLang, defaultLang) || 'PAKETİ SEÇİN';
 
   const badgeText = getLocalized(club, 'badge', currentLang, defaultLang) || (club.badge !== undefined && club.badge !== null && String(club.badge).trim() !== '' ? club.badge : t('club_badge'));
   const titleText = getLocalized(club, 'title', currentLang, defaultLang) || (club.title !== undefined && club.title !== null && String(club.title).trim() !== '' ? club.title : t('club_title'));
@@ -68,7 +70,7 @@ export default function Club() {
       }
       return;
     }
-    openApplication(premiumTier || { id: 'premium', title: tierName, price: `₼ ${tierPrice}` }, 'club');
+    openApplication(activePopularTier || { id: 'premium', title: tierName, price: `₼ ${tierPrice}` }, 'club');
   };
 
   // Right card button text & link
@@ -76,7 +78,7 @@ export default function Club() {
     ? (getLocalized(club, 'tierCtaActiveText', currentLang, defaultLang) || club.tierCtaActiveText || 'Aktiv Rezident')
     : (userClubApp 
         ? `Müraciət Statusu: ${userClubApp.status}` 
-        : (getLocalized(club, 'tierCtaText', currentLang, defaultLang) || club.tierCtaText || tierCtaText || 'REZİDENT OL'));
+        : (getLocalized(club, 'tierCtaText', currentLang, defaultLang) || club.tierCtaText || tierCtaText || 'PAKETİ SEÇİN'));
 
   const rightBtnLink = isResident
     ? (getLocalized(club, 'tierCtaActiveLink', currentLang, defaultLang) || club.tierCtaActiveLink)
@@ -100,7 +102,7 @@ export default function Club() {
       }
       return;
     }
-    openApplication(premiumTier || { id: 'premium', title: tierName, price: `₼ ${tierPrice}` }, 'club');
+    openApplication(activePopularTier || { id: 'premium', title: tierName, price: `₼ ${tierPrice}` }, 'club');
   };
 
   return (
