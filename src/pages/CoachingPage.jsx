@@ -4,6 +4,7 @@ import { getLocalized, getLocalizedArray } from '../i18n/localize';
 import { useApp } from '../context/AppContext';
 import PageHero from '../components/PageHero';
 import ExpertProfileModal from '../components/modals/ExpertProfileModal';
+import { COACHES } from '../data/mockData';
 
 export default function CoachingPage() {
   const { t, currentLang, defaultLang } = useLanguage();
@@ -160,6 +161,10 @@ export default function CoachingPage() {
                               const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
                               if (imgStore[c.id]) coachImg = imgStore[c.id];
                             } catch (e) {}
+                          }
+                          if (!coachImg) {
+                            const seed = COACHES.find(sc => sc.id === c.id || (sc.name && c.name && sc.name.toLowerCase().trim() === c.name.toLowerCase().trim()));
+                            if (seed?.image) coachImg = seed.image;
                           }
                           return coachImg ? (
                             <img

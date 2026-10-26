@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useApp } from '../../context/AppContext';
+import { COACHES } from '../../data/mockData';
 
 // Generate time slots for a day in 30-min increments
 function generateTimeSlots(startHour = 8, endHour = 21, stepMin = 30) {
@@ -236,6 +237,10 @@ export default function BookingModal() {
       const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
       if (imgStore[activeCoach.id]) coachImg = imgStore[activeCoach.id];
     } catch (e) {}
+  }
+  if (!coachImg) {
+    const seed = COACHES.find(sc => sc.id === activeCoach.id || (sc.name && activeCoach.name && sc.name.toLowerCase().trim() === activeCoach.name.toLowerCase().trim()));
+    if (seed?.image) coachImg = seed.image;
   }
 
   const handleSubmit = async (e) => {

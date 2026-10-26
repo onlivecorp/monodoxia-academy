@@ -1197,6 +1197,52 @@ export const COACHES = [
         specialties: ["Отношения", "Гармония разума и тела", "Прощение себя"]
       }
     }
+  },
+  {
+    id: "coach-1792923105867",
+    userId: "usr_1792923099303",
+    name: "Sədaqət Rzayeva",
+    title: "Kouç & Ekspert",
+    experience: "10+ il",
+    bio: "Sədaqət Rzayeva — Monodoxia Academy fərdi inkişaf və kouçinq ekspertidir. Fərdi inkişaf, emosional balans və hədəf yönümlü kouçinq üzrə ixtisaslaşmışdır.",
+    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCn9ZjfxW-PL-o_xZ9Me83EiOB9x_aaIbuIEYtOce00950-vB-hL99E3BUxNBeJriyWWNWGGDlnTJRCJGRwkjlEPSCAIQYPacFkDcUc0Gx7SG3u_LdP-yJ9ZvAxESWMhqm8PQ0_Jjk2lpNGCZW3k-pFcnjQ873cYwWNg72N95sYxMH-w5fpXfjJZfJo1LZC2K5AStfFo8Xfl-GQ968CVb_yfDTaqIDcMiTxISBiZMVtj4d_vRd_K_L3",
+    specialties: ["Fərdi İnkişaf", "Psixologiya", "Həyat Balansı"],
+    availableSlots: [],
+    customCertificates: [
+      {
+        id: "cc-sedaqet-1",
+        title: "Beynəlxalq Sertifikatlı Fərdi Kouçinq",
+        issuer: "Monodoxia Academy & ICF Accredited",
+        issueDate: "2023",
+        credentialId: "MDX-SR-2023-01"
+      }
+    ],
+    translations: {
+      az: {
+        title: "Kouç & Ekspert",
+        experience: "10+ il",
+        bio: "Sədaqət Rzayeva — Monodoxia Academy fərdi inkişaf və kouçinq ekspertidir.",
+        specialties: ["Fərdi İnkişaf", "Psixologiya", "Həyat Balansı"]
+      },
+      en: {
+        title: "Coach & Expert",
+        experience: "10+ yrs",
+        bio: "Sedaqet Rzayeva — Personal development and coaching expert at Monodoxia Academy.",
+        specialties: ["Personal Growth", "Psychology", "Life Balance"]
+      },
+      tr: {
+        title: "Koç & Uzman",
+        experience: "10+ yıl",
+        bio: "Sedaqet Rzayeva — Monodoxia Academy kişisel gelişim ve koçluk uzmanıdır.",
+        specialties: ["Kişisel Gelişim", "Psikoloji", "Yaşam Dengesi"]
+      },
+      ru: {
+        title: "Коуч и Эксперт",
+        experience: "10+ лет",
+        bio: "Седагат Рзаева — эксперт по личностному развитию и коучингу Monodoxia Academy.",
+        specialties: ["Личностное развитие", "Психология", "Жизненный баланс"]
+      }
+    }
   }
 ];
 

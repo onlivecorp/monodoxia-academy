@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { getLocalized, getLocalizedArray } from '../../i18n/localize';
 import { useApp } from '../../context/AppContext';
+import { COACHES } from '../../data/mockData';
 
 export default function ExpertProfileModal({ coach, isOpen, onClose }) {
   const { currentLang, defaultLang } = useLanguage();
@@ -88,6 +89,10 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
       const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
       if (imgStore[liveCoach.id]) coachDisplayImage = imgStore[liveCoach.id];
     } catch (e) {}
+  }
+  if (!coachDisplayImage && liveCoach) {
+    const seed = COACHES.find(sc => sc.id === liveCoach.id || (sc.name && liveCoach.name && sc.name.toLowerCase().trim() === liveCoach.name.toLowerCase().trim()));
+    if (seed?.image) coachDisplayImage = seed.image;
   }
 
   const coachTitle = liveCoach ? (getLocalized(liveCoach, 'title', currentLang, defaultLang) || liveCoach.title || 'Kouç & Ekspert') : '';

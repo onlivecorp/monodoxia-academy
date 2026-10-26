@@ -458,7 +458,7 @@ export function AppProvider({ children }) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
           return parsed.map(c => {
-            const seed = COACHES.find(sc => sc.id === c.id);
+            const seed = COACHES.find(sc => sc.id === c.id || (sc.name && c.name && sc.name.toLowerCase().trim() === c.name.toLowerCase().trim()));
             const mergedCustomCerts = (c.customCertificates && c.customCertificates.length > 0) 
               ? c.customCertificates 
               : (seed?.customCertificates || []);
@@ -1032,22 +1032,37 @@ export function AppProvider({ children }) {
             setCategoriesList(mergedCats);
           }
           if (data.coaches && data.coaches.length > 0) {
-            setCoachesList(data.coaches.map(c => ({
-              id: c.id,
-              name: c.name,
-              title: c.title,
-              bio: c.bio,
-              rating: Number(c.rating) || 5.0,
-              reviewsCount: Number(c.reviews_count) || 0,
-              hourlyRate: c.hourly_rate || '100 ₼ / saat',
-              sessionDuration: c.session_duration || '60 dəqiqə',
-              image: c.avatar_url || '',
-              isActive: Boolean(Number(c.is_active ?? 1)),
-              specialties: typeof c.specialties_json === 'string' ? JSON.parse(c.specialties_json || '[]') : (c.specialties_json || []),
-              languages: typeof c.languages_json === 'string' ? JSON.parse(c.languages_json || '[]') : (c.languages_json || []),
-              availableSlots: (typeof c.available_slots_json === 'string' ? JSON.parse(c.available_slots_json || '[]') : (c.available_slots_json || [])).filter(s => s !== 'Sabah 15:00' && s !== 'Cümə 18:00'),
-              translations: typeof c.translations_json === 'string' ? JSON.parse(c.translations_json || '{}') : (c.translations_json || {})
-            })));
+            setCoachesList(data.coaches.map(c => {
+              const seed = COACHES.find(sc => sc.id === c.id || (sc.name && c.name && sc.name.toLowerCase().trim() === c.name.toLowerCase().trim()));
+              let img = c.avatar_url || '';
+              if (!img) {
+                try {
+                  const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
+                  if (imgStore[c.id]) img = imgStore[c.id];
+                } catch (e) {}
+              }
+              if (!img && seed?.image) {
+                img = seed.image;
+              }
+              return {
+                id: c.id,
+                name: c.name,
+                title: c.title,
+                bio: c.bio,
+                rating: Number(c.rating) || 5.0,
+                reviewsCount: Number(c.reviews_count) || 0,
+                hourlyRate: c.hourly_rate || '100 ₼ / saat',
+                sessionDuration: c.session_duration || '60 dəqiqə',
+                image: img,
+                avatar: img,
+                userId: c.userId || seed?.userId || null,
+                isActive: Boolean(Number(c.is_active ?? 1)),
+                specialties: typeof c.specialties_json === 'string' ? JSON.parse(c.specialties_json || '[]') : (c.specialties_json || []),
+                languages: typeof c.languages_json === 'string' ? JSON.parse(c.languages_json || '[]') : (c.languages_json || []),
+                availableSlots: (typeof c.available_slots_json === 'string' ? JSON.parse(c.available_slots_json || '[]') : (c.available_slots_json || [])).filter(s => s !== 'Sabah 15:00' && s !== 'Cümə 18:00'),
+                translations: typeof c.translations_json === 'string' ? JSON.parse(c.translations_json || '{}') : (c.translations_json || {})
+              };
+            }));
           }
           if (data.cms_blocks && data.cms_blocks.length > 0) {
             const blockMap = {};

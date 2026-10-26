@@ -310,6 +310,17 @@ if ($action === 'get_all') {
     $categories = $safeQuery("SELECT * FROM mdx_categories ORDER BY created_at ASC");
     $roles = $safeQuery("SELECT * FROM mdx_roles ORDER BY is_system DESC, name ASC");
     $coaches = $safeQuery("SELECT * FROM mdx_coaches WHERE is_active = 1 ORDER BY created_at ASC");
+    $defaultCoachAvatar = "https://lh3.googleusercontent.com/aida-public/AB6AXuCn9ZjfxW-PL-o_xZ9Me83EiOB9x_aaIbuIEYtOce00950-vB-hL99E3BUxNBeJriyWWNWGGDlnTJRCJGRwkjlEPSCAIQYPacFkDcUc0Gx7SG3u_LdP-yJ9ZvAxESWMhqm8PQ0_Jjk2lpNGCZW3k-pFcnjQ873cYwWNg72N95sYxMH-w5fpXfjJZfJo1LZC2K5AStfFo8Xfl-GQ968CVb_yfDTaqIDcMiTxISBiZMVtj4d_vRd_K_L3";
+    foreach ($coaches as &$cItem) {
+        if (empty($cItem['avatar_url'])) {
+            $cItem['avatar_url'] = $defaultCoachAvatar;
+            try {
+                $uStmt = $pdo->prepare("UPDATE mdx_coaches SET avatar_url = ? WHERE id = ? AND (avatar_url IS NULL OR avatar_url = '')");
+                $uStmt->execute([$defaultCoachAvatar, $cItem['id']]);
+            } catch (PDOException $e) {}
+        }
+    }
+    unset($cItem);
     $cms_blocks = $safeQuery("SELECT block_key, content_json FROM mdx_cms_blocks");
 
     $student_progress = [];
@@ -2604,6 +2615,12 @@ if ($action === 'save_coach' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $hourly_rate = trim($input['hourlyRate'] ?? ($input['hourly_rate'] ?? '100 ₼ / saat'));
     $session_duration = trim($input['sessionDuration'] ?? ($input['session_duration'] ?? '60 dəqiqə'));
     $avatar_url = trim($input['image'] ?? ($input['avatarUrl'] ?? ($input['avatar_url'] ?? '')));
+    if (!empty($avatar_url) && strpos($avatar_url, 'data:image/') === 0) {
+        $savedPath = saveBase64Image($avatar_url, 'coach_' . preg_replace('/[^a-zA-Z0-9_-]/', '', $id));
+        if (!empty($savedPath)) {
+            $avatar_url = $savedPath;
+        }
+    }
     $is_active = isset($input['isActive']) ? ($input['isActive'] ? 1 : 0) : (isset($input['is_active']) ? ($input['is_active'] ? 1 : 0) : 1);
 
     $specialties = $input['specialties'] ?? [];
