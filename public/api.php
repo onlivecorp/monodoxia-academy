@@ -325,9 +325,15 @@ if ($action === 'get_all') {
             $cStmt->execute([$_SESSION['user_id']]);
             $student_certificates = $cStmt->fetchAll();
 
-            $bStmt = $pdo->prepare("SELECT * FROM mdx_bookings WHERE user_id = ? ORDER BY created_at DESC");
-            $bStmt->execute([$_SESSION['user_id']]);
-            $bookings = $bStmt->fetchAll();
+            if (!empty($_SESSION['role']) && $_SESSION['role'] === 'Admin') {
+                $bStmt = $pdo->query("SELECT * FROM mdx_bookings ORDER BY created_at DESC");
+                $bookings = $bStmt ? $bStmt->fetchAll() : [];
+            } else {
+                $bStmt = $pdo->prepare("SELECT * FROM mdx_bookings WHERE user_id = ? OR coach_id = ? OR coach_name LIKE ? ORDER BY created_at DESC");
+                $uName = $_SESSION['name'] ?? '';
+                $bStmt->execute([$_SESSION['user_id'], $_SESSION['user_id'], '%' . $uName . '%']);
+                $bookings = $bStmt->fetchAll();
+            }
         } catch (PDOException $e) {}
     }
 
@@ -2878,14 +2884,86 @@ if ($action === 'save_booking' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $slot = trim($input['slot'] ?? ($input['time'] ?? ''));
     $format = trim($input['format'] ?? 'Online (Google Meet)');
     $notes = trim($input['notes'] ?? '');
+    $status = trim($input['status'] ?? 'Gözləyir');
+
+    // Server-side Collision Protection: prevent booking a slot already confirmed for this coach
+    if ($slot && ($coach_id || $coach_name)) {
+        $conflictQuery = $pdo->prepare("
+            SELECT id, slot FROM mdx_bookings
+            WHERE (coach_id = ? OR (coach_name = ? AND coach_name != ''))
+              AND slot = ?
+              AND status = 'Təsdiqləndi'
+              AND id != ?
+            LIMIT 1
+        ");
+        $conflictQuery->execute([$coach_id, $coach_name, $slot, $id]);
+        if ($conflictQuery->fetch()) {
+            http_response_code(409);
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Bu tarix və saat aralığı artıq təsdiqlənmiş başqa bir rezervasiya tərəfindən tutulub. Zəhmət olmasa başqa vaxt seçin.'
+            ], JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+    }
 
     $stmt = $pdo->prepare("
-        INSERT INTO mdx_bookings (id, user_id, coach_id, coach_name, slot, format, notes)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO mdx_bookings (id, user_id, coach_id, coach_name, slot, format, notes, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE 
+            coach_id = VALUES(coach_id),
+            coach_name = VALUES(coach_name),
+            slot = VALUES(slot),
+            format = VALUES(format),
+            notes = VALUES(notes),
+            status = VALUES(status)
     ");
-    $stmt->execute([$id, $authUser['id'], $coach_id, $coach_name, $slot, $format, $notes]);
+    $stmt->execute([$id, $authUser['id'], $coach_id, $coach_name, $slot, $format, $notes, $status]);
 
     echo json_encode(['status' => 'success', 'message' => 'Kouçinq sessiyası rezervasiya edildi', 'id' => $id], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+if ($action === 'update_booking_status' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $authUser = requireAuthUser($pdo);
+    verifyCsrfToken();
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+    $id = trim($input['id'] ?? '');
+    $status = trim($input['status'] ?? 'Təsdiqləndi');
+    if (!$id) {
+        echo json_encode(['status' => 'error', 'message' => 'ID tapılmadı'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    // Server-side collision check when approving
+    if ($status === 'Təsdiqləndi') {
+        $curStmt = $pdo->prepare("SELECT * FROM mdx_bookings WHERE id = ?");
+        $curStmt->execute([$id]);
+        $curBooking = $curStmt->fetch();
+        if ($curBooking && !empty($curBooking['slot'])) {
+            $confChk = $pdo->prepare("
+                SELECT id FROM mdx_bookings 
+                WHERE (coach_id = ? OR (coach_name = ? AND coach_name != ''))
+                  AND slot = ?
+                  AND status = 'Təsdiqləndi'
+                  AND id != ?
+                LIMIT 1
+            ");
+            $confChk->execute([$curBooking['coach_id'], $curBooking['coach_name'], $curBooking['slot'], $id]);
+            if ($confChk->fetch()) {
+                http_response_code(409);
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Toqquşma xətası: Bu saat aralığında artıq başqa bir təsdiqlənmiş rezervasiya mövcuddur.'
+                ], JSON_UNESCAPED_UNICODE);
+                exit();
+            }
+        }
+    }
+
+    $stmt = $pdo->prepare("UPDATE mdx_bookings SET status = ? WHERE id = ?");
+    $stmt->execute([$status, $id]);
+    echo json_encode(['status' => 'success', 'message' => 'Status yeniləndi', 'id' => $id, 'status' => $status], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
@@ -2894,8 +2972,9 @@ if ($action === 'get_bookings') {
     if ($authUser['role'] === 'Admin') {
         $stmt = $pdo->query("SELECT * FROM mdx_bookings ORDER BY created_at DESC");
     } else {
-        $stmt = $pdo->prepare("SELECT * FROM mdx_bookings WHERE user_id = ? ORDER BY created_at DESC");
-        $stmt->execute([$authUser['id']]);
+        $stmt = $pdo->prepare("SELECT * FROM mdx_bookings WHERE user_id = ? OR coach_id = ? OR coach_name LIKE ? ORDER BY created_at DESC");
+        $uName = $authUser['name'] ?? '';
+        $stmt->execute([$authUser['id'], $authUser['id'], '%' . $uName . '%']);
     }
     echo json_encode(['status' => 'success', 'bookings' => $stmt->fetchAll()], JSON_UNESCAPED_UNICODE);
     exit();
@@ -3311,12 +3390,15 @@ if ($action === 'migrate' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             `languages_json` text DEFAULT NULL,
             `available_slots_json` longtext DEFAULT NULL,
             `translations_json` longtext DEFAULT NULL,
-            `avatar_url` varchar(255) DEFAULT NULL,
+            `avatar_url` longtext DEFAULT NULL,
             `is_active` tinyint(1) NOT NULL DEFAULT 1,
             `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
             PRIMARY KEY (`id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
+    try {
+        $pdo->exec("ALTER TABLE `mdx_coaches` MODIFY `avatar_url` LONGTEXT DEFAULT NULL");
+    } catch (Exception $e) {}
     $results[] = 'mdx_coaches';
 
     // 14. mdx_cms_blocks
