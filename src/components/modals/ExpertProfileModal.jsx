@@ -1265,7 +1265,9 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                             </span>
                             <span className="text-slate-500">• {b.format}</span>
                             {b.userEmail && <span className="text-slate-500 text-[11px]">({b.userEmail})</span>}
-                            {b.userPhone && <span className="text-slate-500 text-[11px]">Tel: {b.userPhone}</span>}
+                            {b.userPhone && <span className="text-slate-600 text-[11px] font-medium flex items-center gap-0.5"><span className="material-symbols-outlined text-[13px] text-emerald-600">call</span> {b.userPhone}</span>}
+                            {b.userAddress && <span className="text-slate-600 text-[11px] font-medium flex items-center gap-0.5"><span className="material-symbols-outlined text-[13px] text-amber-600">location_on</span> {b.userAddress}</span>}
+                            {b.isGuest && <span className="text-[10px] bg-amber-100 text-amber-900 border border-amber-300 px-1.5 py-0.2 rounded font-semibold">Qonaq Formu</span>}
                           </div>
 
                           {b.notes && (

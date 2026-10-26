@@ -36,7 +36,9 @@ export default function BookingModal() {
     bookings = [],
     timeBlocks = [],
     bookingPreselectedSlot,
-    setBookingPreselectedSlot
+    setBookingPreselectedSlot,
+    setAuthModalOpen,
+    setAuthModalTab
   } = useApp();
 
   const today = new Date().toISOString().split('T')[0];
@@ -50,6 +52,13 @@ export default function BookingModal() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitResult, setSubmitResult] = useState(null); // null | 'success' | 'error'
   const [submitMessage, setSubmitMessage] = useState('');
+
+  // Non-authenticated user choice: 'guest_form' | 'login_register'
+  const [authChoice, setAuthChoice] = useState('guest_form');
+  const [guestFirstName, setGuestFirstName] = useState('');
+  const [guestLastName, setGuestLastName] = useState('');
+  const [guestPhone, setGuestPhone] = useState('');
+  const [guestAddress, setGuestAddress] = useState('');
 
   // Mini-calendar state
   const [calendarYear, setCalendarYear] = useState(() => new Date().getFullYear());
@@ -65,6 +74,11 @@ export default function BookingModal() {
       setIsSubmitting(false);
       setSubmitResult(null);
       setSubmitMessage('');
+      setAuthChoice('guest_form');
+      setGuestFirstName('');
+      setGuestLastName('');
+      setGuestPhone('');
+      setGuestAddress('');
       const now = new Date();
       setCalendarYear(now.getFullYear());
       setCalendarMonth(now.getMonth());
@@ -228,9 +242,29 @@ export default function BookingModal() {
     e.preventDefault();
     if (conflictError || !selectedStart || !selectedEnd) return;
 
+    if (!currentUser) {
+      if (authChoice === 'login_register') {
+        setAuthModalTab('login');
+        setAuthModalOpen(true);
+        return;
+      }
+      if (!guestFirstName.trim() || !guestLastName.trim() || !guestPhone.trim() || !guestAddress.trim()) {
+        setSubmitResult('error');
+        setSubmitMessage('Zəhmət olmasa müraciət üçün Ad, Soyad, Telefon (WhatsApp) və Ünvan xanalarını tam doldurun.');
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     const formattedDate = formatDateAz(selectedDate);
     const slotText = `${formattedDate} ${selectedStart} - ${selectedEnd}`;
+
+    const clientName = currentUser
+      ? (currentUser.name || `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim() || 'İstifadəçi')
+      : `${guestFirstName.trim()} ${guestLastName.trim()}`;
+
+    const clientPhone = currentUser ? (currentUser.phone || '') : guestPhone.trim();
+    const clientAddress = currentUser ? (currentUser.address || '') : guestAddress.trim();
 
     const result = confirmBooking({
       coachId: activeCoach.id,
@@ -241,9 +275,11 @@ export default function BookingModal() {
       endTime: selectedEnd,
       type,
       notes,
-      userName: currentUser?.name || 'Qonaq İstifadəçi',
+      userName: clientName,
       userEmail: currentUser?.email || '',
-      userPhone: currentUser?.phone || '',
+      userPhone: clientPhone,
+      userAddress: clientAddress,
+      isGuest: !currentUser,
       status: 'Gözləyir'
     });
 
@@ -253,7 +289,7 @@ export default function BookingModal() {
       setSubmitMessage('Rezervasiya zamanı xəta baş verdi. Vaxt intervalı artıq tutulmuş ola bilər.');
     } else {
       setSubmitResult('success');
-      setSubmitMessage(`Rezervasiya müraciətiniz göndərildi! Ekspert tezliklə sizinlə əlaqə saxlayacaq.\n\nTarix: ${formattedDate}\nSaat: ${selectedStart} – ${selectedEnd}\nFormat: ${type}`);
+      setSubmitMessage(`Rezervasiya müraciətiniz qeydə alındı! Ekspert tezliklə sizinlə əlaqə saxlayacaq.\n\nMüştəri: ${clientName}\nTel (WhatsApp): ${clientPhone || 'Qeyd edilməyib'}${clientAddress ? '\nÜnvan: ' + clientAddress : ''}\nTarix: ${formattedDate}\nSaat: ${selectedStart} – ${selectedEnd}\nFormat: ${type}`);
     }
   };
 
@@ -565,6 +601,165 @@ export default function BookingModal() {
               </div>
             )}
 
+            {/* İSTİFADƏÇİ STATUSU VƏ YA QONAQ SEÇİMİ */}
+            {currentUser ? (
+              <div className="p-3 bg-emerald-50/70 border border-emerald-200 rounded-xl flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[18px] text-emerald-600">verified_user</span>
+                  <div>
+                    <span className="font-bold text-emerald-950 block">
+                      Daxil olmusunuz: {currentUser.name || `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim()}
+                    </span>
+                    <span className="text-[11px] text-emerald-700">{currentUser.email || currentUser.phone || ''}</span>
+                  </div>
+                </div>
+                <span className="text-[10px] bg-emerald-200/80 text-emerald-900 px-2 py-0.5 rounded-full font-bold">
+                  Hesabla Giriş
+                </span>
+              </div>
+            ) : (
+              <div className="p-3.5 rounded-2xl bg-amber-50/60 border border-amber-200 space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[17px] text-amber-600">how_to_reg</span>
+                    Rezervasiya Üçün Seçim Edin
+                  </label>
+                  <span className="text-[10px] text-amber-900 bg-amber-100/90 px-2 py-0.5 rounded-full font-bold border border-amber-200">
+                    Giriş edilməyib
+                  </span>
+                </div>
+
+                {/* 2 Seçim Düyməsi: a və b */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setAuthChoice('login_register')}
+                    className={`p-2.5 rounded-xl text-left border transition-all cursor-pointer flex items-start gap-2.5 ${
+                      authChoice === 'login_register'
+                        ? 'bg-amber-600 text-white border-amber-600 shadow-xs ring-2 ring-amber-400/40'
+                        : 'bg-white text-slate-700 border-slate-200 hover:border-amber-400 hover:bg-amber-50/50'
+                    }`}
+                  >
+                    <span className={`material-symbols-outlined text-[18px] shrink-0 ${authChoice === 'login_register' ? 'text-white' : 'text-amber-600'}`}>
+                      account_circle
+                    </span>
+                    <div>
+                      <span className="text-xs font-bold block">a) Sayta Giriş / Qeydiyyat</span>
+                      <span className={`text-[10px] block leading-tight ${authChoice === 'login_register' ? 'text-amber-100' : 'text-slate-500'}`}>
+                        Hesabınıza daxil olaraq və ya qeydiyyatdan keçərək seansı izləyin
+                      </span>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setAuthChoice('guest_form')}
+                    className={`p-2.5 rounded-xl text-left border transition-all cursor-pointer flex items-start gap-2.5 ${
+                      authChoice === 'guest_form'
+                        ? 'bg-amber-600 text-white border-amber-600 shadow-xs ring-2 ring-amber-400/40'
+                        : 'bg-white text-slate-700 border-slate-200 hover:border-amber-400 hover:bg-amber-50/50'
+                    }`}
+                  >
+                    <span className={`material-symbols-outlined text-[18px] shrink-0 ${authChoice === 'guest_form' ? 'text-white' : 'text-amber-600'}`}>
+                      assignment
+                    </span>
+                    <div>
+                      <span className="text-xs font-bold block">b) Formu Doldurub Müraciət Göndər</span>
+                      <span className={`text-[10px] block leading-tight ${authChoice === 'guest_form' ? 'text-amber-100' : 'text-slate-500'}`}>
+                        Qeydiyyatsız birbaşa əlaqə məlumatlarını yazaraq göndərin
+                      </span>
+                    </div>
+                  </button>
+                </div>
+
+                {/* a) Seçimi: Sayta Giriş və Qeydiyyat Kartı */}
+                {authChoice === 'login_register' && (
+                  <div className="p-3.5 bg-white rounded-xl border border-slate-200 text-center space-y-2.5 animate-fadeIn">
+                    <p className="text-xs text-slate-600 leading-relaxed">
+                      Monodoxia Academy hesabınıza daxil olun və ya yeni hesab yaradaraq rezervasiyalarınızı şəxsi kabinetdə izləyin:
+                    </p>
+                    <div className="flex gap-2 justify-center pt-0.5">
+                      <button
+                        type="button"
+                        onClick={() => { setAuthModalTab('login'); setAuthModalOpen(true); }}
+                        className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1.5"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">login</span>
+                        Daxil Ol
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setAuthModalTab('register'); setAuthModalOpen(true); }}
+                        className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition-all border border-slate-300 cursor-pointer flex items-center gap-1.5"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">person_add</span>
+                        Qeydiyyatdan Keç
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* b) Seçimi: Form Sahələri (Ad, Soyad, Telefon / WhatsApp, Ünvan) */}
+                {authChoice === 'guest_form' && (
+                  <div className="space-y-2.5 pt-1 animate-fadeIn">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                          Ad <span className="text-rose-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={guestFirstName}
+                          onChange={(e) => setGuestFirstName(e.target.value)}
+                          placeholder="Adınız"
+                          className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                          Soyad <span className="text-rose-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={guestLastName}
+                          onChange={(e) => setGuestLastName(e.target.value)}
+                          placeholder="Soyadınız"
+                          className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1">
+                          <span>Telefon (WhatsApp)</span> <span className="text-rose-500">*</span>
+                        </label>
+                        <input
+                          type="tel"
+                          value={guestPhone}
+                          onChange={(e) => setGuestPhone(e.target.value)}
+                          placeholder="+994 50 123 45 67"
+                          className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                          Ünvan <span className="text-rose-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={guestAddress}
+                          onChange={(e) => setGuestAddress(e.target.value)}
+                          placeholder="Şəhər, rayon, küçə ünvanınız"
+                          className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Session Format */}
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
@@ -606,42 +801,59 @@ export default function BookingModal() {
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={!selectedStart || !selectedEnd || !!conflictError || isSubmitting}
-              className={`w-full py-2.5 rounded-xl text-xs font-bold tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md ${
-                !selectedStart || !selectedEnd || !!conflictError || isSubmitting
-                  ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none'
-                  : 'bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white shadow-amber-600/25'
-              }`}
-            >
-              {isSubmitting ? (
-                <>
-                  <span className="material-symbols-outlined text-[17px] animate-spin">autorenew</span>
-                  <span>Göndərilir...</span>
-                </>
-              ) : !selectedStart ? (
-                <>
-                  <span className="material-symbols-outlined text-[17px]">schedule</span>
-                  <span>Başlama Saatı Seçin</span>
-                </>
-              ) : !selectedEnd ? (
-                <>
-                  <span className="material-symbols-outlined text-[17px]">timer</span>
-                  <span>Bitmə Saatı Seçin</span>
-                </>
-              ) : conflictError ? (
-                <>
-                  <span className="material-symbols-outlined text-[17px]">block</span>
-                  <span>Bu Vaxt Əlçatmaz</span>
-                </>
-              ) : (
-                <>
-                  <span className="material-symbols-outlined text-[17px]">check_circle</span>
-                  <span>Sessiyanı Təsdiqlə və Rezerv Et</span>
-                </>
-              )}
-            </button>
+            {(() => {
+              const guestFormIncomplete = !currentUser && authChoice === 'guest_form' && (!guestFirstName.trim() || !guestLastName.trim() || !guestPhone.trim() || !guestAddress.trim());
+              const isDisabled = !selectedStart || !selectedEnd || !!conflictError || isSubmitting || guestFormIncomplete;
+
+              return (
+                <button
+                  type="submit"
+                  disabled={isDisabled}
+                  className={`w-full py-2.5 rounded-xl text-xs font-bold tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md ${
+                    isDisabled
+                      ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none'
+                      : 'bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white shadow-amber-600/25'
+                  }`}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <span className="material-symbols-outlined text-[17px] animate-spin">autorenew</span>
+                      <span>Göndərilir...</span>
+                    </>
+                  ) : !selectedStart ? (
+                    <>
+                      <span className="material-symbols-outlined text-[17px]">schedule</span>
+                      <span>Başlama Saatı Seçin</span>
+                    </>
+                  ) : !selectedEnd ? (
+                    <>
+                      <span className="material-symbols-outlined text-[17px]">timer</span>
+                      <span>Bitmə Saatı Seçin</span>
+                    </>
+                  ) : conflictError ? (
+                    <>
+                      <span className="material-symbols-outlined text-[17px]">block</span>
+                      <span>Bu Vaxt Əlçatmaz</span>
+                    </>
+                  ) : !currentUser && authChoice === 'login_register' ? (
+                    <>
+                      <span className="material-symbols-outlined text-[17px]">login</span>
+                      <span>Sayta Giriş / Qeydiyyat</span>
+                    </>
+                  ) : guestFormIncomplete ? (
+                    <>
+                      <span className="material-symbols-outlined text-[17px]">edit</span>
+                      <span>Formu Doldurun (Ad, Soyad, Tel, Ünvan)</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined text-[17px]">check_circle</span>
+                      <span>Sessiyanı Təsdiqlə və Rezerv Et</span>
+                    </>
+                  )}
+                </button>
+              );
+            })()}
           </div>
         </form>
       </div>

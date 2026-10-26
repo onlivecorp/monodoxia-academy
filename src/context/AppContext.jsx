@@ -1755,6 +1755,8 @@ export function AppProvider({ children }) {
       userName: currentUser?.name || bookingData.userName || 'Qonaq İstifadəçi',
       userEmail: currentUser?.email || bookingData.userEmail || '',
       userPhone: currentUser?.phone || bookingData.userPhone || '',
+      userAddress: bookingData.userAddress || '',
+      isGuest: bookingData.isGuest !== undefined ? bookingData.isGuest : !currentUser,
       status: 'Gözləyir',
       date: new Date().toLocaleDateString('az-AZ'),
       createdAt: new Date().toISOString()
