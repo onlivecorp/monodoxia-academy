@@ -275,343 +275,374 @@ export default function BookingModal() {
   // Success screen
   if (submitResult === 'success') {
     return (
-      <div className="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4 backdrop-blur-sm bg-slate-900/50">
-        <div className="bg-[#fcfbf9] rounded-3xl border border-amber-900/15 shadow-2xl max-w-md w-full p-8 relative animate-fadeIn text-center">
-          <div className="w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-4">
-            <span className="material-symbols-outlined text-[36px]">check_circle</span>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+        <div 
+          className="fixed inset-0 bg-[#070f1e]/80 backdrop-blur-md" 
+          onClick={() => { setBookingModalOpen(false); setSubmitResult(null); }} 
+        />
+        <div className="relative bg-[#fcfbf9] rounded-3xl border border-amber-900/15 shadow-2xl max-w-md w-full p-6 sm:p-8 z-10 animate-scaleUp text-center my-auto">
+          <div className="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-3.5 shadow-sm">
+            <span className="material-symbols-outlined text-[32px]">check_circle</span>
           </div>
           <h3 className="font-serif text-xl font-bold text-slate-900 mb-2">Müraciət Göndərildi!</h3>
-          <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-line mb-6">{submitMessage}</p>
-          <div className="flex gap-3">
-            <button
-              onClick={() => { setBookingModalOpen(false); setSubmitResult(null); }}
-              className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white text-xs font-bold tracking-wider shadow-md cursor-pointer"
-            >
-              Bağla
-            </button>
-          </div>
+          <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-line mb-5">{submitMessage}</p>
+          <button
+            type="button"
+            onClick={() => { setBookingModalOpen(false); setSubmitResult(null); }}
+            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white text-xs font-bold tracking-wider shadow-md cursor-pointer"
+          >
+            Bağla
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4 backdrop-blur-sm bg-slate-900/50 overflow-y-auto">
-      <div className="bg-[#fcfbf9] rounded-3xl border border-amber-900/15 shadow-2xl max-w-2xl w-full p-6 relative overflow-hidden animate-fadeIn my-4">
-        <button
-          onClick={() => setBookingModalOpen(false)}
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 transition-colors p-1 rounded-full cursor-pointer z-10"
-          aria-label="Bağla"
-        >
-          <span className="material-symbols-outlined text-[22px]">close</span>
-        </button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+      {/* Backdrop */}
+      <div 
+        className="fixed inset-0 bg-[#070f1e]/80 backdrop-blur-md transition-opacity" 
+        onClick={() => setBookingModalOpen(false)} 
+      />
 
-        {/* Header */}
-        <div className="flex items-center gap-3.5 mb-5 pb-4 border-b border-slate-200">
-          <div className="w-14 h-14 rounded-2xl overflow-hidden border-2 border-amber-500/30 shrink-0 bg-amber-50 flex items-center justify-center shadow-xs">
-            {coachImg ? (
-              <img src={coachImg} alt={activeCoach.name} className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-xl">
-                {activeCoach.name?.[0] || 'K'}
-              </div>
-            )}
-          </div>
-          <div>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 tracking-wider uppercase border border-amber-300">
-              Kouçinq & Seans Rezervasiyası
-            </span>
-            <h4 className="font-serif text-lg text-slate-900 font-bold mt-0.5">{activeCoach.name}</h4>
-            <span className="text-xs text-slate-500">{activeCoach.title}</span>
-          </div>
-        </div>
+      {/* Modal Dialog */}
+      <div 
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="booking-modal-title"
+        className="relative bg-[#fcfbf9] border border-amber-900/15 rounded-3xl shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden z-10 animate-scaleUp my-auto text-[#071326]"
+      >
+        {/* Top Gold Gradient Bar */}
+        <div className="h-1.5 w-full bg-gradient-to-r from-[#c5a059] via-[#e5c57d] to-[#775a19] shrink-0" />
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* MINI CALENDAR */}
-          <div className="rounded-2xl border border-slate-200 overflow-hidden bg-white shadow-xs">
-            {/* Calendar header */}
-            <div className="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-200">
-              <button
-                type="button"
-                onClick={prevMonth}
-                className="p-1 rounded-lg hover:bg-slate-200 text-slate-600 cursor-pointer transition-colors"
-                aria-label="Əvvəlki ay"
-              >
-                <span className="material-symbols-outlined text-[18px]">chevron_left</span>
-              </button>
-              <span className="text-sm font-bold text-slate-800">
-                {monthNames[calendarMonth]} {calendarYear}
+        {/* Fixed Header */}
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-200 bg-[#fcfbf9] shrink-0">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-11 h-11 rounded-xl overflow-hidden border border-amber-500/30 shrink-0 bg-amber-50 flex items-center justify-center shadow-xs">
+              {coachImg ? (
+                <img src={coachImg} alt={activeCoach.name} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-[#071326] to-[#0c2242] text-[#e5c57d] font-serif font-bold text-lg flex items-center justify-center">
+                  {activeCoach.name?.[0] || 'K'}
+                </div>
+              )}
+            </div>
+            <div className="min-w-0">
+              <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-100 text-amber-900 tracking-wider uppercase border border-amber-300">
+                Kouçinq Rezervasiyası
               </span>
-              <button
-                type="button"
-                onClick={nextMonth}
-                className="p-1 rounded-lg hover:bg-slate-200 text-slate-600 cursor-pointer transition-colors"
-                aria-label="Növbəti ay"
-              >
-                <span className="material-symbols-outlined text-[18px]">chevron_right</span>
-              </button>
-            </div>
-
-            {/* Day names */}
-            <div className="grid grid-cols-7 border-b border-slate-100">
-              {dayNames.map(d => (
-                <div key={d} className="text-center text-[10px] font-bold text-slate-400 py-2 uppercase tracking-wider">
-                  {d}
-                </div>
-              ))}
-            </div>
-
-            {/* Calendar days */}
-            <div className="grid grid-cols-7 p-2 gap-1">
-              {calDays.map((day, idx) => {
-                if (!day) return <div key={`empty-${idx}`} />;
-                const dateStr = `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const isPast = dateStr < today;
-                const isToday = dateStr === today;
-                const isSelected = dateStr === selectedDate;
-                const meta = getDayMeta(calendarYear, calendarMonth, day);
-
-                return (
-                  <button
-                    type="button"
-                    key={day}
-                    disabled={isPast}
-                    onClick={() => {
-                      setSelectedDate(dateStr);
-                      setSelectedStart('');
-                      setSelectedEnd('');
-                    }}
-                    className={`
-                      relative aspect-square flex flex-col items-center justify-center rounded-xl text-xs font-semibold transition-all cursor-pointer
-                      ${isPast ? 'text-slate-300 cursor-not-allowed' : ''}
-                      ${isSelected ? 'bg-amber-600 text-white shadow-md ring-2 ring-amber-400' : ''}
-                      ${!isPast && !isSelected ? 'hover:bg-amber-50 hover:text-amber-800 text-slate-700' : ''}
-                      ${isToday && !isSelected ? 'ring-1 ring-amber-400 text-amber-700' : ''}
-                    `}
-                    aria-label={`${day} ${monthNames[calendarMonth]}`}
-                  >
-                    {day}
-                    {!isPast && (
-                      <span className={`absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full ${
-                        meta === 'partial' ? 'bg-amber-400' :
-                        meta === 'free' ? 'bg-emerald-400' : ''
-                      }`} />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Legend */}
-            <div className="px-4 py-2 border-t border-slate-100 flex items-center gap-4 text-[10px] text-slate-500 flex-wrap">
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-400 inline-block"/> Boş gün</span>
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400 inline-block"/> Qismən dolu</span>
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-slate-200 inline-block"/> Keçmiş</span>
+              <h4 id="booking-modal-title" className="font-serif text-base text-slate-900 font-bold truncate leading-tight mt-0.5">
+                {activeCoach.name}
+              </h4>
+              <span className="text-[11px] text-slate-500 truncate block leading-tight">{activeCoach.title}</span>
             </div>
           </div>
-
-          {/* Selected date display */}
-          <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 rounded-xl border border-amber-200">
-            <span className="material-symbols-outlined text-[16px] text-amber-600">calendar_today</span>
-            <span className="text-xs font-bold text-amber-900">
-              Seçilmiş tarix: {formatDateAz(selectedDate)}
-            </span>
-          </div>
-
-          {/* Time slots */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
-                <span className="material-symbols-outlined text-[15px] text-amber-600">schedule</span>
-                Saat Seçin
-              </label>
-              <div className="flex items-center gap-3 text-[10px] text-slate-500">
-                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-emerald-200 inline-block border border-emerald-400"/> Boş</span>
-                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-rose-100 inline-block border border-rose-300"/> Rezerv</span>
-                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-purple-100 inline-block border border-purple-300"/> Bloklanıb</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5 max-h-52 overflow-y-auto p-0.5">
-              {generateTimeSlots(8, 21, 30).map(slotTime => {
-                const status = getSlotStatus(slotTime);
-                const isSelected = selectedStart === slotTime;
-                const isUnavailable = status === 'past' || status === 'booked' || status === 'blocked';
-
-                return (
-                  <button
-                    type="button"
-                    key={slotTime}
-                    disabled={isUnavailable}
-                    onClick={() => {
-                      if (isUnavailable) return;
-                      setSelectedStart(slotTime);
-                      // Auto-set end time to +1 hour
-                      const [h, m] = slotTime.split(':').map(Number);
-                      const newH = h + 1;
-                      if (newH < 21) {
-                        setSelectedEnd(`${String(newH).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
-                      } else {
-                        setSelectedEnd('');
-                      }
-                    }}
-                    className={`
-                      py-1.5 rounded-lg text-[11px] font-semibold text-center transition-all
-                      ${status === 'past' ? 'bg-slate-50 text-slate-300 border border-slate-100 cursor-not-allowed' : ''}
-                      ${status === 'booked' ? 'bg-rose-50 text-rose-300 border border-rose-200 cursor-not-allowed' : ''}
-                      ${status === 'blocked' ? 'bg-purple-50 text-purple-300 border border-purple-200 cursor-not-allowed' : ''}
-                      ${status === 'available' && !isSelected ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 hover:border-emerald-400 cursor-pointer' : ''}
-                      ${isSelected ? 'bg-amber-600 text-white border border-amber-500 ring-2 ring-amber-400 shadow-sm' : ''}
-                    `}
-                    title={
-                      status === 'past' ? 'Keçmiş vaxt' :
-                      status === 'booked' ? 'Rezervasiya edilib' :
-                      status === 'blocked' ? 'Bloklanmış vaxt' :
-                      'Seçmək üçün klikləyin'
-                    }
-                  >
-                    {slotTime}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* End time selector */}
-          {selectedStart && (
-            <div className="p-4 rounded-2xl bg-amber-50/40 border border-amber-200 space-y-3 animate-fadeIn">
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-[16px] text-amber-600">timer</span>
-                <span className="text-xs font-bold text-amber-900">
-                  Başlama saatı: <strong>{selectedStart}</strong> — Bitmə saatını seçin:
-                </span>
-              </div>
-              <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5">
-                {generateTimeSlots(8, 22, 30)
-                  .filter(t => t > selectedStart)
-                  .slice(0, 12)
-                  .map(endTime => {
-                    const isSelectedEnd = selectedEnd === endTime;
-                    const dur = (() => {
-                      const [sh, sm] = selectedStart.split(':').map(Number);
-                      const [eh, em] = endTime.split(':').map(Number);
-                      const mins = (eh * 60 + em) - (sh * 60 + sm);
-                      return mins >= 60 ? `${Math.floor(mins/60)}s${mins%60 ? ' ' + mins%60 + 'dq' : ''}` : `${mins}dq`;
-                    })();
-                    return (
-                      <button
-                        type="button"
-                        key={endTime}
-                        onClick={() => setSelectedEnd(endTime)}
-                        className={`py-1.5 rounded-lg text-[10px] font-semibold text-center transition-all cursor-pointer ${
-                          isSelectedEnd
-                            ? 'bg-amber-600 text-white border border-amber-500 ring-2 ring-amber-400 shadow-sm'
-                            : 'bg-white text-slate-700 border border-slate-200 hover:border-amber-400 hover:bg-amber-50'
-                        }`}
-                      >
-                        <div>{endTime}</div>
-                        <div className="text-[9px] opacity-75">{dur}</div>
-                      </button>
-                    );
-                  })
-                }
-              </div>
-
-              {/* Conflict error */}
-              {conflictError && (
-                <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-1.5 animate-fadeIn">
-                  <span className="material-symbols-outlined text-[16px] text-rose-600 shrink-0">error</span>
-                  <span>{conflictError}</span>
-                </div>
-              )}
-
-              {/* Selected interval summary */}
-              {selectedStart && selectedEnd && !conflictError && (
-                <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-[16px] text-emerald-600 shrink-0">event_available</span>
-                  <span>
-                    Seçilmiş vaxt: <strong>{formatDateAz(selectedDate)} · {selectedStart} – {selectedEnd}</strong>
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Session Format */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
-              <span className="material-symbols-outlined text-[15px] text-amber-600">videocam</span>
-              Sessiya Formatı
-            </label>
-            <select
-              value={type}
-              onChange={(e) => setType(e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500"
-            >
-              <option value="Online (Təhlükəsiz Video Otaq)">Onlayn (Təhlükəsiz Video Otaq - Zoom/Google Meet/WebRTC)</option>
-              <option value="Offline (Bakı Mərkəzi Ofis)">Oflayn (Bakı Mərkəzi Ofis - Nizami küç. 142)</option>
-            </select>
-          </div>
-
-          {/* Notes */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
-              <span className="material-symbols-outlined text-[15px] text-amber-600">chat</span>
-              Fokus Sahəniz və ya Qeydlər
-            </label>
-            <textarea
-              rows="2"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Sessiyada müzakirə etmək istədiyiniz mövzu haqqında qısa qeyd..."
-              className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
-            />
-          </div>
-
-          {/* Submit error */}
-          {submitResult === 'error' && (
-            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px] text-rose-600 shrink-0">error</span>
-              <span>{submitMessage}</span>
-            </div>
-          )}
 
           <button
-            type="submit"
-            disabled={!selectedStart || !selectedEnd || !!conflictError || isSubmitting}
-            className={`w-full py-2.5 rounded-xl text-xs font-bold tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md ${
-              !selectedStart || !selectedEnd || !!conflictError || isSubmitting
-                ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none'
-                : 'bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white shadow-amber-600/25'
-            }`}
+            type="button"
+            onClick={() => setBookingModalOpen(false)}
+            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-colors cursor-pointer shrink-0 ml-2"
+            aria-label="Bağla"
           >
-            {isSubmitting ? (
-              <>
-                <span className="material-symbols-outlined text-[17px] animate-spin">autorenew</span>
-                <span>Göndərilir...</span>
-              </>
-            ) : !selectedStart ? (
-              <>
-                <span className="material-symbols-outlined text-[17px]">schedule</span>
-                <span>Başlama Saatı Seçin</span>
-              </>
-            ) : !selectedEnd ? (
-              <>
-                <span className="material-symbols-outlined text-[17px]">timer</span>
-                <span>Bitmə Saatı Seçin</span>
-              </>
-            ) : conflictError ? (
-              <>
-                <span className="material-symbols-outlined text-[17px]">block</span>
-                <span>Bu Vaxt Əlçatmaz</span>
-              </>
-            ) : (
-              <>
-                <span className="material-symbols-outlined text-[17px]">check_circle</span>
-                <span>Sessiyanı Təsdiqlə və Rezerv Et</span>
-              </>
-            )}
+            <span className="material-symbols-outlined text-[19px]">close</span>
           </button>
+        </div>
+
+        {/* Form with scrollable body + fixed footer */}
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+          {/* Scrollable Content Body */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
+            {/* MINI CALENDAR */}
+            <div className="rounded-2xl border border-slate-200 overflow-hidden bg-white shadow-xs">
+              {/* Calendar header */}
+              <div className="flex items-center justify-between px-4 py-2.5 bg-slate-50 border-b border-slate-200">
+                <button
+                  type="button"
+                  onClick={prevMonth}
+                  className="p-1 rounded-lg hover:bg-slate-200 text-slate-600 cursor-pointer transition-colors"
+                  aria-label="Əvvəlki ay"
+                >
+                  <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+                </button>
+                <span className="text-xs sm:text-sm font-bold text-slate-800">
+                  {monthNames[calendarMonth]} {calendarYear}
+                </span>
+                <button
+                  type="button"
+                  onClick={nextMonth}
+                  className="p-1 rounded-lg hover:bg-slate-200 text-slate-600 cursor-pointer transition-colors"
+                  aria-label="Növbəti ay"
+                >
+                  <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+                </button>
+              </div>
+
+              {/* Day names */}
+              <div className="grid grid-cols-7 border-b border-slate-100 bg-slate-50/50">
+                {dayNames.map(d => (
+                  <div key={d} className="text-center text-[10px] font-bold text-slate-400 py-1.5 uppercase tracking-wider">
+                    {d}
+                  </div>
+                ))}
+              </div>
+
+              {/* Calendar days */}
+              <div className="grid grid-cols-7 p-1.5 gap-1">
+                {calDays.map((day, idx) => {
+                  if (!day) return <div key={`empty-${idx}`} />;
+                  const dateStr = `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                  const isPast = dateStr < today;
+                  const isToday = dateStr === today;
+                  const isSelected = dateStr === selectedDate;
+                  const meta = getDayMeta(calendarYear, calendarMonth, day);
+
+                  return (
+                    <button
+                      type="button"
+                      key={day}
+                      disabled={isPast}
+                      onClick={() => {
+                        setSelectedDate(dateStr);
+                        setSelectedStart('');
+                        setSelectedEnd('');
+                      }}
+                      className={`
+                        relative h-8 sm:h-9 flex flex-col items-center justify-center rounded-lg text-xs font-semibold transition-all cursor-pointer
+                        ${isPast ? 'text-slate-300 cursor-not-allowed bg-transparent' : ''}
+                        ${isSelected ? 'bg-amber-600 text-white shadow-sm ring-2 ring-amber-400' : ''}
+                        ${!isPast && !isSelected ? 'hover:bg-amber-50 hover:text-amber-800 text-slate-700' : ''}
+                        ${isToday && !isSelected ? 'ring-1 ring-amber-400 text-amber-700 font-bold' : ''}
+                      `}
+                      aria-label={`${day} ${monthNames[calendarMonth]}`}
+                    >
+                      <span>{day}</span>
+                      {!isPast && (
+                        <span className={`w-1 h-1 rounded-full -mt-0.5 ${
+                          meta === 'partial' ? 'bg-amber-400' :
+                          meta === 'free' ? 'bg-emerald-400' : ''
+                        }`} />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Legend */}
+              <div className="px-3.5 py-1.5 border-t border-slate-100 flex items-center gap-3.5 text-[10px] text-slate-500 flex-wrap bg-slate-50/30">
+                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"/> Boş gün</span>
+                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block"/> Qismən dolu</span>
+                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-slate-300 inline-block"/> Keçmiş</span>
+              </div>
+            </div>
+
+            {/* Selected date display */}
+            <div className="flex items-center justify-between px-3.5 py-2 bg-amber-50/80 rounded-xl border border-amber-200">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-[16px] text-amber-600">calendar_today</span>
+                <span className="text-xs font-bold text-amber-900">
+                  Seçilmiş tarix: {formatDateAz(selectedDate)}
+                </span>
+              </div>
+              <span className="text-[10px] text-amber-700 font-medium">Aşağıdan saat seçin</span>
+            </div>
+
+            {/* Time slots */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[15px] text-amber-600">schedule</span>
+                  Başlama Saatı Seçin
+                </label>
+                <div className="flex items-center gap-2.5 text-[10px] text-slate-500">
+                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-emerald-200 inline-block border border-emerald-400"/> Boş</span>
+                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-rose-100 inline-block border border-rose-300"/> Rezerv</span>
+                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-purple-100 inline-block border border-purple-300"/> Blok</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5 max-h-44 overflow-y-auto p-1 bg-slate-50/50 rounded-xl border border-slate-100">
+                {generateTimeSlots(8, 21, 30).map(slotTime => {
+                  const status = getSlotStatus(slotTime);
+                  const isSelected = selectedStart === slotTime;
+                  const isUnavailable = status === 'past' || status === 'booked' || status === 'blocked';
+
+                  return (
+                    <button
+                      type="button"
+                      key={slotTime}
+                      disabled={isUnavailable}
+                      onClick={() => {
+                        if (isUnavailable) return;
+                        setSelectedStart(slotTime);
+                        const [h, m] = slotTime.split(':').map(Number);
+                        const newH = h + 1;
+                        if (newH < 21) {
+                          setSelectedEnd(`${String(newH).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+                        } else {
+                          setSelectedEnd('');
+                        }
+                      }}
+                      className={`
+                        py-1.5 rounded-lg text-[11px] font-semibold text-center transition-all
+                        ${status === 'past' ? 'bg-slate-100 text-slate-300 border border-slate-200 cursor-not-allowed' : ''}
+                        ${status === 'booked' ? 'bg-rose-50 text-rose-300 border border-rose-200 cursor-not-allowed' : ''}
+                        ${status === 'blocked' ? 'bg-purple-50 text-purple-300 border border-purple-200 cursor-not-allowed' : ''}
+                        ${status === 'available' && !isSelected ? 'bg-white text-emerald-800 border border-emerald-300 hover:bg-emerald-50 hover:border-emerald-500 cursor-pointer shadow-2xs' : ''}
+                        ${isSelected ? 'bg-amber-600 text-white border border-amber-500 ring-2 ring-amber-400 shadow-sm' : ''}
+                      `}
+                      title={
+                        status === 'past' ? 'Keçmiş vaxt' :
+                        status === 'booked' ? 'Rezervasiya edilib' :
+                        status === 'blocked' ? 'Bloklanmış vaxt' :
+                        'Seçmək üçün klikləyin'
+                      }
+                    >
+                      {slotTime}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* End time selector */}
+            {selectedStart && (
+              <div className="p-3.5 rounded-2xl bg-amber-50/50 border border-amber-200 space-y-2.5 animate-fadeIn">
+                <div className="flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-[15px] text-amber-600">timer</span>
+                  <span className="text-xs font-bold text-amber-900">
+                    Başlama saatı: <strong>{selectedStart}</strong> — Seansın Bitmə Saatı:
+                  </span>
+                </div>
+                <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5">
+                  {generateTimeSlots(8, 22, 30)
+                    .filter(t => t > selectedStart)
+                    .slice(0, 12)
+                    .map(endTime => {
+                      const isSelectedEnd = selectedEnd === endTime;
+                      const dur = (() => {
+                        const [sh, sm] = selectedStart.split(':').map(Number);
+                        const [eh, em] = endTime.split(':').map(Number);
+                        const mins = (eh * 60 + em) - (sh * 60 + sm);
+                        return mins >= 60 ? `${Math.floor(mins/60)}s${mins%60 ? ' ' + mins%60 + 'dq' : ''}` : `${mins}dq`;
+                      })();
+                      return (
+                        <button
+                          type="button"
+                          key={endTime}
+                          onClick={() => setSelectedEnd(endTime)}
+                          className={`py-1.5 rounded-lg text-[10px] font-semibold text-center transition-all cursor-pointer ${
+                            isSelectedEnd
+                              ? 'bg-amber-600 text-white border border-amber-500 ring-2 ring-amber-400 shadow-sm'
+                              : 'bg-white text-slate-700 border border-slate-200 hover:border-amber-400 hover:bg-amber-50'
+                          }`}
+                        >
+                          <div>{endTime}</div>
+                          <div className="text-[9px] opacity-75">{dur}</div>
+                        </button>
+                      );
+                    })
+                  }
+                </div>
+
+                {/* Conflict error */}
+                {conflictError && (
+                  <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-1.5 animate-fadeIn">
+                    <span className="material-symbols-outlined text-[16px] text-rose-600 shrink-0">error</span>
+                    <span>{conflictError}</span>
+                  </div>
+                )}
+
+                {/* Selected interval summary */}
+                {selectedStart && selectedEnd && !conflictError && (
+                  <div className="p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[15px] text-emerald-600 shrink-0">event_available</span>
+                    <span>
+                      Seçilmiş interval: <strong>{formatDateAz(selectedDate)} · {selectedStart} – {selectedEnd}</strong>
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Session Format */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
+                <span className="material-symbols-outlined text-[15px] text-amber-600">videocam</span>
+                Sessiya Formatı
+              </label>
+              <select
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              >
+                <option value="Online (Təhlükəsiz Video Otaq)">Onlayn (Təhlükəsiz Video Otaq - Zoom/Google Meet/WebRTC)</option>
+                <option value="Offline (Bakı Mərkəzi Ofis)">Oflayn (Bakı Mərkəzi Ofis - Nizami küç. 142)</option>
+              </select>
+            </div>
+
+            {/* Notes */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
+                <span className="material-symbols-outlined text-[15px] text-amber-600">chat</span>
+                Fokus Sahəniz və ya Qeydlər
+              </label>
+              <textarea
+                rows="2"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Sessiyada müzakirə etmək istədiyiniz mövzu haqqında qısa qeyd..."
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
+              />
+            </div>
+          </div>
+
+          {/* Fixed Footer */}
+          <div className="px-5 py-3 border-t border-slate-200 bg-[#fcfbf9] shrink-0 space-y-2">
+            {submitResult === 'error' && (
+              <div className="p-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[16px] text-rose-600 shrink-0">error</span>
+                <span>{submitMessage}</span>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={!selectedStart || !selectedEnd || !!conflictError || isSubmitting}
+              className={`w-full py-2.5 rounded-xl text-xs font-bold tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md ${
+                !selectedStart || !selectedEnd || !!conflictError || isSubmitting
+                  ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none'
+                  : 'bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white shadow-amber-600/25'
+              }`}
+            >
+              {isSubmitting ? (
+                <>
+                  <span className="material-symbols-outlined text-[17px] animate-spin">autorenew</span>
+                  <span>Göndərilir...</span>
+                </>
+              ) : !selectedStart ? (
+                <>
+                  <span className="material-symbols-outlined text-[17px]">schedule</span>
+                  <span>Başlama Saatı Seçin</span>
+                </>
+              ) : !selectedEnd ? (
+                <>
+                  <span className="material-symbols-outlined text-[17px]">timer</span>
+                  <span>Bitmə Saatı Seçin</span>
+                </>
+              ) : conflictError ? (
+                <>
+                  <span className="material-symbols-outlined text-[17px]">block</span>
+                  <span>Bu Vaxt Əlçatmaz</span>
+                </>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined text-[17px]">check_circle</span>
+                  <span>Sessiyanı Təsdiqlə və Rezerv Et</span>
+                </>
+              )}
+            </button>
+          </div>
         </form>
       </div>
     </div>
