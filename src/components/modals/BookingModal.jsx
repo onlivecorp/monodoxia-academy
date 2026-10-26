@@ -1,144 +1,244 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useApp } from '../../context/AppContext';
 
+// Generate time slots for a day in 30-min increments
+function generateTimeSlots(startHour = 8, endHour = 21, stepMin = 30) {
+  const slots = [];
+  for (let h = startHour; h < endHour; h++) {
+    for (let m = 0; m < 60; m += stepMin) {
+      const hh = String(h).padStart(2, '0');
+      const mm = String(m).padStart(2, '0');
+      slots.push(`${hh}:${mm}`);
+    }
+  }
+  return slots;
+}
+
+// Format date to "DD.MM.YYYY"
+function formatDateAz(dateStr) {
+  if (!dateStr) return '';
+  return dateStr.split('-').reverse().join('.');
+}
+
+// Check if time overlaps with a booked/blocked interval
+function timesOverlap(aStart, aEnd, bStart, bEnd) {
+  return aStart < bEnd && aEnd > bStart;
+}
+
 export default function BookingModal() {
-  const { bookingModalOpen, setBookingModalOpen, activeCoach, confirmBooking, currentUser, usersList = [], bookings = [], bookingPreselectedSlot, setBookingPreselectedSlot } = useApp();
-  const [slot, setSlot] = useState('');
-  const [useCustomTime, setUseCustomTime] = useState(false);
-  const [customDate, setCustomDate] = useState(() => new Date().toISOString().split('T')[0]);
-  const [customStartTime, setCustomStartTime] = useState('15:00');
-  const [customEndTime, setCustomEndTime] = useState('16:00');
+  const {
+    bookingModalOpen,
+    setBookingModalOpen,
+    activeCoach,
+    confirmBooking,
+    currentUser,
+    usersList = [],
+    bookings = [],
+    timeBlocks = [],
+    bookingPreselectedSlot,
+    setBookingPreselectedSlot
+  } = useApp();
+
+  const today = new Date().toISOString().split('T')[0];
+  const nowTime = new Date().toTimeString().slice(0, 5); // HH:MM
+
+  const [selectedDate, setSelectedDate] = useState(today);
+  const [selectedStart, setSelectedStart] = useState('');
+  const [selectedEnd, setSelectedEnd] = useState('');
   const [type, setType] = useState('Online (Təhlükəsiz Video Otaq)');
   const [notes, setNotes] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitResult, setSubmitResult] = useState(null); // null | 'success' | 'error'
+  const [submitMessage, setSubmitMessage] = useState('');
 
-  // Sync preselected slot when modal opens
+  // Mini-calendar state
+  const [calendarYear, setCalendarYear] = useState(() => new Date().getFullYear());
+  const [calendarMonth, setCalendarMonth] = useState(() => new Date().getMonth()); // 0-indexed
+
+  // Reset when modal opens
   useEffect(() => {
     if (bookingModalOpen) {
-      setSlot(bookingPreselectedSlot || '');
-      setUseCustomTime(false);
+      setSelectedDate(today);
+      setSelectedStart('');
+      setSelectedEnd('');
+      setNotes('');
+      setIsSubmitting(false);
+      setSubmitResult(null);
+      setSubmitMessage('');
+      const now = new Date();
+      setCalendarYear(now.getFullYear());
+      setCalendarMonth(now.getMonth());
+
+      // If preselected slot exists, try to parse it
+      if (bookingPreselectedSlot) {
+        const match = bookingPreselectedSlot.match(/(\d{2})\.(\d{2})\.(\d{4})\s+(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})/);
+        if (match) {
+          const [, d, mo, y, start, end] = match;
+          const dateVal = `${y}-${mo}-${d}`;
+          setSelectedDate(dateVal);
+          setSelectedStart(start);
+          setSelectedEnd(end);
+        }
+      }
     }
   }, [bookingModalOpen, bookingPreselectedSlot]);
 
-  // Confirmed bookings for this coach from database
-  const confirmedCoachBookings = useMemo(() => {
+  // Confirmed bookings for this coach
+  const confirmedBookings = useMemo(() => {
     if (!activeCoach || !Array.isArray(bookings)) return [];
     return bookings.filter(b => {
-      if (!b) return false;
       const matchCoach = (b.coachId && b.coachId === activeCoach.id) ||
-                         (b.coachName && activeCoach.name && b.coachName.toLowerCase().trim() === activeCoach.name.toLowerCase().trim());
+        (b.coachName && activeCoach.name && b.coachName.toLowerCase().trim() === activeCoach.name.toLowerCase().trim());
       return matchCoach && b.status === 'Təsdiqləndi';
     });
   }, [bookings, activeCoach]);
 
-  // Coach's booked slots from profile
-  const coachBookedSlots = useMemo(() => {
+  // Manual blocks for this coach
+  const coachBlocks = useMemo(() => {
+    if (!activeCoach || !Array.isArray(timeBlocks)) return [];
+    return timeBlocks.filter(tb => tb.coachId === activeCoach.id);
+  }, [timeBlocks, activeCoach]);
+
+  // Coach schedule slots (from profile)
+  const scheduleSlots = useMemo(() => {
     if (!activeCoach) return [];
-    return Array.isArray(activeCoach?.bookedSlots) ? activeCoach.bookedSlots : [];
+    return (Array.isArray(activeCoach.scheduleSlots) ? activeCoach.scheduleSlots : [])
+      .filter(s => {
+        const lbl = typeof s === 'string' ? s : s?.label;
+        return lbl !== 'Sabah 15:00' && lbl !== 'Cümə 18:00';
+      });
   }, [activeCoach]);
 
-  // Combine and normalize all schedule slots
-  const allSlots = useMemo(() => {
+  // Get status of a specific time slot for selected date
+  const getSlotStatus = useCallback((slotTime) => {
+    const slotEndDefault = (() => {
+      const [h, m] = slotTime.split(':').map(Number);
+      const newM = m + 30;
+      const newH = h + Math.floor(newM / 60);
+      return `${String(newH).padStart(2, '0')}:${String(newM % 60).padStart(2, '0')}`;
+    })();
+
+    // Past time?
+    if (selectedDate === today && slotTime <= nowTime) return 'past';
+
+    // Manual block?
+    const isBlocked = coachBlocks.some(tb => {
+      if (tb.date !== selectedDate) return false;
+      return timesOverlap(slotTime, slotEndDefault, tb.startTime, tb.endTime);
+    });
+    if (isBlocked) return 'blocked';
+
+    // Confirmed booking?
+    const isBooked = confirmedBookings.some(b => {
+      if (b.selectedDate !== selectedDate) return false;
+      if (!b.startTime) return false;
+      const bEnd = b.endTime || slotEndDefault;
+      return timesOverlap(slotTime, slotEndDefault, b.startTime, bEnd);
+    });
+    if (isBooked) return 'booked';
+
+    // Coach's manually marked slots in schedule
+    const isMarked = scheduleSlots.some(s => {
+      if (typeof s === 'string') return false;
+      if (!s.isBooked) return false;
+      if (s.date !== selectedDate) return false;
+      if (!s.startTime) return false;
+      const sEnd = s.endTime || slotEndDefault;
+      return timesOverlap(slotTime, slotEndDefault, s.startTime, sEnd);
+    });
+    if (isMarked) return 'booked';
+
+    return 'available';
+  }, [selectedDate, today, nowTime, coachBlocks, confirmedBookings, scheduleSlots]);
+
+  // Check if selected time range is valid and available
+  const conflictError = useMemo(() => {
+    if (!selectedStart || !selectedEnd) return null;
+    if (selectedStart >= selectedEnd) return 'Bitmə saatı başlama saatından sonra olmalıdır.';
+    if (selectedDate === today && selectedStart <= nowTime) return 'Keçmiş vaxt üçün rezervasiya etmək mümkün deyil.';
+    if (selectedDate < today) return 'Keçmiş tarix üçün rezervasiya etmək mümkün deyil.';
+
+    // Block conflict
+    const blockHit = coachBlocks.find(tb => {
+      if (tb.date !== selectedDate) return false;
+      return timesOverlap(selectedStart, selectedEnd, tb.startTime, tb.endTime);
+    });
+    if (blockHit) return `Bu vaxt aralığı ekspert tərəfindən bloklanıb${blockHit.reason ? ': ' + blockHit.reason : ''}.`;
+
+    // Booking conflict
+    const bookingHit = confirmedBookings.find(b => {
+      if (b.selectedDate !== selectedDate || !b.startTime) return false;
+      const bEnd = b.endTime || selectedEnd;
+      return timesOverlap(selectedStart, selectedEnd, b.startTime, bEnd);
+    });
+    if (bookingHit) return 'Bu vaxt aralığı artıq başqa bir rezervasiya tərəfindən tutulub.';
+
+    return null;
+  }, [selectedStart, selectedEnd, selectedDate, today, nowTime, coachBlocks, confirmedBookings]);
+
+  // Available slots list for selected date (from coach schedule, if any defined slots for this date)
+  const availableSlotsForDate = useMemo(() => {
     if (!activeCoach) return [];
-    const list = [];
-    if (Array.isArray(activeCoach?.scheduleSlots) && activeCoach.scheduleSlots.length > 0) {
-      activeCoach.scheduleSlots.forEach(s => {
-        const lbl = s.label || `${s.date || ''} ${s.startTime || ''}-${s.endTime || ''}`.trim();
-        if (lbl === 'Sabah 15:00' || lbl === 'Cümə 18:00') return;
-        list.push({
-          id: s.id || lbl,
-          label: lbl,
-          isBooked: Boolean(s.isBooked),
-          date: s.date,
-          startTime: s.startTime,
-          endTime: s.endTime,
-          note: s.note
-        });
-      });
-    }
+    // Check if coach has explicit slots for this date
+    const dateSlots = scheduleSlots.filter(s => {
+      if (typeof s === 'string') return false;
+      return s.date === selectedDate;
+    });
+    if (dateSlots.length > 0) return dateSlots;
+    // Otherwise generate standard 30-min slots
+    return generateTimeSlots(8, 21, 30).map(t => ({ id: t, startTime: t, label: t }));
+  }, [activeCoach, scheduleSlots, selectedDate]);
 
-    if (Array.isArray(activeCoach?.availableSlots)) {
-      activeCoach.availableSlots.forEach((s, idx) => {
-        const text = typeof s === 'string' ? s : (s.label || s.slot || '');
-        if (text === 'Sabah 15:00' || text === 'Cümə 18:00') return;
-        if (text && !list.some(item => item.label === text)) {
-          // Check if marked in coachBookedSlots or confirmedCoachBookings
-          const isMarkedBooked = coachBookedSlots.some(bs => (typeof bs === 'string' && bs === text) || (bs.slot && bs.slot === text)) ||
-                                 confirmedCoachBookings.some(cb => cb.slot === text);
-          list.push({
-            id: 'avail-' + idx,
-            label: text,
-            isBooked: isMarkedBooked
-          });
-        }
-      });
-    }
+  // Calendar helpers
+  const daysInMonth = (y, m) => new Date(y, m + 1, 0).getDate();
+  const firstDayOfMonth = (y, m) => {
+    const d = new Date(y, m, 1).getDay();
+    return d === 0 ? 6 : d - 1; // Monday-first
+  };
 
-    return list;
-  }, [activeCoach, coachBookedSlots, confirmedCoachBookings]);
+  const dayNames = ['B.e', 'Ç.a', 'Çər', 'C.a', 'Cüm', 'Şnb', 'Baz'];
+  const monthNames = ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'İyun', 'İyul', 'Avqust', 'Sentyabr', 'Oktyabr', 'Noyabr', 'Dekabr'];
 
-  // First available (non-booked) slot
-  const firstAvailable = allSlots.find(s => !s.isBooked)?.label || '';
-  const currentSlot = slot || firstAvailable || (allSlots[0]?.label || 'Fərdi razılaşma ilə');
+  // Check if a calendar day has any available slots (not all blocked)
+  const getDayMeta = useCallback((y, m, d) => {
+    const dateStr = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    if (dateStr < today) return 'past';
 
-  // Check if selected slot or custom time is booked
-  const isSelectedSlotBooked = useMemo(() => {
-    if (!activeCoach) return false;
-    if (useCustomTime) {
-      if (customStartTime >= customEndTime) return true;
-      const formattedDate = customDate.split('-').reverse().join('.');
-      
-      const matchSchedule = allSlots.some(s => {
-        if (!s.isBooked) return false;
-        if (s.date && s.date === customDate && s.startTime && s.endTime) {
-          return customStartTime < s.endTime && customEndTime > s.startTime;
-        }
-        if (s.label && s.label.includes(formattedDate)) {
-          const match = s.label.match(/(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/);
-          if (match) return customStartTime < match[2] && customEndTime > match[1];
-          return true;
-        }
-        return false;
-      });
+    // Has confirmed booking on this day?
+    const hasBooking = confirmedBookings.some(b => b.selectedDate === dateStr);
+    // Has manual block on this day?
+    const hasBlock = coachBlocks.some(tb => tb.date === dateStr);
 
-      const matchConfirmed = confirmedCoachBookings.some(cb => {
-        if (cb.selectedDate && cb.selectedDate === customDate && cb.startTime) {
-          const bStart = cb.startTime;
-          const bEnd = cb.endTime || cb.startTime;
-          return customStartTime < bEnd && customEndTime > bStart;
-        }
-        if (cb.slot && cb.slot.includes(formattedDate)) {
-          const match = cb.slot.match(/(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/);
-          if (match) return customStartTime < match[2] && customEndTime > match[1];
-          return true;
-        }
-        return false;
-      });
-
-      return matchSchedule || matchConfirmed;
-    }
-    const found = allSlots.find(s => s.label === currentSlot);
-    return found ? found.isBooked : false;
-  }, [useCustomTime, customDate, customStartTime, customEndTime, currentSlot, allSlots, confirmedCoachBookings]);
+    if (hasBooking || hasBlock) return 'partial'; // some slots taken
+    return 'free';
+  }, [today, confirmedBookings, coachBlocks]);
 
   if (!bookingModalOpen || !activeCoach) return null;
 
-  const handleSubmit = (e) => {
+  // Coach image
+  let coachImg = activeCoach.image || activeCoach.avatar;
+  if (!coachImg) {
+    try {
+      const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
+      if (imgStore[activeCoach.id]) coachImg = imgStore[activeCoach.id];
+    } catch (e) {}
+  }
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isSelectedSlotBooked) return;
+    if (conflictError || !selectedStart || !selectedEnd) return;
 
-    let finalSlotText = currentSlot;
-    if (useCustomTime) {
-      const formattedDate = customDate.split('-').reverse().join('.');
-      finalSlotText = `${formattedDate} ${customStartTime} - ${customEndTime}`;
-    }
+    setIsSubmitting(true);
+    const formattedDate = formatDateAz(selectedDate);
+    const slotText = `${formattedDate} ${selectedStart} - ${selectedEnd}`;
 
-    confirmBooking({
+    const result = confirmBooking({
       coachId: activeCoach.id,
       coachName: activeCoach.name,
-      slot: finalSlotText,
-      selectedDate: useCustomTime ? customDate : '',
-      startTime: useCustomTime ? customStartTime : '',
-      endTime: useCustomTime ? customEndTime : '',
+      slot: slotText,
+      selectedDate,
+      startTime: selectedStart,
+      endTime: selectedEnd,
       type,
       notes,
       userName: currentUser?.name || 'Qonaq İstifadəçi',
@@ -146,47 +246,76 @@ export default function BookingModal() {
       userPhone: currentUser?.phone || '',
       status: 'Gözləyir'
     });
+
+    setIsSubmitting(false);
+    if (result === false) {
+      setSubmitResult('error');
+      setSubmitMessage('Rezervasiya zamanı xəta baş verdi. Vaxt intervalı artıq tutulmuş ola bilər.');
+    } else {
+      setSubmitResult('success');
+      setSubmitMessage(`Rezervasiya müraciətiniz göndərildi! Ekspert tezliklə sizinlə əlaqə saxlayacaq.\n\nTarix: ${formattedDate}\nSaat: ${selectedStart} – ${selectedEnd}\nFormat: ${type}`);
+    }
   };
 
+  const prevMonth = () => {
+    if (calendarMonth === 0) { setCalendarMonth(11); setCalendarYear(y => y - 1); }
+    else setCalendarMonth(m => m - 1);
+  };
+  const nextMonth = () => {
+    if (calendarMonth === 11) { setCalendarMonth(0); setCalendarYear(y => y + 1); }
+    else setCalendarMonth(m => m + 1);
+  };
+
+  const totalDays = daysInMonth(calendarYear, calendarMonth);
+  const firstDay = firstDayOfMonth(calendarYear, calendarMonth);
+  const calDays = [];
+  for (let i = 0; i < firstDay; i++) calDays.push(null);
+  for (let i = 1; i <= totalDays; i++) calDays.push(i);
+
+  // Success screen
+  if (submitResult === 'success') {
+    return (
+      <div className="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4 backdrop-blur-sm bg-slate-900/50">
+        <div className="bg-[#fcfbf9] rounded-3xl border border-amber-900/15 shadow-2xl max-w-md w-full p-8 relative animate-fadeIn text-center">
+          <div className="w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-4">
+            <span className="material-symbols-outlined text-[36px]">check_circle</span>
+          </div>
+          <h3 className="font-serif text-xl font-bold text-slate-900 mb-2">Müraciət Göndərildi!</h3>
+          <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-line mb-6">{submitMessage}</p>
+          <div className="flex gap-3">
+            <button
+              onClick={() => { setBookingModalOpen(false); setSubmitResult(null); }}
+              className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white text-xs font-bold tracking-wider shadow-md cursor-pointer"
+            >
+              Bağla
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4 backdrop-blur-sm bg-slate-900/50">
-      <div className="bg-[#fcfbf9] rounded-3xl border border-amber-900/15 shadow-2xl max-w-lg w-full p-6 relative overflow-hidden animate-fadeIn">
+    <div className="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4 backdrop-blur-sm bg-slate-900/50 overflow-y-auto">
+      <div className="bg-[#fcfbf9] rounded-3xl border border-amber-900/15 shadow-2xl max-w-2xl w-full p-6 relative overflow-hidden animate-fadeIn my-4">
         <button
           onClick={() => setBookingModalOpen(false)}
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 transition-colors p-1 rounded-full cursor-pointer"
+          className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 transition-colors p-1 rounded-full cursor-pointer z-10"
+          aria-label="Bağla"
         >
           <span className="material-symbols-outlined text-[22px]">close</span>
         </button>
 
+        {/* Header */}
         <div className="flex items-center gap-3.5 mb-5 pb-4 border-b border-slate-200">
           <div className="w-14 h-14 rounded-2xl overflow-hidden border-2 border-amber-500/30 shrink-0 bg-amber-50 flex items-center justify-center shadow-xs">
-            {(() => {
-              let coachImg = activeCoach.image || activeCoach.avatar;
-              if (!coachImg) {
-                const matchedUser = (usersList || []).find(u => 
-                  (activeCoach.userId && String(u.id) === String(activeCoach.userId)) || 
-                  (activeCoach.name && u.name && u.name.toLowerCase().trim() === activeCoach.name.toLowerCase().trim())
-                ) || (currentUser && ((activeCoach.userId && String(currentUser.id) === String(activeCoach.userId)) || (activeCoach.name && currentUser.name && activeCoach.name.toLowerCase().trim() === currentUser.name.toLowerCase().trim())) ? currentUser : null);
-                coachImg = matchedUser?.avatar || matchedUser?.image || '';
-              }
-              if (!coachImg) {
-                try {
-                  const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
-                  if (imgStore[activeCoach.id]) coachImg = imgStore[activeCoach.id];
-                } catch (e) {}
-              }
-              return coachImg ? (
-                <img
-                  src={coachImg}
-                  alt={activeCoach.name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-xl">
-                  {activeCoach.name?.[0] || 'K'}
-                </div>
-              );
-            })()}
+            {coachImg ? (
+              <img src={coachImg} alt={activeCoach.name} className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-xl">
+                {activeCoach.name?.[0] || 'K'}
+              </div>
+            )}
           </div>
           <div>
             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 tracking-wider uppercase border border-amber-300">
@@ -197,136 +326,212 @@ export default function BookingModal() {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Slot Selection Method Toggle */}
-          <div className="flex items-center gap-2 p-1 bg-slate-100 rounded-xl">
-            <button
-              type="button"
-              onClick={() => setUseCustomTime(false)}
-              className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                !useCustomTime ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <span className="material-symbols-outlined text-[15px]">schedule</span>
-              <span>Cədvəldən Seç</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setUseCustomTime(true)}
-              className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                useCustomTime ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <span className="material-symbols-outlined text-[15px]">calendar_month</span>
-              <span>Təqvimdən Saat Təyin Et</span>
-            </button>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* MINI CALENDAR */}
+          <div className="rounded-2xl border border-slate-200 overflow-hidden bg-white shadow-xs">
+            {/* Calendar header */}
+            <div className="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-200">
+              <button
+                type="button"
+                onClick={prevMonth}
+                className="p-1 rounded-lg hover:bg-slate-200 text-slate-600 cursor-pointer transition-colors"
+                aria-label="Əvvəlki ay"
+              >
+                <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+              </button>
+              <span className="text-sm font-bold text-slate-800">
+                {monthNames[calendarMonth]} {calendarYear}
+              </span>
+              <button
+                type="button"
+                onClick={nextMonth}
+                className="p-1 rounded-lg hover:bg-slate-200 text-slate-600 cursor-pointer transition-colors"
+                aria-label="Növbəti ay"
+              >
+                <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+              </button>
+            </div>
+
+            {/* Day names */}
+            <div className="grid grid-cols-7 border-b border-slate-100">
+              {dayNames.map(d => (
+                <div key={d} className="text-center text-[10px] font-bold text-slate-400 py-2 uppercase tracking-wider">
+                  {d}
+                </div>
+              ))}
+            </div>
+
+            {/* Calendar days */}
+            <div className="grid grid-cols-7 p-2 gap-1">
+              {calDays.map((day, idx) => {
+                if (!day) return <div key={`empty-${idx}`} />;
+                const dateStr = `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const isPast = dateStr < today;
+                const isToday = dateStr === today;
+                const isSelected = dateStr === selectedDate;
+                const meta = getDayMeta(calendarYear, calendarMonth, day);
+
+                return (
+                  <button
+                    type="button"
+                    key={day}
+                    disabled={isPast}
+                    onClick={() => {
+                      setSelectedDate(dateStr);
+                      setSelectedStart('');
+                      setSelectedEnd('');
+                    }}
+                    className={`
+                      relative aspect-square flex flex-col items-center justify-center rounded-xl text-xs font-semibold transition-all cursor-pointer
+                      ${isPast ? 'text-slate-300 cursor-not-allowed' : ''}
+                      ${isSelected ? 'bg-amber-600 text-white shadow-md ring-2 ring-amber-400' : ''}
+                      ${!isPast && !isSelected ? 'hover:bg-amber-50 hover:text-amber-800 text-slate-700' : ''}
+                      ${isToday && !isSelected ? 'ring-1 ring-amber-400 text-amber-700' : ''}
+                    `}
+                    aria-label={`${day} ${monthNames[calendarMonth]}`}
+                  >
+                    {day}
+                    {!isPast && (
+                      <span className={`absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full ${
+                        meta === 'partial' ? 'bg-amber-400' :
+                        meta === 'free' ? 'bg-emerald-400' : ''
+                      }`} />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Legend */}
+            <div className="px-4 py-2 border-t border-slate-100 flex items-center gap-4 text-[10px] text-slate-500 flex-wrap">
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-400 inline-block"/> Boş gün</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400 inline-block"/> Qismən dolu</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-slate-200 inline-block"/> Keçmiş</span>
+            </div>
           </div>
 
-          {!useCustomTime ? (
-            /* Choose from coach's configured slots */
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-bold text-slate-700 flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[15px] text-amber-600">event_seat</span>
-                  Mövcud və Rezerv Edilə Bilən Saatlar
-                </label>
-                <span className="text-[11px] text-slate-400">
-                  {allSlots.filter(s => !s.isBooked).length} boş saat
+          {/* Selected date display */}
+          <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 rounded-xl border border-amber-200">
+            <span className="material-symbols-outlined text-[16px] text-amber-600">calendar_today</span>
+            <span className="text-xs font-bold text-amber-900">
+              Seçilmiş tarix: {formatDateAz(selectedDate)}
+            </span>
+          </div>
+
+          {/* Time slots */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
+                <span className="material-symbols-outlined text-[15px] text-amber-600">schedule</span>
+                Saat Seçin
+              </label>
+              <div className="flex items-center gap-3 text-[10px] text-slate-500">
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-emerald-200 inline-block border border-emerald-400"/> Boş</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-rose-100 inline-block border border-rose-300"/> Rezerv</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-purple-100 inline-block border border-purple-300"/> Bloklanıb</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5 max-h-52 overflow-y-auto p-0.5">
+              {generateTimeSlots(8, 21, 30).map(slotTime => {
+                const status = getSlotStatus(slotTime);
+                const isSelected = selectedStart === slotTime;
+                const isUnavailable = status === 'past' || status === 'booked' || status === 'blocked';
+
+                return (
+                  <button
+                    type="button"
+                    key={slotTime}
+                    disabled={isUnavailable}
+                    onClick={() => {
+                      if (isUnavailable) return;
+                      setSelectedStart(slotTime);
+                      // Auto-set end time to +1 hour
+                      const [h, m] = slotTime.split(':').map(Number);
+                      const newH = h + 1;
+                      if (newH < 21) {
+                        setSelectedEnd(`${String(newH).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+                      } else {
+                        setSelectedEnd('');
+                      }
+                    }}
+                    className={`
+                      py-1.5 rounded-lg text-[11px] font-semibold text-center transition-all
+                      ${status === 'past' ? 'bg-slate-50 text-slate-300 border border-slate-100 cursor-not-allowed' : ''}
+                      ${status === 'booked' ? 'bg-rose-50 text-rose-300 border border-rose-200 cursor-not-allowed' : ''}
+                      ${status === 'blocked' ? 'bg-purple-50 text-purple-300 border border-purple-200 cursor-not-allowed' : ''}
+                      ${status === 'available' && !isSelected ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 hover:border-emerald-400 cursor-pointer' : ''}
+                      ${isSelected ? 'bg-amber-600 text-white border border-amber-500 ring-2 ring-amber-400 shadow-sm' : ''}
+                    `}
+                    title={
+                      status === 'past' ? 'Keçmiş vaxt' :
+                      status === 'booked' ? 'Rezervasiya edilib' :
+                      status === 'blocked' ? 'Bloklanmış vaxt' :
+                      'Seçmək üçün klikləyin'
+                    }
+                  >
+                    {slotTime}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* End time selector */}
+          {selectedStart && (
+            <div className="p-4 rounded-2xl bg-amber-50/40 border border-amber-200 space-y-3 animate-fadeIn">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-[16px] text-amber-600">timer</span>
+                <span className="text-xs font-bold text-amber-900">
+                  Başlama saatı: <strong>{selectedStart}</strong> — Bitmə saatını seçin:
                 </span>
               </div>
-
-              {allSlots.length > 0 ? (
-                <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-                  {allSlots.map((s, idx) => {
-                    const isSelected = currentSlot === s.label;
-                    const isBooked = s.isBooked;
-
+              <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5">
+                {generateTimeSlots(8, 22, 30)
+                  .filter(t => t > selectedStart)
+                  .slice(0, 12)
+                  .map(endTime => {
+                    const isSelectedEnd = selectedEnd === endTime;
+                    const dur = (() => {
+                      const [sh, sm] = selectedStart.split(':').map(Number);
+                      const [eh, em] = endTime.split(':').map(Number);
+                      const mins = (eh * 60 + em) - (sh * 60 + sm);
+                      return mins >= 60 ? `${Math.floor(mins/60)}s${mins%60 ? ' ' + mins%60 + 'dq' : ''}` : `${mins}dq`;
+                    })();
                     return (
-                      <label
-                        key={idx}
-                        className={`flex items-center justify-between p-2.5 rounded-xl border text-xs cursor-pointer transition-all ${
-                          isBooked
-                            ? 'bg-rose-50/60 border-rose-200 text-slate-400 cursor-not-allowed opacity-75'
-                            : isSelected
-                            ? 'bg-amber-50/80 border-amber-500 text-slate-900 font-semibold ring-1 ring-amber-500'
-                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                      <button
+                        type="button"
+                        key={endTime}
+                        onClick={() => setSelectedEnd(endTime)}
+                        className={`py-1.5 rounded-lg text-[10px] font-semibold text-center transition-all cursor-pointer ${
+                          isSelectedEnd
+                            ? 'bg-amber-600 text-white border border-amber-500 ring-2 ring-amber-400 shadow-sm'
+                            : 'bg-white text-slate-700 border border-slate-200 hover:border-amber-400 hover:bg-amber-50'
                         }`}
                       >
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <input
-                            type="radio"
-                            name="slotOption"
-                            disabled={isBooked}
-                            checked={isSelected && !isBooked}
-                            onChange={() => setSlot(s.label)}
-                            className="text-amber-600 focus:ring-amber-500 shrink-0"
-                          />
-                          <span className="truncate">{s.label}</span>
-                        </div>
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${
-                          isBooked
-                            ? 'bg-rose-100 text-rose-800 border border-rose-300'
-                            : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                        }`}>
-                          {isBooked ? '🔴 Dolu / Rezerv olunub' : '🟢 Sərbəst / Boş'}
-                        </span>
-                      </label>
+                        <div>{endTime}</div>
+                        <div className="text-[9px] opacity-75">{dur}</div>
+                      </button>
                     );
-                  })}
-                </div>
-              ) : (
-                <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[16px] text-amber-600 shrink-0">info</span>
-                  <span>Bu kouç üçün hazırda təyin edilmiş saat yoxdur. "Təqvimdən Saat Təyin Et" bölməsindən istədiyiniz vaxtı təklif edə bilərsiniz.</span>
-                </div>
-              )}
-            </div>
-          ) : (
-            /* Custom calendar date and hour range */
-            <div className="p-3.5 rounded-2xl bg-amber-50/40 border border-amber-200 space-y-3">
-              <div>
-                <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[14px] text-amber-700">calendar_today</span>
-                  Tarix Seçin
-                </label>
-                <input
-                  type="date"
-                  min={new Date().toISOString().split('T')[0]}
-                  value={customDate}
-                  onChange={e => setCustomDate(e.target.value)}
-                  className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500"
-                />
+                  })
+                }
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                    Başlama Saatı
-                  </label>
-                  <input
-                    type="time"
-                    value={customStartTime}
-                    onChange={e => setCustomStartTime(e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                    Bitmə Saatı
-                  </label>
-                  <input
-                    type="time"
-                    value={customEndTime}
-                    onChange={e => setCustomEndTime(e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  />
-                </div>
-              </div>
-
-              {isSelectedSlotBooked && (
+              {/* Conflict error */}
+              {conflictError && (
                 <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-1.5 animate-fadeIn">
                   <span className="material-symbols-outlined text-[16px] text-rose-600 shrink-0">error</span>
-                  <span>Bu saat aralığı artıq ekspert tərəfindən rezerv olunub (doludur). Zəhmət olmasa digər vaxt seçin.</span>
+                  <span>{conflictError}</span>
+                </div>
+              )}
+
+              {/* Selected interval summary */}
+              {selectedStart && selectedEnd && !conflictError && (
+                <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-[16px] text-emerald-600 shrink-0">event_available</span>
+                  <span>
+                    Seçilmiş vaxt: <strong>{formatDateAz(selectedDate)} · {selectedStart} – {selectedEnd}</strong>
+                  </span>
                 </div>
               )}
             </div>
@@ -360,24 +565,52 @@ export default function BookingModal() {
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Sessiyada müzakirə etmək istədiyiniz mövzu haqqında qısa qeyd..."
               className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
-            ></textarea>
+            />
           </div>
+
+          {/* Submit error */}
+          {submitResult === 'error' && (
+            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
+              <span className="material-symbols-outlined text-[18px] text-rose-600 shrink-0">error</span>
+              <span>{submitMessage}</span>
+            </div>
+          )}
 
           <button
             type="submit"
-            disabled={isSelectedSlotBooked}
+            disabled={!selectedStart || !selectedEnd || !!conflictError || isSubmitting}
             className={`w-full py-2.5 rounded-xl text-xs font-bold tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md ${
-              isSelectedSlotBooked
+              !selectedStart || !selectedEnd || !!conflictError || isSubmitting
                 ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none'
                 : 'bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white shadow-amber-600/25'
             }`}
           >
-            <span className="material-symbols-outlined text-[17px]">
-              {isSelectedSlotBooked ? 'block' : 'check_circle'}
-            </span>
-            <span>
-              {isSelectedSlotBooked ? 'Bu Saat Doludur (Digərini Seçin)' : 'Sessiyanı Təsdiqlə və Rezerv Et'}
-            </span>
+            {isSubmitting ? (
+              <>
+                <span className="material-symbols-outlined text-[17px] animate-spin">autorenew</span>
+                <span>Göndərilir...</span>
+              </>
+            ) : !selectedStart ? (
+              <>
+                <span className="material-symbols-outlined text-[17px]">schedule</span>
+                <span>Başlama Saatı Seçin</span>
+              </>
+            ) : !selectedEnd ? (
+              <>
+                <span className="material-symbols-outlined text-[17px]">timer</span>
+                <span>Bitmə Saatı Seçin</span>
+              </>
+            ) : conflictError ? (
+              <>
+                <span className="material-symbols-outlined text-[17px]">block</span>
+                <span>Bu Vaxt Əlçatmaz</span>
+              </>
+            ) : (
+              <>
+                <span className="material-symbols-outlined text-[17px]">check_circle</span>
+                <span>Sessiyanı Təsdiqlə və Rezerv Et</span>
+              </>
+            )}
           </button>
         </form>
       </div>

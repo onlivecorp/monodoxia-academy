@@ -310,6 +310,14 @@ export function AppProvider({ children }) {
     return saved ? JSON.parse(saved) : [];
   });
 
+  // Manual time blocks by expert (separate from reservations)
+  const [timeBlocks, setTimeBlocks] = useState(() => {
+    try {
+      const saved = localStorage.getItem('monodoxia_time_blocks');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) { return []; }
+  });
+
   const [userTier, setUserTier] = useState(() => {
     const saved = localStorage.getItem('monodoxia_tier');
     if (!saved) return 'Free';
@@ -1269,6 +1277,12 @@ export function AppProvider({ children }) {
   }, [bookings]);
 
   useEffect(() => {
+    try {
+      localStorage.setItem('monodoxia_time_blocks', JSON.stringify(timeBlocks));
+    } catch (e) {}
+  }, [timeBlocks]);
+
+  useEffect(() => {
     localStorage.setItem('monodoxia_tier', userTier);
   }, [userTier]);
 
@@ -1699,8 +1713,8 @@ export function AppProvider({ children }) {
     const startTime = bookingData.startTime || '';
     const endTime = bookingData.endTime || '';
 
-    // Collision check: prevent overlapping booking with already confirmed bookings
-    const hasConflict = bookings.some(b => {
+    // Collision check against confirmed bookings
+    const hasBookingConflict = bookings.some(b => {
       const matchCoach = (b.coachId && b.coachId === coachId) || (b.coachName && coachName && b.coachName.toLowerCase().trim() === coachName.toLowerCase().trim());
       if (!matchCoach || b.status !== 'Təsdiqləndi') return false;
       if (b.slot && slot && b.slot.trim() === slot.trim()) return true;
@@ -1714,8 +1728,17 @@ export function AppProvider({ children }) {
       return false;
     });
 
-    if (hasConflict) {
-      showToast('Bu tarix və saat aralığı artıq başqa bir təsdiqlənmiş rezervasiya tərəfindən tutulub. Zəhmət olmasa başqa vaxt seçin.', 'error');
+    // Collision check against manual time blocks
+    const hasBlockConflict = selectedDate && startTime ? timeBlocks.some(tb => {
+      if (tb.coachId !== coachId) return false;
+      if (tb.date !== selectedDate) return false;
+      const tbEnd = tb.endTime || tb.startTime;
+      const nEnd = endTime || startTime;
+      return startTime < tbEnd && nEnd > tb.startTime;
+    }) : false;
+
+    if (hasBookingConflict || hasBlockConflict) {
+      showToast('Bu tarix və saat aralığı artıq tutulub (rezervasiya və ya blok). Zəhmət olmasa başqa vaxt seçin.', 'error');
       return false;
     }
 
@@ -1743,13 +1766,162 @@ export function AppProvider({ children }) {
     return true;
   };
 
-  const updateBookingStatus = (bookingId, newStatus) => {
+  // Update booking end time (expert sets session duration after accepting)
+  const updateBookingEndTime = (bookingId, newEndTime) => {
+    const booking = bookings.find(b => b.id === bookingId);
+    if (!booking) return;
+
+    // Collision check: ensure new end time doesn't conflict
+    if (booking.selectedDate && booking.startTime && newEndTime) {
+      const collision = bookings.some(b => {
+        if (b.id === bookingId || b.status !== 'Təsdiqləndi') return false;
+        const matchCoach = b.coachId === booking.coachId;
+        if (!matchCoach || b.selectedDate !== booking.selectedDate || !b.startTime) return false;
+        const bEnd = b.endTime || b.startTime;
+        return booking.startTime < bEnd && newEndTime > b.startTime;
+      });
+      if (collision) {
+        showToast('Yeni bitmə saatı başqa bir rezervasiya ilə toqquşur!', 'error');
+        return false;
+      }
+    }
+
+    setBookings(prev => {
+      const next = prev.map(b => {
+        if (b.id === bookingId) {
+          const updated = { ...b, endTime: newEndTime };
+          // Also update the slot label
+          if (b.selectedDate && b.startTime) {
+            const formattedDate = b.selectedDate.split('-').reverse().join('.');
+            updated.slot = `${formattedDate} ${b.startTime} - ${newEndTime}`;
+          }
+          return updated;
+        }
+        return b;
+      });
+      try { localStorage.setItem('monodoxia_bookings', JSON.stringify(next)); } catch (e) {}
+      return next;
+    });
+
+    // Update coach schedule slot end time too
+    setCoachesList(prevCoaches => {
+      const next = prevCoaches.map(c => {
+        if (c.id !== booking.coachId) return c;
+        const updatedSchedule = (Array.isArray(c.scheduleSlots) ? c.scheduleSlots : []).map(s => {
+          if (s.bookingId === bookingId || (s.date === booking.selectedDate && s.startTime === booking.startTime)) {
+            const formattedDate = booking.selectedDate ? booking.selectedDate.split('-').reverse().join('.') : '';
+            const newLabel = `${formattedDate ? formattedDate + ' ' : ''}${booking.startTime} - ${newEndTime}`;
+            return { ...s, endTime: newEndTime, label: newLabel };
+          }
+          return s;
+        });
+        return { ...c, scheduleSlots: updatedSchedule };
+      });
+      try { localStorage.setItem('monodoxia_coaches', JSON.stringify(next)); } catch (e) {}
+      return next;
+    });
+
+    apiCall('update_booking_status', { id: bookingId, end_time: newEndTime });
+    showToast('Seansın bitmə vaxtı yeniləndi!', 'success');
+    return true;
+  };
+
+  // Manual time block operations
+  const addTimeBlock = (blockData) => {
+    const coachId = blockData.coachId;
+    const { date, startTime, endTime } = blockData;
+
+    if (!coachId || !date || !startTime || !endTime) {
+      showToast('Tarix, başlama və bitmə saatı mütləqdir!', 'error');
+      return false;
+    }
+    if (startTime >= endTime) {
+      showToast('Bitmə saatı başlama saatından sonra olmalıdır!', 'error');
+      return false;
+    }
+
+    // Conflict with confirmed bookings
+    const hasBookingConflict = bookings.some(b => {
+      if (b.coachId !== coachId || b.status !== 'Təsdiqləndi') return false;
+      if (b.selectedDate !== date || !b.startTime) return false;
+      const bEnd = b.endTime || b.startTime;
+      return startTime < bEnd && endTime > b.startTime;
+    });
+    if (hasBookingConflict) {
+      showToast('Bu vaxt aralığında artıq təsdiqlənmiş rezervasiya var! Bloklama edilə bilməz.', 'error');
+      return false;
+    }
+
+    // Conflict with existing blocks
+    const hasBlockConflict = timeBlocks.some(tb => {
+      if (tb.coachId !== coachId || tb.date !== date) return false;
+      return startTime < tb.endTime && endTime > tb.startTime;
+    });
+    if (hasBlockConflict) {
+      showToast('Bu vaxt aralığı artıq başqa bir blok ilə üst-üstə düşür!', 'error');
+      return false;
+    }
+
+    const newBlock = {
+      id: 'TB-' + Date.now(),
+      coachId,
+      date,
+      startTime,
+      endTime,
+      reason: blockData.reason || '',
+      createdAt: new Date().toISOString()
+    };
+    setTimeBlocks(prev => [...prev, newBlock]);
+    showToast('Vaxt aralığı uğurla bloklandı!', 'success');
+    return true;
+  };
+
+  const removeTimeBlock = (blockId) => {
+    setTimeBlocks(prev => prev.filter(tb => tb.id !== blockId));
+    showToast('Blok silindi, vaxt yenidən açıldı.', 'info');
+  };
+
+  const updateTimeBlock = (blockId, updates) => {
+    const existing = timeBlocks.find(tb => tb.id === blockId);
+    if (!existing) return;
+
+    const merged = { ...existing, ...updates };
+    if (merged.startTime >= merged.endTime) {
+      showToast('Bitmə saatı başlama saatından sonra olmalıdır!', 'error');
+      return false;
+    }
+
+    // Conflict check (excluding self)
+    const hasConflict = bookings.some(b => {
+      if (b.coachId !== merged.coachId || b.status !== 'Təsdiqləndi') return false;
+      if (b.selectedDate !== merged.date || !b.startTime) return false;
+      const bEnd = b.endTime || b.startTime;
+      return merged.startTime < bEnd && merged.endTime > b.startTime;
+    }) || timeBlocks.some(tb => {
+      if (tb.id === blockId || tb.coachId !== merged.coachId || tb.date !== merged.date) return false;
+      return merged.startTime < tb.endTime && merged.endTime > tb.startTime;
+    });
+
+    if (hasConflict) {
+      showToast('Yenilənmiş vaxt aralığı mövcud rezervasiya və ya blokla toqquşur!', 'error');
+      return false;
+    }
+
+    setTimeBlocks(prev => prev.map(tb => tb.id === blockId ? { ...tb, ...updates } : tb));
+    showToast('Blok yeniləndi!', 'success');
+    return true;
+  };
+
+  const updateBookingStatus = (bookingId, newStatus, extraData = {}) => {
     let targetBooking = null;
 
     // Check collision if approving
     if (newStatus === 'Təsdiqləndi') {
       const existingToConfirm = bookings.find(b => b.id === bookingId);
       if (existingToConfirm) {
+        // Use provided endTime (if expert set one) or existing
+        const approvedEndTime = extraData.endTime || existingToConfirm.endTime || existingToConfirm.startTime;
+
         const isCollision = bookings.some(b => {
           if (b.id === bookingId || b.status !== 'Təsdiqləndi') return false;
           const matchCoach = (b.coachId && b.coachId === existingToConfirm.coachId) ||
@@ -1760,15 +1932,39 @@ export function AppProvider({ children }) {
             const bStart = b.startTime;
             const bEnd = b.endTime || b.startTime;
             const nStart = existingToConfirm.startTime;
-            const nEnd = existingToConfirm.endTime || existingToConfirm.startTime;
+            const nEnd = approvedEndTime;
             return nStart < bEnd && nEnd > bStart;
           }
           return false;
         });
 
-        if (isCollision) {
-          showToast('Xəta: Bu saat aralığında artıq başqa bir təsdiqlənmiş rezervasiya mövcuddur! Toqquşmanın qarşısı alındı.', 'error');
+        // Also check against manual time blocks
+        const blockConflict = existingToConfirm.selectedDate && existingToConfirm.startTime ? timeBlocks.some(tb => {
+          if (tb.coachId !== existingToConfirm.coachId || tb.date !== existingToConfirm.selectedDate) return false;
+          const nEnd = approvedEndTime;
+          return existingToConfirm.startTime < tb.endTime && nEnd > tb.startTime;
+        }) : false;
+
+        if (isCollision || blockConflict) {
+          showToast('Xəta: Bu saat aralığında artıq başqa bir rezervasiya və ya blok mövcuddur! Toqquşmanın qarşısı alındı.', 'error');
           return;
+        }
+
+        // If expert provided end time during approval, update booking
+        if (extraData.endTime && extraData.endTime !== existingToConfirm.endTime) {
+          setBookings(prev => prev.map(b => {
+            if (b.id === bookingId) {
+              const formattedDate = b.selectedDate ? b.selectedDate.split('-').reverse().join('.') : '';
+              return {
+                ...b,
+                endTime: extraData.endTime,
+                slot: b.selectedDate && b.startTime
+                  ? `${formattedDate} ${b.startTime} - ${extraData.endTime}`
+                  : b.slot
+              };
+            }
+            return b;
+          }));
         }
       }
     }
@@ -4184,7 +4380,8 @@ export function AppProvider({ children }) {
       activeCertificate,
       bookingModalOpen, setBookingModalOpen,
       bookingPreselectedSlot, setBookingPreselectedSlot,
-      activeCoach, openBooking, openBookingModal: openBooking, confirmBooking, updateBookingStatus,
+      activeCoach, openBooking, openBookingModal: openBooking, confirmBooking, updateBookingStatus, updateBookingEndTime,
+      timeBlocks, addTimeBlock, removeTimeBlock, updateTimeBlock,
       newTopicModalOpen, setNewTopicModalOpen,
       topicDetailModalOpen, setTopicDetailModalOpen,
       selectedTopic, setSelectedTopic,

@@ -20,12 +20,27 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
     setCertViewModalOpen,
     showToast,
     bookings = [],
-    updateBookingStatus
+    updateBookingStatus,
+    updateBookingEndTime,
+    timeBlocks = [],
+    addTimeBlock,
+    removeTimeBlock,
+    updateTimeBlock
   } = useApp();
 
   const [bookingFilter, setBookingFilter] = useState('all'); // 'all' | 'Gözləyir' | 'Təsdiqləndi' | 'Ləğv edildi'
 
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'certificates' | 'reviews'
+  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'certificates' | 'reviews' | 'calendar'
+
+  // Approval end time state: { [bookingId]: string }
+  const [approvalEndTimes, setApprovalEndTimes] = useState({});
+
+  // Manual block form state
+  const [blockDate, setBlockDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [blockStart, setBlockStart] = useState('09:00');
+  const [blockEnd, setBlockEnd] = useState('10:00');
+  const [blockReason, setBlockReason] = useState('');
+  const [editingBlockId, setEditingBlockId] = useState(null);
 
   // Expert profile edit state (for self or admin)
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -123,6 +138,9 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
     if (bookingFilter === 'all') return true;
     return b.status === bookingFilter;
   });
+
+  // Coach's manual time blocks
+  const coachTimeBlocks = liveCoach ? timeBlocks.filter(tb => tb.coachId === liveCoach.id) : [];
 
   // Keep modalSchedule in sync with liveCoach schedule (hook unconditionally called)
   useEffect(() => {
@@ -1259,15 +1277,47 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
 
                         <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
                           {b.status !== 'Təsdiqləndi' && (
-                            <button
-                              type="button"
-                              onClick={() => updateBookingStatus(b.id, 'Təsdiqləndi')}
-                              className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer transition-colors"
-                              title="Rezervasiyanı qəbul et və təqvimdə avtomatik məşğul (dolu) et"
-                            >
-                              <span className="material-symbols-outlined text-[16px]">check_circle</span>
-                              <span>Qəbul Et & Rezervlə</span>
-                            </button>
+                            <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
+                              {/* End time input for approval */}
+                              <div className="flex items-center gap-1.5">
+                                <label className="text-[10px] font-bold text-slate-600 whitespace-nowrap">Bitmə vaxtı:</label>
+                                <input
+                                  type="time"
+                                  value={approvalEndTimes[b.id] || b.endTime || (b.startTime ? (() => { const [h,m] = (b.startTime||'00:00').split(':').map(Number); return `${String(h+1).padStart(2,'0')}:${String(m).padStart(2,'0')}`; })() : '15:00')}
+                                  onChange={e => setApprovalEndTimes(prev => ({ ...prev, [b.id]: e.target.value }))}
+                                  className="px-2 py-1 rounded-lg border border-slate-300 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-amber-500"
+                                  title="Seans bitmə vaxtını təyin edin"
+                                />
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => updateBookingStatus(b.id, 'Təsdiqləndi', { endTime: approvalEndTimes[b.id] || b.endTime || '' })}
+                                className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer transition-colors"
+                                title="Rezervasiyanı qəbul et və bitmə vaxtını təyin et"
+                              >
+                                <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                                <span>Qəbul Et & Rezervlə</span>
+                              </button>
+                            </div>
+                          )}
+                          {b.status === 'Təsdiqləndi' && (
+                            <div className="flex items-center gap-1.5">
+                              <label className="text-[10px] font-bold text-slate-600 whitespace-nowrap">Bitmə vaxtını dəyiş:</label>
+                              <input
+                                type="time"
+                                defaultValue={b.endTime || ''}
+                                onChange={e => setApprovalEndTimes(prev => ({ ...prev, [b.id]: e.target.value }))}
+                                className="px-2 py-1 rounded-lg border border-amber-300 text-xs bg-amber-50 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => { const t = approvalEndTimes[b.id]; if (t) updateBookingEndTime(b.id, t); }}
+                                className="px-2.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors"
+                              >
+                                <span className="material-symbols-outlined text-[14px]">update</span>
+                                <span>Yenilə</span>
+                              </button>
+                            </div>
                           )}
                           {b.status !== 'Ləğv edildi' && (
                             <button
@@ -1424,6 +1474,162 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                               onClick={() => handleRemoveModalSlot(s.id)}
                               className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-white transition-colors cursor-pointer"
                               title="Sil"
+                            >
+                              <span className="material-symbols-outlined text-[16px]">delete</span>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* 3. SECTION: MANUAL VAXT BLOKLAMA */}
+              <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-4">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-100 flex-wrap gap-2">
+                  <div>
+                    <h4 className="text-sm font-bold text-[#071326] flex items-center gap-1.5 font-mono uppercase tracking-wider">
+                      <span className="material-symbols-outlined text-[18px] text-purple-600">block</span>
+                      Vaxtı Blokla (Şəxsi / Manual)
+                    </h4>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      Şəxsi iş, görüş və ya istənilən səbəblə vaxt aralığını bağlayın. Bloklanmış vaxtlar müştərilərə əlçatmaz görünür.
+                    </p>
+                  </div>
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                    {coachTimeBlocks.length} blok aktiv
+                  </span>
+                </div>
+
+                {/* Block Form */}
+                <div className="p-4 rounded-2xl bg-purple-50/40 border border-purple-200/80 space-y-3">
+                  <span className="text-[11px] font-bold text-purple-800 uppercase tracking-wider block flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[15px]">add_circle</span>
+                    {editingBlockId ? 'Bloku Redaktə Et' : 'Yeni Blok Əlavə Et'}
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Tarix</label>
+                      <input
+                        type="date"
+                        min={new Date().toISOString().split('T')[0]}
+                        value={blockDate}
+                        onChange={e => setBlockDate(e.target.value)}
+                        className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-purple-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Başlama Saatı</label>
+                      <input
+                        type="time"
+                        value={blockStart}
+                        onChange={e => setBlockStart(e.target.value)}
+                        className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-purple-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Bitmə Saatı</label>
+                      <input
+                        type="time"
+                        value={blockEnd}
+                        onChange={e => setBlockEnd(e.target.value)}
+                        className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-purple-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Bloklama Səbəbi (istəyə bağlı)</label>
+                      <input
+                        type="text"
+                        value={blockReason}
+                        onChange={e => setBlockReason(e.target.value)}
+                        placeholder="Məs: Şəxsi iş, Görüş..."
+                        className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-purple-500"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!liveCoach) return;
+                        if (editingBlockId) {
+                          updateTimeBlock(editingBlockId, { date: blockDate, startTime: blockStart, endTime: blockEnd, reason: blockReason });
+                          setEditingBlockId(null);
+                        } else {
+                          addTimeBlock({ coachId: liveCoach.id, date: blockDate, startTime: blockStart, endTime: blockEnd, reason: blockReason });
+                        }
+                        setBlockReason('');
+                      }}
+                      className="px-4 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors shadow-xs"
+                    >
+                      <span className="material-symbols-outlined text-[15px]">{editingBlockId ? 'save' : 'block'}</span>
+                      <span>{editingBlockId ? 'Bloku Yadda Saxla' : 'Vaxtı Blokla'}</span>
+                    </button>
+                    {editingBlockId && (
+                      <button
+                        type="button"
+                        onClick={() => { setEditingBlockId(null); setBlockReason(''); }}
+                        className="px-3 py-1.5 rounded-lg bg-white border border-slate-300 text-slate-600 text-xs cursor-pointer"
+                      >
+                        Ləğv Et
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Existing Blocks List */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+                    <span>Aktiv Bloklar ({coachTimeBlocks.length})</span>
+                    <span className="text-[10px] font-normal text-slate-400">🟣 = Manual Blok · 🔴 = Rezervasiya</span>
+                  </div>
+
+                  {coachTimeBlocks.length === 0 ? (
+                    <div className="p-4 rounded-xl bg-purple-50/50 border border-dashed border-purple-200 text-center">
+                      <span className="material-symbols-outlined text-2xl text-purple-300 block mb-1">block</span>
+                      <p className="text-xs text-slate-400">Heç bir manual blok yoxdur. Yuxarıdakı forma ilə əlavə edin.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
+                      {coachTimeBlocks.map(tb => (
+                        <div
+                          key={tb.id}
+                          className="p-2.5 rounded-xl border border-purple-200 bg-purple-50/60 flex items-center justify-between gap-2"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-purple-700 font-bold text-xs">
+                                🟣 {tb.date.split('-').reverse().join('.')} · {tb.startTime}–{tb.endTime}
+                              </span>
+                              <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-purple-200 text-purple-900 border border-purple-300 uppercase tracking-wider">
+                                Manual Blok
+                              </span>
+                            </div>
+                            {tb.reason && (
+                              <p className="text-[11px] text-slate-500 mt-0.5 truncate">{tb.reason}</p>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingBlockId(tb.id);
+                                setBlockDate(tb.date);
+                                setBlockStart(tb.startTime);
+                                setBlockEnd(tb.endTime);
+                                setBlockReason(tb.reason || '');
+                              }}
+                              className="p-1 rounded-lg text-slate-400 hover:text-purple-600 hover:bg-white transition-colors cursor-pointer"
+                              title="Redaktə et"
+                            >
+                              <span className="material-symbols-outlined text-[16px]">edit</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => removeTimeBlock(tb.id)}
+                              className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-white transition-colors cursor-pointer"
+                              title="Bloku sil"
                             >
                               <span className="material-symbols-outlined text-[16px]">delete</span>
                             </button>
