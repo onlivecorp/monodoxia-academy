@@ -1,4 +1,5 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useApp } from '../context/AppContext';
 import FlagIcon from './common/FlagIcon';
@@ -37,6 +38,22 @@ export default function Header() {
     return () => {
       document.body.style.overflow = '';
     };
+  }, [mobileMenuOpen]);
+
+  // Close mobile menu on page change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [currentPage]);
+
+  // Close mobile menu on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setMobileMenuOpen(false);
+    };
+    if (mobileMenuOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [mobileMenuOpen]);
 
   const DEFAULT_FALLBACK_LINKS = [
@@ -157,7 +174,7 @@ export default function Header() {
           <img
             src={logoUrl}
             alt="Monodoxia Academy"
-            className="h-8 sm:h-10 md:h-12 w-auto max-w-[135px] sm:max-w-[200px] md:max-w-none object-contain transition-transform duration-300 group-hover:scale-105"
+            className="h-8 sm:h-10 md:h-12 w-auto max-w-[125px] sm:max-w-[200px] md:max-w-none object-contain transition-transform duration-300 group-hover:scale-105"
             onError={(e) => {
               if (e.currentTarget.src !== window.location.origin + '/header_logo.svg') {
                 e.currentTarget.src = '/header_logo.svg';
@@ -321,7 +338,7 @@ export default function Header() {
               </button>
               <button
                 onClick={() => { setAuthModalTab('register'); setAuthModalOpen(true); }}
-                className="bg-primary-container text-on-primary hover:bg-[#112240] px-3 sm:px-5 py-1.5 sm:py-2.5 rounded text-xs sm:text-sm font-medium tracking-wide transition-all shadow-sm flex items-center gap-1 border border-secondary/30 whitespace-nowrap"
+                className="hidden sm:flex bg-primary-container text-on-primary hover:bg-[#112240] px-3 sm:px-5 py-1.5 sm:py-2.5 rounded text-xs sm:text-sm font-medium tracking-wide transition-all shadow-sm items-center gap-1 border border-secondary/30 whitespace-nowrap"
               >
                 <span>{t('nav_join')}</span>
                 <span className="material-symbols-outlined text-[14px] sm:text-[16px]">arrow_forward</span>
@@ -331,8 +348,12 @@ export default function Header() {
 
           {/* MOBILE BURGER MENU BUTTON - FULLY VISIBLE & PROMINENT */}
           <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden w-9 h-9 rounded-lg bg-surface-container-low hover:bg-secondary/15 text-primary border border-outline-variant/80 hover:border-secondary flex items-center justify-center shrink-0 transition-all shadow-xs cursor-pointer ml-1"
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setMobileMenuOpen(prev => !prev);
+            }}
+            className="lg:hidden w-9 h-9 rounded-lg bg-surface-container-low hover:bg-secondary/15 text-primary border border-outline-variant/80 hover:border-secondary flex items-center justify-center shrink-0 transition-all shadow-xs cursor-pointer ml-1 select-none"
             aria-label="Menyu"
             title="Naviqasiya menyusu"
           >
@@ -344,16 +365,19 @@ export default function Header() {
       </div>
 
       {/* LUXURY MOBILE DRAWER OVERLAY */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 flex flex-col justify-start">
+      {mobileMenuOpen && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[9999] flex flex-col justify-start lg:hidden">
           {/* Backdrop */}
           <div 
-            className="fixed inset-0 bg-[#070f1e]/50 backdrop-blur-sm transition-opacity"
+            className="fixed inset-0 bg-[#070f1e]/60 backdrop-blur-sm transition-opacity"
             onClick={() => setMobileMenuOpen(false)}
           />
 
           {/* Drawer Content */}
-          <div className="relative bg-[#fcfbf9] border-b border-[#c5a059]/30 shadow-2xl w-full max-h-[92vh] overflow-y-auto px-5 py-5 space-y-5 animate-fadeIn">
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="relative z-10 bg-[#fcfbf9] border-b border-[#c5a059]/30 shadow-2xl w-full max-h-[92vh] overflow-y-auto px-5 py-5 space-y-5 animate-fadeIn"
+          >
             {/* Top Close Header */}
             <div className="flex items-center justify-between pb-3 border-b border-[#e2d9c8]/70">
               <div className="flex items-center gap-2">
@@ -558,7 +582,8 @@ export default function Header() {
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </header>
   );
