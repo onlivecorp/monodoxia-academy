@@ -93,7 +93,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
 
   if (!coachDisplayImage) {
     const rawImg = liveCoach?.image || liveCoach?.avatar || matchedUser?.avatar || matchedUser?.image || '';
-    if (rawImg && !rawImg.includes('googleusercontent.com') && !rawImg.startsWith('/uploads/')) {
+    if (rawImg && !rawImg.includes('googleusercontent.com') && (!rawImg.startsWith('/uploads/') || rawImg.includes('api.php?action=get_image'))) {
       coachDisplayImage = rawImg;
     }
   }

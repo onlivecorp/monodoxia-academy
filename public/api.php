@@ -253,7 +253,25 @@ function requireAdminUser($pdo) {
     exit();
 }
 
-function saveBase64Image($base64Data, $prefix = 'event') {
+function ensureMediaTable($pdo) {
+    static $created = false;
+    if ($created) return;
+    try {
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS `mdx_media` (
+                `id` varchar(64) NOT NULL,
+                `mime_type` varchar(50) NOT NULL DEFAULT 'image/jpeg',
+                `file_size` int(11) NOT NULL DEFAULT 0,
+                `image_data` longblob NOT NULL,
+                `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+                PRIMARY KEY (`id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ");
+        $created = true;
+    } catch (Exception $e) {}
+}
+
+function saveBase64Image($base64Data, $prefix = 'event', $pdo = null) {
     if (empty($base64Data) || strpos($base64Data, 'data:image/') !== 0) {
         return $base64Data;
     }
@@ -272,6 +290,22 @@ function saveBase64Image($base64Data, $prefix = 'event') {
     if (!$decoded || strlen($decoded) < 50) {
         return '';
     }
+
+    // 1. Permanent Storage in MySQL database (never wiped by Git deploys)
+    if ($pdo) {
+        try {
+            ensureMediaTable($pdo);
+            $mime = ($ext === 'png') ? 'image/png' : (($ext === 'webp') ? 'image/webp' : (($ext === 'gif') ? 'image/gif' : 'image/jpeg'));
+            $mediaId = $prefix . '_' . time() . '_' . substr(md5(uniqid()), 0, 8);
+            $stmt = $pdo->prepare("INSERT INTO mdx_media (id, mime_type, file_size, image_data) VALUES (?, ?, ?, ?)");
+            $stmt->execute([$mediaId, $mime, strlen($decoded), $decoded]);
+            return '/api.php?action=get_image&id=' . urlencode($mediaId);
+        } catch (Exception $e) {
+            error_log("Failed to store image in mdx_media: " . $e->getMessage());
+        }
+    }
+
+    // 2. Fallback: Local filesystem storage
     $uploadDir = __DIR__ . '/uploads/events';
     if (!file_exists($uploadDir)) {
         @mkdir($uploadDir, 0755, true);
@@ -374,6 +408,10 @@ if ($action === 'get_all') {
         $isBroken = empty($curImg) || strpos($curImg, 'googleusercontent.com') !== false || strlen($curImg) === 255;
         if (!$isBroken && strpos($curImg, '/uploads/') === 0 && !file_exists(__DIR__ . $curImg)) {
             $isBroken = true;
+        }
+        // Valid dynamic image handler from MySQL mdx_media is never broken
+        if (strpos($curImg, '/api.php?action=get_image') === 0 || strpos($curImg, 'api.php?action=get_image') === 0) {
+            $isBroken = false;
         }
         if ($isBroken) {
             $avatarToSet = $defaultCoachAvatar;
@@ -2496,13 +2534,33 @@ if ($action === 'delete_course' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // --------------------------------------------------------
-// 7.5.5. ŞƏKİL VƏ MEDİA YÜKLƏMƏ APİ (IMAGE UPLOAD)
+// 7.5.5. ŞƏKİL VƏ MEDİA YÜKLƏMƏ APİ (IMAGE UPLOAD & SERVE)
 // --------------------------------------------------------
-if ($action === 'upload_image' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $uploadDir = __DIR__ . '/uploads/events';
-    if (!file_exists($uploadDir)) {
-        @mkdir($uploadDir, 0755, true);
+if ($action === 'get_image') {
+    $id = trim($_GET['id'] ?? '');
+    if (!$id) {
+        http_response_code(400);
+        exit('ID tapılmadı');
     }
+    ensureMediaTable($pdo);
+    $stmt = $pdo->prepare("SELECT mime_type, image_data FROM mdx_media WHERE id = ? LIMIT 1");
+    $stmt->execute([$id]);
+    $row = $stmt->fetch();
+    if ($row && !empty($row['image_data'])) {
+        header('Content-Type: ' . ($row['mime_type'] ?: 'image/jpeg'));
+        header('Cache-Control: public, max-age=31536000, immutable');
+        header('Content-Length: ' . strlen($row['image_data']));
+        echo $row['image_data'];
+        exit();
+    }
+    http_response_code(404);
+    exit('Şəkil tapılmadı');
+}
+
+if ($action === 'upload_image' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    ensureMediaTable($pdo);
+    $prefix = preg_replace('/[^a-zA-Z0-9_-]/', '', $_GET['prefix'] ?? ($_POST['prefix'] ?? 'img'));
+    if (!$prefix) $prefix = 'img';
 
     if (!empty($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
         $file = $_FILES['image'];
@@ -2512,19 +2570,30 @@ if ($action === 'upload_image' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             echo json_encode(['status' => 'error', 'message' => 'Yalnız şəkil faylları qəbul edilir (.jpg, .png, .webp)'], JSON_UNESCAPED_UNICODE);
             exit();
         }
-        $fileName = 'event_' . time() . '_' . substr(md5(uniqid()), 0, 8) . '.' . $ext;
-        $dest = $uploadDir . '/' . $fileName;
-        if (move_uploaded_file($file['tmp_name'], $dest)) {
-            echo json_encode(['status' => 'success', 'url' => '/uploads/events/' . $fileName], JSON_UNESCAPED_UNICODE);
-            exit();
+        $mime = ($ext === 'png') ? 'image/png' : (($ext === 'webp') ? 'image/webp' : (($ext === 'gif') ? 'image/gif' : (($ext === 'svg') ? 'image/svg+xml' : 'image/jpeg')));
+        $content = file_get_contents($file['tmp_name']);
+        if ($content && strlen($content) > 0) {
+            $mediaId = $prefix . '_' . time() . '_' . substr(md5(uniqid()), 0, 8);
+            try {
+                $stmt = $pdo->prepare("INSERT INTO mdx_media (id, mime_type, file_size, image_data) VALUES (?, ?, ?, ?)");
+                $stmt->execute([$mediaId, $mime, strlen($content), $content]);
+                echo json_encode([
+                    'status' => 'success',
+                    'url' => '/api.php?action=get_image&id=' . urlencode($mediaId),
+                    'id' => $mediaId
+                ], JSON_UNESCAPED_UNICODE);
+                exit();
+            } catch (Exception $e) {
+                error_log("Upload save error: " . $e->getMessage());
+            }
         }
     }
 
     $raw = file_get_contents('php://input');
     $data = json_decode($raw, true);
     if (!empty($data['image'])) {
-        $savedUrl = saveBase64Image($data['image'], 'event');
-        if ($savedUrl && strpos($savedUrl, '/uploads/') === 0) {
+        $savedUrl = saveBase64Image($data['image'], $prefix, $pdo);
+        if ($savedUrl) {
             echo json_encode(['status' => 'success', 'url' => $savedUrl], JSON_UNESCAPED_UNICODE);
             exit();
         }
@@ -2555,9 +2624,9 @@ if ($action === 'save_event' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $is_online = isset($input['isOnline']) ? ($input['isOnline'] ? 1 : 0) : (isset($input['is_online']) ? ($input['is_online'] ? 1 : 0) : 1);
     $image = trim($input['image'] ?? '');
 
-    // If image is a base64 string, auto-save to real file on disk!
+    // If image is a base64 string, auto-save permanently in MySQL mdx_media!
     if (!empty($image) && strpos($image, 'data:image/') === 0) {
-        $savedPath = saveBase64Image($image, 'event_' . preg_replace('/[^a-zA-Z0-9_-]/', '', $id));
+        $savedPath = saveBase64Image($image, 'event_' . preg_replace('/[^a-zA-Z0-9_-]/', '', $id), $pdo);
         if (!empty($savedPath)) {
             $image = $savedPath;
         }
@@ -2738,8 +2807,13 @@ if ($action === 'save_coach' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $hourly_rate = trim($input['hourlyRate'] ?? ($input['hourly_rate'] ?? '100 ₼ / saat'));
     $session_duration = trim($input['sessionDuration'] ?? ($input['session_duration'] ?? '60 dəqiqə'));
     $avatar_url = trim($input['image'] ?? ($input['avatarUrl'] ?? ($input['avatar_url'] ?? '')));
-    // For coach avatars: keep base64 directly in database (avatar_url is LONGTEXT)
-    // This ensures permanent persistence across Hostinger git deploys without broken 404 image paths.
+    // Automatically save base64 coach avatars permanently into MySQL mdx_media!
+    if (!empty($avatar_url) && strpos($avatar_url, 'data:image/') === 0) {
+        $savedMediaUrl = saveBase64Image($avatar_url, 'coach_' . preg_replace('/[^a-zA-Z0-9_-]/', '', $id), $pdo);
+        if (!empty($savedMediaUrl)) {
+            $avatar_url = $savedMediaUrl;
+        }
+    }
     $is_active = isset($input['isActive']) ? ($input['isActive'] ? 1 : 0) : (isset($input['is_active']) ? ($input['is_active'] ? 1 : 0) : 1);
 
     $specialties = $input['specialties'] ?? [];
