@@ -149,27 +149,36 @@ export default function CoachingPage() {
                       <div className="relative shrink-0">
                         {(() => {
                           let coachImg = c.image || c.avatar;
+                          if (coachImg && coachImg.includes('googleusercontent.com')) coachImg = '';
                           if (!coachImg) {
                             const matchedUser = (usersList || []).find(u => 
                               (c.userId && String(u.id) === String(c.userId)) || 
                               (c.name && u.name && u.name.toLowerCase().trim() === c.name.toLowerCase().trim())
                             ) || (currentUser && ((c.userId && String(currentUser.id) === String(c.userId)) || (c.name && currentUser.name && c.name.toLowerCase().trim() === currentUser.name.toLowerCase().trim())) ? currentUser : null);
                             coachImg = matchedUser?.avatar || matchedUser?.image || '';
+                            if (coachImg && coachImg.includes('googleusercontent.com')) coachImg = '';
                           }
                           if (!coachImg) {
                             try {
                               const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
-                              if (imgStore[c.id]) coachImg = imgStore[c.id];
+                              if (imgStore[c.id] && !imgStore[c.id].includes('googleusercontent.com')) coachImg = imgStore[c.id];
                             } catch (e) {}
                           }
                           if (!coachImg) {
                             const seed = COACHES.find(sc => sc.id === c.id || (sc.name && c.name && sc.name.toLowerCase().trim() === c.name.toLowerCase().trim()));
                             if (seed?.image) coachImg = seed.image;
                           }
+                          if (!coachImg) {
+                            coachImg = c.id === 'coach-farid' ? '/images/coaches/coach-farid.jpg' : (c.id === 'coach-nargiz' ? '/images/coaches/coach-nargiz.jpg' : '/images/coaches/coach-sedaqet.jpg');
+                          }
                           return coachImg ? (
                             <img
                               src={coachImg}
                               alt={c.name}
+                              onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = '/images/coaches/coach-sedaqet.jpg';
+                              }}
                               className="w-16 h-16 rounded-2xl object-cover border-2 border-[#c5a059]/40 shadow-sm group-hover:scale-105 transition-transform duration-300"
                             />
                           ) : (

@@ -232,15 +232,19 @@ export default function BookingModal() {
 
   // Coach image
   let coachImg = activeCoach.image || activeCoach.avatar;
+  if (coachImg && coachImg.includes('googleusercontent.com')) coachImg = '';
   if (!coachImg) {
     try {
       const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
-      if (imgStore[activeCoach.id]) coachImg = imgStore[activeCoach.id];
+      if (imgStore[activeCoach.id] && !imgStore[activeCoach.id].includes('googleusercontent.com')) coachImg = imgStore[activeCoach.id];
     } catch (e) {}
   }
   if (!coachImg) {
     const seed = COACHES.find(sc => sc.id === activeCoach.id || (sc.name && activeCoach.name && sc.name.toLowerCase().trim() === activeCoach.name.toLowerCase().trim()));
     if (seed?.image) coachImg = seed.image;
+  }
+  if (!coachImg) {
+    coachImg = activeCoach.id === 'coach-farid' ? '/images/coaches/coach-farid.jpg' : (activeCoach.id === 'coach-nargiz' ? '/images/coaches/coach-nargiz.jpg' : '/images/coaches/coach-sedaqet.jpg');
   }
 
   const handleSubmit = async (e) => {
@@ -362,7 +366,15 @@ export default function BookingModal() {
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-11 h-11 rounded-xl overflow-hidden border border-amber-500/30 shrink-0 bg-amber-50 flex items-center justify-center shadow-xs">
               {coachImg ? (
-                <img src={coachImg} alt={activeCoach.name} className="w-full h-full object-cover" />
+                <img
+                  src={coachImg}
+                  alt={activeCoach.name}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = '/images/coaches/coach-sedaqet.jpg';
+                  }}
+                  className="w-full h-full object-cover"
+                />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-[#071326] to-[#0c2242] text-[#e5c57d] font-serif font-bold text-lg flex items-center justify-center">
                   {activeCoach.name?.[0] || 'K'}

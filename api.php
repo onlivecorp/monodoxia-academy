@@ -310,13 +310,27 @@ if ($action === 'get_all') {
     $categories = $safeQuery("SELECT * FROM mdx_categories ORDER BY created_at ASC");
     $roles = $safeQuery("SELECT * FROM mdx_roles ORDER BY is_system DESC, name ASC");
     $coaches = $safeQuery("SELECT * FROM mdx_coaches WHERE is_active = 1 ORDER BY created_at ASC");
-    $defaultCoachAvatar = "https://lh3.googleusercontent.com/aida-public/AB6AXuCn9ZjfxW-PL-o_xZ9Me83EiOB9x_aaIbuIEYtOce00950-vB-hL99E3BUxNBeJriyWWNWGGDlnTJRCJGRwkjlEPSCAIQYPacFkDcUc0Gx7SG3u_LdP-yJ9ZvAxESWMhqm8PQ0_Jjk2lpNGCZW3k-pFcnjQ873cYwWNg72N95sYxMH-w5fpXfjJZfJo1LZC2K5AStfFo8Xfl-GQ968CVb_yfDTaqIDcMiTxISBiZMVtj4d_vRd_K_L3";
+    $defaultCoachAvatar = "/images/coaches/coach-sedaqet.jpg";
     foreach ($coaches as &$cItem) {
-        if (empty($cItem['avatar_url'])) {
-            $cItem['avatar_url'] = $defaultCoachAvatar;
+        $curImg = trim($cItem['avatar_url'] ?? '');
+        $isBroken = empty($curImg) || strpos($curImg, 'googleusercontent.com') !== false || strlen($curImg) === 255;
+        if ($isBroken) {
+            $avatarToSet = $defaultCoachAvatar;
+            $cid = $cItem['id'] ?? '';
+            $cname = $cItem['name'] ?? '';
+            if ($cid === 'coach-farid' || stripos($cname, 'Fərid') !== false || stripos($cname, 'Farid') !== false) {
+                $avatarToSet = "/images/coaches/coach-farid.jpg";
+            } else if ($cid === 'coach-nargiz' || stripos($cname, 'Nərgiz') !== false || stripos($cname, 'Nargiz') !== false) {
+                $avatarToSet = "/images/coaches/coach-nargiz.jpg";
+            } else if ($cid === 'coach-leyla' || stripos($cname, 'Leyla') !== false) {
+                $avatarToSet = "/images/coaches/coach-leyla.jpg";
+            } else {
+                $avatarToSet = "/images/coaches/coach-sedaqet.jpg";
+            }
+            $cItem['avatar_url'] = $avatarToSet;
             try {
-                $uStmt = $pdo->prepare("UPDATE mdx_coaches SET avatar_url = ? WHERE id = ? AND (avatar_url IS NULL OR avatar_url = '')");
-                $uStmt->execute([$defaultCoachAvatar, $cItem['id']]);
+                $uStmt = $pdo->prepare("UPDATE mdx_coaches SET avatar_url = ? WHERE id = ?");
+                $uStmt->execute([$avatarToSet, $cItem['id']]);
             } catch (PDOException $e) {}
         }
     }

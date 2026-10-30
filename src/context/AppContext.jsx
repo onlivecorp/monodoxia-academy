@@ -43,7 +43,7 @@ const INITIAL_USERS = [
     tier: 'VIP', 
     status: 'Aktiv', 
     joinedDate: '2025-01-10',
-    avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuApho0mk-jt09_EKWhr9Kr-rV4ni1mNVZ9NMTTJnSr7Io_rS9AF4YMxdvwdvNBSQ5niLnit1PKeNozwDdDlqiBGbJTz1MOiuOo8yyY1b3AbDK33_Lc-ZOXlb5WzmwRuSsfZWSPYV7fmbNuRtSts2hYeTZFmwlHsu99rLvjRaczoStwMfhP4xbjxoLfdcfKKedG3I9Wsc86Mw84ULdwPbgpzWaz6dnC5ZnLFz2n5VuHMa6K1rX1itB96' 
+    avatar: '/images/coaches/coach-nargiz.jpg'
   }
 ];
 
@@ -473,13 +473,17 @@ export function AppProvider({ children }) {
             let coachImage = c.image || c.avatar || seed?.image || '';
             try {
               const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
-              if (imgStore[c.id]) coachImage = imgStore[c.id];
+              if (imgStore[c.id] && !imgStore[c.id].includes('googleusercontent.com')) coachImage = imgStore[c.id];
             } catch (e) {}
+            if (!coachImage || coachImage.includes('googleusercontent.com')) {
+              coachImage = seed?.image || '/images/coaches/coach-sedaqet.jpg';
+            }
             return {
               ...c,
               availableSlots: cleanAvail,
               scheduleSlots: cleanSched,
               image: coachImage,
+              avatar: coachImage,
               userId: (c.id === 'coach-nargiz' && !c.userId) ? 'u-nargiz' : (c.userId || seed?.userId),
               customCertificates: mergedCustomCerts
             };
@@ -493,9 +497,12 @@ export function AppProvider({ children }) {
       let coachImage = c.image || c.avatar || '';
       try {
         const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
-        if (imgStore[c.id]) coachImage = imgStore[c.id];
+        if (imgStore[c.id] && !imgStore[c.id].includes('googleusercontent.com')) coachImage = imgStore[c.id];
       } catch (e) {}
-      return { ...c, image: coachImage };
+      if (!coachImage || coachImage.includes('googleusercontent.com')) {
+        coachImage = c.image || '/images/coaches/coach-sedaqet.jpg';
+      }
+      return { ...c, image: coachImage, avatar: coachImage };
     });
   });
 
@@ -1035,14 +1042,14 @@ export function AppProvider({ children }) {
             setCoachesList(data.coaches.map(c => {
               const seed = COACHES.find(sc => sc.id === c.id || (sc.name && c.name && sc.name.toLowerCase().trim() === c.name.toLowerCase().trim()));
               let img = c.avatar_url || '';
-              if (!img) {
+              if (!img || img.includes('googleusercontent.com')) {
                 try {
                   const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
-                  if (imgStore[c.id]) img = imgStore[c.id];
+                  if (imgStore[c.id] && !imgStore[c.id].includes('googleusercontent.com')) img = imgStore[c.id];
                 } catch (e) {}
               }
-              if (!img && seed?.image) {
-                img = seed.image;
+              if (!img || img.includes('googleusercontent.com')) {
+                img = seed?.image || (c.id === 'coach-farid' ? '/images/coaches/coach-farid.jpg' : (c.id === 'coach-nargiz' ? '/images/coaches/coach-nargiz.jpg' : '/images/coaches/coach-sedaqet.jpg'));
               }
               return {
                 id: c.id,

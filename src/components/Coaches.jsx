@@ -77,28 +77,37 @@ export default function Coaches() {
                     <div className="relative aspect-[4/4] bg-[#f5f3ef] overflow-hidden flex items-center justify-center">
                       {(() => {
                         let coachImg = c.image || c.avatar;
+                        if (coachImg && coachImg.includes('googleusercontent.com')) coachImg = '';
                         if (!coachImg) {
                           const matchedUser = (usersList || []).find(u => 
                             (c.userId && String(u.id) === String(c.userId)) || 
                             (c.name && u.name && u.name.toLowerCase().trim() === c.name.toLowerCase().trim())
                           ) || (currentUser && ((c.userId && String(currentUser.id) === String(c.userId)) || (c.name && currentUser.name && c.name.toLowerCase().trim() === currentUser.name.toLowerCase().trim())) ? currentUser : null);
                           coachImg = matchedUser?.avatar || matchedUser?.image || '';
+                          if (coachImg && coachImg.includes('googleusercontent.com')) coachImg = '';
                         }
                         if (!coachImg) {
                           try {
                             const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
-                            if (imgStore[c.id]) coachImg = imgStore[c.id];
+                            if (imgStore[c.id] && !imgStore[c.id].includes('googleusercontent.com')) coachImg = imgStore[c.id];
                           } catch (e) {}
                         }
                         if (!coachImg) {
                           const seed = COACHES.find(sc => sc.id === c.id || (sc.name && c.name && sc.name.toLowerCase().trim() === c.name.toLowerCase().trim()));
                           if (seed?.image) coachImg = seed.image;
                         }
+                        if (!coachImg) {
+                          coachImg = c.id === 'coach-farid' ? '/images/coaches/coach-farid.jpg' : (c.id === 'coach-nargiz' ? '/images/coaches/coach-nargiz.jpg' : '/images/coaches/coach-sedaqet.jpg');
+                        }
                         return coachImg ? (
                           <img
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                             src={coachImg}
                             alt={c.name}
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src = '/images/coaches/coach-sedaqet.jpg';
+                            }}
                           />
                         ) : (
                           <div className="w-full h-full bg-gradient-to-br from-[#070f1e] to-[#112240] flex items-center justify-center">

@@ -84,15 +84,19 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
   ) ? currentUser : null)) : null;
 
   let coachDisplayImage = liveCoach?.image || liveCoach?.avatar || matchedUser?.avatar || matchedUser?.image || '';
+  if (coachDisplayImage && coachDisplayImage.includes('googleusercontent.com')) coachDisplayImage = '';
   if (!coachDisplayImage && liveCoach) {
     try {
       const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
-      if (imgStore[liveCoach.id]) coachDisplayImage = imgStore[liveCoach.id];
+      if (imgStore[liveCoach.id] && !imgStore[liveCoach.id].includes('googleusercontent.com')) coachDisplayImage = imgStore[liveCoach.id];
     } catch (e) {}
   }
   if (!coachDisplayImage && liveCoach) {
     const seed = COACHES.find(sc => sc.id === liveCoach.id || (sc.name && liveCoach.name && sc.name.toLowerCase().trim() === liveCoach.name.toLowerCase().trim()));
     if (seed?.image) coachDisplayImage = seed.image;
+  }
+  if (!coachDisplayImage && liveCoach) {
+    coachDisplayImage = liveCoach.id === 'coach-farid' ? '/images/coaches/coach-farid.jpg' : (liveCoach.id === 'coach-nargiz' ? '/images/coaches/coach-nargiz.jpg' : '/images/coaches/coach-sedaqet.jpg');
   }
 
   const coachTitle = liveCoach ? (getLocalized(liveCoach, 'title', currentLang, defaultLang) || liveCoach.title || 'Kouç & Ekspert') : '';
@@ -410,6 +414,10 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                 <img
                   src={coachDisplayImage}
                   alt={liveCoach.name}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = '/images/coaches/coach-sedaqet.jpg';
+                  }}
                   className="w-24 h-24 rounded-2xl object-cover border-2 border-[#c5a059]/40 shadow-md"
                 />
               ) : (

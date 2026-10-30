@@ -1046,7 +1046,7 @@ export const COACHES = [
     title: "PhD Psixologiya | ICF PCC",
     experience: "14+ il",
     bio: "Koqnitiv fərqindəlik və şüuraltı travmalar üzrə baş ekspert. Harvard və Bakı Dövlət Universitetinin tədqiqat layihələrinin məzunu.",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCn9ZjfxW-PL-o_xZ9Me83EiOB9x_aaIbuIEYtOce00950-vB-hL99E3BUxNBeJriyWWNWGGDlnTJRCJGRwkjlEPSCAIQYPacFkDcUc0Gx7SG3u_LdP-yJ9ZvAxESWMhqm8PQ0_Jjk2lpNGCZW3k-pFcnjQ873cYwWNg72N95sYxMH-w5fpXfjJZfJo1LZC2K5AStfFo8Xfl-GQ968CVb_yfDTaqIDcMiTxISBiZMVtj4d_vRd_K_L3",
+    image: "/images/coaches/coach-leyla.jpg",
     specialties: ["Travma terapiyası", "Şüuraltı inanc dəyişimi", "Mindfulness"],
     availableSlots: [],
     customCertificates: [
@@ -1099,7 +1099,7 @@ export const COACHES = [
     title: "ICF MCC Kouç | EQ Master",
     experience: "11+ il",
     bio: "Top menecerlər və sahibkarlar üçün ekzekyutiv kouçinq, böhran idarəçiliyi və emosional liderlik üzrə baş məsləhətçi.",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBdkVIgrGvOaJjxAlQWP_tOgF6MLIc1W_hVcrzQBsdy3Nmj3_bg1aNTtm-J7ngXIQHCb_HUk8Wgmb1fcNip_lsrL-Gmar-UetvxkeR45_vSt4q1wmYr827ItSKFD3KvdecV_H8wq93ilFYULT8I6h79AaRYC4hHvZXNqnITSxTBQyhdlEbyKM6jmxqnqbhzDwzEMCBH3hkOs9Ek7d1JxL4eWrgGao9MIfgwjA76wbSTi5zJlsf9FF_w",
+    image: "/images/coaches/coach-farid.jpg",
     specialties: ["EQ Liderlik", "Karyera sıçrayışı", "Stres menecmenti"],
     availableSlots: [],
     customCertificates: [
@@ -1152,7 +1152,7 @@ export const COACHES = [
     title: "Münasibət Kouçu | Somatik Təlimçi",
     experience: "9+ il",
     bio: "Cütlüklər və fərdlər üçün münasibət dinamikası, psixosomatika və affektiv tənzimləmə üzrə mütəxəssis.",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuApho0mk-jt09_EKWhr9Kr-rV4ni1mNVZ9NMTTJnSr7Io_rS9AF4YMxdvwdvNBSQ5niLnit1PKeNozwDdDlqiBGbJTz1MOiuOo8yyY1b3AbDK33_Lc-ZOXlb5WzmwRuSsfZWSPYV7fmbNuRtSts2hYeTZFmwlHsu99rLvjRaczoStwMfhP4xbjxoLfdcfKKedG3I9Wsc86Mw84ULdwPbgpzWaz6dnC5ZnLFz2n5VuHMa6K1rX1itB96",
+    image: "/images/coaches/coach-nargiz.jpg",
     specialties: ["Münasibətlər", "Bədən-zihin harmoniyası", "Özünü bağışlama"],
     availableSlots: [],
     customCertificates: [
@@ -1205,7 +1205,7 @@ export const COACHES = [
     title: "Kouç & Ekspert",
     experience: "10+ il",
     bio: "Sədaqət Rzayeva — Monodoxia Academy fərdi inkişaf və kouçinq ekspertidir. Fərdi inkişaf, emosional balans və hədəf yönümlü kouçinq üzrə ixtisaslaşmışdır.",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCn9ZjfxW-PL-o_xZ9Me83EiOB9x_aaIbuIEYtOce00950-vB-hL99E3BUxNBeJriyWWNWGGDlnTJRCJGRwkjlEPSCAIQYPacFkDcUc0Gx7SG3u_LdP-yJ9ZvAxESWMhqm8PQ0_Jjk2lpNGCZW3k-pFcnjQ873cYwWNg72N95sYxMH-w5fpXfjJZfJo1LZC2K5AStfFo8Xfl-GQ968CVb_yfDTaqIDcMiTxISBiZMVtj4d_vRd_K_L3",
+    image: "/images/coaches/coach-sedaqet.jpg",
     specialties: ["Fərdi İnkişaf", "Psixologiya", "Həyat Balansı"],
     availableSlots: [],
     customCertificates: [
@@ -1757,7 +1757,7 @@ export const INITIAL_HOME_CONTENT = {
     stat2Label: "Məmnuniyyət",
     stat3Num: "ICF & PhD",
     stat3Label: "Sertifikatlı Kouçlar",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBu6A42fLsKyb7QEyw763LYrM2DhMvrcMod35fdqpYFnlKrGTcsg11v2ljzwkebadfB8h3tfo-a23eJ2C1IgUxOWL0A7cON3aCvZ3irV6bqO5eStKS9edI_Qda-YAOeRR0EMqS_cCqNkoDRtBJgrns8bUxgLQjRFG1ZVUGF2Ob9e9CG4dgb2myU2AJgY2j8uSiSRSDuMt6yq1zuCRYVZhvt2-Eiq7WHllVLEpzNMbm6AuMR7CS-ijR7",
+    image: "/images/hero-main.jpg",
     mediaType: "image",
     videoUrl: "",
     videoPoster: "",
@@ -1856,7 +1856,7 @@ export const INITIAL_HOME_CONTENT = {
     badge: "Akademiyanın Məramı",
     title: "Daxili ahəngdarlıq və şüurlu həyat üçün elmi və mənəvi yanaşma.",
     desc: "Biz inanırıq ki, əsl inkişaf səthi motivasiya ilə deyil, dərin psixoloji fərqindəlik və daxili mənliyin tədqiqi ilə mümkündür. Monodoxia Academy hər bir fərdin öz gizli potensialını kəşf edərək sabit, harmonik və mənalı bir həyat qurması üçün elmi metodlara əsaslanan bələdçidir.",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCfJ9v48nWJzTbw80sDrDtTVhJ3mvXbVUbCeHjTMi_Y-NUPyOTMrFxaSuOPQsSmEsuH1iFUesyI1GA23YGlZQlqzMJLdnrhTp12XLt8NPffBd1uWx8YenygyqGA2zja0D9d-rKVoNVykmJRjh03f9EEtW4IghPWZy_-gBbdmrV1VbwrBwzlJWS1Ixvco8e0IdrYq8AHbaR5Pdystz7aBbXr4cWkfac3BRp_ESWqbNA0K6eg7X2YuuMP",
+    image: "/images/about-main.jpg",
     imageBadgeLeft: "Gündəlik Fərqindəlik",
     imageBadgeRight: "01 / SÜKUT",
     heroBadge1Icon: "psychology",

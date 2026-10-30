@@ -2815,7 +2815,7 @@ export default function AdminCmsTab() {
                   <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
                     <button
                       type="button"
-                      onClick={() => setCmsHero(p => ({ ...p, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBu6A42fLsKyb7QEyw763LYrM2DhMvrcMod35fdqpYFnlKrGTcsg11v2ljzwkebadfB8h3tfo-a23eJ2C1IgUxOWL0A7cON3aCvZ3irV6bqO5eStKS9edI_Qda-YAOeRR0EMqS_cCqNkoDRtBJgrns8bUxgLQjRFG1ZVUGF2Ob9e9CG4dgb2myU2AJgY2j8uSiSRSDuMt6yq1zuCRYVZhvt2-Eiq7WHllVLEpzNMbm6AuMR7CS-ijR7" }))}
+                      onClick={() => setCmsHero(p => ({ ...p, image: "/images/hero-main.jpg" }))}
                       className="admin-btn-secondary"
                       style={{ fontSize: '11px', padding: '4px 10px' }}
                     >
@@ -3414,8 +3414,7 @@ export default function AdminCmsTab() {
                         ) : (
                           <img
                             src={
-                              cmsHero.image ||
-                              "https://lh3.googleusercontent.com/aida-public/AB6AXuBu6A42fLsKyb7QEyw763LYrM2DhMvrcMod35fdqpYFnlKrGTcsg11v2ljzwkebadfB8h3tfo-a23eJ2C1IgUxOWL0A7cON3aCvZ3irV6bqO5eStKS9edI_Qda-YAOeRR0EMqS_cCqNkoDRtBJgrns8bUxgLQjRFG1ZVUGF2Ob9e9CG4dgb2myU2AJgY2j8uSiSRSDuMt6yq1zuCRYVZhvt2-Eiq7WHllVLEpzNMbm6AuMR7CS-ijR7"
+                              (cmsHero.image && !cmsHero.image.includes('googleusercontent.com')) ? cmsHero.image : "/images/hero-main.jpg"
                             }
                             alt="Hero Preview"
                             style={{ width: '100%', height: '100%', objectFit: heroStyles.objectFit }}
@@ -3705,7 +3704,7 @@ export default function AdminCmsTab() {
                       type="button"
                       onClick={() => setCmsAbout(p => ({
                         ...p,
-                        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCfJ9v48nWJzTbw80sDrDtTVhJ3mvXbVUbCeHjTMi_Y-NUPyOTMrFxaSuOPQsSmEsuH1iFUesyI1GA23YGlZQlqzMJLdnrhTp12XLt8NPffBd1uWx8YenygyqGA2zja0D9d-rKVoNVykmJRjh03f9EEtW4IghPWZy_-gBbdmrV1VbwrBwzlJWS1Ixvco8e0IdrYq8AHbaR5Pdystz7aBbXr4cWkfac3BRp_ESWqbNA0K6eg7X2YuuMP"
+                        image: "/images/about-main.jpg"
                       }))}
                       className="admin-btn-secondary"
                       style={{ fontSize: '11px', padding: '4px 10px' }}
@@ -4227,8 +4226,7 @@ export default function AdminCmsTab() {
                         ) : (
                           <img
                             src={
-                              cmsAbout.image ||
-                              "https://lh3.googleusercontent.com/aida-public/AB6AXuCfJ9v48nWJzTbw80sDrDtTVhJ3mvXbVUbCeHjTMi_Y-NUPyOTMrFxaSuOPQsSmEsuH1iFUesyI1GA23YGlZQlqzMJLdnrhTp12XLt8NPffBd1uWx8YenygyqGA2zja0D9d-rKVoNVykmJRjh03f9EEtW4IghPWZy_-gBbdmrV1VbwrBwzlJWS1Ixvco8e0IdrYq8AHbaR5Pdystz7aBbXr4cWkfac3BRp_ESWqbNA0K6eg7X2YuuMP"
+                              (cmsAbout.image && !cmsAbout.image.includes('googleusercontent.com')) ? cmsAbout.image : "/images/about-main.jpg"
                             }
                             alt="Məram Önizləmə"
                             style={{ width: '100%', height: '100%', objectFit: aboutStyles.objectFit }}
