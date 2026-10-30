@@ -645,6 +645,7 @@ export default function AdminCmsTab() {
     heroBadge3Icon: "laptop_chromebook",
     heroBadge3Text: "Ömürlük Giriş və LMS Arxiv",
     searchPlaceholder: "Kurs və ya kouç axtar...",
+    defaultCourseStatus: "Qrup qəbulu aktivdir",
     emptyTitle: "Hal-hazırda aktiv kurs mövcud deyil",
     emptyDesc: "Yeni proqramlar və qeydiyyat tarixləri tezliklə elan olunacaqdır.",
     guarantee1Icon: "verified",
@@ -4694,6 +4695,23 @@ export default function AdminCmsTab() {
               <Field label="Əsas Başlıq (Title)" block={cmsAcademy} setBlock={setCmsAcademy} fieldKey="title" placeholder="Məs: Kurslar və Sertifikasiya Proqramları" />
               <Field label="Təsvir (Desc)" block={cmsAcademy} setBlock={setCmsAcademy} fieldKey="desc" multiline rows={3} placeholder="Akademiyanın təhsil istiqaməti haqqında geniş izah..." />
               <Field label="Düymə Mətni (CTA)" block={cmsAcademy} setBlock={setCmsAcademy} fieldKey="ctaText" placeholder="Məs: Kurslara Bax" />
+
+              {/* Global Default Kurs Status Nişanı */}
+              <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px', padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: '#92400e', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  🏷️ Kurs Kartlarındakı Global Qəbul Nişanı (default)
+                </span>
+                <Field
+                  label="Nişan Mətni"
+                  block={cmsAcademy}
+                  setBlock={setCmsAcademy}
+                  fieldKey="defaultCourseStatus"
+                  placeholder="Qrup qəbulu aktivdir"
+                />
+                <span style={{ fontSize: '10px', color: '#78350f' }}>
+                  Ana səhifə kurs kartlarında göstərilən nişan. Hər kurs öz xüsusi statusuna sahib deyilsə bu mətn istifadə olunur. Admin › Kurslar panelindən tək-tək dəyişdirilə bilər.
+                </span>
+              </div>
             </div>
           </div>
 

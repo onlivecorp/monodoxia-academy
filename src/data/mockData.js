@@ -1974,6 +1974,7 @@ export const INITIAL_HOME_CONTENT = {
     heroBadge3Icon: "laptop_chromebook",
     heroBadge3Text: "Ömürlük Giriş və LMS Arxiv",
     searchPlaceholder: "Kurs və ya kouç axtar...",
+    defaultCourseStatus: "Qrup qəbulu aktivdir",
     emptyTitle: "Hal-hazırda aktiv kurs mövcud deyil",
     emptyDesc: "Yeni proqramlar və qeydiyyat tarixləri tezliklə elan olunacaqdır.",
     notFoundTitle: "Axtarışa uyğun kurs tapılmadı",

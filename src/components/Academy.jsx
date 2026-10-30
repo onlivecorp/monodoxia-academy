@@ -124,7 +124,8 @@ export default function Academy() {
               const courseTitle = getLocalized(c, 'title', currentLang, defaultLang);
               const courseDesc = getLocalized(c, 'description', currentLang, defaultLang);
               const courseBadge = getLocalized(c, 'badge', currentLang, defaultLang);
-              const courseStatus = getLocalized(c, 'status', currentLang, defaultLang);
+              const defaultStatus = getLocalized(academy, 'defaultCourseStatus', currentLang, defaultLang) || academy.defaultCourseStatus || 'Qrup qəbulu aktivdir';
+              const courseStatus = getLocalized(c, 'status', currentLang, defaultLang) || defaultStatus;
               const courseDuration = getLocalized(c, 'duration', currentLang, defaultLang) || c.duration;
 
               return (
