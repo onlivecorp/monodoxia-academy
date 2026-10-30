@@ -167,9 +167,70 @@ function requireAuthUser($pdo) {
     $user = getSessionUser($pdo);
     if (!$user) {
         http_response_code(401);
-        echo json_encode(['status' => 'unauthorized', 'message' => 'Giriş tələb olunur (401 Unauthorized)'], JSON_UNESCAPED_UNICODE);
+        echo json_encode([
+            'status' => 'unauthenticated',
+            'error' => 'unauthenticated',
+            'code' => 401,
+            'message' => 'Sessiyanın vaxtı bitib və ya giriş tələb olunur (401 Unauthorized)'
+        ], JSON_UNESCAPED_UNICODE);
         exit();
     }
+    return $user;
+}
+
+function userHasPermission($pdo, $userRole, $requiredPermission) {
+    if ($userRole === 'Admin') {
+        return true;
+    }
+    try {
+        $stmt = $pdo->prepare("SELECT permissions FROM mdx_roles WHERE code = ? OR name = ? LIMIT 1");
+        $stmt->execute([$userRole, $userRole]);
+        $roleData = $stmt->fetch();
+        if ($roleData && !empty($roleData['permissions'])) {
+            $perms = json_decode($roleData['permissions'], true);
+            if (is_array($perms)) {
+                if (in_array('*', $perms) || in_array('all', $perms) || in_array($requiredPermission, $perms)) {
+                    return true;
+                }
+            }
+        }
+    } catch (Exception $e) {}
+    return false;
+}
+
+function requireRole($pdo, array $allowedRoles, $resourceOwnerId = null) {
+    $user = requireAuthUser($pdo);
+    
+    // Admin always has full access
+    if ($user['role'] === 'Admin') {
+        return $user;
+    }
+
+    // Role check
+    $hasRole = in_array($user['role'], $allowedRoles, true);
+    if (!$hasRole) {
+        http_response_code(403);
+        echo json_encode([
+            'status' => 'forbidden',
+            'error' => 'forbidden',
+            'code' => 403,
+            'message' => 'Bu əməliyyat üçün icazəniz yoxdur (403 Forbidden)'
+        ], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    // IDOR (Insecure Direct Object Reference) Ownership check
+    if ($resourceOwnerId !== null && $user['id'] !== $resourceOwnerId) {
+        http_response_code(403);
+        echo json_encode([
+            'status' => 'forbidden',
+            'error' => 'forbidden',
+            'code' => 403,
+            'message' => 'Yalnız öz resursunuz üzərində dəyişiklik edə bilərsiniz (403 Forbidden - IDOR Protection)'
+        ], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
     return $user;
 }
 
@@ -178,20 +239,17 @@ function requireAdminUser($pdo) {
     if ($user['role'] === 'Admin') {
         return $user;
     }
-    try {
-        $stmt = $pdo->prepare("SELECT permissions FROM mdx_roles WHERE code = ? OR name = ? LIMIT 1");
-        $stmt->execute([$user['role'], $user['role']]);
-        $roleData = $stmt->fetch();
-        if ($roleData && !empty($roleData['permissions'])) {
-            $perms = json_decode($roleData['permissions'], true);
-            if (is_array($perms) && (in_array('*', $perms) || in_array('all', $perms) || in_array('admin.access', $perms))) {
-                return $user;
-            }
-        }
-    } catch (Exception $e) {}
+    if (userHasPermission($pdo, $user['role'], 'admin.access')) {
+        return $user;
+    }
 
     http_response_code(403);
-    echo json_encode(['status' => 'forbidden', 'message' => 'Admin hüququ tələb olunur (403 Forbidden)'], JSON_UNESCAPED_UNICODE);
+    echo json_encode([
+        'status' => 'forbidden',
+        'error' => 'forbidden',
+        'code' => 403,
+        'message' => 'Admin hüququ tələb olunur (403 Forbidden)'
+    ], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
@@ -889,9 +947,13 @@ if ($action === 'me' || $action === 'get_session') {
             'csrf_token' => $_SESSION['csrf_token']
         ], JSON_UNESCAPED_UNICODE);
     } else {
+        http_response_code(401);
         echo json_encode([
-            'status' => 'success',
+            'status' => 'unauthenticated',
+            'error' => 'unauthenticated',
+            'code' => 401,
             'authenticated' => false,
+            'message' => 'Sessiya aktiv deyil və ya vaxtı bitib.',
             'csrf_token' => $_SESSION['csrf_token']
         ], JSON_UNESCAPED_UNICODE);
     }
@@ -1005,6 +1067,8 @@ if ($action === 'register_user' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if ($action === 'save_user' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $authUser = requireAuthUser($pdo);
+    verifyCsrfToken();
     $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
     if (!$input || !is_array($input)) {
         http_response_code(400);
@@ -1021,6 +1085,24 @@ if ($action === 'save_user' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = !empty($input['password']) ? (string)$input['password'] : null;
     $password_hash = $password ? password_hash($password, PASSWORD_DEFAULT) : null;
     $joined_date = $input['joined_date'] ?? $input['joinedDate'] ?? date('Y-m-d');
+
+    // IDOR & RBAC Protection: Non-admins can only update their own profile and cannot escalate role/tier
+    if ($authUser['role'] !== 'Admin') {
+        if ($id !== $authUser['id']) {
+            http_response_code(403);
+            echo json_encode([
+                'status' => 'forbidden',
+                'error' => 'forbidden',
+                'code' => 403,
+                'message' => 'Başqa istifadəçinin profilini dəyişmək icazəniz yoxdur (IDOR Qorunması)'
+            ], JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+        // Force preserve user's real role, tier, and status from DB
+        $role = $authUser['role'];
+        $tier = $authUser['tier'];
+        $status = $authUser['status'];
+    }
 
     if (!$email) {
         http_response_code(400);
@@ -1077,6 +1159,8 @@ if ($action === 'save_user' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if ($action === 'delete_user' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
     $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
     $id = $input['id'] ?? null;
     if ($id) {
@@ -1345,6 +1429,8 @@ if ($action === 'delete_role' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if ($action === 'save_club_tier' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
     $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
 
     $id = trim($input['id'] ?? ('tier-' . round(microtime(true) * 1000)));
@@ -1397,6 +1483,8 @@ if ($action === 'save_club_tier' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if ($action === 'delete_club_tier' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
     $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
     $id = $input['id'] ?? null;
     if ($id) {
@@ -1408,6 +1496,8 @@ if ($action === 'delete_club_tier' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if ($action === 'save_settings' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
     $input = json_decode(file_get_contents('php://input'), true);
     if (!$input) {
         $input = $_POST;
@@ -1853,6 +1943,8 @@ if ($action === 'submit_application' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if ($action === 'update_application_status' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
     $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
 
     $id = trim($input['id'] ?? '');
@@ -2042,6 +2134,8 @@ if ($action === 'update_application_status' && $_SERVER['REQUEST_METHOD'] === 'P
 }
 
 if ($action === 'delete_application' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
     $input = json_decode(file_get_contents('php://input'), true);
     $id = $input['id'] ?? null;
     $permanent = ($input['permanent'] ?? false) === true;
@@ -2083,6 +2177,8 @@ if ($action === 'get_form_fields') {
 }
 
 if ($action === 'save_form_field' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
     $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
     if (!$input || !is_array($input)) {
         http_response_code(400);
@@ -2160,6 +2256,8 @@ if ($action === 'save_form_field' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if ($action === 'delete_form_field' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
     $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
     $id = $input['id'] ?? null;
     if ($id) {
@@ -2306,6 +2404,8 @@ if ($action === 'delete_category' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 // 7.5. KURSLAR VƏ PROQRAMLAR APİ (COURSES API)
 // --------------------------------------------------------
 if ($action === 'save_course' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
     $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
     $id = trim($input['id'] ?? ('course-' . round(microtime(true) * 1000)));
     $category = trim($input['category'] ?? 'psychology');
@@ -2383,6 +2483,8 @@ if ($action === 'save_course' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if ($action === 'delete_course' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
     $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
     $id = $input['id'] ?? null;
     if ($id) {
@@ -2437,6 +2539,8 @@ if ($action === 'upload_image' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 // 7.6. TƏDBİRLƏR VƏ VEBİNARLAR APİ (EVENTS API)
 // --------------------------------------------------------
 if ($action === 'save_event' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
     $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
     $id = trim($input['id'] ?? ('event-' . round(microtime(true) * 1000)));
     $title = trim($input['title'] ?? '');
@@ -2522,6 +2626,8 @@ if ($action === 'save_event' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if ($action === 'delete_event' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
     $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
     $id = $input['id'] ?? null;
     if ($id) {
@@ -2961,16 +3067,39 @@ if ($action === 'update_booking_status' && $_SERVER['REQUEST_METHOD'] === 'POST'
     $id = trim($input['id'] ?? '');
     $status = trim($input['status'] ?? 'Təsdiqləndi');
     if (!$id) {
+        http_response_code(400);
         echo json_encode(['status' => 'error', 'message' => 'ID tapılmadı'], JSON_UNESCAPED_UNICODE);
         exit();
     }
 
+    // IDOR check: Verify if the user has rights to update this booking (Admin, or the assigned Coach, or booking user)
+    $curStmt = $pdo->prepare("SELECT * FROM mdx_bookings WHERE id = ?");
+    $curStmt->execute([$id]);
+    $curBooking = $curStmt->fetch();
+    if (!$curBooking) {
+        http_response_code(404);
+        echo json_encode(['status' => 'error', 'message' => 'Rezervasiya tapılmadı'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    if ($authUser['role'] !== 'Admin') {
+        $isAssignedCoach = ($curBooking['coach_id'] === $authUser['id'] || (!empty($curBooking['coach_name']) && stripos($curBooking['coach_name'], $authUser['name']) !== false));
+        $isBookingOwner = ($curBooking['user_id'] === $authUser['id']);
+        if (!$isAssignedCoach && !$isBookingOwner) {
+            http_response_code(403);
+            echo json_encode([
+                'status' => 'forbidden',
+                'error' => 'forbidden',
+                'code' => 403,
+                'message' => 'Bu rezervasiyanın statusunu dəyişmək hüququnuz yoxdur (IDOR Qorunması)'
+            ], JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+    }
+
     // Server-side collision check when approving
     if ($status === 'Təsdiqləndi') {
-        $curStmt = $pdo->prepare("SELECT * FROM mdx_bookings WHERE id = ?");
-        $curStmt->execute([$id]);
-        $curBooking = $curStmt->fetch();
-        if ($curBooking && !empty($curBooking['slot'])) {
+        if (!empty($curBooking['slot'])) {
             $confChk = $pdo->prepare("
                 SELECT id FROM mdx_bookings 
                 WHERE (coach_id = ? OR (coach_name = ? AND coach_name != ''))

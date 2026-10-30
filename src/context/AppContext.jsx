@@ -259,7 +259,13 @@ export function safeSetLocalStorage(key, val) {
     const serialized = typeof val === 'string' ? val : JSON.stringify(val);
     localStorage.setItem(key, serialized);
   } catch (err) {
-    console.warn(`localStorage save failed for ${key}:`, err);
+    console.warn(`localStorage save failed for ${key} (QuotaExceededError protection):`, err);
+    // Quota management: purge heavy base64 images and temporary caches
+    try {
+      localStorage.removeItem('monodoxia_coach_images');
+      localStorage.removeItem('monodoxia_recent_searches_v1');
+    } catch (e) {}
+
     if (key === 'monodoxia_admin_events' && Array.isArray(val)) {
       try {
         const stripped = val.map(ev => ({
@@ -268,6 +274,15 @@ export function safeSetLocalStorage(key, val) {
         }));
         localStorage.setItem(key, JSON.stringify(stripped));
       } catch (e2) {}
+    } else if (key === 'monodoxia_coaches' && Array.isArray(val)) {
+      try {
+        const stripped = val.map(c => ({
+          ...c,
+          image: (c && typeof c.image === 'string' && c.image.startsWith('data:')) ? '' : (c?.image || ''),
+          avatar: (c && typeof c.avatar === 'string' && c.avatar.startsWith('data:')) ? '' : (c?.avatar || '')
+        }));
+        localStorage.setItem(key, JSON.stringify(stripped));
+      } catch (e3) {}
     }
   }
 }
@@ -782,7 +797,7 @@ export function AppProvider({ children }) {
     return sessionStorage.getItem('monodoxia_csrf') || '';
   });
 
-  // Centralized Authenticated API Call Helper
+  // Centralized Authenticated API Call Helper with 401 Session Interceptor
   const apiCall = async (action, data = null, method = 'POST') => {
     const token = csrfToken || sessionStorage.getItem('monodoxia_csrf') || '';
     const options = {
@@ -799,6 +814,20 @@ export function AppProvider({ children }) {
     try {
       const res = await fetch(`/api.php?action=${action}`, options);
       const resData = await res.json().catch(() => null);
+
+      // Intercept 401 Unauthorized / Unauthenticated Session Expiration
+      if (res.status === 401 || resData?.code === 401 || resData?.status === 'unauthenticated' || resData?.error === 'unauthenticated') {
+        setCurrentUser(prev => {
+          if (prev) {
+            localStorage.removeItem('monodoxia_user');
+            showToast('Sessiyanın vaxtı bitib, zəhmət olmasa yenidən daxil olun.', 'warning');
+            setAuthModalTab('login');
+            setAuthModalOpen(true);
+          }
+          return null;
+        });
+      }
+
       if (resData?.csrf_token) {
         setCsrfToken(resData.csrf_token);
         sessionStorage.setItem('monodoxia_csrf', resData.csrf_token);
@@ -808,6 +837,94 @@ export function AppProvider({ children }) {
       return null;
     }
   };
+
+  // Session Verification Helper (/api.php?action=me)
+  const verifySession = async () => {
+    try {
+      const res = await fetch('/api.php?action=me', { credentials: 'include' });
+      const data = await res.json().catch(() => null);
+      if (res.status === 401 || !data || data.authenticated === false) {
+        setCurrentUser(prev => {
+          if (prev) {
+            localStorage.removeItem('monodoxia_user');
+            showToast('Sessiyanızın müddəti başa çatıb. Yenidən daxil olun.', 'info');
+            setAuthModalTab('login');
+            setAuthModalOpen(true);
+          }
+          return null;
+        });
+      } else if (data?.authenticated && data?.user) {
+        if (data.csrf_token) {
+          setCsrfToken(data.csrf_token);
+          sessionStorage.setItem('monodoxia_csrf', data.csrf_token);
+        }
+        setCurrentUser(prev => {
+          const names = data.user.name ? data.user.name.split(' ') : [(prev?.firstName || ''), (prev?.lastName || '')];
+          const updated = {
+            ...(prev || {}),
+            id: data.user.id,
+            name: data.user.name,
+            firstName: names[0] || (prev?.firstName || ''),
+            lastName: names.slice(1).join(' ') || (prev?.lastName || ''),
+            email: data.user.email,
+            role: data.user.role || 'Tələbə',
+            tier: data.user.tier || 'Free',
+            status: data.user.status || 'Aktiv'
+          };
+          localStorage.setItem('monodoxia_user', JSON.stringify(updated));
+          return updated;
+        });
+      }
+    } catch (e) {}
+  };
+
+  // Session Synchronization: Tab Focus (visibilitychange) and 5-Minute Sliding Interval
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        verifySession();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    const intervalId = setInterval(() => {
+      verifySession();
+    }, 5 * 60 * 1000); // 5 minutes
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearInterval(intervalId);
+    };
+  }, []);
+
+  // Base64 Quota Migration & Cleanup on App Mount
+  useEffect(() => {
+    try {
+      // 1. Clean legacy heavy coach images cache from localStorage
+      if (localStorage.getItem('monodoxia_coach_images')) {
+        const raw = localStorage.getItem('monodoxia_coach_images');
+        if (raw && raw.length > 50000) {
+          localStorage.removeItem('monodoxia_coach_images');
+        }
+      }
+      // 2. Scan coaches list in localStorage and prune oversized base64 to avoid QuotaExceededError
+      const rawCoaches = localStorage.getItem('monodoxia_coaches');
+      if (rawCoaches && rawCoaches.includes('data:image/')) {
+        try {
+          const parsed = JSON.parse(rawCoaches);
+          if (Array.isArray(parsed)) {
+            const sanitized = parsed.map(c => ({
+              ...c,
+              image: (c.image && c.image.startsWith('data:')) ? '' : c.image,
+              avatar: (c.avatar && c.avatar.startsWith('data:')) ? '' : c.avatar
+            }));
+            localStorage.setItem('monodoxia_coaches', JSON.stringify(sanitized));
+          }
+        } catch (e) {}
+      }
+    } catch (err) {
+      console.warn('LocalStorage base64 cleanup notice:', err);
+    }
+  }, []);
 
   // Live MySQL Hydration on App Mount
   useEffect(() => {
