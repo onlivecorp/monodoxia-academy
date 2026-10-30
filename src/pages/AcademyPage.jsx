@@ -83,10 +83,10 @@ export default function AcademyPage() {
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[900px] h-[600px] bg-gradient-to-b from-[#c5a059]/6 via-transparent to-transparent rounded-full blur-3xl pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          
+
           {/* Search & Filter Toolbar */}
           <div className="bg-white/80 backdrop-blur-md border border-[#c5a059]/25 rounded-2xl p-4 sm:p-5 shadow-[0_10px_30px_-10px_rgba(7,19,38,0.05)] mb-10 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
-            
+
             {/* Search Input */}
             <div className="relative flex-1 max-w-full md:max-w-md">
               <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[19px] text-[#775a19]">search</span>
@@ -139,8 +139,8 @@ export default function AcademyPage() {
               <span>Tapılan proqramlar: <strong className="text-[#071326] font-semibold text-sm">{filteredCourses.length}</strong></span>
             </span>
             {(filter !== 'all' || searchQuery) && (
-              <button 
-                onClick={() => { setFilter('all'); setSearchQuery(''); }} 
+              <button
+                onClick={() => { setFilter('all'); setSearchQuery(''); }}
                 className="text-[#775a19] hover:text-[#071326] font-medium flex items-center gap-1 hover:underline cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[14px]">refresh</span>
@@ -250,7 +250,7 @@ export default function AcademyPage() {
                               {c.modules.length} Modul
                             </span>
                           </div>
-                          
+
                           <div className="flex flex-col gap-1.5">
                             {c.modules.slice(0, 2).map((m, mIdx) => (
                               <div key={m.id || mIdx} className="flex items-center gap-2 text-xs text-[#475569] truncate">
@@ -307,9 +307,9 @@ export default function AcademyPage() {
                             <span className="font-semibold text-[#775a19]">{prog}%</span>
                           </div>
                           <div className="w-full bg-[#e2e8f0] h-2 rounded-full overflow-hidden">
-                            <div 
-                              className="bg-gradient-to-r from-[#c5a059] to-[#775a19] h-full rounded-full transition-all duration-500" 
-                              style={{ width: `${prog}%` }} 
+                            <div
+                              className="bg-gradient-to-r from-[#c5a059] to-[#775a19] h-full rounded-full transition-all duration-500"
+                              style={{ width: `${prog}%` }}
                             />
                           </div>
                         </div>
@@ -349,7 +349,7 @@ export default function AcademyPage() {
             <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-[#c5a059]/10 rounded-full blur-3xl pointer-events-none" />
 
             <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-10">
-              
+
               {/* Guarantee 1 */}
               <div className="flex items-start gap-4">
                 <div className="w-13 h-13 rounded-2xl bg-[#c5a059]/20 border border-[#c5a059]/40 text-[#e5c57d] flex items-center justify-center shrink-0">

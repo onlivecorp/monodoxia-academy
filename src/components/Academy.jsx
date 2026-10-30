@@ -54,27 +54,28 @@ export default function Academy() {
             )}
           </div>
 
-          {/* Segmented Filter Tabs */}
-          <div className="flex flex-wrap items-stretch w-full p-1.5 rounded-2xl bg-white/95 border border-[#e2d9c8]/90 shadow-sm gap-1.5">
-            {[
-              { id: 'all', label: t('filter_all') },
-              ...courseCategories.map(cat => ({
-                id: cat.key,
-                label: getCategoryLabel(cat.key, currentLang)
-              }))
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setFilter(tab.id)}
-                className={`flex-1 min-w-[130px] sm:min-w-[150px] px-3.5 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer text-center flex items-center justify-center ${
-                  filter === tab.id
-                    ? 'bg-[#070f1e] text-[#e5c57d] shadow-md border border-[#c5a059]/40'
-                    : 'text-slate-600 hover:text-[#070f1e] hover:bg-[#c5a059]/10'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+          {/* Category Select Box (Dropbox) */}
+          <div className="relative w-full sm:max-w-md">
+            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-[#775a19] pointer-events-none">
+              filter_list
+            </span>
+            <select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              className="w-full pl-11 pr-11 py-3 text-sm rounded-xl bg-white/95 border border-[#c5a059]/40 focus:border-[#775a19] focus:bg-white focus:ring-2 focus:ring-[#c5a059]/20 outline-none transition-all text-[#071326] font-medium appearance-none cursor-pointer shadow-sm hover:border-[#c5a059]"
+            >
+              <option value="all">
+                {t('filter_all') || 'Bütün Proqramlar'}
+              </option>
+              {courseCategories.map(cat => (
+                <option key={cat.key} value={cat.key}>
+                  {getCategoryLabel(cat.key, currentLang)}
+                </option>
+              ))}
+            </select>
+            <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-[20px] text-[#775a19] pointer-events-none">
+              expand_more
+            </span>
           </div>
         </div>
 
