@@ -85,10 +85,10 @@ export default function AcademyPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           
           {/* Search & Filter Toolbar */}
-          <div className="bg-white/80 backdrop-blur-md border border-[#c5a059]/25 rounded-2xl p-4 sm:p-5 shadow-[0_10px_30px_-10px_rgba(7,19,38,0.05)] mb-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="bg-white/80 backdrop-blur-md border border-[#c5a059]/25 rounded-2xl p-4 sm:p-5 shadow-[0_10px_30px_-10px_rgba(7,19,38,0.05)] mb-10 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
             
             {/* Search Input */}
-            <div className="relative w-full md:w-84">
+            <div className="relative flex-1 max-w-full md:max-w-md">
               <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[19px] text-[#775a19]">search</span>
               <input
                 type="text"
@@ -107,30 +107,28 @@ export default function AcademyPage() {
               )}
             </div>
 
-            {/* Category Filter Tabs */}
-            <div className="flex flex-wrap items-stretch w-full gap-2 p-1.5 rounded-2xl bg-white/80 border border-[#e2d9c8]/80 shadow-sm">
-              {[
-                { id: 'all', label: t('filter_all') || 'Bütün Kurslar' },
-                ...courseCategories.map(cat => ({
-                  id: cat.key,
-                  label: getCategoryLabel(cat.key, currentLang)
-                }))
-              ].map(tab => {
-                const isActive = filter === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setFilter(tab.id)}
-                    className={`flex-1 min-w-[130px] sm:min-w-[150px] px-4 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer text-center flex items-center justify-center ${
-                      isActive
-                        ? 'bg-gradient-to-r from-[#071326] to-[#0c2242] text-[#e5c57d] shadow-md border border-[#c5a059]/40'
-                        : 'bg-[#faf8f5] text-[#475569] hover:text-[#071326] hover:bg-white border border-[#e2e8f0]'
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                );
-              })}
+            {/* Category Select Dropdown (Select Box) */}
+            <div className="relative w-full md:w-80 shrink-0">
+              <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[19px] text-[#775a19] pointer-events-none">
+                filter_list
+              </span>
+              <select
+                value={filter}
+                onChange={e => setFilter(e.target.value)}
+                className="w-full pl-10 pr-10 py-2.5 text-sm rounded-xl bg-[#faf8f5] border border-[#c5a059]/30 focus:border-[#775a19] focus:bg-white focus:ring-2 focus:ring-[#c5a059]/20 outline-none transition-all text-[#071326] font-medium appearance-none cursor-pointer shadow-2xs hover:border-[#c5a059]/60"
+              >
+                <option value="all">
+                  {t('filter_all') || 'Bütün Proqramlar'}
+                </option>
+                {courseCategories.map(cat => (
+                  <option key={cat.key} value={cat.key}>
+                    {getCategoryLabel(cat.key, currentLang)}
+                  </option>
+                ))}
+              </select>
+              <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[18px] text-[#775a19] pointer-events-none">
+                expand_more
+              </span>
             </div>
           </div>
 
