@@ -47,6 +47,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editBio, setEditBio] = useState('');
   const [editImage, setEditImage] = useState('');
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [editSpecialties, setEditSpecialties] = useState('');
   const [modalSchedule, setModalSchedule] = useState([]);
   const [modalSlotDate, setModalSlotDate] = useState(() => new Date().toISOString().split('T')[0]);
@@ -609,8 +610,12 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                       Profil Şəkli
                     </label>
                     <div className="flex items-center gap-3">
-                      <div className="w-14 h-14 rounded-xl border-2 border-amber-500/40 overflow-hidden shrink-0 bg-slate-100 flex items-center justify-center">
-                        {editImage ? (
+                      <div className="w-14 h-14 rounded-xl border-2 border-amber-500/40 overflow-hidden shrink-0 bg-slate-100 flex items-center justify-center relative shadow-xs">
+                        {isUploadingImage ? (
+                          <div className="flex flex-col items-center justify-center text-amber-600">
+                            <span className="material-symbols-outlined text-[20px] animate-spin">progress_activity</span>
+                          </div>
+                        ) : editImage ? (
                           <img
                             src={editImage}
                             alt="Önizləmə"
@@ -629,48 +634,59 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                           type="text"
                           value={editImage}
                           onChange={e => setEditImage(e.target.value)}
-                          placeholder="https://... şəkil linki"
+                          placeholder="https://... şəkil linki və ya fayl yükləyin"
                           className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-800 text-xs focus:outline-none focus:ring-1 focus:ring-amber-500"
                         />
                         <div className="flex items-center gap-2">
-                          <label className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-bold cursor-pointer transition-colors shadow-xs">
-                            <span className="material-symbols-outlined text-[14px]">upload</span>
-                            <span>Fayl Yüklə</span>
+                          <label className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-white text-[11px] font-bold cursor-pointer transition-colors shadow-xs ${
+                            isUploadingImage ? 'bg-amber-400 cursor-not-allowed' : 'bg-amber-600 hover:bg-amber-700'
+                          }`}>
+                            <span className="material-symbols-outlined text-[14px]">
+                              {isUploadingImage ? 'hourglass_top' : 'upload'}
+                            </span>
+                            <span>{isUploadingImage ? 'Yüklənir...' : 'Fayl Yüklə'}</span>
                             <input
                               type="file"
                               accept="image/*"
+                              disabled={isUploadingImage}
                               className="hidden"
-                              onChange={e => {
+                              onChange={async (e) => {
                                 const file = e.target.files?.[0];
                                 if (!file) return;
                                 if (file.size > 10 * 1024 * 1024) {
                                   if (showToast) showToast('Şəkil 10MB-dan böyük ola bilməz', 'error');
                                   return;
                                 }
-                                const reader = new FileReader();
-                                reader.onload = ev => {
-                                  const img = new window.Image();
-                                  img.onload = () => {
-                                    const MAX = 400;
-                                    const scale = Math.min(MAX / img.width, MAX / img.height, 1);
-                                    const w = Math.round(img.width * scale);
-                                    const h = Math.round(img.height * scale);
-                                    const canvas = document.createElement('canvas');
-                                    canvas.width = w;
-                                    canvas.height = h;
-                                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                                    const compressed = canvas.toDataURL('image/jpeg', 0.82);
-                                    setEditImage(compressed);
-                                    try {
-                                      const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
-                                      imgStore[liveCoach.id] = compressed;
-                                      localStorage.setItem('monodoxia_coach_images', JSON.stringify(imgStore));
-                                    } catch (err) {}
-                                    if (showToast) showToast('Şəkil hazırlandı və yadda saxlanıldı!', 'success');
+                                setIsUploadingImage(true);
+                                try {
+                                  const formData = new FormData();
+                                  formData.append('image', file);
+                                  const res = await fetch('/api.php?action=upload_image&prefix=coach', {
+                                    method: 'POST',
+                                    body: formData,
+                                    credentials: 'include'
+                                  });
+                                  const resData = await res.json().catch(() => null);
+                                  if (resData && resData.status === 'success' && resData.url) {
+                                    setEditImage(resData.url);
+                                    if (showToast) showToast('Şəkil serverdə (MySQL) uğurla saxlanıldı!', 'success');
+                                  } else {
+                                    const reader = new FileReader();
+                                    reader.onload = ev => {
+                                      setEditImage(ev.target.result);
+                                    };
+                                    reader.readAsDataURL(file);
+                                    if (showToast) showToast('Şəkil seçildi', 'info');
+                                  }
+                                } catch (err) {
+                                  const reader = new FileReader();
+                                  reader.onload = ev => {
+                                    setEditImage(ev.target.result);
                                   };
-                                  img.src = ev.target.result;
-                                };
-                                reader.readAsDataURL(file);
+                                  reader.readAsDataURL(file);
+                                } finally {
+                                  setIsUploadingImage(false);
+                                }
                               }}
                             />
                           </label>

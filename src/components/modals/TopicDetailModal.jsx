@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import DOMPurify from 'dompurify';
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { getLocalized } from '../../i18n/localize';
@@ -35,11 +36,19 @@ export default function TopicDetailModal() {
   const commentsCount = commentsList.reduce((acc, c) => acc + 1 + (Array.isArray(c.replies) ? c.replies.length : 0), 0) || topic.repliesCount || 0;
 
   const title = getLocalized(topic, 'title', currentLang, defaultLang) || topic.title || '';
-  const fullContent = topic.content || topic.desc || topic.snippet || '';
-  const badgeText = getLocalized(topic, 'badge', currentLang, defaultLang) || topic.badge || 'İcma Müzakirəsi';
+  const rawContent = topic.content || topic.desc || topic.snippet || '';
+  const badgeText = getLocalized(topic, 'badge', currentLang, defaultLang) || topic.badge || 'İcma & Bloq';
   const authorName = topic.author || 'Müəllif';
   const authorRole = topic.authorRole || 'İcma Üzvü';
   const timeText = topic.time || topic.time_ago || 'İndicə';
+  const coverImage = topic.coverImage || topic.image || '';
+  const readTime = topic.readTime || '3 dəqiqə';
+
+  // Sanitize Rich Text HTML to prevent XSS attacks
+  const sanitizedHtml = DOMPurify.sanitize(rawContent, {
+    ADD_TAGS: ['iframe', 'video', 'source', 'figure', 'figcaption'],
+    ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling', 'controls']
+  });
 
   const handleLike = (e) => {
     e.stopPropagation();
@@ -51,12 +60,12 @@ export default function TopicDetailModal() {
       const url = window.location.origin + window.location.pathname + '#icma';
       if (navigator.clipboard) {
         navigator.clipboard.writeText(url);
-        showToast('Mövzu linki kopyalandı', 'success');
+        showToast('Məqalə linki kopyalandı', 'success');
       } else {
-        showToast('Mövzu linki: ' + url, 'info');
+        showToast('Məqalə linki: ' + url, 'info');
       }
     } catch (e) {
-      showToast('Mövzu linki kopyalandı', 'success');
+      showToast('Məqalə linki kopyalandı', 'success');
     }
   };
 
@@ -101,118 +110,144 @@ export default function TopicDetailModal() {
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/65 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 overflow-y-auto"
+      className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 overflow-y-auto"
       onClick={closeTopicDetail}
     >
       <div
-        className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-[#c5a059]/30 overflow-hidden my-auto max-h-[92vh] flex flex-col"
+        className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-[#c5a059]/40 overflow-hidden my-auto max-h-[94vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* TOP LUXURY HEADER */}
-        <div className="bg-gradient-to-br from-[#070f1e] via-[#0d213f] to-[#040e1c] text-white p-6 sm:p-8 relative shrink-0 border-b border-[#c5a059]/30">
-          {/* Subtle Ambient Radial Glow */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-[#c5a059]/15 rounded-full blur-3xl pointer-events-none" />
+        {/* EDITORIAL BLOG HERO HEADER */}
+        <div className="bg-gradient-to-br from-[#070f1e] via-[#0d213f] to-[#040e1c] text-white relative shrink-0 border-b border-[#c5a059]/30">
+          {/* Ambient Glow */}
+          <div className="absolute top-0 right-0 w-80 h-80 bg-[#c5a059]/15 rounded-full blur-3xl pointer-events-none" />
 
           {/* Close button */}
           <button
             onClick={closeTopicDetail}
-            className="absolute top-5 right-5 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white flex items-center justify-center transition-all cursor-pointer z-10"
+            className="absolute top-5 right-5 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer z-20 shadow-md"
             title="Bağla"
           >
             <span className="material-symbols-outlined text-[20px]">close</span>
           </button>
 
-          {/* Badge & Pinned tag */}
-          <div className="flex items-center gap-2 mb-3 flex-wrap pr-10">
-            {topic.pinned && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40 tracking-wider uppercase">
-                <span className="material-symbols-outlined text-[13px]">push_pin</span>
-                <span>Sabit</span>
+          <div className="p-6 sm:p-10 relative z-10 pr-16 sm:pr-20">
+            {/* Meta Tags */}
+            <div className="flex items-center gap-2 mb-4 flex-wrap">
+              {topic.pinned && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40 tracking-wider uppercase">
+                  <span className="material-symbols-outlined text-[13px]">push_pin</span>
+                  <span>Sabitlənmiş Məqalə</span>
+                </span>
+              )}
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase bg-[#c5a059]/25 text-[#e5c57d] border border-[#c5a059]/40 shadow-xs">
+                <span className="material-symbols-outlined text-[13px]">article</span>
+                <span>{badgeText}</span>
               </span>
-            )}
-            <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] font-bold tracking-widest uppercase bg-[#c5a059]/20 text-[#e5c57d] border border-[#c5a059]/40">
-              <span className="material-symbols-outlined text-[12px]">forum</span>
-              <span>{badgeText}</span>
-            </span>
-          </div>
-
-          {/* Full Title */}
-          <h2 className="font-serif text-2xl sm:text-3xl font-normal leading-snug tracking-tight text-white mb-4">
-            "{title}"
-          </h2>
-
-          {/* Author & Timestamp Bar */}
-          <div className="flex items-center justify-between text-xs text-slate-300 pt-3 border-t border-white/10 flex-wrap gap-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#9e782f] to-[#c5a059] text-white font-serif font-bold text-xs flex items-center justify-center shadow-sm">
-                {authorName.charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <p className="font-semibold text-white leading-tight">{authorName}</p>
-                <p className="text-[11px] text-slate-400 font-light">{authorRole}</p>
-              </div>
+              <span className="inline-flex items-center gap-1 text-[11px] text-slate-300 font-mono bg-white/5 px-2.5 py-1 rounded-full border border-white/10">
+                <span className="material-symbols-outlined text-[13px] text-[#e5c57d]">timer</span>
+                <span>{readTime}</span>
+              </span>
             </div>
 
-            <div className="flex items-center gap-1.5 font-mono text-[11px] text-slate-400">
-              <span className="material-symbols-outlined text-[15px] text-[#c5a059]">schedule</span>
-              <span>{timeText}</span>
+            {/* Article Headline */}
+            <h1 className="font-serif text-2xl sm:text-4xl lg:text-[2.6rem] font-medium leading-[1.25] tracking-tight text-white mb-6">
+              {title}
+            </h1>
+
+            {/* Author Byline Bar */}
+            <div className="flex items-center justify-between text-xs text-slate-300 pt-4 border-t border-white/15 flex-wrap gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#9e782f] to-[#c5a059] text-white font-serif font-bold text-sm flex items-center justify-center shadow-md border-2 border-white/20 shrink-0">
+                  {authorName.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <p className="font-semibold text-white text-sm leading-tight">{authorName}</p>
+                  <p className="text-[11px] text-slate-300 font-light">{authorRole}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 text-slate-400 text-xs">
+                <div className="flex items-center gap-1 font-mono">
+                  <span className="material-symbols-outlined text-[15px] text-[#c5a059]">calendar_today</span>
+                  <span>{timeText}</span>
+                </div>
+                <button
+                  onClick={handleShare}
+                  className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+                  title="Məqalə linkini kopyala"
+                >
+                  <span className="material-symbols-outlined text-[14px] text-[#e5c57d]">share</span>
+                  <span>Paylaş</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* SCROLLABLE CONTENT BODY */}
-        <div className="p-6 sm:p-8 overflow-y-auto space-y-6 flex-1 text-[#071326]">
-          {/* Main Post Content */}
-          <div className="prose prose-slate max-w-none">
-            <div className="text-sm sm:text-base text-slate-700 leading-relaxed font-normal whitespace-pre-line bg-[#faf8f5] p-5 sm:p-6 rounded-2xl border border-[#e2d9c8]/70 shadow-inner">
-              {fullContent}
+        {/* SCROLLABLE ARTICLE BODY */}
+        <div className="p-6 sm:p-10 overflow-y-auto space-y-8 flex-1 text-[#071326] bg-[#faf8f5]">
+          
+          {/* Cover Image Feature */}
+          {coverImage && (
+            <div className="w-full max-h-[420px] rounded-3xl overflow-hidden shadow-lg border border-[#c5a059]/25 bg-slate-900">
+              <img
+                src={coverImage}
+                alt={title}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
             </div>
+          )}
+
+          {/* Editorial Content Body */}
+          <div className="bg-white p-6 sm:p-10 rounded-3xl border border-[#c5a059]/25 shadow-sm">
+            <div
+              className="prose prose-slate max-w-none text-slate-800 leading-relaxed font-normal text-base sm:text-lg space-y-4"
+              dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
+            />
           </div>
 
-          {/* Interaction Bar (Like, Comment Count, Share) */}
-          <div className="flex items-center justify-between py-3 px-4 rounded-xl bg-white border border-[#e2d9c8] shadow-sm flex-wrap gap-3">
+          {/* Social Interaction Toolbar */}
+          <div className="flex items-center justify-between py-4 px-6 rounded-2xl bg-white border border-[#c5a059]/25 shadow-sm flex-wrap gap-4">
             <div className="flex items-center gap-3">
-              {/* Like / Unlike Button */}
               <button
                 onClick={handleLike}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-sm ${
+                className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs ${
                   isLiked
                     ? 'bg-rose-50 border border-rose-300 text-rose-600 hover:bg-rose-100 scale-[1.02]'
-                    : 'bg-slate-50 border border-slate-200 text-slate-600 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200'
+                    : 'bg-slate-50 border border-slate-200 text-slate-700 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200'
                 }`}
-                title={isLiked ? 'Bəyənməni geri götür' : 'Bəyən'}
               >
-                <span className={`material-symbols-outlined text-[18px] transition-transform ${isLiked ? 'text-rose-600 fill-current scale-110' : 'text-slate-400'}`}>
+                <span className={`material-symbols-outlined text-[18px] ${isLiked ? 'text-rose-600 fill-current' : 'text-slate-400'}`}>
                   {isLiked ? 'favorite' : 'favorite_border'}
                 </span>
-                <span>{likesCount} {likesCount === 1 ? 'Bəyənmə' : 'Bəyənmə'}</span>
-                {isLiked && <span className="text-[10px] text-rose-500 font-bold ml-1">(Bəyəndiniz)</span>}
+                <span>{likesCount} Bəyənmə</span>
               </button>
 
-              {/* Comment Count Tag */}
-              <div className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 font-medium">
-                <span className="material-symbols-outlined text-[17px] text-[#775a19]">chat_bubble</span>
-                <span>{commentsCount} Rəy</span>
+              <div className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 font-semibold">
+                <span className="material-symbols-outlined text-[18px] text-[#775a19]">comment</span>
+                <span>{commentsCount} Şərh</span>
               </div>
             </div>
 
-            {/* Share button */}
             <button
               onClick={handleShare}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-[#071326] hover:bg-slate-100 transition-colors cursor-pointer"
-              title="Linki kopyala"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-[#071326] hover:bg-slate-100 transition-colors cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[16px] text-[#c5a059]">share</span>
-              <span>Paylaş</span>
+              <span className="material-symbols-outlined text-[16px] text-[#c5a059]">content_copy</span>
+              <span>Linki Kopyala</span>
             </button>
           </div>
 
-          {/* COMMENTS SECTION */}
-          <div className="pt-2 space-y-5">
-            <div className="flex items-center justify-between border-b border-[#e2d9c8]/70 pb-3">
-              <h3 className="font-serif text-lg font-bold text-[#070f1e] flex items-center gap-2">
-                <span>Müzakirə və Şərhlər</span>
-                <span className="text-xs font-sans font-bold px-2 py-0.5 rounded-full bg-[#c5a059]/15 text-[#775a19]">
+          {/* DISCUSSION & COMMENTS SECTION */}
+          <div className="space-y-6 pt-2">
+            <div className="flex items-center justify-between border-b border-[#c5a059]/30 pb-3">
+              <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#070f1e] flex items-center gap-2">
+                <span>Oxucu Şərhləri və Müzakirə</span>
+                <span className="text-xs font-sans font-bold px-2.5 py-0.5 rounded-full bg-[#c5a059]/15 text-[#775a19]">
                   {commentsCount}
                 </span>
               </h3>
@@ -220,216 +255,148 @@ export default function TopicDetailModal() {
                 <button
                   type="button"
                   onClick={() => setAuthModalOpen(true)}
-                  className="text-xs text-[#775a19] hover:underline font-medium cursor-pointer"
+                  className="text-xs text-[#775a19] hover:underline font-semibold cursor-pointer"
                 >
-                  Hesabla daxil ol
+                  Daxil olaraq yazın
                 </button>
               )}
             </div>
 
-            {/* Comment Form */}
-            <form onSubmit={handleSubmitComment} className="space-y-3 bg-[#faf8f5] p-4 sm:p-5 rounded-2xl border border-[#e2d9c8]">
-              {!currentUser && (
+            {/* Comment Post Form */}
+            {topic.allowComments !== false ? (
+              <form onSubmit={handleSubmitComment} className="space-y-3 bg-white p-5 sm:p-6 rounded-2xl border border-[#c5a059]/30 shadow-xs">
+                {!currentUser && (
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Adınız və ya Təxəllüsünüz
+                    </label>
+                    <input
+                      type="text"
+                      value={guestName}
+                      onChange={(e) => setGuestName(e.target.value)}
+                      placeholder="Məs: Rəşad M."
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#faf8f5] border border-slate-200 text-xs text-[#071326] focus:outline-none focus:border-[#775a19]"
+                    />
+                  </div>
+                )}
+
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1">
-                    Adınız və ya Təxəllüsünüz (opsional)
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                    {currentUser ? `Şərh yazırsınız: ${currentUser.firstName || currentUser.name || currentUser.email}` : 'Fikir və Təhliliniz'}
                   </label>
-                  <input
-                    type="text"
-                    value={guestName}
-                    onChange={(e) => setGuestName(e.target.value)}
-                    placeholder="Məs: Kənan M."
-                    className="w-full px-3 py-2 rounded-xl bg-white border border-[#c5a059]/30 text-xs text-[#071326] focus:outline-none focus:border-[#c5a059] shadow-sm"
+                  <textarea
+                    rows="3"
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    placeholder="Məqalə haqqında fikir və suallarınızı bölüşün..."
+                    className="w-full px-4 py-3 rounded-xl bg-[#faf8f5] border border-slate-200 text-sm text-[#071326] focus:outline-none focus:border-[#775a19] focus:bg-white transition-all shadow-inner"
                   />
                 </div>
-              )}
 
-              <div>
-                <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1">
-                  {currentUser ? `Rəy yazırsınız: ${currentUser.firstName || currentUser.email}` : 'Rəyiniz'}
-                </label>
-                <textarea
-                  value={commentText}
-                  onChange={(e) => setCommentText(e.target.value)}
-                  placeholder="Bu mövzu ilə bağlı fikir, təcrübə və ya sualınızı qeyd edin..."
-                  rows={3}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#c5a059]/30 text-xs sm:text-sm text-[#071326] focus:outline-none focus:border-[#c5a059] shadow-sm placeholder-slate-400 resize-none"
-                  required
-                />
+                <div className="flex items-center justify-between pt-1">
+                  <span className="text-[11px] text-slate-400 font-light">Etik və konstruktiv dialoqa üstünlük verilir.</span>
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#071326] to-[#0c2242] text-[#e5c57d] hover:text-white text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-sm hover:shadow"
+                  >
+                    {submitting ? 'Göndərilir...' : 'Şərhi Göndər'}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="p-4 bg-slate-100 rounded-2xl border border-slate-200 text-xs text-slate-500 italic text-center">
+                Bu məqalə üçün şərhlər müəllif tərəfindən bağlanmışdır.
               </div>
-
-              <div className="flex items-center justify-between pt-1">
-                <span className="text-[11px] text-slate-400 italic">
-                  İntellektual hörmət və etika qaydalarına riayət edin
-                </span>
-                <button
-                  type="submit"
-                  disabled={submitting || !commentText.trim()}
-                  className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-gradient-to-r from-[#070f1e] to-[#0c2242] hover:from-[#0c2242] hover:to-[#112d55] text-[#e5c57d] text-xs font-semibold tracking-wider uppercase shadow-md transition-all disabled:opacity-50 cursor-pointer"
-                >
-                  <span>Şərh Yaz</span>
-                  <span className="material-symbols-outlined text-[15px]">send</span>
-                </button>
-              </div>
-            </form>
+            )}
 
             {/* Comments List */}
-            <div className="space-y-3 pt-2">
-              {commentsList.length > 0 ? (
-                commentsList.map((c, idx) => (
-                  <div
-                    key={c.id || idx}
-                    className="p-4 rounded-2xl bg-white border border-[#e2d9c8]/70 shadow-sm space-y-2 hover:border-[#c5a059]/50 transition-colors"
-                  >
-                    <div className="flex items-center justify-between text-xs">
+            {commentsList.length === 0 ? (
+              <p className="text-xs text-slate-400 italic text-center py-4 bg-white rounded-2xl border border-dashed border-slate-200">
+                Hələ heç bir şərh yazılmayıb. İlk şərhi siz yazın!
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {commentsList.map((c) => (
+                  <div key={c.id || Math.random()} className="bg-white p-5 rounded-2xl border border-[#c5a059]/20 shadow-xs space-y-3">
+                    <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-full bg-[#c5a059]/20 text-[#775a19] font-bold text-[11px] flex items-center justify-center">
-                          {(c.author || 'Q').charAt(0).toUpperCase()}
+                        <div className="w-8 h-8 rounded-full bg-slate-100 text-[#071326] font-bold text-xs flex items-center justify-center border border-slate-200">
+                          {(c.author || 'Q')[0].toUpperCase()}
                         </div>
                         <div>
-                          <span className="font-semibold text-[#070f1e]">{c.author || 'Anonim'}</span>
-                          {c.authorRole && (
-                            <span className="ml-2 text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium">
-                              {c.authorRole}
-                            </span>
-                          )}
+                          <p className="text-xs font-bold text-[#071326]">{c.author || 'Oxucu'}</p>
+                          <p className="text-[10px] text-slate-400">{c.time || 'İndicə'}</p>
                         </div>
                       </div>
-                      <span className="text-[11px] text-slate-400 font-mono">{c.time || 'İndicə'}</span>
-                    </div>
 
-                    <p className="text-xs sm:text-sm text-slate-700 leading-relaxed pl-9 whitespace-pre-line font-normal">
-                      {c.text}
-                    </p>
-
-                    {/* Action Bar for Comment (Reply trigger) */}
-                    <div className="flex items-center justify-between pl-9 pt-1">
-                      <button
-                        type="button"
-                        onClick={() => handleToggleReply(c.id)}
-                        className={`inline-flex items-center gap-1.5 text-xs font-semibold transition-colors cursor-pointer ${
-                          activeReplyId === c.id
-                            ? 'text-[#775a19] underline'
-                            : 'text-slate-500 hover:text-[#775a19]'
-                        }`}
-                      >
-                        <span className="material-symbols-outlined text-[15px]">reply</span>
-                        <span>{activeReplyId === c.id ? 'Ləğv et' : 'Cavab yaz'}</span>
-                      </button>
-
-                      {Array.isArray(c.replies) && c.replies.length > 0 && (
-                        <span className="text-[11px] text-slate-400 font-mono">
-                          {c.replies.length} {c.replies.length === 1 ? 'cavab' : 'cavab'}
-                        </span>
+                      {topic.allowComments !== false && (
+                        <button
+                          type="button"
+                          onClick={() => handleToggleReply(c.id)}
+                          className="text-[11px] font-bold text-[#775a19] hover:text-[#071326] transition-colors cursor-pointer"
+                        >
+                          Cavab yaz
+                        </button>
                       )}
                     </div>
 
-                    {/* Inline Reply Form */}
-                    {activeReplyId === c.id && (
-                      <form
-                        onSubmit={(e) => handleSubmitReply(e, c.id)}
-                        className="ml-9 mt-2 p-3 sm:p-4 rounded-xl bg-[#faf8f5] border border-[#c5a059]/40 space-y-2.5 animate-fadeIn"
-                      >
-                        <div className="flex items-center justify-between text-[11px] text-[#775a19] font-semibold">
-                          <span className="flex items-center gap-1">
-                            <span className="material-symbols-outlined text-[14px]">reply</span>
-                            <span>{c.author} şəxsinə cavab yazırsınız</span>
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => setActiveReplyId(null)}
-                            className="text-slate-400 hover:text-slate-600 text-[10px] cursor-pointer"
-                          >
-                            ✕
-                          </button>
-                        </div>
+                    <p className="text-xs sm:text-sm text-slate-700 leading-relaxed pl-10">
+                      {c.text || c.content}
+                    </p>
 
+                    {/* Replies */}
+                    {Array.isArray(c.replies) && c.replies.length > 0 && (
+                      <div className="ml-10 pt-2 space-y-2 border-l-2 border-amber-200 pl-4">
+                        {c.replies.map((r, rIdx) => (
+                          <div key={r.id || rIdx} className="bg-[#faf8f5] p-3 rounded-xl border border-slate-100 space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[11px] font-bold text-[#071326]">{r.author || 'Cavab'}</span>
+                              <span className="text-[10px] text-slate-400">{r.time || 'İndicə'}</span>
+                            </div>
+                            <p className="text-xs text-slate-700">{r.text || r.content}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Reply Input Form */}
+                    {activeReplyId === c.id && (
+                      <form onSubmit={(e) => handleSubmitReply(e, c.id)} className="ml-10 pt-2 space-y-2">
                         {!currentUser && (
                           <input
                             type="text"
                             value={replyGuestName}
                             onChange={(e) => setReplyGuestName(e.target.value)}
-                            placeholder="Adınız və ya Təxəllüsünüz (opsional)"
-                            className="w-full px-3 py-1.5 rounded-lg bg-white border border-[#c5a059]/30 text-xs text-[#071326] focus:outline-none focus:border-[#c5a059]"
+                            placeholder="Adınız..."
+                            className="w-full px-3 py-1.5 rounded-lg bg-[#faf8f5] border border-slate-200 text-xs text-[#071326]"
                           />
                         )}
-
-                        <textarea
-                          value={replyText}
-                          onChange={(e) => setReplyText(e.target.value)}
-                          placeholder="Cavabınızı bura daxil edin..."
-                          rows={2}
-                          autoFocus
-                          className="w-full px-3 py-2 rounded-lg bg-white border border-[#c5a059]/30 text-xs text-[#071326] focus:outline-none focus:border-[#c5a059] shadow-inner resize-none"
-                          required
-                        />
-
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            type="button"
-                            onClick={() => setActiveReplyId(null)}
-                            className="px-3 py-1 rounded-lg text-xs font-medium text-slate-500 hover:bg-slate-200/60 cursor-pointer"
-                          >
-                            Bağla
-                          </button>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={replyText}
+                            onChange={(e) => setReplyText(e.target.value)}
+                            placeholder="Cavabınızı yazın..."
+                            className="flex-1 px-3 py-2 rounded-xl bg-[#faf8f5] border border-slate-200 text-xs text-[#071326] focus:outline-none focus:border-[#775a19]"
+                          />
                           <button
                             type="submit"
-                            disabled={submittingReply || !replyText.trim()}
-                            className="inline-flex items-center gap-1 px-4 py-1.5 rounded-lg bg-gradient-to-r from-[#070f1e] to-[#0c2242] text-[#e5c57d] text-xs font-semibold transition-all disabled:opacity-50 cursor-pointer shadow-sm"
+                            disabled={submittingReply}
+                            className="px-3.5 py-2 rounded-xl bg-[#071326] text-[#e5c57d] text-xs font-bold cursor-pointer hover:bg-black transition-colors"
                           >
-                            <span>Cavabla</span>
-                            <span className="material-symbols-outlined text-[13px]">send</span>
+                            Cavabla
                           </button>
                         </div>
                       </form>
                     )}
-
-                    {/* Nested Replies List */}
-                    {Array.isArray(c.replies) && c.replies.length > 0 && (
-                      <div className="ml-9 mt-3 pt-3 border-l-2 border-[#c5a059]/30 pl-3 sm:pl-4 space-y-2.5">
-                        {c.replies.map((reply, rIdx) => (
-                          <div
-                            key={reply.id || rIdx}
-                            className="p-3 rounded-xl bg-slate-50/80 border border-slate-200/80 space-y-1.5"
-                          >
-                            <div className="flex items-center justify-between text-xs">
-                              <div className="flex items-center gap-2">
-                                <div className="w-5 h-5 rounded-full bg-[#070f1e] text-[#e5c57d] font-bold text-[9px] flex items-center justify-center">
-                                  {(reply.author || 'Q').charAt(0).toUpperCase()}
-                                </div>
-                                <span className="font-semibold text-[#070f1e] text-xs">
-                                  {reply.author || 'Anonim'}
-                                </span>
-                                {reply.authorRole && (
-                                  <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-slate-200/70 text-slate-600 font-medium">
-                                    {reply.authorRole}
-                                  </span>
-                                )}
-                              </div>
-                              <span className="text-[10px] text-slate-400 font-mono">
-                                {reply.time || 'İndicə'}
-                              </span>
-                            </div>
-
-                            <p className="text-xs text-slate-700 pl-7 leading-relaxed whitespace-pre-line font-normal">
-                              {reply.text}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
                   </div>
-                ))
-              ) : (
-                <div className="text-center py-8 px-4 rounded-2xl bg-slate-50 border border-dashed border-slate-200">
-                  <span className="material-symbols-outlined text-3xl text-slate-400 mb-2">chat_bubble_outline</span>
-                  <p className="text-xs text-slate-500 font-medium">Hələ ki heç bir şərh yazılmayıb.</p>
-                  <p className="text-[11px] text-slate-400 mt-1">Bu mövzu haqqında ilk fikri siz bildirin!</p>
-                </div>
-              )}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
+
       </div>
     </div>
   );

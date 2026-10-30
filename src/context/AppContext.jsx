@@ -1093,6 +1093,11 @@ export function AppProvider({ children }) {
                 desc: p.snippet || p.content || '',
                 author: p.author,
                 authorRole: p.author_role || (defaultMatch?.authorRole) || 'Üzv',
+                authorAvatar: p.author_avatar || '',
+                coverImage: p.cover_image || (defaultMatch?.coverImage) || '',
+                readTime: p.read_time || '3 dəqiqə',
+                status: p.status || 'published',
+                category: p.category || 'general',
                 time: p.time_ago || 'İndicə',
                 likes: Number(p.likes) || (defaultMatch?.likes) || 0,
                 likedBy: parsedLikedBy,
@@ -2440,18 +2445,24 @@ export function AppProvider({ children }) {
     return true;
   };
 
-  const addTopic = (title, content, badge = "İcma Müzakirəsi", author = null, translations = {}) => {
+  const addTopic = (title, content, badge = "İcma Müzakirəsi", author = null, translations = {}, extraData = {}) => {
+    const rawSnippet = content ? content.replace(/<[^>]*>?/gm, '').slice(0, 180) : '';
     const newT = {
       id: 'topic-' + Date.now(),
       badge: badge || "İcma Müzakirəsi",
       badgeClass: "text-secondary font-semibold",
       time: "İndicə",
       title,
-      snippet: content,
+      snippet: rawSnippet,
       content,
-      desc: content,
+      desc: rawSnippet,
       author: author || (currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : "Üzv"),
       authorRole: currentUser?.role || "Klub Üzvü",
+      authorAvatar: currentUser?.avatar || '',
+      coverImage: extraData.coverImage || '',
+      readTime: extraData.readTime || '3 dəqiqə',
+      status: extraData.status || 'published',
+      category: extraData.category || 'general',
       likes: 1,
       likedBy: currentUser?.id ? [currentUser.id] : ['guest'],
       repliesCount: 0,
@@ -2465,7 +2476,7 @@ export function AppProvider({ children }) {
     });
     setNewTopicModalOpen(false);
     apiCall('save_community_post', newT);
-    showToast('Mövzu uğurla dərc edildi.', 'success');
+    showToast(newT.status === 'draft' ? 'Qaralama olaraq yadda saxlanıldı.' : 'Məzmun uğurla dərc edildi.', 'success');
   };
 
   const deleteTopic = (topicId) => {
@@ -2723,7 +2734,7 @@ export function AppProvider({ children }) {
     return { success: true, application: newApp };
   };
 
-  const submitTopicApplication = (title, content, badge = "İcma Müzakirəsi") => {
+  const submitTopicApplication = (title, content, badge = "İcma Müzakirəsi", extraData = {}) => {
     if (!currentUser) {
       setAuthModalTab('login');
       setAuthModalOpen(true);
@@ -2752,7 +2763,10 @@ export function AppProvider({ children }) {
       formResponses: {
         fld_topic_title: title,
         fld_topic_content: content,
-        fld_badge: badge
+        fld_badge: badge,
+        cover_image: extraData.coverImage || '',
+        read_time: extraData.readTime || '3 dəqiqə',
+        category: extraData.category || 'general'
       },
       archived: false
     };
@@ -2947,17 +2961,22 @@ export function AppProvider({ children }) {
         const isPinned = Boolean(updatedApp.isPinned ?? updatedApp.pinned ?? false);
         const allowComments = updatedApp.allowComments !== undefined ? Boolean(updatedApp.allowComments) : true;
 
+        const rawSnippet = topicContent ? topicContent.replace(/<[^>]*>?/gm, '').slice(0, 180) : '';
         const approvedTopic = {
           id: topicId,
           badge: topicBadge,
           badgeClass: 'text-secondary font-semibold',
           time: 'İndicə',
           title: topicTitle,
-          snippet: topicContent,
+          snippet: rawSnippet,
           content: topicContent,
-          desc: topicContent,
+          desc: rawSnippet,
           author: topicAuthor,
           authorRole: 'Üzv',
+          coverImage: updatedApp.formResponses?.cover_image || '',
+          readTime: updatedApp.formResponses?.read_time || '3 dəqiqə',
+          status: 'published',
+          category: updatedApp.formResponses?.category || 'general',
           likes: 1,
           repliesCount: 0,
           pinned: isPinned,

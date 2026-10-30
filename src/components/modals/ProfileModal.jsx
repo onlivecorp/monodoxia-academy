@@ -146,13 +146,29 @@ export default function ProfileModal() {
     return fieldKey.replace(/^fld_/, '').replace(/_/g, ' ');
   };
 
-  const handleAvatarFile = (e) => {
+  const handleAvatarFile = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      showToast('Şəkil ölçüsü 5MB-dan çox ola bilməz', 'error');
+    if (file.size > 10 * 1024 * 1024) {
+      showToast('Şəkil ölçüsü 10MB-dan çox ola bilməz', 'error');
       return;
     }
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await fetch('/api.php?action=upload_image&prefix=avatar', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include'
+      });
+      const resData = await res.json().catch(() => null);
+      if (resData && resData.status === 'success' && resData.url) {
+        setProfileForm(p => ({ ...p, avatar: resData.url }));
+        updateCurrentUser({ avatar: resData.url, image: resData.url });
+        showToast('Profil şəkli bazada saxlanıldı!', 'success');
+        return;
+      }
+    } catch (err) {}
     const reader = new FileReader();
     reader.onload = (event) => {
       const dataUrl = event.target.result;
@@ -1597,27 +1613,29 @@ export default function ProfileModal() {
                             type="file"
                             accept="image/*"
                             className="hidden"
-                            onChange={e => {
+                            onChange={async e => {
                               const file = e.target.files?.[0];
                               if (!file) return;
                               if (file.size > 10 * 1024 * 1024) { showToast('Şəkil 10MB-dan böyük ola bilməz', 'error'); return; }
+                              try {
+                                const formData = new FormData();
+                                formData.append('image', file);
+                                const res = await fetch('/api.php?action=upload_image&prefix=coach', {
+                                  method: 'POST',
+                                  body: formData,
+                                  credentials: 'include'
+                                });
+                                const resData = await res.json().catch(() => null);
+                                if (resData && resData.status === 'success' && resData.url) {
+                                  setExpertImage(resData.url);
+                                  showToast('Şəkil serverdə (MySQL) saxlanıldı!', 'success');
+                                  return;
+                                }
+                              } catch (err) {}
                               const reader = new FileReader();
                               reader.onload = ev => {
-                                const img = new window.Image();
-                                img.onload = () => {
-                                  const MAX = 400;
-                                  const scale = Math.min(MAX / img.width, MAX / img.height, 1);
-                                  const w = Math.round(img.width * scale);
-                                  const h = Math.round(img.height * scale);
-                                  const canvas = document.createElement('canvas');
-                                  canvas.width = w;
-                                  canvas.height = h;
-                                  canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                                  const compressed = canvas.toDataURL('image/jpeg', 0.75);
-                                  setExpertImage(compressed);
-                                  showToast('Şəkil yükləndi!', 'success');
-                                };
-                                img.src = ev.target.result;
+                                setExpertImage(ev.target.result);
+                                showToast('Şəkil seçildi', 'info');
                               };
                               reader.readAsDataURL(file);
                             }}

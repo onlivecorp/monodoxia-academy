@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { getLocalized } from '../i18n/localize';
 import { useApp } from '../context/AppContext';
@@ -15,66 +15,76 @@ export default function CommunityPage() {
     isTopicLiked,
     currentUser,
     setAuthModalOpen,
-    categoriesList,
-    getCategoryLabel
+    categoriesList = []
   } = useApp();
 
   const community = homeContent?.community || {};
-  const [filterTag, setFilterTag] = useState('all');
+  const [filterCategory, setFilterCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+  const [sortBy, setSortBy] = useState('latest'); // 'latest', 'popular', 'readTime'
 
   const safeTopics = Array.isArray(communityTopics) ? communityTopics : [];
 
-  // Extract tags from topics (supports badges, categories, and tags)
-  const allTags = Array.from(
+  // Filter out drafts if not author or admin
+  const visibleTopics = safeTopics.filter(t => {
+    if (!t) return false;
+    if (t.status === 'draft') {
+      if (currentUser?.role === 'Admin') return true;
+      if (currentUser && t.author === `${currentUser.firstName} ${currentUser.lastName}`) return true;
+      return false;
+    }
+    return true;
+  });
+
+  // Extract all categories
+  const allCategories = Array.from(
     new Set(
-      safeTopics.flatMap(t => {
+      visibleTopics.flatMap(t => {
         if (!t) return [];
         const result = [];
-        if (Array.isArray(t.tags)) result.push(...t.tags);
-        if (typeof t.tag === 'string') result.push(t.tag);
-        if (typeof t.badge === 'string') result.push(t.badge.replace('📌 ', '').trim());
-        if (typeof t.category === 'string') result.push(t.category);
+        if (t.badge) result.push(t.badge.replace('📌 ', '').replace('🌟 ', '').trim());
+        if (t.category && t.category !== 'general') result.push(t.category);
         return result;
       }).filter(Boolean)
     )
   );
 
-  const filteredTopics = safeTopics.filter(t => {
+  const filteredTopics = visibleTopics.filter(t => {
     if (!t) return false;
-    const cleanBadge = (t.badge || '').replace('📌 ', '').trim();
-    const matchesTag = filterTag === 'all' ||
-      cleanBadge === filterTag ||
-      t.badge === filterTag ||
-      t.category === filterTag ||
-      (Array.isArray(t.tags) && t.tags.includes(filterTag)) ||
-      t.tag === filterTag;
+    const cleanBadge = (t.badge || '').replace('📌 ', '').replace('🌟 ', '').trim();
+    const matchesCat = filterCategory === 'all' ||
+      cleanBadge === filterCategory ||
+      t.badge === filterCategory ||
+      t.category === filterCategory;
 
     const title = getLocalized(t, 'title', currentLang, defaultLang) || t.title || '';
     const desc = getLocalized(t, 'snippet', currentLang, defaultLang) || getLocalized(t, 'desc', currentLang, defaultLang) || t.snippet || t.desc || t.content || '';
     const author = t.author || '';
-    const badge = t.badge || '';
 
     const matchesSearch = !searchQuery.trim() ||
       title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       desc.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      badge.toLowerCase().includes(searchQuery.toLowerCase()) ||
       author.toLowerCase().includes(searchQuery.toLowerCase());
 
-    return matchesTag && matchesSearch;
+    return matchesCat && matchesSearch;
   }).sort((a, b) => {
-    const aWeekly = Boolean(a.isWeekly || (typeof a.badge === 'string' && a.badge.includes('Həftənin Mövzusu')));
-    const bWeekly = Boolean(b.isWeekly || (typeof b.badge === 'string' && b.badge.includes('Həftənin Mövzusu')));
-    if (aWeekly !== bWeekly) return aWeekly ? -1 : 1;
+    // Pinned always on top
     const aPin = Boolean(a.pinned || (typeof a.badge === 'string' && a.badge.includes('📌')));
     const bPin = Boolean(b.pinned || (typeof b.badge === 'string' && b.badge.includes('📌')));
-    if (aPin === bPin) return 0;
-    return aPin ? -1 : 1;
+    if (aPin !== bPin) return aPin ? -1 : 1;
+
+    if (sortBy === 'popular') {
+      return (b.likes || 0) - (a.likes || 0);
+    }
+    // Default: latest
+    return 0;
   });
 
-  const weeklyTopic = safeTopics.find(t => t.id === community.weeklyTopicId || t.isWeekly || t.badge?.includes('Həftənin Mövzusu'));
+  const featuredPost = filteredTopics.find(t => t.pinned || t.isWeekly) || filteredTopics[0];
+  const listPosts = featuredPost ? filteredTopics.filter(t => t.id !== featuredPost.id) : filteredTopics;
 
-  const handleCreateTopic = () => {
+  const handleCreateArticle = () => {
     if (!currentUser) {
       setAuthModalOpen(true);
     } else {
@@ -82,303 +92,356 @@ export default function CommunityPage() {
     }
   };
 
-  const handleWeeklyTopicClick = () => {
-    if (weeklyTopic) {
-      openTopicDetail(weeklyTopic);
-    } else {
-      handleCreateTopic();
-    }
-  };
-
   return (
     <div className="min-h-screen bg-[#faf8f5] text-[#071326]">
-      {/* Editorial Page Hero */}
+      {/* EDITORIAL HERO */}
       <PageHero
-        badge={getLocalized(community, 'badge', currentLang, defaultLang) || 'İntellektual Şəbəkə'}
-        title={getLocalized(community, 'title', currentLang, defaultLang) || 'Düşüncə və Təcrübə Mübadiləsi'}
-        description={getLocalized(community, 'desc', currentLang, defaultLang) || 'Akademiyamızın tələbələri və klub Üzvləri üçün gündəlik fəlsəfi dialoq, dərin suallar və daxili kəşflər sahəsi.'}
-        breadcrumbs={[{ label: 'İcma' }]}
+        badge={getLocalized(community, 'badge', currentLang, defaultLang) || 'Bloq & İcma Platforması'}
+        title={getLocalized(community, 'title', currentLang, defaultLang) || 'Bilik, Düşüncə və Təcrübə Bloqu'}
+        description={getLocalized(community, 'desc', currentLang, defaultLang) || 'Müasir psixologiya, nevrobiologiya, kouçinq və daxili inkişaf sahəsində mütəxəssislərin elmi məqalələri və açıq müzakirələri.'}
+        breadcrumbs={[{ label: 'Bloq & İcma' }]}
         adminCmsBlock="community"
       >
         <div className="flex flex-wrap items-center justify-between gap-4 mt-8 pt-6 border-t border-[#c5a059]/20">
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
-              <span className="material-symbols-outlined text-[#775a19] text-[18px]">
-                {community.heroBadge1Icon || 'verified_user'}
-              </span>
-              <span className="font-medium">{getLocalized(community, 'heroBadge1Text', currentLang, defaultLang) || 'Konfidensiallıq və Qarşılıqlı Hörmət'}</span>
+              <span className="material-symbols-outlined text-[#775a19] text-[18px]">verified</span>
+              <span className="font-medium">Elmi və Praktik Məqalələr</span>
             </div>
 
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
-              <span className="material-symbols-outlined text-[#775a19] text-[18px]">
-                {community.heroBadge2Icon || 'psychology'}
-              </span>
-              <span className="font-medium">{getLocalized(community, 'heroBadge2Text', currentLang, defaultLang) || 'Moderasiya Olunan Dərin Dialoq'}</span>
+              <span className="material-symbols-outlined text-[#775a19] text-[18px]">psychology</span>
+              <span className="font-medium">Dərin İntellektual Təhlillər</span>
             </div>
           </div>
 
           <button
-            onClick={handleCreateTopic}
+            onClick={handleCreateArticle}
             className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#071326] to-[#0c2242] text-white hover:text-[#e5c57d] font-semibold text-xs tracking-wider uppercase transition-all flex items-center gap-2 cursor-pointer shadow-md hover:shadow-lg group/btn"
           >
-            <span className="material-symbols-outlined text-[17px] text-[#e5c57d] group-hover/btn:scale-110 transition-transform">add_circle</span>
-            <span>{getLocalized(community, 'newTopicBtnText', currentLang, defaultLang) || 'Yeni Mövzu Başlat'}</span>
+            <span className="material-symbols-outlined text-[17px] text-[#e5c57d] group-hover/btn:scale-110 transition-transform">edit_note</span>
+            <span>Məqalə / Mövzu Yaz</span>
           </button>
         </div>
       </PageHero>
 
-      {/* Main Section */}
-      <section className="py-14 sm:py-20 relative overflow-hidden">
-        {/* Subtle Ambient Radial Glow */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[950px] h-[650px] bg-gradient-to-b from-[#c5a059]/7 via-transparent to-transparent rounded-full blur-3xl pointer-events-none" />
+      {/* MAIN CONTENT AREA */}
+      <section className="py-12 sm:py-16 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-10">
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* TOOLBAR: SEARCH, CATEGORY DROPDOWN & VIEW MODE */}
+          <div className="bg-white rounded-3xl border border-[#c5a059]/30 p-5 sm:p-6 shadow-[0_10px_30px_-10px_rgba(7,19,38,0.05)] flex flex-wrap items-center justify-between gap-4">
             
-            {/* Left Column: Topics Feed (2 Cols) */}
-            <div className="lg:col-span-2 space-y-6">
-              
-              {/* Search & Tag Filter Toolbar */}
-              <div className="bg-white/80 backdrop-blur-md border border-[#c5a059]/25 rounded-2xl p-5 shadow-[0_10px_30px_-10px_rgba(7,19,38,0.05)] space-y-4">
-                <div className="relative">
-                  <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[19px] text-[#775a19]">search</span>
-                  <input
-                    type="text"
-                    placeholder="Mövzu və ya müəllif axtar..."
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-9 py-2.5 text-sm rounded-xl bg-[#faf8f5] border border-[#c5a059]/30 focus:border-[#775a19] focus:bg-white focus:ring-2 focus:ring-[#c5a059]/20 outline-none transition-all placeholder-[#94a3b8] text-[#071326]"
-                  />
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery('')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94a3b8] hover:text-[#071326] transition-colors p-1"
-                    >
-                      <span className="material-symbols-outlined text-[16px]">close</span>
-                    </button>
-                  )}
-                </div>
-
-                {allTags.length > 0 && (
-                  <div className="flex flex-wrap items-center gap-2 pt-1">
-                    <button
-                      onClick={() => setFilterTag('all')}
-                      className={`px-4 py-1.5 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer ${
-                        filterTag === 'all'
-                          ? 'bg-gradient-to-r from-[#071326] to-[#0c2242] text-[#e5c57d] shadow-sm border border-[#c5a059]/40'
-                          : 'bg-[#faf8f5] text-[#475569] hover:text-[#071326] hover:bg-white border border-[#e2e8f0]'
-                      }`}
-                    >
-                      Bütün Mövzular ({safeTopics.length})
-                    </button>
-                    {allTags.map(tag => {
-                      const isActive = filterTag === tag;
-                      return (
-                        <button
-                          key={tag}
-                          onClick={() => setFilterTag(tag)}
-                          className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer ${
-                            isActive
-                              ? 'bg-gradient-to-r from-[#071326] to-[#0c2242] text-[#e5c57d] shadow-sm border border-[#c5a059]/40'
-                              : 'bg-[#faf8f5] text-[#475569] hover:text-[#071326] hover:bg-white border border-[#e2e8f0]'
-                          }`}
-                        >
-                          #{tag}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
-              {/* Topics List */}
-              {filteredTopics.length === 0 ? (
-                <div className="bg-white rounded-3xl border border-[#c5a059]/30 p-12 text-center shadow-[0_15px_40px_-15px_rgba(7,19,38,0.07)]">
-                  <div className="w-16 h-16 rounded-2xl bg-[#c5a059]/15 text-[#775a19] flex items-center justify-center mx-auto mb-4">
-                    <span className="material-symbols-outlined text-3xl">forum</span>
-                  </div>
-                  <h4 className="font-serif text-xl font-medium text-[#071326] mb-2">Heç bir mövzu tapılmadı</h4>
-                  <p className="text-sm text-[#64748b] mb-6 font-light">İlk intellektual mövzunu başlatmaq üçün aşağıdakı düyməyə klikləyin.</p>
-                  <button
-                    onClick={handleCreateTopic}
-                    className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#071326] to-[#0c2242] text-[#e5c57d] text-xs font-semibold tracking-wider uppercase shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
-                  >
-                    Yeni Mövzu Başlat
-                  </button>
-                </div>
-              ) : (
-                filteredTopics.map((topic) => {
-                  const title = getLocalized(topic, 'title', currentLang, defaultLang) || topic.title;
-                  const desc = getLocalized(topic, 'snippet', currentLang, defaultLang) || getLocalized(topic, 'desc', currentLang, defaultLang) || topic.snippet || topic.desc || topic.content || '';
-                  const badge = getLocalized(topic, 'badge', currentLang, defaultLang) || topic.badge || topic.category || topic.tag;
-
-                  return (
-                    <div
-                      key={topic.id}
-                      className="group relative bg-white rounded-3xl border border-[#c5a059]/25 hover:border-[#c5a059]/60 shadow-[0_6px_25px_-6px_rgba(7,19,38,0.06)] hover:shadow-[0_15px_35px_-10px_rgba(7,19,38,0.12)] hover:-translate-y-0.5 transition-all duration-300 p-7 sm:p-8 overflow-hidden"
-                    >
-                      {/* Top Gold Ambient Sheen on Pinned or Hover */}
-                      <div className={`h-1.5 w-full absolute top-0 left-0 bg-gradient-to-r from-[#c5a059] via-[#e5c57d] to-[#775a19] ${topic.pinned ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-300`} />
-
-                      {/* Topic Header */}
-                      <div className="flex items-center justify-between gap-3 mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#071326] to-[#0c2242] text-[#e5c57d] font-serif font-bold text-xs flex items-center justify-center shrink-0 shadow-sm">
-                            {topic.author?.charAt(0) || 'R'}
-                          </div>
-                          <div>
-                            <span className="font-semibold text-xs sm:text-sm text-[#071326] block leading-tight">{topic.author || 'Üzv'}</span>
-                            <span className="text-[11px] text-[#64748b] block">{topic.time || topic.time_ago || topic.date || 'İndicə'}</span>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          {topic.pinned && (
-                            <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-700 border border-amber-500/30 flex items-center gap-1">
-                              <span className="material-symbols-outlined text-[13px]">push_pin</span>
-                              <span>Sabitlənib</span>
-                            </span>
-                          )}
-                          {badge && (
-                            <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-[#c5a059]/15 border border-[#c5a059]/35 text-[#775a19] uppercase tracking-wider">
-                              #{badge.replace('📌 ', '')}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Title & Desc */}
-                      <h3 
-                        onClick={() => openTopicDetail(topic)}
-                        className="font-serif text-xl sm:text-2xl font-medium text-[#071326] mb-3 leading-snug group-hover:text-[#775a19] transition-colors cursor-pointer"
-                      >
-                        {title}
-                      </h3>
-                      <p 
-                        onClick={() => openTopicDetail(topic)}
-                        className="text-xs sm:text-sm text-[#475569] leading-relaxed mb-6 font-light cursor-pointer hover:text-slate-800 transition-colors"
-                      >
-                        {desc}
-                      </p>
-
-                      {/* Footer Actions */}
-                      <div className="flex items-center justify-between pt-4 border-t border-[#e2d9c8]/70 text-xs text-[#64748b]">
-                        <div className="flex items-center gap-4">
-                          <button
-                            onClick={() => openTopicDetail(topic)}
-                            className="flex items-center gap-1.5 hover:text-[#071326] transition-colors cursor-pointer"
-                            title="Şərhləri oxu və ya yaz"
-                          >
-                            <span className="material-symbols-outlined text-[16px] text-[#775a19]">forum</span>
-                            <span className="font-medium">{topic.comments?.length || topic.repliesCount || topic.replies || topic.commentsCount || 0} şərh</span>
-                          </button>
-                          <button
-                            onClick={() => likeTopic(topic.id)}
-                            className={`flex items-center gap-1.5 transition-colors cursor-pointer px-2 py-0.5 rounded-md ${
-                              isTopicLiked(topic.id)
-                                ? 'text-rose-600 bg-rose-50 font-bold'
-                                : 'hover:text-rose-600'
-                            }`}
-                            title={isTopicLiked(topic.id) ? 'Bəyənməni geri götür' : 'Bəyən'}
-                          >
-                            <span className={`material-symbols-outlined text-[16px] ${isTopicLiked(topic.id) ? 'text-rose-600 fill-current' : 'text-rose-500/80'}`}>
-                              {isTopicLiked(topic.id) ? 'favorite' : 'favorite_border'}
-                            </span>
-                            <span className="font-medium">{topic.likes || 0} bəyənmə</span>
-                          </button>
-                        </div>
-
-                        {topic.allowComments === false ? (
-                          <span className="text-[#94a3b8] text-xs italic flex items-center gap-1">
-                            <span className="material-symbols-outlined text-[14px]">lock</span>
-                            <span>Rəylərə bağlıdır</span>
-                          </span>
-                        ) : (
-                          <button
-                            onClick={() => openTopicDetail(topic)}
-                            className="text-[#775a19] hover:text-[#071326] text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
-                          >
-                            <span>Ətraflı oxu & Cavab yaz</span>
-                            <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })
+            {/* Search Bar */}
+            <div className="relative flex-1 min-w-[240px]">
+              <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[19px] text-[#775a19]">search</span>
+              <input
+                type="text"
+                placeholder="Məqalə, müəllif və ya mövzu axtar..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-9 py-2.5 text-xs sm:text-sm rounded-xl bg-[#faf8f5] border border-[#c5a059]/30 focus:border-[#775a19] focus:bg-white focus:outline-none transition-all placeholder-[#94a3b8] text-[#071326]"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94a3b8] hover:text-[#071326] transition-colors p-1"
+                >
+                  <span className="material-symbols-outlined text-[16px]">close</span>
+                </button>
               )}
             </div>
 
-            {/* Right Column: Community Guidelines & Moderator Info */}
-            <div className="space-y-8">
-              
-              {/* Community Rules Card */}
-              <div className="bg-white rounded-3xl border border-[#c5a059]/30 p-7 sm:p-8 shadow-[0_10px_30px_-10px_rgba(7,19,38,0.05)]">
-                <div className="flex items-center gap-2.5 mb-5 text-[#071326]">
-                  <span className="material-symbols-outlined text-[#775a19] text-2xl">
-                    {community.rulesIcon || 'shield'}
-                  </span>
-                  <h4 className="font-serif text-lg font-medium">
-                    {getLocalized(community, 'rulesTitle', currentLang, defaultLang) || 'İcma Etikası və Qaydaları'}
-                  </h4>
-                </div>
-                <div className="space-y-4 text-xs sm:text-sm text-[#475569] leading-relaxed font-light">
-                  <div className="flex items-start gap-2.5">
-                    <span className="material-symbols-outlined text-[#775a19] text-[18px] shrink-0 mt-0.5">check_circle</span>
-                    <span>
-                      <strong className="text-[#071326] font-semibold">{getLocalized(community, 'rule1Title', currentLang, defaultLang) || 'Məxfilik prinsipi:'} </strong>
-                      {getLocalized(community, 'rule1Desc', currentLang, defaultLang) || 'Müzakirə olunan şəxsi təcrübələr və etiraflar icmadan kənara çıxarılmır.'}
-                    </span>
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <span className="material-symbols-outlined text-[#775a19] text-[18px] shrink-0 mt-0.5">check_circle</span>
-                    <span>
-                      <strong className="text-[#071326] font-semibold">{getLocalized(community, 'rule2Title', currentLang, defaultLang) || 'Konstruktiv yanaşma:'} </strong>
-                      {getLocalized(community, 'rule2Desc', currentLang, defaultLang) || 'Qınaq və mühakimə yoxdur; hər fikir təkamül nöqteyi-nəzərindən dinlənilir.'}
-                    </span>
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <span className="material-symbols-outlined text-[#775a19] text-[18px] shrink-0 mt-0.5">check_circle</span>
-                    <span>
-                      <strong className="text-[#071326] font-semibold">{getLocalized(community, 'rule3Title', currentLang, defaultLang) || 'Səthilikdən uzaq:'} </strong>
-                      {getLocalized(community, 'rule3Desc', currentLang, defaultLang) || 'Siyasi, polemik və ya kommersiya xarakterli paylaşımlar qadağandır.'}
-                    </span>
-                  </div>
-                </div>
+            {/* Category Dropdown */}
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider hidden sm:inline">Kateqoriya:</span>
+                <select
+                  value={filterCategory}
+                  onChange={(e) => setFilterCategory(e.target.value)}
+                  className="px-3 py-2 bg-[#faf8f5] border border-[#c5a059]/30 rounded-xl text-xs font-semibold text-[#071326] focus:border-[#775a19] focus:outline-none cursor-pointer"
+                >
+                  <option value="all">Bütün Bloq Yazıları ({visibleTopics.length})</option>
+                  {allCategories.map(cat => (
+                    <option key={cat} value={cat}>#{cat}</option>
+                  ))}
+                </select>
               </div>
 
-              {/* Weekly Discussion Theme in Velvet Obsidian */}
-              <div className="rounded-3xl bg-gradient-to-br from-[#071326] via-[#0a1932] to-[#040e1c] border border-[#c5a059]/30 p-7 sm:p-8 text-white shadow-xl relative overflow-hidden">
-                <div className="absolute -top-20 -left-20 w-52 h-52 bg-[#c5a059]/15 rounded-full blur-3xl pointer-events-none" />
-
-                <div className="relative z-10">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#c5a059]/20 border border-[#c5a059]/40 text-[#e5c57d] text-[10px] font-bold tracking-widest uppercase mb-3">
-                    <span className="material-symbols-outlined text-[13px]">psychology</span>
-                    <span>{getLocalized(community, 'weeklyBadge', currentLang, defaultLang) || 'Həftənin Fəlsəfi Mövzusu'}</span>
-                  </div>
-                  <h4 className="font-serif text-lg sm:text-xl font-medium text-white mb-2 leading-snug">
-                    {getLocalized(community, 'weeklyTitle', currentLang, defaultLang) || '"Daxili təzyiq qarşısında şüurlu müşahidəçi qalmaq necə mümkündür?"'}
-                  </h4>
-                  <p className="text-xs sm:text-sm text-[#cbd5e1] font-light leading-relaxed mb-6">
-                    {getLocalized(community, 'weeklyDesc', currentLang, defaultLang) || 'Bu həftə mentorlarımızın fasilitasiyası ilə emosional reaktivliyi idarə etməyin nevrobioloji yollarını müzakirə edirik.'}
-                  </p>
-                  <button
-                    onClick={handleWeeklyTopicClick}
-                    className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#c5a059] via-[#e5c57d] to-[#b38f46] text-[#071326] font-semibold text-xs tracking-wider uppercase shadow-lg shadow-[#c5a059]/20 hover:shadow-xl hover:shadow-[#c5a059]/35 hover:scale-[1.02] active:scale-[0.98] transition-all text-center cursor-pointer"
-                  >
-                    {weeklyTopic ? 'Müzakirəni Aç və Şərh Yaz' : (getLocalized(community, 'weeklyBtnText', currentLang, defaultLang) || 'Müzakirəyə Qoşul')}
-                  </button>
-                </div>
+              {/* Sort By Dropdown */}
+              <div className="flex items-center gap-2">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="px-3 py-2 bg-[#faf8f5] border border-[#c5a059]/30 rounded-xl text-xs font-semibold text-[#071326] focus:border-[#775a19] focus:outline-none cursor-pointer"
+                >
+                  <option value="latest">Ən Yenilər</option>
+                  <option value="popular">Ən Çox Bəyənilənlər</option>
+                </select>
               </div>
 
+              {/* View Toggle */}
+              <div className="flex items-center rounded-xl bg-slate-100 p-1 border border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setViewMode('grid')}
+                  className={`p-1.5 rounded-lg transition-colors cursor-pointer ${viewMode === 'grid' ? 'bg-white text-[#775a19] shadow-xs' : 'text-slate-400 hover:text-slate-700'}`}
+                  title="Qrid görünüşü"
+                >
+                  <span className="material-symbols-outlined text-[18px]">grid_view</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode('list')}
+                  className={`p-1.5 rounded-lg transition-colors cursor-pointer ${viewMode === 'list' ? 'bg-white text-[#775a19] shadow-xs' : 'text-slate-400 hover:text-slate-700'}`}
+                  title="Siyahı görünüşü"
+                >
+                  <span className="material-symbols-outlined text-[18px]">view_list</span>
+                </button>
+              </div>
             </div>
 
           </div>
+
+          {/* FEATURED HERO POST (IF NOT FILTERING BY SEARCH) */}
+          {featuredPost && !searchQuery && filterCategory === 'all' && (
+            <div
+              onClick={() => openTopicDetail(featuredPost)}
+              className="group relative bg-white rounded-3xl border border-[#c5a059]/35 overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer grid grid-cols-1 lg:grid-cols-12 gap-0"
+            >
+              {/* Featured Cover Image */}
+              <div className="lg:col-span-7 relative h-72 sm:h-96 lg:h-auto overflow-hidden bg-slate-900">
+                <img
+                  src={featuredPost.coverImage || featuredPost.image || '/images/coaches/coach-sedaqet.jpg'}
+                  alt={featuredPost.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = '/images/coaches/coach-sedaqet.jpg';
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent lg:hidden" />
+                <div className="absolute top-4 left-4 flex items-center gap-2">
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#c5a059] text-white tracking-wider uppercase shadow-md flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[14px]">star</span>
+                    <span>Seçilmiş Məqalə</span>
+                  </span>
+                </div>
+              </div>
+
+              {/* Featured Post Meta & Info */}
+              <div className="lg:col-span-5 p-7 sm:p-10 flex flex-col justify-between bg-white space-y-6">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#c5a059]/15 text-[#775a19] uppercase tracking-wider">
+                      #{featuredPost.badge || 'Psixologiya'}
+                    </span>
+                    <span className="text-xs text-slate-400 font-mono">• {featuredPost.readTime || '5 dəqiqə'}</span>
+                  </div>
+
+                  <h2 className="font-serif text-2xl sm:text-3xl font-medium text-[#071326] group-hover:text-[#775a19] transition-colors leading-snug">
+                    {featuredPost.title}
+                  </h2>
+
+                  <p className="text-xs sm:text-sm text-slate-600 line-clamp-4 leading-relaxed font-light">
+                    {(featuredPost.snippet || featuredPost.content || '').replace(/<[^>]*>?/gm, '')}
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-[#071326] text-[#e5c57d] font-bold text-xs flex items-center justify-center">
+                      {(featuredPost.author || 'M')[0].toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-[#071326] leading-tight">{featuredPost.author || 'Müəllif'}</p>
+                      <p className="text-[11px] text-slate-400">{featuredPost.time || 'İndicə'}</p>
+                    </div>
+                  </div>
+
+                  <span className="inline-flex items-center gap-1 text-xs font-bold text-[#775a19] group-hover:translate-x-1 transition-transform">
+                    <span>Oxu</span>
+                    <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* POSTS LISTING: GRID OR LIST VIEW */}
+          {filteredTopics.length === 0 ? (
+            <div className="bg-white rounded-3xl border border-[#c5a059]/30 p-12 text-center shadow-sm">
+              <div className="w-16 h-16 rounded-2xl bg-[#c5a059]/15 text-[#775a19] flex items-center justify-center mx-auto mb-4">
+                <span className="material-symbols-outlined text-3xl">article</span>
+              </div>
+              <h4 className="font-serif text-xl font-medium text-[#071326] mb-2">Axtarışa uyğun məqalə tapılmadı</h4>
+              <p className="text-sm text-slate-500 mb-6 font-light">Digər kateqoriyalara baxa və ya öz məqalənizi yarada bilərsiniz.</p>
+              <button
+                onClick={handleCreateArticle}
+                className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#071326] to-[#0c2242] text-[#e5c57d] text-xs font-bold tracking-wider uppercase shadow-md transition-all cursor-pointer"
+              >
+                Yeni Məqalə Yaz
+              </button>
+            </div>
+          ) : viewMode === 'grid' ? (
+            /* BLOG CARDS GRID */
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
+              {filteredTopics.map((post) => {
+                const title = getLocalized(post, 'title', currentLang, defaultLang) || post.title;
+                const plainSnippet = (post.snippet || post.content || '').replace(/<[^>]*>?/gm, '');
+                const cover = post.coverImage || post.image || '/images/coaches/coach-sedaqet.jpg';
+                const readDuration = post.readTime || '3 dəqiqə';
+
+                return (
+                  <article
+                    key={post.id}
+                    onClick={() => openTopicDetail(post)}
+                    className="group bg-white rounded-3xl border border-[#c5a059]/25 hover:border-[#c5a059]/60 shadow-[0_4px_20px_-4px_rgba(7,19,38,0.05)] hover:shadow-[0_16px_36px_-8px_rgba(7,19,38,0.12)] hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden cursor-pointer"
+                  >
+                    {/* Card Thumbnail */}
+                    <div className="relative h-48 w-full overflow-hidden bg-slate-900">
+                      <img
+                        src={cover}
+                        alt={title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = '/images/coaches/coach-sedaqet.jpg';
+                        }}
+                      />
+                      <div className="absolute top-3.5 left-3.5 flex items-center gap-2">
+                        <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-[#071326]/85 backdrop-blur-sm text-[#e5c57d] border border-[#c5a059]/40 uppercase tracking-wider">
+                          #{post.badge || 'Bloq'}
+                        </span>
+                      </div>
+                      {post.status === 'draft' && (
+                        <div className="absolute top-3.5 right-3.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-white">
+                          Qaralama
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Card Content */}
+                    <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-[11px] text-slate-400 font-mono">
+                          <span>{post.time || 'İndicə'}</span>
+                          <span>•</span>
+                          <span>{readDuration} oxu</span>
+                        </div>
+
+                        <h3 className="font-serif text-lg sm:text-xl font-medium text-[#071326] group-hover:text-[#775a19] transition-colors leading-snug line-clamp-2">
+                          {title}
+                        </h3>
+
+                        <p className="text-xs text-slate-500 line-clamp-3 leading-relaxed font-light">
+                          {plainSnippet}
+                        </p>
+                      </div>
+
+                      {/* Author & Footer Meta */}
+                      <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-7 h-7 rounded-full bg-slate-100 text-[#071326] font-bold text-xs flex items-center justify-center border border-slate-200">
+                            {(post.author || 'M')[0].toUpperCase()}
+                          </div>
+                          <span className="font-semibold text-slate-800 text-xs truncate max-w-[120px]">
+                            {post.author || 'Üzv'}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-3 text-slate-400">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              likeTopic(post.id);
+                            }}
+                            className={`flex items-center gap-1 transition-colors ${
+                              isTopicLiked(post.id) ? 'text-rose-600 font-bold' : 'hover:text-rose-600'
+                            }`}
+                          >
+                            <span className={`material-symbols-outlined text-[15px] ${isTopicLiked(post.id) ? 'fill-current' : ''}`}>
+                              favorite
+                            </span>
+                            <span>{post.likes || 0}</span>
+                          </button>
+
+                          <div className="flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[15px]">chat_bubble</span>
+                            <span>{post.comments?.length || post.repliesCount || 0}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          ) : (
+            /* BLOG LIST VIEW */
+            <div className="space-y-5">
+              {filteredTopics.map((post) => {
+                const title = getLocalized(post, 'title', currentLang, defaultLang) || post.title;
+                const plainSnippet = (post.snippet || post.content || '').replace(/<[^>]*>?/gm, '');
+                const cover = post.coverImage || post.image || '/images/coaches/coach-sedaqet.jpg';
+
+                return (
+                  <article
+                    key={post.id}
+                    onClick={() => openTopicDetail(post)}
+                    className="group bg-white rounded-3xl border border-[#c5a059]/25 hover:border-[#c5a059]/60 p-5 sm:p-6 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col sm:flex-row items-center gap-6 cursor-pointer"
+                  >
+                    <div className="w-full sm:w-48 sm:h-36 h-48 rounded-2xl overflow-hidden shrink-0 bg-slate-900">
+                      <img
+                        src={cover}
+                        alt={title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = '/images/coaches/coach-sedaqet.jpg';
+                        }}
+                      />
+                    </div>
+
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#c5a059]/15 text-[#775a19] uppercase tracking-wider">
+                          #{post.badge || 'Bloq'}
+                        </span>
+                        <span className="text-xs text-slate-400 font-mono">{post.time || 'İndicə'} • {post.readTime || '3 dəqiqə'}</span>
+                      </div>
+
+                      <h3 className="font-serif text-lg sm:text-xl font-medium text-[#071326] group-hover:text-[#775a19] transition-colors leading-snug">
+                        {title}
+                      </h3>
+
+                      <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                        {plainSnippet}
+                      </p>
+
+                      <div className="flex items-center justify-between pt-2 text-xs text-slate-400">
+                        <span>Müəllif: <strong>{post.author || 'Üzv'}</strong></span>
+                        <div className="flex items-center gap-3">
+                          <span className="flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[15px] text-rose-500">favorite</span>
+                            <span>{post.likes || 0}</span>
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[15px]">chat_bubble</span>
+                            <span>{post.comments?.length || post.repliesCount || 0}</span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
 
         </div>
       </section>
     </div>
   );
 }
-

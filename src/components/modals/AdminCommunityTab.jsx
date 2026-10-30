@@ -3,6 +3,7 @@ import { useApp } from '../../context/AppContext';
 import AdminInlineTranslator from './AdminInlineTranslator';
 import AdminConfirmModal from './AdminConfirmModal';
 import AdminPopupModal from './AdminPopupModal';
+import RichTextEditor from '../RichTextEditor';
 
 const ITEMS_PER_PAGE = 8;
 
@@ -32,6 +33,10 @@ export default function AdminCommunityTab() {
   const [newTopicCategory, setNewTopicCategory] = useState('İcma Müzakirəsi');
   const [newTopicAuthor, setNewTopicAuthor] = useState('Monodoxia Komandası');
   const [newTopicContent, setNewTopicContent] = useState('');
+  const [newTopicCoverImage, setNewTopicCoverImage] = useState('');
+  const [newTopicReadTime, setNewTopicReadTime] = useState('4 dəq');
+  const [newTopicStatus, setNewTopicStatus] = useState('published');
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [newTopicTranslations, setNewTopicTranslations] = useState({});
   const [newTopicTransOpen, setNewTopicTransOpen] = useState(false);
   const [newTopicTransLang, setNewTopicTransLang] = useState('en');
@@ -65,29 +70,53 @@ export default function AdminCommunityTab() {
   }, [filteredTopics, currentPage]);
 
   const handleCreateTopic = (e) => {
-    e.preventDefault();
+    e?.preventDefault();
     if (!newTopicTitle.trim() || !newTopicContent.trim()) {
-      showToast('Zəhmət olmasa mövzu başlığını və məzmununu daxil edin', 'warning');
+      showToast('Zəhmət olmasa məqalə başlığını və məzmununu daxil edin', 'warning');
       return;
     }
-    addTopic(newTopicTitle.trim(), newTopicContent.trim(), newTopicCategory, newTopicAuthor, newTopicTranslations);
+    addTopic(
+      newTopicTitle.trim(),
+      newTopicContent.trim(),
+      newTopicCategory,
+      newTopicAuthor,
+      newTopicTranslations,
+      {
+        coverImage: newTopicCoverImage.trim(),
+        readTime: newTopicReadTime.trim() || '4 dəq',
+        status: newTopicStatus,
+        category: newTopicCategory
+      }
+    );
     setNewTopicTitle('');
     setNewTopicContent('');
+    setNewTopicCoverImage('');
+    setNewTopicReadTime('4 dəq');
+    setNewTopicStatus('published');
     setNewTopicTranslations({});
     setNewTopicTransOpen(false);
     setShowAddForm(false);
   };
 
   const handleSaveEditTopic = (e) => {
-    e.preventDefault();
+    e?.preventDefault();
     if (!editingTopic) return;
+    const bodyContent = editingTopic.content || editingTopic.snippet || '';
+    const cleanSnippet = bodyContent
+      ? bodyContent.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 220)
+      : (editingTopic.snippet || '');
+
     updateTopic(editingTopic.id, {
       title: editingTopic.title,
       badge: editingTopic.badge,
+      category: editingTopic.category || editingTopic.badge,
       author: editingTopic.author,
-      snippet: editingTopic.snippet,
-      content: editingTopic.snippet,
-      desc: editingTopic.snippet,
+      content: bodyContent,
+      snippet: cleanSnippet,
+      desc: cleanSnippet,
+      coverImage: editingTopic.coverImage || editingTopic.cover_image || '',
+      readTime: editingTopic.readTime || editingTopic.read_time || '4 dəq',
+      status: editingTopic.status || 'published',
       translations: editingTopic.translations || {}
     });
     setEditingTopic(null);
@@ -212,7 +241,7 @@ export default function AdminCommunityTab() {
       {/* Edit Topic Popup Modal */}
       <AdminPopupModal
         isOpen={Boolean(editingTopic)}
-        title={editingTopic ? `İcma Mövzusunu Redaktə Et: "${editingTopic.title}"` : 'İcma Mövzusunu Redaktə Et'}
+        title={editingTopic ? `İcma / Blog Məqaləsini Redaktə Et: "${editingTopic.title}"` : 'Məqaləni Redaktə Et'}
         icon="edit_document"
         onClose={() => setEditingTopic(null)}
       >
@@ -220,7 +249,7 @@ export default function AdminCommunityTab() {
           <form onSubmit={handleSaveEditTopic} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
               <div style={{ gridColumn: 'span 2' }}>
-                <label className="admin-label">Mövzu Başlığı *</label>
+                <label className="admin-label">Məqalə Başlığı *</label>
                 <input
                   type="text"
                   required
@@ -230,10 +259,10 @@ export default function AdminCommunityTab() {
                 />
               </div>
               <div>
-                <label className="admin-label">Bölmə / Nişan</label>
+                <label className="admin-label">Bölmə / Kateqoriya</label>
                 <select
-                  value={editingTopic.badge}
-                  onChange={(e) => setEditingTopic({ ...editingTopic, badge: e.target.value })}
+                  value={editingTopic.badge || editingTopic.category}
+                  onChange={(e) => setEditingTopic({ ...editingTopic, badge: e.target.value, category: e.target.value })}
                   className="admin-select"
                 >
                   {communityCategories.map(cat => (
@@ -251,26 +280,90 @@ export default function AdminCommunityTab() {
               </div>
             </div>
 
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+              <div>
+                <label className="admin-label">Müəllif</label>
+                <input
+                  type="text"
+                  value={editingTopic.author || ''}
+                  onChange={(e) => setEditingTopic({ ...editingTopic, author: e.target.value })}
+                  className="admin-input"
+                />
+              </div>
+              <div>
+                <label className="admin-label">Mütaliə Müddəti</label>
+                <input
+                  type="text"
+                  placeholder="məsələn: 5 dəq"
+                  value={editingTopic.readTime || editingTopic.read_time || '4 dəq'}
+                  onChange={(e) => setEditingTopic({ ...editingTopic, readTime: e.target.value })}
+                  className="admin-input"
+                />
+              </div>
+              <div>
+                <label className="admin-label">Status</label>
+                <select
+                  value={editingTopic.status || 'published'}
+                  onChange={(e) => setEditingTopic({ ...editingTopic, status: e.target.value })}
+                  className="admin-select"
+                >
+                  <option value="published">Nəşr Edilib (Aktiv)</option>
+                  <option value="draft">Qaralama (Gizli)</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Cover Image Input + Upload */}
             <div>
-              <label className="admin-label">Müəllif</label>
-              <input
-                type="text"
-                value={editingTopic.author}
-                onChange={(e) => setEditingTopic({ ...editingTopic, author: e.target.value })}
-                className="admin-input"
-              />
+              <label className="admin-label">Qapaq Şəkli (Cover Image)</label>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <input
+                  type="text"
+                  placeholder="https://... və ya fayl yükləyin"
+                  value={editingTopic.coverImage || editingTopic.cover_image || ''}
+                  onChange={(e) => setEditingTopic({ ...editingTopic, coverImage: e.target.value })}
+                  className="admin-input"
+                  style={{ flex: 1 }}
+                />
+                <label className="admin-btn-secondary" style={{ cursor: 'pointer', fontSize: '11px', padding: '8px 12px', whiteSpace: 'nowrap' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>upload</span>
+                  <span>Şəkil Yüklə</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const formData = new FormData();
+                      formData.append('image', file);
+                      try {
+                        const res = await fetch('/api.php?action=upload_image&prefix=blog_cover', {
+                          method: 'POST',
+                          body: formData,
+                          credentials: 'include'
+                        });
+                        const data = await res.json().catch(() => null);
+                        if (data && data.url) {
+                          setEditingTopic({ ...editingTopic, coverImage: data.url });
+                          showToast('Qapaq şəkli bazada saxlanıldı!', 'success');
+                        }
+                      } catch (err) {}
+                    }}
+                  />
+                </label>
+              </div>
             </div>
 
             <div>
-              <label className="admin-label">Mövzu Mətni / Məzmun *</label>
-              <textarea
-                rows="3"
-                required
-                value={editingTopic.snippet}
-                onChange={(e) => setEditingTopic({ ...editingTopic, snippet: e.target.value })}
-                className="admin-input"
-                style={{ resize: 'vertical' }}
-              />
+              <label className="admin-label">Məqalə Məzmunu (Rich Text Redaktor) *</label>
+              <div style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
+                <RichTextEditor
+                  value={editingTopic.content || editingTopic.snippet || ''}
+                  onChange={(val) => setEditingTopic({ ...editingTopic, content: val, snippet: val })}
+                  placeholder="Məqalə mətni, başlıqlar, şəkillər və ya video əlavə edin..."
+                />
+              </div>
             </div>
 
             {/* Inline Translations Panel - Community */}
@@ -309,18 +402,18 @@ export default function AdminCommunityTab() {
       {/* Add Topic Popup Modal */}
       <AdminPopupModal
         isOpen={showAddForm}
-        title="Yeni İcma Mövzusu Əlavə Et"
+        title="Yeni İcma / Blog Məqaləsi Əlavə Et"
         icon="add_circle"
         onClose={() => setShowAddForm(false)}
       >
         <form onSubmit={handleCreateTopic} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
             <div style={{ gridColumn: 'span 2' }}>
-              <label className="admin-label">Mövzu Başlığı *</label>
+              <label className="admin-label">Məqalə Başlığı *</label>
               <input
                 type="text"
                 required
-                placeholder="məsələn: Həyəcan və narahatlığı dəf etməkdə ən faydalı metodunuz nədir?"
+                placeholder="məsələn: Daxili tarazlıq və emosional intellektin formalaşması"
                 value={newTopicTitle}
                 onChange={(e) => setNewTopicTitle(e.target.value)}
                 className="admin-input"
@@ -345,28 +438,96 @@ export default function AdminCommunityTab() {
             </div>
           </div>
 
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+            <div>
+              <label className="admin-label">Müəllif</label>
+              <input
+                type="text"
+                value={newTopicAuthor}
+                onChange={(e) => setNewTopicAuthor(e.target.value)}
+                placeholder="Monodoxia Komandası"
+                className="admin-input"
+              />
+            </div>
+            <div>
+              <label className="admin-label">Mütaliə Müddəti</label>
+              <input
+                type="text"
+                value={newTopicReadTime}
+                onChange={(e) => setNewTopicReadTime(e.target.value)}
+                placeholder="məs: 4 dəq"
+                className="admin-input"
+              />
+            </div>
+            <div>
+              <label className="admin-label">Status</label>
+              <select
+                value={newTopicStatus}
+                onChange={(e) => setNewTopicStatus(e.target.value)}
+                className="admin-select"
+              >
+                <option value="published">Nəşr Et (Aktiv)</option>
+                <option value="draft">Qaralama Kimi Saxla</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Cover Image */}
           <div>
-            <label className="admin-label">Müəllif</label>
-            <input
-              type="text"
-              value={newTopicAuthor}
-              onChange={(e) => setNewTopicAuthor(e.target.value)}
-              placeholder="Monodoxia Komandası"
-              className="admin-input"
-            />
+            <label className="admin-label">Qapaq Şəkli (Cover Image URL)</label>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <input
+                type="text"
+                placeholder="https://... şəkil linki və ya fayl yükləyin"
+                value={newTopicCoverImage}
+                onChange={(e) => setNewTopicCoverImage(e.target.value)}
+                className="admin-input"
+                style={{ flex: 1 }}
+              />
+              <label className="admin-btn-secondary" style={{ cursor: 'pointer', fontSize: '11px', padding: '8px 12px', whiteSpace: 'nowrap' }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>upload</span>
+                <span>{isUploadingCover ? 'Yüklənir...' : 'Şəkil Yüklə'}</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  disabled={isUploadingCover}
+                  style={{ display: 'none' }}
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setIsUploadingCover(true);
+                    const formData = new FormData();
+                    formData.append('image', file);
+                    try {
+                      const res = await fetch('/api.php?action=upload_image&prefix=blog_cover', {
+                        method: 'POST',
+                        body: formData,
+                        credentials: 'include'
+                      });
+                      const data = await res.json().catch(() => null);
+                      if (data && data.url) {
+                        setNewTopicCoverImage(data.url);
+                        showToast('Qapaq şəkli uğurla yükləndi!', 'success');
+                      }
+                    } catch (err) {}
+                    finally {
+                      setIsUploadingCover(false);
+                    }
+                  }}
+                />
+              </label>
+            </div>
           </div>
 
           <div>
-            <label className="admin-label">Məzmun *</label>
-            <textarea
-              rows="2"
-              required
-              value={newTopicContent}
-              onChange={(e) => setNewTopicContent(e.target.value)}
-              placeholder="Müzakirəyə başlamaq üçün sualınızı və ya fikrinizi təfərrüatlı qeyd edin..."
-              className="admin-input"
-              style={{ resize: 'vertical' }}
-            />
+            <label className="admin-label">Məzmun (Rich Text Redaktor) *</label>
+            <div style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
+              <RichTextEditor
+                value={newTopicContent}
+                onChange={setNewTopicContent}
+                placeholder="Məqalə mətni, başlıqlar, şəkillər və ya video əlavə edin..."
+              />
+            </div>
           </div>
 
           {/* Inline Translations Panel - New Topic */}

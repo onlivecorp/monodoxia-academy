@@ -2728,6 +2728,17 @@ if ($action === 'save_community_post' && $_SERVER['REQUEST_METHOD'] === 'POST') 
     $author_role = trim($input['authorRole'] ?? ($input['author_role'] ?? ($authUser ? $authUser['role'] : 'Üzv')));
     $author_avatar = trim($input['authorAvatar'] ?? ($input['author_avatar'] ?? ''));
     $category = trim($input['category'] ?? 'general');
+    $cover_image = trim($input['coverImage'] ?? ($input['cover_image'] ?? ($input['image'] ?? '')));
+    $read_time = trim($input['readTime'] ?? ($input['read_time'] ?? '3 dəqiqə'));
+    $status = trim($input['status'] ?? 'published');
+
+    // Auto-save base64 cover image permanently into MySQL mdx_media if uploaded
+    if (!empty($cover_image) && strpos($cover_image, 'data:image/') === 0) {
+        $savedMediaUrl = saveBase64Image($cover_image, 'blog_cover_' . preg_replace('/[^a-zA-Z0-9_-]/', '', $id), $pdo);
+        if (!empty($savedMediaUrl)) {
+            $cover_image = $savedMediaUrl;
+        }
+    }
 
     $translations = $input['translations'] ?? [];
     $translations_json = is_array($translations) ? json_encode($translations, JSON_UNESCAPED_UNICODE) : (string)$translations;
@@ -2738,9 +2749,15 @@ if ($action === 'save_community_post' && $_SERVER['REQUEST_METHOD'] === 'POST') 
         exit();
     }
 
+    try {
+        $pdo->exec("ALTER TABLE mdx_community_posts ADD COLUMN IF NOT EXISTS cover_image VARCHAR(255) DEFAULT NULL");
+        $pdo->exec("ALTER TABLE mdx_community_posts ADD COLUMN IF NOT EXISTS read_time VARCHAR(50) DEFAULT '3 dəqiqə'");
+        $pdo->exec("ALTER TABLE mdx_community_posts ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'published'");
+    } catch (PDOException $e) {}
+
     $stmt = $pdo->prepare("
-        INSERT INTO mdx_community_posts (id, badge, title, snippet, content, author, author_role, author_avatar, time_ago, likes, replies, pinned, allow_comments, category, translations_json)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO mdx_community_posts (id, badge, title, snippet, content, author, author_role, author_avatar, time_ago, likes, replies, pinned, allow_comments, category, cover_image, read_time, status, translations_json)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE
             badge = VALUES(badge),
             title = VALUES(title),
@@ -2755,15 +2772,19 @@ if ($action === 'save_community_post' && $_SERVER['REQUEST_METHOD'] === 'POST') 
             pinned = VALUES(pinned),
             allow_comments = VALUES(allow_comments),
             category = VALUES(category),
+            cover_image = VALUES(cover_image),
+            read_time = VALUES(read_time),
+            status = VALUES(status),
             translations_json = VALUES(translations_json)
     ");
     $stmt->execute([
         $id, $badge, $title, $snippet, $content, $author, $author_role,
         $author_avatar, $time_ago, $likes, $replies, $pinned, $allow_comments, $category,
+        $cover_image, $read_time, $status,
         $translations_json
     ]);
 
-    echo json_encode(['status' => 'success', 'message' => 'İcma mövzusu dərc edildi', 'id' => $id], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['status' => 'success', 'message' => 'İcma / Blog məzmunu dərc edildi', 'id' => $id, 'cover_image' => $cover_image], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
@@ -2795,10 +2816,23 @@ if ($action === 'like_community_post' && $_SERVER['REQUEST_METHOD'] === 'POST') 
 // 7.8. KOUÇLAR VƏ EKSPERTLƏR APİ (COACHES API)
 // --------------------------------------------------------
 if ($action === 'save_coach' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    requireAdminUser($pdo);
+    $authCurrentUser = requireAuthUser($pdo);
     verifyCsrfToken();
     $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
     $id = trim($input['id'] ?? ('coach-' . round(microtime(true) * 1000)));
+
+    $isAdmin = ($authCurrentUser['role'] === 'Admin') || userHasPermission($pdo, $authCurrentUser['role'], 'admin.access');
+    $userRole = strtolower($authCurrentUser['role'] ?? '');
+    $isExpertRole = in_array($userRole, ['ekspert', 'kouç', 'coach', 'expert']);
+    $isSelf = ((string)($authCurrentUser['id'] ?? '') === (string)$id) ||
+              (!empty($authCurrentUser['email']) && !empty($input['email']) && strtolower($authCurrentUser['email']) === strtolower($input['email'])) ||
+              (!empty($authCurrentUser['name']) && !empty($input['name']) && strtolower(trim($authCurrentUser['name'])) === strtolower(trim($input['name'])));
+
+    if (!$isAdmin && !$isSelf && !$isExpertRole) {
+        http_response_code(403);
+        echo json_encode(['status' => 'forbidden', 'message' => 'Bu profili redaktə etmək üçün icazəniz yoxdur (403 Forbidden)'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
     $name = trim($input['name'] ?? '');
     $title = trim($input['title'] ?? 'Kouç & Ekspert');
     $bio = trim($input['bio'] ?? ($input['experience'] ?? ''));
@@ -3738,6 +3772,9 @@ if ($action === 'migrate' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         "ALTER TABLE mdx_community_posts ADD COLUMN category VARCHAR(50) DEFAULT NULL",
         "ALTER TABLE mdx_community_posts ADD COLUMN translations_json LONGTEXT DEFAULT NULL",
         "ALTER TABLE mdx_community_posts ADD COLUMN allow_comments TINYINT(1) DEFAULT 1",
+        "ALTER TABLE mdx_community_posts ADD COLUMN cover_image VARCHAR(255) DEFAULT NULL",
+        "ALTER TABLE mdx_community_posts ADD COLUMN read_time VARCHAR(50) DEFAULT '3 dəqiqə'",
+        "ALTER TABLE mdx_community_posts ADD COLUMN status VARCHAR(50) DEFAULT 'published'",
         "ALTER TABLE mdx_categories ADD COLUMN translations_json LONGTEXT DEFAULT NULL",
         "ALTER TABLE mdx_club_tiers ADD COLUMN translations LONGTEXT DEFAULT NULL",
         "ALTER TABLE mdx_application_form_fields ADD COLUMN translations_json LONGTEXT DEFAULT NULL"
