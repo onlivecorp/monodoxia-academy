@@ -389,10 +389,9 @@ export default function AdminCoursesTab() {
                   />
                 </div>
                 <div>
-                  <label className="admin-label">Qiymət *</label>
+                  <label className="admin-label">Qiymət</label>
                   <input
                     type="text"
-                    required
                     value={editingCourse.price}
                     onChange={(e) => setEditingCourse({ ...editingCourse, price: e.target.value })}
                     className="admin-input"
@@ -440,7 +439,7 @@ export default function AdminCoursesTab() {
 
                 {/* Müddət / Son Tarix via DateTime picker */}
                 <div>
-                  <label className="admin-label">Son Tarix & Saat (Müddət Formatı) *</label>
+                  <label className="admin-label">Son Tarix & Saat (Müddət Formatı)</label>
                   <input
                     type="datetime-local"
                     value={editingCourse.deadline || ''}
