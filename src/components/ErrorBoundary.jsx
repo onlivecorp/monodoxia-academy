@@ -21,11 +21,11 @@ export default class ErrorBoundary extends React.Component {
       error?.name === 'ChunkLoadError';
 
     if (isChunkError) {
-      const lastReload = window.sessionStorage.getItem('last_chunk_eb_reload');
-      const now = Date.now();
-      if (!lastReload || now - parseInt(lastReload, 10) > 10000) {
-        window.sessionStorage.setItem('last_chunk_eb_reload', String(now));
-        window.location.reload();
+      const alreadyReloaded = window.sessionStorage.getItem('chunk_eb_reloaded');
+      if (!alreadyReloaded) {
+        window.sessionStorage.clear();
+        window.sessionStorage.setItem('chunk_eb_reloaded', '1');
+        window.location.href = window.location.pathname + '?_t=' + Date.now();
       }
     }
   }

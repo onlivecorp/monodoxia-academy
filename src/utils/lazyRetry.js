@@ -22,8 +22,9 @@ export function lazyRetry(componentImport) {
         error?.name === 'ChunkLoadError';
 
       if (isDynamicImportError && !pageHasBeenForceRefreshed) {
+        window.sessionStorage.clear();
         window.sessionStorage.setItem('monodoxia_page_force_refreshed', 'true');
-        window.location.reload();
+        window.location.href = window.location.pathname + '?_t=' + Date.now();
         return new Promise(() => {});
       }
       throw error;
