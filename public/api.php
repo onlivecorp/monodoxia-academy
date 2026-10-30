@@ -314,6 +314,9 @@ if ($action === 'get_all') {
     foreach ($coaches as &$cItem) {
         $curImg = trim($cItem['avatar_url'] ?? '');
         $isBroken = empty($curImg) || strpos($curImg, 'googleusercontent.com') !== false || strlen($curImg) === 255;
+        if (!$isBroken && strpos($curImg, '/uploads/') === 0 && !file_exists(__DIR__ . $curImg)) {
+            $isBroken = true;
+        }
         if ($isBroken) {
             $avatarToSet = $defaultCoachAvatar;
             $cid = $cItem['id'] ?? '';
@@ -2629,12 +2632,8 @@ if ($action === 'save_coach' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $hourly_rate = trim($input['hourlyRate'] ?? ($input['hourly_rate'] ?? '100 ₼ / saat'));
     $session_duration = trim($input['sessionDuration'] ?? ($input['session_duration'] ?? '60 dəqiqə'));
     $avatar_url = trim($input['image'] ?? ($input['avatarUrl'] ?? ($input['avatar_url'] ?? '')));
-    if (!empty($avatar_url) && strpos($avatar_url, 'data:image/') === 0) {
-        $savedPath = saveBase64Image($avatar_url, 'coach_' . preg_replace('/[^a-zA-Z0-9_-]/', '', $id));
-        if (!empty($savedPath)) {
-            $avatar_url = $savedPath;
-        }
-    }
+    // For coach avatars: keep base64 directly in database (avatar_url is LONGTEXT)
+    // This ensures permanent persistence across Hostinger git deploys without broken 404 image paths.
     $is_active = isset($input['isActive']) ? ($input['isActive'] ? 1 : 0) : (isset($input['is_active']) ? ($input['is_active'] ? 1 : 0) : 1);
 
     $specialties = $input['specialties'] ?? [];

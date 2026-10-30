@@ -149,19 +149,19 @@ export default function CoachingPage() {
                       <div className="relative shrink-0">
                         {(() => {
                           let coachImg = c.image || c.avatar;
-                          if (coachImg && coachImg.includes('googleusercontent.com')) coachImg = '';
+                          if (coachImg && (coachImg.includes('googleusercontent.com') || coachImg.startsWith('/uploads/'))) coachImg = '';
                           if (!coachImg) {
                             const matchedUser = (usersList || []).find(u => 
                               (c.userId && String(u.id) === String(c.userId)) || 
                               (c.name && u.name && u.name.toLowerCase().trim() === c.name.toLowerCase().trim())
                             ) || (currentUser && ((c.userId && String(currentUser.id) === String(c.userId)) || (c.name && currentUser.name && c.name.toLowerCase().trim() === currentUser.name.toLowerCase().trim())) ? currentUser : null);
                             coachImg = matchedUser?.avatar || matchedUser?.image || '';
-                            if (coachImg && coachImg.includes('googleusercontent.com')) coachImg = '';
+                            if (coachImg && (coachImg.includes('googleusercontent.com') || coachImg.startsWith('/uploads/'))) coachImg = '';
                           }
                           if (!coachImg) {
                             try {
                               const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
-                              if (imgStore[c.id] && !imgStore[c.id].includes('googleusercontent.com')) coachImg = imgStore[c.id];
+                              if (imgStore[c.id] && !imgStore[c.id].includes('googleusercontent.com') && !imgStore[c.id].startsWith('/uploads/')) coachImg = imgStore[c.id];
                             } catch (e) {}
                           }
                           if (!coachImg) {

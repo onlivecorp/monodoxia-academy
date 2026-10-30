@@ -83,13 +83,19 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
     (liveCoach.name && currentUser.name && liveCoach.name.toLowerCase().trim() === currentUser.name.toLowerCase().trim())
   ) ? currentUser : null)) : null;
 
-  let coachDisplayImage = liveCoach?.image || liveCoach?.avatar || matchedUser?.avatar || matchedUser?.image || '';
-  if (coachDisplayImage && coachDisplayImage.includes('googleusercontent.com')) coachDisplayImage = '';
-  if (!coachDisplayImage && liveCoach) {
-    try {
-      const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
-      if (imgStore[liveCoach.id] && !imgStore[liveCoach.id].includes('googleusercontent.com')) coachDisplayImage = imgStore[liveCoach.id];
-    } catch (e) {}
+  let coachDisplayImage = '';
+  try {
+    const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
+    if (imgStore[liveCoach?.id] && !imgStore[liveCoach?.id].includes('googleusercontent.com') && !imgStore[liveCoach?.id].startsWith('/uploads/')) {
+      coachDisplayImage = imgStore[liveCoach.id];
+    }
+  } catch (e) {}
+
+  if (!coachDisplayImage) {
+    const rawImg = liveCoach?.image || liveCoach?.avatar || matchedUser?.avatar || matchedUser?.image || '';
+    if (rawImg && !rawImg.includes('googleusercontent.com') && !rawImg.startsWith('/uploads/')) {
+      coachDisplayImage = rawImg;
+    }
   }
   if (!coachDisplayImage && liveCoach) {
     const seed = COACHES.find(sc => sc.id === liveCoach.id || (sc.name && liveCoach.name && sc.name.toLowerCase().trim() === liveCoach.name.toLowerCase().trim()));
@@ -190,7 +196,9 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
 
   const handleStartEdit = () => {
     setEditBio(liveCoach.bio || liveCoach.experience || '');
-    setEditImage(coachDisplayImage || '');
+    let initialImg = coachDisplayImage || '';
+    if (initialImg.startsWith('/uploads/')) initialImg = '';
+    setEditImage(initialImg);
     const currentSpecs = Array.isArray(liveCoach.specialties)
       ? liveCoach.specialties.join(', ')
       : (liveCoach.specialties || '');
@@ -337,6 +345,13 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
         bookedSlots: bookedList,
         availableSlots: availList.length > 0 ? availList : availableSlots
       });
+    }
+    if (editImage) {
+      try {
+        const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
+        imgStore[liveCoach.id] = editImage;
+        localStorage.setItem('monodoxia_coach_images', JSON.stringify(imgStore));
+      } catch (e) {}
     }
     setSaveSuccess(true);
     setIsEditingProfile(false);
@@ -596,7 +611,15 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                     <div className="flex items-center gap-3">
                       <div className="w-14 h-14 rounded-xl border-2 border-amber-500/40 overflow-hidden shrink-0 bg-slate-100 flex items-center justify-center">
                         {editImage ? (
-                          <img src={editImage} alt="Önizləmə" className="w-full h-full object-cover" />
+                          <img
+                            src={editImage}
+                            alt="Önizləmə"
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src = '/images/coaches/coach-sedaqet.jpg';
+                            }}
+                          />
                         ) : (
                           <span className="text-xs text-slate-400 font-bold">Şəkil yoxdur</span>
                         )}
@@ -636,9 +659,14 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                                     canvas.width = w;
                                     canvas.height = h;
                                     canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                                    const compressed = canvas.toDataURL('image/jpeg', 0.75);
+                                    const compressed = canvas.toDataURL('image/jpeg', 0.82);
                                     setEditImage(compressed);
-                                    if (showToast) showToast('Şəkil hazırlandı!', 'success');
+                                    try {
+                                      const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
+                                      imgStore[liveCoach.id] = compressed;
+                                      localStorage.setItem('monodoxia_coach_images', JSON.stringify(imgStore));
+                                    } catch (err) {}
+                                    if (showToast) showToast('Şəkil hazırlandı və yadda saxlanıldı!', 'success');
                                   };
                                   img.src = ev.target.result;
                                 };

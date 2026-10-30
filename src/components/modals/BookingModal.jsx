@@ -232,11 +232,11 @@ export default function BookingModal() {
 
   // Coach image
   let coachImg = activeCoach.image || activeCoach.avatar;
-  if (coachImg && coachImg.includes('googleusercontent.com')) coachImg = '';
+  if (coachImg && (coachImg.includes('googleusercontent.com') || coachImg.startsWith('/uploads/'))) coachImg = '';
   if (!coachImg) {
     try {
       const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
-      if (imgStore[activeCoach.id] && !imgStore[activeCoach.id].includes('googleusercontent.com')) coachImg = imgStore[activeCoach.id];
+      if (imgStore[activeCoach.id] && !imgStore[activeCoach.id].includes('googleusercontent.com') && !imgStore[activeCoach.id].startsWith('/uploads/')) coachImg = imgStore[activeCoach.id];
     } catch (e) {}
   }
   if (!coachImg) {

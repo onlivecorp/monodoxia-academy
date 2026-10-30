@@ -469,11 +469,14 @@ export function AppProvider({ children }) {
                 const lbl = typeof s === 'string' ? s : s?.label;
                 return lbl !== 'Sabah 15:00' && lbl !== 'Cümə 18:00';
               });
-            // Merge image from separate storage if missing
+            // Merge image from separate storage if missing or broken
             let coachImage = c.image || c.avatar || seed?.image || '';
+            if (coachImage.startsWith('/uploads/')) coachImage = '';
             try {
               const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
-              if (imgStore[c.id] && !imgStore[c.id].includes('googleusercontent.com')) coachImage = imgStore[c.id];
+              if (imgStore[c.id] && !imgStore[c.id].includes('googleusercontent.com') && !imgStore[c.id].startsWith('/uploads/')) {
+                coachImage = imgStore[c.id];
+              }
             } catch (e) {}
             if (!coachImage || coachImage.includes('googleusercontent.com')) {
               coachImage = seed?.image || '/images/coaches/coach-sedaqet.jpg';
@@ -1042,12 +1045,13 @@ export function AppProvider({ children }) {
             setCoachesList(data.coaches.map(c => {
               const seed = COACHES.find(sc => sc.id === c.id || (sc.name && c.name && sc.name.toLowerCase().trim() === c.name.toLowerCase().trim()));
               let img = c.avatar_url || '';
-              if (!img || img.includes('googleusercontent.com')) {
-                try {
-                  const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
-                  if (imgStore[c.id] && !imgStore[c.id].includes('googleusercontent.com')) img = imgStore[c.id];
-                } catch (e) {}
-              }
+              if (img.startsWith('/uploads/')) img = '';
+              try {
+                const imgStore = JSON.parse(localStorage.getItem('monodoxia_coach_images') || '{}');
+                if (imgStore[c.id] && !imgStore[c.id].includes('googleusercontent.com') && !imgStore[c.id].startsWith('/uploads/')) {
+                  img = imgStore[c.id];
+                }
+              } catch (e) {}
               if (!img || img.includes('googleusercontent.com')) {
                 img = seed?.image || (c.id === 'coach-farid' ? '/images/coaches/coach-farid.jpg' : (c.id === 'coach-nargiz' ? '/images/coaches/coach-nargiz.jpg' : '/images/coaches/coach-sedaqet.jpg'));
               }
