@@ -12,12 +12,32 @@ export default class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
+    const msg = error?.message || String(error || '');
+    const isChunkError =
+      msg.includes('Failed to fetch dynamically imported module') ||
+      msg.includes('Importing a module script failed') ||
+      msg.includes('dynamically imported module') ||
+      msg.includes('error loading dynamically imported module') ||
+      error?.name === 'ChunkLoadError';
+
+    if (isChunkError) {
+      const lastReload = window.sessionStorage.getItem('last_chunk_eb_reload');
+      const now = Date.now();
+      if (!lastReload || now - parseInt(lastReload, 10) > 10000) {
+        window.sessionStorage.setItem('last_chunk_eb_reload', String(now));
+        window.location.reload();
+      }
+    }
   }
 
   handleReset = () => {
+    try {
+      sessionStorage.removeItem('monodoxia_page_force_refreshed');
+      sessionStorage.removeItem('last_chunk_eb_reload');
+      sessionStorage.removeItem('last_vite_preload_reload');
+    } catch (e) {}
     this.setState({ hasError: false, error: null });
-    window.location.hash = '';
-    window.location.reload();
+    window.location.href = window.location.pathname + '?_t=' + Date.now();
   };
 
   handleCleanReset = () => {
@@ -27,10 +47,10 @@ export default class ErrorBoundary extends React.Component {
       localStorage.removeItem('monodoxia_admin_categories');
       localStorage.removeItem('monodoxia_admin_home_content');
       localStorage.removeItem('monodoxia_admin_roles');
+      sessionStorage.clear();
     } catch (e) {}
     this.setState({ hasError: false, error: null });
-    window.location.hash = '';
-    window.location.reload();
+    window.location.href = window.location.pathname + '?_t=' + Date.now();
   };
 
   render() {

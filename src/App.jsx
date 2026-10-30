@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { LanguageProvider } from './i18n/LanguageContext';
 import { AppProvider, useApp } from './context/AppContext';
 
@@ -8,29 +8,30 @@ import Footer from './components/Footer';
 import ToastContainer from './components/ToastContainer';
 import MaintenanceScreen from './components/MaintenanceScreen';
 import ErrorBoundary from './components/ErrorBoundary';
+import { lazyRetry } from './utils/lazyRetry';
 
 import AuthModal from './components/modals/AuthModal';
-const OnboardingModal = lazy(() => import('./components/modals/OnboardingModal'));
-const PlayerModal = lazy(() => import('./components/modals/PlayerModal'));
-const CertificateModal = lazy(() => import('./components/modals/CertificateModal'));
-const BookingModal = lazy(() => import('./components/modals/BookingModal'));
-const AdminModal = lazy(() => import('./components/modals/AdminModal'));
-const NewTopicModal = lazy(() => import('./components/modals/NewTopicModal'));
-const ProfileModal = lazy(() => import('./components/modals/ProfileModal'));
-const ApplicationModal = lazy(() => import('./components/modals/ApplicationModal'));
-const CertificateViewModal = lazy(() => import('./components/modals/CertificateViewModal'));
-const TopicDetailModal = lazy(() => import('./components/modals/TopicDetailModal'));
-const CertificateVerifyPage = lazy(() => import('./certificates/CertificateVerifyPage'));
+const OnboardingModal = lazyRetry(() => import('./components/modals/OnboardingModal'));
+const PlayerModal = lazyRetry(() => import('./components/modals/PlayerModal'));
+const CertificateModal = lazyRetry(() => import('./components/modals/CertificateModal'));
+const BookingModal = lazyRetry(() => import('./components/modals/BookingModal'));
+const AdminModal = lazyRetry(() => import('./components/modals/AdminModal'));
+const NewTopicModal = lazyRetry(() => import('./components/modals/NewTopicModal'));
+const ProfileModal = lazyRetry(() => import('./components/modals/ProfileModal'));
+const ApplicationModal = lazyRetry(() => import('./components/modals/ApplicationModal'));
+const CertificateViewModal = lazyRetry(() => import('./components/modals/CertificateViewModal'));
+const TopicDetailModal = lazyRetry(() => import('./components/modals/TopicDetailModal'));
+const CertificateVerifyPage = lazyRetry(() => import('./certificates/CertificateVerifyPage'));
 
 import HomePage from './pages/HomePage';
-const AcademyPage = lazy(() => import('./pages/AcademyPage'));
-const CoachingPage = lazy(() => import('./pages/CoachingPage'));
-const ClubPage = lazy(() => import('./pages/ClubPage'));
-const EventsPage = lazy(() => import('./pages/EventsPage'));
-const CommunityPage = lazy(() => import('./pages/CommunityPage'));
-const AboutPage = lazy(() => import('./pages/AboutPage'));
-const ContactPage = lazy(() => import('./pages/ContactPage'));
-const SearchPage = lazy(() => import('./pages/SearchPage'));
+const AcademyPage = lazyRetry(() => import('./pages/AcademyPage'));
+const CoachingPage = lazyRetry(() => import('./pages/CoachingPage'));
+const ClubPage = lazyRetry(() => import('./pages/ClubPage'));
+const EventsPage = lazyRetry(() => import('./pages/EventsPage'));
+const CommunityPage = lazyRetry(() => import('./pages/CommunityPage'));
+const AboutPage = lazyRetry(() => import('./pages/AboutPage'));
+const ContactPage = lazyRetry(() => import('./pages/ContactPage'));
+const SearchPage = lazyRetry(() => import('./pages/SearchPage'));
 import GlobalSearchModal from './components/search/GlobalSearchModal';
 
 function AppContent() {
@@ -63,6 +64,12 @@ function AppContent() {
   const isMaintenance = isMaintenanceModeActive && (!isAdminUser || !adminBypass);
 
   // Ensure all hooks run unconditionally before any conditional return
+  useEffect(() => {
+    try {
+      sessionStorage.setItem('monodoxia_page_force_refreshed', 'false');
+    } catch (e) {}
+  }, []);
+
   useEffect(() => {
     const titles = {
       home: platformSettings?.siteTitle ? `${platformSettings.siteTitle} — ${platformSettings.subtitle || 'Fərdi İnkişaf və Psixologiya Mərkəzi'}` : 'Monodoxia Academy',

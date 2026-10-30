@@ -13,9 +13,24 @@
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [L]
 
-  # 3. Route everything else to index.html (SPA Fallback)
+  # 3. Do not route missing assets to index.html (return clean 404 for missing chunks)
+  RewriteCond %{REQUEST_URI} ^/assets/ [OR]
+  RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|webp|json|map)$ [NC]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule ^ - [R=404,L]
+
+  # 4. Route everything else to index.html (SPA Fallback)
   RewriteRule ^ index.html [L]
 </IfModule>
+
+# Never cache index.html so client always loads fresh chunk hashes
+<FilesMatch "^(index\.html)?$">
+    <IfModule mod_headers.c>
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+    </IfModule>
+</FilesMatch>
 
 # Block sensitive and internal files
 <FilesMatch "^\.env|\.(sql|log|ini|sh|bak|git|md)$">
