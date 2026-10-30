@@ -204,69 +204,79 @@ export default function CommunityPage() {
           </div>
 
           {/* FEATURED HERO POST (IF NOT FILTERING BY SEARCH) */}
-          {featuredPost && !searchQuery && filterCategory === 'all' && (
-            <div
-              onClick={() => openTopicDetail(featuredPost)}
-              className="group relative bg-white rounded-3xl border border-[#c5a059]/35 overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer grid grid-cols-1 lg:grid-cols-12 gap-0"
-            >
-              {/* Featured Cover Image */}
-              <div className="lg:col-span-7 relative h-72 sm:h-96 lg:h-auto overflow-hidden bg-slate-900">
-                <img
-                  src={featuredPost.coverImage || featuredPost.image || '/images/coaches/coach-sedaqet.jpg'}
-                  alt={featuredPost.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  onError={(e) => {
-                    e.currentTarget.onerror = null;
-                    e.currentTarget.src = '/images/coaches/coach-sedaqet.jpg';
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent lg:hidden" />
-                <div className="absolute top-4 left-4 flex items-center gap-2">
-                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#c5a059] text-white tracking-wider uppercase shadow-md flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px]">star</span>
-                    <span>Seçilmiş Məqalə</span>
-                  </span>
-                </div>
-              </div>
+          {featuredPost && !searchQuery && filterCategory === 'all' && (() => {
+            const featuredCover = (featuredPost.coverImage || featuredPost.image || '').trim();
+            return (
+              <div
+                onClick={() => openTopicDetail(featuredPost)}
+                className="group relative bg-white rounded-3xl border border-[#c5a059]/35 overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer grid grid-cols-1 lg:grid-cols-12 gap-0"
+              >
+                {/* Featured Cover Image (if available) */}
+                {featuredCover ? (
+                  <div className="lg:col-span-7 relative h-72 sm:h-96 lg:h-auto overflow-hidden bg-slate-900">
+                    <img
+                      src={featuredCover}
+                      alt={featuredPost.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent lg:hidden" />
+                    <div className="absolute top-4 left-4 flex items-center gap-2">
+                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#c5a059] text-white tracking-wider uppercase shadow-md flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[14px]">star</span>
+                        <span>Seçilmiş Məqalə</span>
+                      </span>
+                    </div>
+                  </div>
+                ) : null}
 
-              {/* Featured Post Meta & Info */}
-              <div className="lg:col-span-5 p-7 sm:p-10 flex flex-col justify-between bg-white space-y-6">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#c5a059]/15 text-[#775a19] uppercase tracking-wider">
-                      #{featuredPost.badge || 'Psixologiya'}
+                {/* Featured Post Meta & Info */}
+                <div className={`${featuredCover ? 'lg:col-span-5' : 'col-span-12'} p-7 sm:p-10 flex flex-col justify-between bg-white space-y-6`}>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      {!featuredCover && (
+                        <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#c5a059] text-white tracking-wider uppercase shadow-sm flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[14px]">star</span>
+                          <span>Seçilmiş Məqalə</span>
+                        </span>
+                      )}
+                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#c5a059]/15 text-[#775a19] uppercase tracking-wider">
+                        #{featuredPost.badge || 'Psixologiya'}
+                      </span>
+                      <span className="text-xs text-slate-400 font-mono">• {featuredPost.readTime || '5 dəqiqə'}</span>
+                    </div>
+
+                    <h2 className="font-serif text-2xl sm:text-3xl font-medium text-[#071326] group-hover:text-[#775a19] transition-colors leading-snug">
+                      {featuredPost.title}
+                    </h2>
+
+                    <p className="text-xs sm:text-sm text-slate-600 line-clamp-4 leading-relaxed font-light">
+                      {(featuredPost.snippet || featuredPost.content || '').replace(/<[^>]*>?/gm, '')}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-[#071326] text-[#e5c57d] font-bold text-xs flex items-center justify-center">
+                        {(featuredPost.author || 'M')[0].toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-[#071326] leading-tight">{featuredPost.author || 'Müəllif'}</p>
+                        <p className="text-[11px] text-slate-400">{featuredPost.time || 'İndicə'}</p>
+                      </div>
+                    </div>
+
+                    <span className="inline-flex items-center gap-1 text-xs font-bold text-[#775a19] group-hover:translate-x-1 transition-transform">
+                      <span>Oxu</span>
+                      <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
                     </span>
-                    <span className="text-xs text-slate-400 font-mono">• {featuredPost.readTime || '5 dəqiqə'}</span>
                   </div>
-
-                  <h2 className="font-serif text-2xl sm:text-3xl font-medium text-[#071326] group-hover:text-[#775a19] transition-colors leading-snug">
-                    {featuredPost.title}
-                  </h2>
-
-                  <p className="text-xs sm:text-sm text-slate-600 line-clamp-4 leading-relaxed font-light">
-                    {(featuredPost.snippet || featuredPost.content || '').replace(/<[^>]*>?/gm, '')}
-                  </p>
-                </div>
-
-                <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-[#071326] text-[#e5c57d] font-bold text-xs flex items-center justify-center">
-                      {(featuredPost.author || 'M')[0].toUpperCase()}
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-[#071326] leading-tight">{featuredPost.author || 'Müəllif'}</p>
-                      <p className="text-[11px] text-slate-400">{featuredPost.time || 'İndicə'}</p>
-                    </div>
-                  </div>
-
-                  <span className="inline-flex items-center gap-1 text-xs font-bold text-[#775a19] group-hover:translate-x-1 transition-transform">
-                    <span>Oxu</span>
-                    <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
-                  </span>
                 </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* POSTS LISTING: GRID OR LIST VIEW */}
           {filteredTopics.length === 0 ? (
@@ -289,7 +299,7 @@ export default function CommunityPage() {
               {filteredTopics.map((post) => {
                 const title = getLocalized(post, 'title', currentLang, defaultLang) || post.title;
                 const plainSnippet = (post.snippet || post.content || '').replace(/<[^>]*>?/gm, '');
-                const cover = post.coverImage || post.image || '/images/coaches/coach-sedaqet.jpg';
+                const cover = (post.coverImage || post.image || '').trim();
                 const readDuration = post.readTime || '3 dəqiqə';
 
                 return (
@@ -298,32 +308,50 @@ export default function CommunityPage() {
                     onClick={() => openTopicDetail(post)}
                     className="group bg-white rounded-3xl border border-[#c5a059]/25 hover:border-[#c5a059]/60 shadow-[0_4px_20px_-4px_rgba(7,19,38,0.05)] hover:shadow-[0_16px_36px_-8px_rgba(7,19,38,0.12)] hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden cursor-pointer"
                   >
-                    {/* Card Thumbnail */}
-                    <div className="relative h-48 w-full overflow-hidden bg-slate-900">
-                      <img
-                        src={cover}
-                        alt={title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          e.currentTarget.src = '/images/coaches/coach-sedaqet.jpg';
-                        }}
-                      />
-                      <div className="absolute top-3.5 left-3.5 flex items-center gap-2">
-                        <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-[#071326]/85 backdrop-blur-sm text-[#e5c57d] border border-[#c5a059]/40 uppercase tracking-wider">
-                          #{post.badge || 'Bloq'}
-                        </span>
-                      </div>
-                      {post.status === 'draft' && (
-                        <div className="absolute top-3.5 right-3.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-white">
-                          Qaralama
+                    {/* Top Gold Stripe if card has no cover image */}
+                    {!cover && (
+                      <div className="h-1.5 w-full bg-gradient-to-r from-[#c5a059] via-[#e5c57d] to-[#775a19]" />
+                    )}
+
+                    {/* Card Thumbnail ONLY if cover exists */}
+                    {cover ? (
+                      <div className="relative h-48 w-full overflow-hidden bg-slate-900">
+                        <img
+                          src={cover}
+                          alt={title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                        <div className="absolute top-3.5 left-3.5 flex items-center gap-2">
+                          <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-[#071326]/85 backdrop-blur-sm text-[#e5c57d] border border-[#c5a059]/40 uppercase tracking-wider">
+                            #{post.badge || 'Bloq'}
+                          </span>
                         </div>
-                      )}
-                    </div>
+                        {post.status === 'draft' && (
+                          <div className="absolute top-3.5 right-3.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-white">
+                            Qaralama
+                          </div>
+                        )}
+                      </div>
+                    ) : null}
 
                     {/* Card Content */}
                     <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
                       <div className="space-y-2">
+                        {!cover && (
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="px-3 py-0.5 rounded-full text-[10px] font-bold bg-[#c5a059]/15 text-[#775a19] uppercase tracking-wider">
+                              #{post.badge || 'Bloq'}
+                            </span>
+                            {post.status === 'draft' && (
+                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-white">
+                                Qaralama
+                              </span>
+                            )}
+                          </div>
+                        )}
                         <div className="flex items-center gap-2 text-[11px] text-slate-400 font-mono">
                           <span>{post.time || 'İndicə'}</span>
                           <span>•</span>
@@ -384,7 +412,7 @@ export default function CommunityPage() {
               {filteredTopics.map((post) => {
                 const title = getLocalized(post, 'title', currentLang, defaultLang) || post.title;
                 const plainSnippet = (post.snippet || post.content || '').replace(/<[^>]*>?/gm, '');
-                const cover = post.coverImage || post.image || '/images/coaches/coach-sedaqet.jpg';
+                const cover = (post.coverImage || post.image || '').trim();
 
                 return (
                   <article
@@ -392,19 +420,21 @@ export default function CommunityPage() {
                     onClick={() => openTopicDetail(post)}
                     className="group bg-white rounded-3xl border border-[#c5a059]/25 hover:border-[#c5a059]/60 p-5 sm:p-6 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col sm:flex-row items-center gap-6 cursor-pointer"
                   >
-                    <div className="w-full sm:w-48 sm:h-36 h-48 rounded-2xl overflow-hidden shrink-0 bg-slate-900">
-                      <img
-                        src={cover}
-                        alt={title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          e.currentTarget.src = '/images/coaches/coach-sedaqet.jpg';
-                        }}
-                      />
-                    </div>
+                    {/* List item thumbnail ONLY if cover exists */}
+                    {cover ? (
+                      <div className="w-full sm:w-48 sm:h-36 h-48 rounded-2xl overflow-hidden shrink-0 bg-slate-900">
+                        <img
+                          src={cover}
+                          alt={title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    ) : null}
 
-                    <div className="flex-1 space-y-2">
+                    <div className="flex-1 space-y-2 w-full">
                       <div className="flex items-center gap-2">
                         <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#c5a059]/15 text-[#775a19] uppercase tracking-wider">
                           #{post.badge || 'Bloq'}
