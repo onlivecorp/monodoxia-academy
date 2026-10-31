@@ -73,7 +73,11 @@ export default function AdminModal() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [adminModalOpen, setAdminModalOpen]);
 
-  const pendingAppsCount = applicationsList.filter(a => a.status === 'Yeni' && !a.archived).length;
+  const pendingAppsCount = useMemo(() => {
+    const appCount = applicationsList.filter(a => a.status === 'Yeni' && !a.archived).length;
+    const bookingCount = (bookings || []).filter(b => b.status === 'Gözləyir').length;
+    return appCount + bookingCount;
+  }, [applicationsList, bookings]);
 
   const allowedNavCategories = useMemo(() => {
     const navCategories = [

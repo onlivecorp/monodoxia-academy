@@ -34,7 +34,8 @@ export const TARGET_TYPE_MAP = {
   event: { label: 'Tədbir', icon: 'event', color: 'text-rose-600 dark:text-rose-400' },
   webinar: { label: 'Vebinar', icon: 'videocam', color: 'text-sky-600 dark:text-sky-400' },
   community: { label: 'İcma', icon: 'groups', color: 'text-teal-600 dark:text-teal-400' },
-  forum: { label: 'Forum', icon: 'forum', color: 'text-purple-600 dark:text-purple-400' }
+  forum: { label: 'Forum', icon: 'forum', color: 'text-purple-600 dark:text-purple-400' },
+  coach_booking: { label: 'Ekspert / Kouç Rezervasiyası', icon: 'psychology', color: 'text-amber-600 dark:text-amber-400' }
 };
 
 export const INITIAL_FORM_FIELDS = [

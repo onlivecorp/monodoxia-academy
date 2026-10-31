@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../i18n/LanguageContext';
 import {
@@ -11,14 +11,16 @@ import {
 
 export default function AdminApplicationsTab() {
   const {
-    applicationsList,
+    applicationsList = [],
     updateApplicationStatus,
     deleteApplication,
-    formFieldsList,
+    formFieldsList = [],
     addFormField,
     updateFormField,
     deleteFormField,
-    usersList,
+    usersList = [],
+    bookings = [],
+    updateBookingStatus,
     showToast
   } = useApp();
 
@@ -66,8 +68,70 @@ export default function AdminApplicationsTab() {
     translations: emptyFieldTranslations()
   });
 
+  // Combined list of regular applications and individual coach bookings
+  const unifiedApplications = useMemo(() => {
+    // 1. Regular applications
+    const regularApps = (applicationsList || []).map(a => ({
+      ...a,
+      isBookingEntry: false
+    }));
+
+    // 2. Transformed individual coach bookings
+    const bookingApps = (bookings || []).map(b => {
+      const coachDisplayName = b.coachName || b.coach_name || 'Təyin edilməmiş Kouç';
+      const slotTime = b.slot || `${b.selectedDate || ''} ${b.startTime || ''}${b.endTime ? '-' + b.endTime : ''}`.trim();
+      const clientName = b.userName || b.user_name || (b.isGuest ? 'Qonaq Müştəri' : 'İstifadəçi');
+      const clientPhone = b.userPhone || b.user_phone || '';
+      const clientEmail = b.userEmail || b.user_email || '';
+      const clientAddress = b.userAddress || b.user_address || '';
+
+      // Normalize status mapping: Gözləyir -> Yeni / Baxılır
+      let mappedStatus = b.status || 'Gözləyir';
+      if (mappedStatus === 'Gözləyir') mappedStatus = 'Yeni';
+
+      return {
+        id: b.id,
+        isBookingEntry: true,
+        bookingRaw: b,
+        targetType: 'coach_booking',
+        targetId: b.coachId || b.coach_id || '',
+        targetTitle: `Fərdi Kouçinq: ${coachDisplayName} (${slotTime})`,
+        coachName: coachDisplayName,
+        coachId: b.coachId || b.coach_id || '',
+        slot: slotTime,
+        startTime: b.startTime || b.start_time || '',
+        endTime: b.endTime || b.end_time || '',
+        selectedDate: b.selectedDate || b.selected_date || '',
+        format: b.format || 'Online (Google Meet)',
+        userName: clientName,
+        userEmail: clientEmail,
+        userPhone: clientPhone,
+        userAddress: clientAddress,
+        userId: b.userId || b.user_id || 'qonaq',
+        isGuest: Boolean(b.isGuest),
+        price: 'Fərdi Seans',
+        status: mappedStatus,
+        paymentStatus: mappedStatus === 'Təsdiqləndi' ? 'Ödənildi' : (mappedStatus === 'Ləğv edildi' ? 'Qaytarıldı' : 'Gözlənilir'),
+        attendanceStatus: mappedStatus === 'Təsdiqləndi' ? 'İştirak edəcək' : (mappedStatus === 'Ləğv edildi' ? 'İştirak etməyəcək' : 'Gözlənilir'),
+        adminNote: b.notes || '',
+        userNote: b.notes || '',
+        appliedAt: b.createdAt ? b.createdAt.split(' ')[0] : (b.date || ''),
+        createdAt: b.createdAt || '',
+        formResponses: {
+          'Ekspert / Kouç': coachDisplayName,
+          'Seans Vaxtı (Slot)': slotTime,
+          'Format': b.format || 'Online (Google Meet)',
+          'Ünvan / Ərazi': clientAddress || 'Qeyd olunmayıb',
+          'İstifadəçi Növü': b.isGuest ? 'Saytdan Qonaq Rezervasiyası' : 'Qeydiyyatlı İstifadəçi'
+        }
+      };
+    });
+
+    return [...regularApps, ...bookingApps];
+  }, [applicationsList, bookings]);
+
   // Filtered applications
-  const filteredApps = applicationsList.filter(app => {
+  const filteredApps = unifiedApplications.filter(app => {
     if (app.archived) return false;
 
     if (filterType !== 'all' && app.targetType !== filterType) {
@@ -81,17 +145,18 @@ export default function AdminApplicationsTab() {
       const matchName = (app.userName || '').toLowerCase().includes(q);
       const matchEmail = (app.userEmail || '').toLowerCase().includes(q);
       const matchTitle = (app.targetTitle || '').toLowerCase().includes(q);
+      const matchCoach = (app.coachName || '').toLowerCase().includes(q);
       const matchId = (app.id || '').toLowerCase().includes(q);
       const matchPhone = (app.userPhone || '').toLowerCase().includes(q);
-      if (!matchName && !matchEmail && !matchTitle && !matchId && !matchPhone) return false;
+      if (!matchName && !matchEmail && !matchTitle && !matchCoach && !matchId && !matchPhone) return false;
     }
     return true;
   });
 
   // Metrics
-  const nonArchived = applicationsList.filter(a => !a.archived);
+  const nonArchived = unifiedApplications.filter(a => !a.archived);
   const totalCount = nonArchived.length;
-  const newCount = nonArchived.filter(a => a.status === 'Yeni').length;
+  const newCount = nonArchived.filter(a => a.status === 'Yeni' || a.status === 'Gözləyir').length;
   const reviewCount = nonArchived.filter(a => a.status === 'Baxılır').length;
   const approvedCount = nonArchived.filter(a => a.status === 'Təsdiqləndi').length;
   const waitlistCount = nonArchived.filter(a => a.status === 'Gözləmədə').length;
@@ -111,6 +176,18 @@ export default function AdminApplicationsTab() {
 
   const handleSaveAppDetails = () => {
     if (!selectedApp) return;
+    if (selectedApp.isBookingEntry) {
+      updateBookingStatus(selectedApp.id, statusInput, {
+        endTime: selectedApp.endTime,
+        adminNote: adminNoteInput.trim()
+      });
+      setSelectedApp(prev => ({
+        ...prev,
+        status: statusInput,
+        adminNote: adminNoteInput.trim()
+      }));
+      return;
+    }
     const isTopic = selectedApp.targetType === 'community' || selectedApp.targetType === 'forum';
     updateApplicationStatus(
       selectedApp.id,
@@ -351,6 +428,7 @@ export default function AdminApplicationsTab() {
                 className="w-full md:w-44 px-3 py-2 rounded-lg border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
               >
                 <option value="all">Bütün Kateqoriyalar</option>
+                <option value="coach_booking">Ekspert / Kouç Rezervasiyaları</option>
                 <option value="course">Akademiya Kursları</option>
                 <option value="club">Zənginlər Klubu</option>
                 <option value="event">Tədbirlər</option>
@@ -425,7 +503,7 @@ export default function AdminApplicationsTab() {
                           </td>
 
                           <td className="py-3.5 px-4">
-                            <div className="flex items-center gap-1.5 mb-0.5">
+                            <div className="flex items-center gap-1.5 mb-1">
                               <span className={`p-1 rounded bg-surface-container ${typeObj.color} flex items-center justify-center`}>
                                 <span className="material-symbols-outlined text-[14px]">{typeObj.icon}</span>
                               </span>
@@ -433,9 +511,28 @@ export default function AdminApplicationsTab() {
                                 {typeObj.label}
                               </span>
                             </div>
-                            <span className="font-medium text-primary line-clamp-1 max-w-[220px]" title={app.targetTitle}>
-                              {app.targetTitle}
-                            </span>
+                            {app.targetType === 'coach_booking' ? (
+                              <div className="space-y-1">
+                                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-amber-500/15 text-amber-900 dark:text-amber-300 font-bold border border-amber-500/30">
+                                  <span className="material-symbols-outlined text-[14px] text-amber-600">psychology</span>
+                                  <span>Kouç: {app.coachName}</span>
+                                </div>
+                                <div className="text-[11px] font-mono text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                                  <span className="material-symbols-outlined text-[13px] text-slate-500">schedule</span>
+                                  <span>{app.slot}</span>
+                                </div>
+                                {app.format && (
+                                  <div className="text-[10px] text-outline flex items-center gap-1">
+                                    <span className="material-symbols-outlined text-[12px]">video_camera_front</span>
+                                    <span>{app.format}</span>
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="font-medium text-primary line-clamp-1 max-w-[220px]" title={app.targetTitle}>
+                                {app.targetTitle}
+                              </span>
+                            )}
                           </td>
 
                           <td className="py-3.5 px-4 font-medium text-primary">
@@ -556,14 +653,18 @@ export default function AdminApplicationsTab() {
                               {app.status !== 'Təsdiqləndi' && (
                                 <button
                                   onClick={() => {
-                                    const isTopic = app.targetType === 'community' || app.targetType === 'forum';
-                                    updateApplicationStatus(
-                                      app.id,
-                                      'Təsdiqləndi',
-                                      'Admin paneldən təsdiqləndi.',
-                                      isTopic ? 'Tələb olunmur' : 'Ödənildi',
-                                      isTopic ? 'Tələb olunmur' : 'İştirak edəcək'
-                                    );
+                                    if (app.isBookingEntry) {
+                                      updateBookingStatus(app.id, 'Təsdiqləndi', { endTime: app.endTime });
+                                    } else {
+                                      const isTopic = app.targetType === 'community' || app.targetType === 'forum';
+                                      updateApplicationStatus(
+                                        app.id,
+                                        'Təsdiqləndi',
+                                        'Admin paneldən təsdiqləndi.',
+                                        isTopic ? 'Tələb olunmur' : 'Ödənildi',
+                                        isTopic ? 'Tələb olunmur' : 'İştirak edəcək'
+                                      );
+                                    }
                                   }}
                                   title="Təsdiqlə"
                                   className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 hover:bg-emerald-200 flex items-center justify-center transition-colors"
@@ -573,9 +674,15 @@ export default function AdminApplicationsTab() {
                               )}
 
                               {/* Quick Reject button */}
-                              {app.status !== 'Rədd edildi' && (
+                              {app.status !== 'Rədd edildi' && app.status !== 'Ləğv edildi' && (
                                 <button
-                                  onClick={() => updateApplicationStatus(app.id, 'Rədd edildi', 'Meyarlara uyğun hesab edilmədi.', 'Qaytarıldı', 'İştirak etməyəcək')}
+                                  onClick={() => {
+                                    if (app.isBookingEntry) {
+                                      updateBookingStatus(app.id, 'Ləğv edildi');
+                                    } else {
+                                      updateApplicationStatus(app.id, 'Rədd edildi', 'Meyarlara uyğun hesab edilmədi.', 'Qaytarıldı', 'İştirak etməyəcək');
+                                    }
+                                  }}
                                   title="Rədd et"
                                   className="w-7 h-7 rounded-lg bg-rose-100 text-rose-800 hover:bg-rose-200 flex items-center justify-center transition-colors"
                                 >
@@ -785,14 +892,33 @@ export default function AdminApplicationsTab() {
                   <span className="text-[10px] font-bold uppercase tracking-wider text-outline block mb-1">
                     Proqram Məlumatları
                   </span>
-                  <div className="font-bold text-primary text-sm">{selectedApp.targetTitle}</div>
-                  <div className="text-on-surface-variant">Kateqoriya: <strong className="uppercase">{selectedApp.targetType}</strong></div>
-                  {selectedApp.targetType !== 'community' && selectedApp.targetType !== 'forum' && (
-                    <div className="text-on-surface-variant">Məbləğ: <strong>{selectedApp.price || 'Pulsuz'}</strong></div>
-                  )}
-                  <div className="text-[10px] text-outline mt-1">Müraciət Tarixi: {selectedApp.appliedAt}</div>
-                  {selectedApp.updatedAt && (
-                    <div className="text-[10px] text-secondary mt-0.5 font-medium">Son Yenilənmə: {selectedApp.updatedAt}</div>
+                  {selectedApp.targetType === 'coach_booking' ? (
+                    <div className="space-y-1.5">
+                      <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30">
+                        <span className="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider block">
+                          Təyin Edilmiş Kouç / Ekspert:
+                        </span>
+                        <div className="font-bold text-amber-900 dark:text-amber-200 text-sm flex items-center gap-1.5 mt-0.5">
+                          <span className="material-symbols-outlined text-[16px] text-amber-600">psychology</span>
+                          <span>{selectedApp.coachName}</span>
+                        </div>
+                      </div>
+                      <div className="text-on-surface-variant text-xs">Vaxt: <strong className="font-mono">{selectedApp.slot}</strong></div>
+                      <div className="text-on-surface-variant text-xs">Format: <strong>{selectedApp.format}</strong></div>
+                      <div className="text-[10px] text-outline mt-1">Rezervasiya Tarixi: {selectedApp.appliedAt}</div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="font-bold text-primary text-sm">{selectedApp.targetTitle}</div>
+                      <div className="text-on-surface-variant">Kateqoriya: <strong className="uppercase">{selectedApp.targetType}</strong></div>
+                      {selectedApp.targetType !== 'community' && selectedApp.targetType !== 'forum' && (
+                        <div className="text-on-surface-variant">Məbləğ: <strong>{selectedApp.price || 'Pulsuz'}</strong></div>
+                      )}
+                      <div className="text-[10px] text-outline mt-1">Müraciət Tarixi: {selectedApp.appliedAt}</div>
+                      {selectedApp.updatedAt && (
+                        <div className="text-[10px] text-secondary mt-0.5 font-medium">Son Yenilənmə: {selectedApp.updatedAt}</div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>

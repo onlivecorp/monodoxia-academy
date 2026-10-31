@@ -109,7 +109,35 @@ export default function ProfileModal() {
 
   if (!profileModalOpen || !currentUser) return null;
 
+  const isCoachOrAdmin = currentUser?.role === 'Kouç' || currentUser?.role === 'Admin';
+  const myCoachProfile = (coachesList || []).find(
+    c => (c.userId && String(c.userId) === String(currentUser?.id)) ||
+         (c.user_id && String(c.user_id) === String(currentUser?.id)) ||
+         (c.name && currentUser?.name && c.name.toLowerCase().trim() === currentUser?.name.toLowerCase().trim()) ||
+         (currentUser?.id === 'usr_1792923099303' && (c.id === 'coach-1792923105867' || (c.name && c.name.includes('Sədaqət')))) ||
+         (currentUser?.id === 'u-nargiz' && (c.id === 'coach-nargiz' || (c.name && c.name.includes('Nərgiz'))))
+  ) || (currentUser?.role === 'Admin' ? (coachesList[0] || null) : null);
+
+  const coachIncomingBookings = (bookings || []).filter(b => {
+    if (!isCoachOrAdmin && !myCoachProfile) return false;
+    if (currentUser?.role === 'Admin') return true;
+    const matchId = (b.coachId && myCoachProfile && b.coachId === myCoachProfile.id) || (b.coach_id && myCoachProfile && b.coach_id === myCoachProfile.id);
+    const matchName = b.coachName && myCoachProfile?.name && (
+      b.coachName.toLowerCase().trim() === myCoachProfile.name.toLowerCase().trim() ||
+      b.coachName.toLowerCase().includes(myCoachProfile.name.toLowerCase().trim()) ||
+      myCoachProfile.name.toLowerCase().includes(b.coachName.toLowerCase().trim())
+    );
+    return matchId || matchName;
+  });
+
+  const myClientBookings = (bookings || []).filter(b => {
+    if (!currentUser?.id) return false;
+    return String(b.userId || b.user_id) === String(currentUser.id) ||
+           (b.userEmail && currentUser.email && b.userEmail.toLowerCase() === currentUser.email.toLowerCase());
+  });
+
   const myApplications = (applicationsList || []).filter(a => String(a.userId) === String(currentUser?.id) && !a.archived);
+  const totalApplicationsCount = myApplications.length + coachIncomingBookings.length + myClientBookings.length;
   const myNotifications = (userNotifications || []).filter(n => {
     if (!currentUser?.id) return false;
     const nUid = String(n.userId || '').replace(/^#/, '');
@@ -436,7 +464,7 @@ export default function ProfileModal() {
               <span className="material-symbols-outlined text-[17px]">assignment</span>
               <span>Müraciətlər & Qeydiyyat</span>
               <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
-                {myApplications.length}
+                {totalApplicationsCount}
               </span>
             </button>
 
@@ -844,11 +872,143 @@ export default function ProfileModal() {
                   Bütün Müraciət və Qeydiyyat Tarixçəsi
                 </h4>
                 <p className="text-[11px] text-slate-500 mt-0.5">
-                  Kurslar, klublar, tədbirlər və icma üçün göndərdiyiniz müraciətlərin aktual vəziyyəti
+                  Kurslar, klublar, fərdi kouçinq və tədbirlər üçün olan müraciətlərin aktual vəziyyəti
                 </p>
               </div>
 
-              {myApplications.length === 0 ? (
+              {/* Saytdan Gələn Kouçinq Rezervasiya Müraciətləri (Kouç üçün) */}
+              {coachIncomingBookings.length > 0 && (
+                <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/10 border border-amber-300 dark:border-amber-700 space-y-3">
+                  <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-amber-200 dark:border-amber-800">
+                    <div>
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-amber-900 dark:text-amber-300 flex items-center gap-1.5 font-mono">
+                        <span className="material-symbols-outlined text-[17px] text-amber-600">psychology</span>
+                        Saytdan Gələn Fərdi Kouçinq Rezervasiyaları ({coachIncomingBookings.length})
+                      </h4>
+                      <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5">
+                        Ziyarətçi və tələbələrinizin sizin üçün göndərdiyi seans müraciətləri
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => refreshBookings && refreshBookings()}
+                      className="px-2.5 py-1 rounded-lg bg-amber-200/60 hover:bg-amber-200 text-amber-900 text-[11px] font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+                      title="Siyahını yenilə"
+                    >
+                      <span className="material-symbols-outlined text-[14px]">refresh</span>
+                      <span>Yenilə</span>
+                    </button>
+                  </div>
+
+                  <div className="space-y-3">
+                    {coachIncomingBookings.map(b => (
+                      <div
+                        key={b.id}
+                        className="p-3.5 rounded-xl border border-slate-200 bg-white shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+                      >
+                        <div className="space-y-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs font-bold text-slate-900">{b.userName || b.user_name || 'İstifadəçi'}</span>
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              b.status === 'Təsdiqləndi' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' :
+                              b.status === 'Ləğv edildi' ? 'bg-rose-100 text-rose-800 border border-rose-300' :
+                              'bg-amber-100 text-amber-800 border border-amber-300'
+                            }`}>
+                              {b.status || 'Gözləyir'}
+                            </span>
+                            <span className="text-[11px] text-slate-400 font-mono">#{b.id}</span>
+                            {b.isGuest && (
+                              <span className="text-[10px] bg-amber-100 text-amber-900 border border-amber-300 px-1.5 py-0.2 rounded font-semibold">
+                                Qonaq
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="text-xs text-slate-700 flex items-center gap-2 flex-wrap">
+                            <span className="font-semibold text-amber-900 bg-amber-100/70 px-2 py-0.5 rounded border border-amber-200 flex items-center gap-1">
+                              <span className="material-symbols-outlined text-[13px]">schedule</span>
+                              {b.slot || `${b.selectedDate || ''} ${b.startTime || ''}${b.endTime ? '-' + b.endTime : ''}`}
+                            </span>
+                            <span className="text-slate-500">• {b.format || 'Online'}</span>
+                            {b.userEmail && <span className="text-slate-400 font-mono text-[11px]">({b.userEmail})</span>}
+                            {b.userPhone && (
+                              <a
+                                href={`https://wa.me/${String(b.userPhone).replace(/[^0-9]/g, '')}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-emerald-700 hover:underline text-[11px] font-medium flex items-center gap-0.5"
+                              >
+                                <span className="material-symbols-outlined text-[13px]">chat</span>
+                                <span>{b.userPhone}</span>
+                              </a>
+                            )}
+                            {b.userAddress && <span className="text-slate-600 text-[11px] font-medium">Ünvan: {b.userAddress}</span>}
+                          </div>
+
+                          {b.notes && (
+                            <p className="text-[11px] text-slate-600 italic bg-slate-50 p-1.5 rounded border border-slate-200/80 mt-1">
+                              "{b.notes}"
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                          {b.status !== 'Təsdiqləndi' && (
+                            <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
+                              <div className="flex items-center gap-1.5">
+                                <label className="text-[10px] font-bold text-slate-600 whitespace-nowrap">Bitiş saatı:</label>
+                                <input
+                                  type="time"
+                                  value={bookingEndTimes[b.id] || b.endTime || (b.startTime ? (() => { const [h,m] = (b.startTime||'00:00').split(':').map(Number); return `${String(h+1).padStart(2,'0')}:${String(m).padStart(2,'0')}`; })() : '15:00')}
+                                  onChange={e => setBookingEndTimes(prev => ({ ...prev, [b.id]: e.target.value }))}
+                                  className="px-2 py-1 rounded-lg border border-slate-300 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-amber-500"
+                                  title="Seans bitiş saatını təyin edin"
+                                />
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => updateBookingStatus(b.id, 'Təsdiqləndi', { endTime: bookingEndTimes[b.id] || b.endTime || (b.startTime ? (() => { const [h,m] = (b.startTime||'00:00').split(':').map(Number); return `${String(h+1).padStart(2,'0')}:${String(m).padStart(2,'0')}`; })() : '') })}
+                                className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer transition-colors"
+                                title="Rezervasiyanı qəbul et və bitiş saatını təsdiqlə"
+                              >
+                                <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                                <span>Qəbul Et</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => updateBookingStatus(b.id, 'Ləğv edildi')}
+                                className="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold flex items-center gap-1 border border-rose-200 cursor-pointer transition-colors"
+                                title="Rezervasiyanı rədd et"
+                              >
+                                <span className="material-symbols-outlined text-[15px]">cancel</span>
+                                <span>Rədd Et</span>
+                              </button>
+                            </div>
+                          )}
+                          {b.status === 'Təsdiqləndi' && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-emerald-700 flex items-center gap-1">
+                                <span className="material-symbols-outlined text-[16px]">check</span>
+                                Təsdiqlənib
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => updateBookingStatus(b.id, 'Ləğv edildi')}
+                                className="text-slate-400 hover:text-rose-600 text-xs transition-colors"
+                                title="Ləğv et"
+                              >
+                                Ləğv Et
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {totalApplicationsCount === 0 ? (
                 <div className="text-center py-14 border border-dashed border-slate-300 rounded-2xl bg-white">
                   <span className="material-symbols-outlined text-[44px] text-slate-400 mb-2">inbox</span>
                   <p className="text-xs text-slate-700 font-medium">Hələ heç bir müraciətiniz yoxdur.</p>
@@ -857,7 +1017,11 @@ export default function ProfileModal() {
                   </p>
                 </div>
               ) : (
+                myApplications.length > 0 && (
                 <div className="space-y-3.5">
+                  <h5 className="text-[11px] font-bold uppercase tracking-wider text-slate-500 font-mono">
+                    Kurs və Tədbir Müraciətləri ({myApplications.length})
+                  </h5>
                   {myApplications.map(app => {
                     const statusObj = APPLICATION_STATUSES.find(s => s.id === app.status) || {
                       badgeClass: 'bg-slate-100 text-slate-800 border-slate-200'
@@ -1050,6 +1214,7 @@ export default function ProfileModal() {
                     );
                   })}
                 </div>
+                )
               )}
             </div>
           )}
