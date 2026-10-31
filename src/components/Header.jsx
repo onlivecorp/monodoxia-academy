@@ -302,7 +302,11 @@ export default function Header() {
               {/* Avatar Button */}
               <button
                 onClick={() => {
-                  setActiveProfileTab('applications');
+                  if (currentUser.role === 'Kouç') {
+                    setActiveProfileTab('expert_profile');
+                  } else {
+                    setActiveProfileTab('applications');
+                  }
                   setProfileModalOpen(true);
                 }}
                 className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-secondary/10 border border-secondary text-secondary flex items-center justify-center font-bold text-xs uppercase hover:bg-secondary hover:text-surface-bright transition-colors shrink-0"
@@ -446,7 +450,11 @@ export default function Header() {
                   </button>
                   <button
                     onClick={() => {
-                      setActiveProfileTab('applications');
+                      if (currentUser.role === 'Kouç') {
+                        setActiveProfileTab('expert_profile');
+                      } else {
+                        setActiveProfileTab('applications');
+                      }
                       setProfileModalOpen(true);
                       setMobileMenuOpen(false);
                     }}

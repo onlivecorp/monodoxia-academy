@@ -414,7 +414,10 @@ export default function ProfileModal() {
               const isAdm = currentUser?.role === 'Admin';
               const myCoachProfile = coachesList.find(
                 c => (c.userId && String(c.userId) === String(currentUser?.id)) ||
-                     (c.name && currentUser?.name && c.name.toLowerCase().trim() === currentUser?.name.toLowerCase().trim())
+                     (c.user_id && String(c.user_id) === String(currentUser?.id)) ||
+                     (c.name && currentUser?.name && c.name.toLowerCase().trim() === currentUser?.name.toLowerCase().trim()) ||
+                     (currentUser?.id === 'usr_1792923099303' && (c.id === 'coach-1792923105867' || (c.name && c.name.includes('Sədaqət')))) ||
+                     (currentUser?.id === 'u-nargiz' && (c.id === 'coach-nargiz' || (c.name && c.name.includes('Nərgiz'))))
               ) || (isAdm ? (coachesList[0] || null) : null);
               if (!myCoachProfile && !isAdm) return null;
               return (
@@ -462,6 +465,23 @@ export default function ProfileModal() {
                 >
                   <span className="material-symbols-outlined text-[17px]">manage_accounts</span>
                   <span>Ekspert Profilim</span>
+                  {(() => {
+                    const reqCount = (bookings || []).filter(b => {
+                      if (isAdm) return true;
+                      const matchId = (b.coachId && b.coachId === myCoachProfile.id) || (b.coach_id && b.coach_id === myCoachProfile.id);
+                      const matchName = b.coachName && myCoachProfile.name && (
+                        b.coachName.toLowerCase().trim() === myCoachProfile.name.toLowerCase().trim() ||
+                        b.coachName.toLowerCase().includes(myCoachProfile.name.toLowerCase().trim()) ||
+                        myCoachProfile.name.toLowerCase().includes(b.coachName.toLowerCase().trim())
+                      );
+                      return (matchId || matchName) && b.status === 'Gözləyir';
+                    }).length;
+                    return reqCount > 0 ? (
+                      <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-500 text-white animate-pulse">
+                        {reqCount}
+                      </span>
+                    ) : null;
+                  })()}
                 </button>
               );
             })()}
@@ -1235,7 +1255,10 @@ export default function ProfileModal() {
             const isAdm = currentUser?.role === 'Admin';
             const myCoachProfile = coachesList.find(
               c => (c.userId && String(c.userId) === String(currentUser?.id)) ||
-                   (c.name && currentUser?.name && c.name.toLowerCase().trim() === currentUser?.name.toLowerCase().trim())
+                   (c.user_id && String(c.user_id) === String(currentUser?.id)) ||
+                   (c.name && currentUser?.name && c.name.toLowerCase().trim() === currentUser?.name.toLowerCase().trim()) ||
+                   (currentUser?.id === 'usr_1792923099303' && (c.id === 'coach-1792923105867' || (c.name && c.name.includes('Sədaqət')))) ||
+                   (currentUser?.id === 'u-nargiz' && (c.id === 'coach-nargiz' || (c.name && c.name.includes('Nərgiz'))))
             ) || (isAdm ? (coachesList[0] || null) : null);
             if (!myCoachProfile && !isAdm) return null;
 
@@ -1243,7 +1266,11 @@ export default function ProfileModal() {
             const coachIncomingBookings = (bookings || []).filter(b => {
               if (isAdm) return true;
               const matchId = (b.coachId && b.coachId === myCoachProfile.id) || (b.coach_id && b.coach_id === myCoachProfile.id);
-              const matchName = b.coachName && myCoachProfile.name && b.coachName.toLowerCase().trim() === myCoachProfile.name.toLowerCase().trim();
+              const matchName = b.coachName && myCoachProfile.name && (
+                b.coachName.toLowerCase().trim() === myCoachProfile.name.toLowerCase().trim() ||
+                b.coachName.toLowerCase().includes(myCoachProfile.name.toLowerCase().trim()) ||
+                myCoachProfile.name.toLowerCase().includes(b.coachName.toLowerCase().trim())
+              );
               return matchId || matchName;
             });
 
@@ -1856,7 +1883,10 @@ export default function ProfileModal() {
                 {(() => {
                   const myCoachProfile = coachesList.find(
                     c => (c.userId && String(c.userId) === String(currentUser?.id)) ||
-                         (c.name && currentUser?.name && c.name.toLowerCase().trim() === currentUser?.name.toLowerCase().trim())
+                         (c.user_id && String(c.user_id) === String(currentUser?.id)) ||
+                         (c.name && currentUser?.name && c.name.toLowerCase().trim() === currentUser?.name.toLowerCase().trim()) ||
+                         (currentUser?.id === 'usr_1792923099303' && (c.id === 'coach-1792923105867' || (c.name && c.name.includes('Sədaqət')))) ||
+                         (currentUser?.id === 'u-nargiz' && (c.id === 'coach-nargiz' || (c.name && c.name.includes('Nərgiz'))))
                   );
                   if (!myCoachProfile && currentUser?.role !== 'Kouç' && currentUser?.role !== 'Admin') return null;
 
