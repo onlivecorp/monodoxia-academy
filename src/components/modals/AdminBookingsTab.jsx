@@ -5,6 +5,8 @@ export default function AdminBookingsTab() {
   const {
     bookings = [],
     updateBookingStatus,
+    deleteBooking,
+    deleteBookings,
     refreshBookings,
     showToast
   } = useApp();
@@ -13,6 +15,7 @@ export default function AdminBookingsTab() {
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterCoach, setFilterCoach] = useState('all');
   const [approvalEndTimes, setApprovalEndTimes] = useState({});
+  const [selectedBookingIds, setSelectedBookingIds] = useState([]);
 
   // Extract unique coach names
   const coachNames = Array.from(new Set(bookings.map(b => b.coachName || b.coach_name).filter(Boolean)));
@@ -35,6 +38,28 @@ export default function AdminBookingsTab() {
     return true;
   });
 
+  const handleToggleSelectAll = () => {
+    if (selectedBookingIds.length === filteredBookings.length && filteredBookings.length > 0) {
+      setSelectedBookingIds([]);
+    } else {
+      setSelectedBookingIds(filteredBookings.map(b => b.id));
+    }
+  };
+
+  const handleToggleBooking = (id) => {
+    setSelectedBookingIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedBookingIds.length === 0) return;
+    const count = selectedBookingIds.length;
+    if (!window.confirm(`Seçilmiş ${count} rezervasiyanı birdəfəlik silmək istədiyinizdən əminsiniz?\n\nBu əməliyyat həm bazadan, həm də təyin edilmiş Kouç / Təqvim kabinetindən tamamilə silinəcək.`)) {
+      return;
+    }
+    deleteBookings(selectedBookingIds);
+    setSelectedBookingIds([]);
+  };
+
   return (
     <div className="space-y-4">
       {/* Header & Controls */}
@@ -49,19 +74,61 @@ export default function AdminBookingsTab() {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => {
-            if (refreshBookings) refreshBookings();
-            showToast('Rezervasiyalar yenilənir...', 'info');
-          }}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-800 text-xs font-bold hover:bg-amber-100 transition-all cursor-pointer shadow-2xs"
-          title="Serverdən ən son rezervasiyaları yüklə"
-        >
-          <span className="material-symbols-outlined text-[16px]">refresh</span>
-          <span>Yenilə</span>
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          {filteredBookings.length > 0 && (
+            <button
+              type="button"
+              onClick={handleToggleSelectAll}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-all cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[16px]">
+                {selectedBookingIds.length === filteredBookings.length ? 'deselect' : 'select_all'}
+              </span>
+              <span>{selectedBookingIds.length === filteredBookings.length ? 'Seçimi Sıfırla' : 'Hamısını Seç'}</span>
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={() => {
+              if (refreshBookings) refreshBookings();
+              showToast('Rezervasiyalar yenilənir...', 'info');
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-800 text-xs font-bold hover:bg-amber-100 transition-all cursor-pointer shadow-2xs"
+            title="Serverdən ən son rezervasiyaları yüklə"
+          >
+            <span className="material-symbols-outlined text-[16px]">refresh</span>
+            <span>Yenilə</span>
+          </button>
+        </div>
       </div>
+
+      {/* Bulk Delete Toolbar */}
+      {selectedBookingIds.length > 0 && (
+        <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-300 dark:border-amber-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-fadeIn">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-[20px] text-amber-700">checklist</span>
+            <span className="text-xs font-bold text-amber-950">
+              Seçilib: <strong>{selectedBookingIds.length}</strong> rezervasiya
+            </span>
+            <button
+              type="button"
+              onClick={() => setSelectedBookingIds([])}
+              className="text-[11px] text-amber-800 underline hover:text-amber-950 ml-2 cursor-pointer font-semibold"
+            >
+              Seçimi ləğv et
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={handleBulkDelete}
+            className="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer transition-colors"
+          >
+            <span className="material-symbols-outlined text-[16px]">delete_sweep</span>
+            <span>Seçilənləri Toplu Sil ({selectedBookingIds.length})</span>
+          </button>
+        </div>
+      )}
 
       {/* Filters & Search */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -114,16 +181,27 @@ export default function AdminBookingsTab() {
             <div
               key={b.id}
               className={`p-4 rounded-2xl border transition-all bg-white shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+                selectedBookingIds.includes(b.id) ? 'border-amber-500 bg-amber-50/40 ring-2 ring-amber-400/40' :
                 b.status === 'Təsdiqləndi' ? 'border-emerald-200 hover:border-emerald-300' :
                 b.status === 'Ləğv edildi' ? 'border-rose-200 opacity-70' :
                 'border-amber-200 hover:border-amber-400'
               }`}
             >
-              <div className="space-y-1.5 min-w-0 flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm font-bold text-slate-900">
-                    {b.userName || b.user_name || 'Qonaq'}
-                  </span>
+              <div className="flex items-start gap-3 flex-1 min-w-0">
+                <div className="pt-1">
+                  <input
+                    type="checkbox"
+                    checked={selectedBookingIds.includes(b.id)}
+                    onChange={() => handleToggleBooking(b.id)}
+                    className="rounded border-slate-300 text-amber-600 focus:ring-amber-500 cursor-pointer h-4 w-4"
+                  />
+                </div>
+
+                <div className="space-y-1.5 min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-bold text-slate-900">
+                      {b.userName || b.user_name || 'Qonaq'}
+                    </span>
                   {b.isGuest ? (
                     <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
                       Qonaq
@@ -185,6 +263,7 @@ export default function AdminBookingsTab() {
                   )}
                 </div>
               </div>
+            </div>
 
               {/* Status Action Buttons */}
               <div className="flex items-center gap-2 shrink-0 flex-wrap sm:flex-nowrap">
@@ -219,6 +298,18 @@ export default function AdminBookingsTab() {
                     <span>Ləğv Et</span>
                   </button>
                 )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm(`Bu rezervasiyanı (#${b.id}) birdəfəlik silmək istəyirsiniz?\n\nBu əməliyyat həm bazadan, həm də təyin edilmiş Kouç / Təqvim kabinetindən tamamilə silinəcək.`)) {
+                      deleteBooking(b.id);
+                    }
+                  }}
+                  className="w-8 h-8 rounded-xl bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200 hover:border-rose-200 flex items-center justify-center cursor-pointer transition-colors"
+                  title="Rezervasiyanı birdəfəlik sil"
+                >
+                  <span className="material-symbols-outlined text-[16px]">delete</span>
+                </button>
               </div>
             </div>
           ))}

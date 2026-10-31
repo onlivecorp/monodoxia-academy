@@ -2346,6 +2346,88 @@ export function AppProvider({ children }) {
     }
   };
 
+  const deleteBooking = (bookingId) => {
+    deleteBookings([bookingId]);
+  };
+
+  const deleteBookings = (bookingIds) => {
+    if (!Array.isArray(bookingIds) || bookingIds.length === 0) return;
+    const idsSet = new Set(bookingIds.map(String));
+
+    const toDelete = bookings.filter(b => idsSet.has(String(b.id)));
+
+    // 1. Remove from bookings state and localStorage
+    setBookings(prev => {
+      const next = prev.filter(b => !idsSet.has(String(b.id)));
+      try {
+        localStorage.setItem('monodoxia_bookings', JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+
+    // 2. Free up any booked slots in coaches profiles
+    if (toDelete.length > 0) {
+      setCoachesList(prevCoaches => {
+        const nextCoaches = prevCoaches.map(c => {
+          let updated = false;
+          let currentSchedule = Array.isArray(c.scheduleSlots) ? [...c.scheduleSlots] : [];
+          let currentBooked = Array.isArray(c.bookedSlots) ? [...c.bookedSlots] : [];
+
+          toDelete.forEach(targetBooking => {
+            const matchId = targetBooking.coachId && c.id === targetBooking.coachId;
+            const matchName = targetBooking.coachName && c.name && targetBooking.coachName.toLowerCase().trim() === c.name.toLowerCase().trim();
+            if (matchId || matchName) {
+              const bSlot = targetBooking.slot || `${targetBooking.selectedDate || ''} ${targetBooking.startTime || ''}-${targetBooking.endTime || ''}`.trim();
+              
+              currentSchedule = currentSchedule.map(s => {
+                const match = s.bookingId === targetBooking.id || s.label === bSlot ||
+                  (s.note && s.note.includes(targetBooking.id)) ||
+                  (s.date && targetBooking.selectedDate && s.date === targetBooking.selectedDate && s.startTime === targetBooking.startTime);
+                if (match) {
+                  updated = true;
+                  return { ...s, isBooked: false, clientName: '', note: '', bookingId: null };
+                }
+                return s;
+              });
+
+              const prevBookedLen = currentBooked.length;
+              currentBooked = currentBooked.filter(bs => {
+                if (typeof bs === 'string') return bs !== bSlot;
+                if (bs.bookingId && bs.bookingId === targetBooking.id) return false;
+                if (bs.id === 'bs-' + targetBooking.id) return false;
+                if (bs.slot && bs.slot === bSlot) return false;
+                return true;
+              });
+              if (currentBooked.length !== prevBookedLen) {
+                updated = true;
+              }
+            }
+          });
+
+          if (updated) {
+            const updatedCoach = {
+              ...c,
+              scheduleSlots: currentSchedule,
+              bookedSlots: currentBooked
+            };
+            apiCall('save_coach', updatedCoach);
+            return updatedCoach;
+          }
+          return c;
+        });
+
+        try {
+          localStorage.setItem('monodoxia_coaches', JSON.stringify(nextCoaches));
+        } catch (e) {}
+        return nextCoaches;
+      });
+    }
+
+    // 3. Delete from backend MySQL mdx_bookings
+    apiCall('delete_booking', { ids: Array.from(idsSet) }).catch(() => {});
+    showToast(bookingIds.length > 1 ? `${bookingIds.length} rezervasiya birdəfəlik silindi.` : 'Rezervasiya birdəfəlik silindi.', 'info');
+  };
+
   // Community Topic Details, Likes & Comments
   const isTopicLiked = (topicId) => {
     if (!topicId) return false;
@@ -3141,15 +3223,30 @@ export function AppProvider({ children }) {
     updateApplicationStatus(appId, 'Ləğv edildi', 'İstifadəçi tərəfindən ləğv edildi.');
   };
 
-  const deleteApplication = (appId, permanent = false) => {
-    if (permanent) {
-      setApplicationsList(prev => prev.filter(a => a.id !== appId));
-    } else {
-      setApplicationsList(prev => prev.map(a => a.id === appId ? { ...a, archived: true } : a));
-    }
-    showToast('Müraciət silindi / arxivləşdirildi.', 'info');
+  const deleteApplication = (appId, permanent = true) => {
+    deleteApplications([appId], permanent);
+  };
 
-    apiCall('delete_application', { id: appId, permanent }).catch(() => {});
+  const deleteApplications = (appIds, permanent = true) => {
+    if (!Array.isArray(appIds) || appIds.length === 0) return;
+    const idsSet = new Set(appIds.map(String));
+
+    if (permanent) {
+      setApplicationsList(prev => {
+        const next = prev.filter(a => !idsSet.has(String(a.id)));
+        try { localStorage.setItem('monodoxia_applications', JSON.stringify(next)); } catch (e) {}
+        return next;
+      });
+    } else {
+      setApplicationsList(prev => {
+        const next = prev.map(a => idsSet.has(String(a.id)) ? { ...a, archived: true } : a);
+        try { localStorage.setItem('monodoxia_applications', JSON.stringify(next)); } catch (e) {}
+        return next;
+      });
+    }
+    showToast(appIds.length > 1 ? `${appIds.length} müraciət birdəfəlik silindi.` : 'Müraciət silindi.', 'info');
+
+    apiCall('delete_application', { ids: Array.from(idsSet), permanent }).catch(() => {});
   };
 
   // Form Fields Management
@@ -4645,7 +4742,7 @@ export function AppProvider({ children }) {
       activeCertificate,
       bookingModalOpen, setBookingModalOpen,
       bookingPreselectedSlot, setBookingPreselectedSlot,
-      activeCoach, openBooking, openBookingModal: openBooking, confirmBooking, updateBookingStatus, updateBookingEndTime, refreshBookings,
+      activeCoach, openBooking, openBookingModal: openBooking, confirmBooking, updateBookingStatus, updateBookingEndTime, refreshBookings, deleteBooking, deleteBookings,
       timeBlocks, addTimeBlock, removeTimeBlock, updateTimeBlock,
       newTopicModalOpen, setNewTopicModalOpen,
       topicDetailModalOpen, setTopicDetailModalOpen,
@@ -4671,6 +4768,7 @@ export function AppProvider({ children }) {
       updateApplicationStatus,
       cancelApplication,
       deleteApplication,
+      deleteApplications,
       addFormField,
       updateFormField,
       deleteFormField,

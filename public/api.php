@@ -2332,24 +2332,31 @@ if ($action === 'update_application_status' && $_SERVER['REQUEST_METHOD'] === 'P
 if ($action === 'delete_application' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     requireAdminUser($pdo);
     verifyCsrfToken();
-    $input = json_decode(file_get_contents('php://input'), true);
-    $id = $input['id'] ?? null;
-    $permanent = ($input['permanent'] ?? false) === true;
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+    $ids = [];
+    if (!empty($input['ids']) && is_array($input['ids'])) {
+        $ids = $input['ids'];
+    } elseif (!empty($input['id'])) {
+        $ids[] = $input['id'];
+    }
+    $ids = array_values(array_filter(array_unique(array_map('strval', $ids))));
+    $permanent = ($input['permanent'] ?? true) === true;
 
-    if (!$id) {
+    if (empty($ids)) {
         http_response_code(400);
         echo json_encode(['status' => 'error', 'message' => 'ID göstərilməyib'], JSON_UNESCAPED_UNICODE);
         exit();
     }
 
+    $inPlaceholder = implode(',', array_fill(0, count($ids), '?'));
     if ($permanent) {
-        $stmt = $pdo->prepare("DELETE FROM mdx_applications WHERE id = ?");
+        $stmt = $pdo->prepare("DELETE FROM mdx_applications WHERE id IN ($inPlaceholder)");
     } else {
-        $stmt = $pdo->prepare("UPDATE mdx_applications SET archived = 1 WHERE id = ?");
+        $stmt = $pdo->prepare("UPDATE mdx_applications SET archived = 1 WHERE id IN ($inPlaceholder)");
     }
-    $stmt->execute([$id]);
+    $stmt->execute($ids);
 
-    echo json_encode(['status' => 'success', 'message' => 'Müraciət uğurla silindi / arxivləşdirildi'], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['status' => 'success', 'message' => 'Müraciət(lər) uğurla silindi', 'count' => count($ids)], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
@@ -3645,6 +3652,32 @@ if ($action === 'get_bookings') {
         ];
     }, $rawBookings);
     echo json_encode(['status' => 'success', 'bookings' => $mappedBookings], JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
+if ($action === 'delete_booking' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireAdminUser($pdo);
+    verifyCsrfToken();
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+    $ids = [];
+    if (!empty($input['ids']) && is_array($input['ids'])) {
+        $ids = $input['ids'];
+    } elseif (!empty($input['id'])) {
+        $ids[] = $input['id'];
+    }
+    $ids = array_values(array_filter(array_unique(array_map('strval', $ids))));
+
+    if (empty($ids)) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Silinəcək rezervasiya ID-si göstərilməyib'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    $inPlaceholder = implode(',', array_fill(0, count($ids), '?'));
+    $stmt = $pdo->prepare("DELETE FROM mdx_bookings WHERE id IN ($inPlaceholder)");
+    $stmt->execute($ids);
+
+    echo json_encode(['status' => 'success', 'message' => 'Rezervasiya(lar) uğurla silindi', 'count' => count($ids)], JSON_UNESCAPED_UNICODE);
     exit();
 }
 

@@ -12,6 +12,7 @@ export default function AdminRegistrationsTab() {
     applicationsList,
     updateApplicationStatus,
     deleteApplication,
+    deleteApplications,
     showToast
   } = useApp();
 
@@ -21,6 +22,7 @@ export default function AdminRegistrationsTab() {
   const [filterPayment, setFilterPayment] = useState('all');
   const [filterAttendance, setFilterAttendance] = useState('all');
   const [sortBy, setSortBy] = useState('date_desc'); // date_desc, date_asc, name_asc, status_asc
+  const [selectedRegIds, setSelectedRegIds] = useState([]);
 
   // Edit Registration Modal State
   const [editingReg, setEditingReg] = useState(null);
@@ -139,6 +141,28 @@ export default function AdminRegistrationsTab() {
     );
     setEditingReg(null);
     showToast(`Qeydiyyat yeniləndi: #${editingReg.id}`, 'success');
+  };
+
+  const handleToggleSelectAll = () => {
+    if (selectedRegIds.length === filteredRegs.length && filteredRegs.length > 0) {
+      setSelectedRegIds([]);
+    } else {
+      setSelectedRegIds(filteredRegs.map(r => r.id));
+    }
+  };
+
+  const handleToggleReg = (id) => {
+    setSelectedRegIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedRegIds.length === 0) return;
+    const count = selectedRegIds.length;
+    if (!window.confirm(`Seçilmiş ${count} qeydiyyatı birdəfəlik silmək istədiyinizdən əminsiniz?\n\nBu əməliyyat geri qaytarılmır və həm bazadan, həm də istifadəçi kabinetindən tamamilə silinəcək.`)) {
+      return;
+    }
+    deleteApplications(selectedRegIds, true);
+    setSelectedRegIds([]);
   };
 
   return (
@@ -300,12 +324,52 @@ export default function AdminRegistrationsTab() {
         </div>
       </div>
 
+      {/* Bulk Delete Toolbar */}
+      {selectedRegIds.length > 0 && (
+        <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-300 dark:border-amber-700/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-fadeIn">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="material-symbols-outlined text-[20px] text-amber-700 dark:text-amber-400">checklist</span>
+            <span className="text-xs font-bold text-amber-950 dark:text-amber-200">
+              Seçilib: <strong>{selectedRegIds.length}</strong> qeydiyyat
+            </span>
+            <button
+              type="button"
+              onClick={handleToggleSelectAll}
+              className="text-[11px] text-amber-800 dark:text-amber-300 font-semibold underline hover:text-amber-900 ml-2 cursor-pointer"
+            >
+              {selectedRegIds.length === filteredRegs.length ? 'Seçimi təmizlə' : 'Bütün görünənləri seç'}
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={handleBulkDelete}
+              className="px-3.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer transition-colors"
+              title="Seçilmiş qeydiyyatları birdəfəlik sil"
+            >
+              <span className="material-symbols-outlined text-[16px]">delete_sweep</span>
+              <span>Seçilənləri Toplu Sil ({selectedRegIds.length})</span>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Central Unified Registrations Table */}
       <div className="rounded-xl border border-outline-variant/40 bg-surface-bright shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="border-b border-outline-variant/40 bg-surface-container/20 text-on-surface-variant uppercase tracking-wider text-[10px] font-bold">
+                <th className="py-3 px-3 w-10 text-center">
+                  <input
+                    type="checkbox"
+                    checked={selectedRegIds.length === filteredRegs.length && filteredRegs.length > 0}
+                    onChange={handleToggleSelectAll}
+                    className="rounded border-outline-variant text-amber-600 focus:ring-amber-500 cursor-pointer"
+                    title="Bütün görünənləri seç"
+                  />
+                </th>
                 <th className="py-3 px-4">İstifadəçi</th>
                 <th className="py-3 px-4">Müraciət Etdiyi Məzmun</th>
                 <th className="py-3 px-4">Qeydiyyat Tarixi</th>
@@ -318,7 +382,7 @@ export default function AdminRegistrationsTab() {
             <tbody className="divide-y divide-outline-variant/20">
               {filteredRegs.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="text-center py-12 text-outline">
+                  <td colSpan="8" className="text-center py-12 text-outline">
                     <span className="material-symbols-outlined text-[36px] block mb-2">person_search</span>
                     Filtrlərə uyğun heç bir qeydiyyat qeydi tapılmadı.
                   </td>
@@ -335,7 +399,15 @@ export default function AdminRegistrationsTab() {
                   };
 
                   return (
-                    <tr key={reg.id} className="hover:bg-surface-container/20 transition-colors">
+                    <tr key={reg.id} className={`hover:bg-surface-container/20 transition-colors ${selectedRegIds.includes(reg.id) ? 'bg-amber-500/10' : ''}`}>
+                      <td className="py-3.5 px-3 text-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedRegIds.includes(reg.id)}
+                          onChange={() => handleToggleReg(reg.id)}
+                          className="rounded border-outline-variant text-amber-600 focus:ring-amber-500 cursor-pointer"
+                        />
+                      </td>
                       {/* User Column */}
                       <td className="py-3.5 px-4">
                         <div className="font-bold text-primary text-xs">{reg.userName}</div>
@@ -433,12 +505,12 @@ export default function AdminRegistrationsTab() {
 
                           <button
                             onClick={() => {
-                              if (window.confirm(`Bu qeydiyyatı arxivləşdirmək istədiyinizdən əminsiniz? (${reg.id})`)) {
-                                deleteApplication(reg.id);
+                              if (window.confirm(`Bu qeydiyyatı birdəfəlik silmək istədiyinizdən əminsiniz? (${reg.id})\n\nBu əməliyyat geri qaytarılmır və həm bazadan, həm də istifadəçi kabinetindən silinəcək.`)) {
+                                deleteApplication(reg.id, true);
                               }
                             }}
                             className="p-1 rounded text-outline hover:text-rose-600 transition-colors"
-                            title="Arxivləşdir / Sil"
+                            title="Birdəfəlik Sil"
                           >
                             <span className="material-symbols-outlined text-[16px]">delete</span>
                           </button>

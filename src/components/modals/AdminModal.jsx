@@ -436,11 +436,10 @@ export default function AdminModal() {
           )}
 
           {/* SIDEBAR */}
-          <aside className={`admin-sidebar admin-scroll p-3 flex flex-col gap-0.5 overflow-y-auto shrink-0 z-30 transition-transform duration-200 ${
-            mobileMenuOpen
+          <aside className={`admin-sidebar admin-scroll p-3 flex flex-col gap-0.5 overflow-y-auto shrink-0 z-30 transition-transform duration-200 ${mobileMenuOpen
               ? 'translate-x-0 absolute inset-y-0 left-0 w-[240px] shadow-2xl bg-white'
               : '-translate-x-full md:translate-x-0 md:static w-[220px]'
-          }`}>
+            }`}>
             {allowedNavCategories.map((group, groupIdx) => (
               <div key={groupIdx} className="flex flex-col gap-0.5">
                 <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#94a3b8', fontWeight: 700, padding: groupIdx === 0 ? '6px 12px 4px' : '12px 12px 4px' }}>

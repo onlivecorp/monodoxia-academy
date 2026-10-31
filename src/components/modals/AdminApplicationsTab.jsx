@@ -14,6 +14,7 @@ export default function AdminApplicationsTab() {
     applicationsList = [],
     updateApplicationStatus,
     deleteApplication,
+    deleteApplications,
     formFieldsList = [],
     addFormField,
     updateFormField,
@@ -21,6 +22,8 @@ export default function AdminApplicationsTab() {
     usersList = [],
     bookings = [],
     updateBookingStatus,
+    deleteBooking,
+    deleteBookings,
     showToast
   } = useApp();
 
@@ -47,6 +50,7 @@ export default function AdminApplicationsTab() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [selectedIds, setSelectedIds] = useState([]);
   const [selectedApp, setSelectedApp] = useState(null);
   const [adminNoteInput, setAdminNoteInput] = useState('');
   const [statusInput, setStatusInput] = useState('');
@@ -161,6 +165,39 @@ export default function AdminApplicationsTab() {
   const approvedCount = nonArchived.filter(a => a.status === 'Təsdiqləndi').length;
   const waitlistCount = nonArchived.filter(a => a.status === 'Gözləmədə').length;
   const rejectedCount = nonArchived.filter(a => ['Rədd edildi', 'Ləğv edildi'].includes(a.status)).length;
+
+  const handleToggleSelectAll = () => {
+    if (selectedIds.length === filteredApps.length && filteredApps.length > 0) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredApps.map(a => a.id));
+    }
+  };
+
+  const handleToggleRow = (id) => {
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedIds.length === 0) return;
+    const count = selectedIds.length;
+    if (!window.confirm(`Seçilmiş ${count} müraciəti birdəfəlik silmək istədiyinizdən əminsiniz?\n\nQeyd: Bu əməliyyat geri qaytarılmır, həm bazadan, həm də təyin edilmiş Kouç / Təqvim kabinetindən tamamilə silinəcək.`)) {
+      return;
+    }
+
+    const selectedEntries = unifiedApplications.filter(a => selectedIds.includes(a.id));
+    const bookingIdsToDelete = selectedEntries.filter(a => a.isBookingEntry).map(a => a.id);
+    const appIdsToDelete = selectedEntries.filter(a => !a.isBookingEntry).map(a => a.id);
+
+    if (bookingIdsToDelete.length > 0) {
+      deleteBookings(bookingIdsToDelete);
+    }
+    if (appIdsToDelete.length > 0) {
+      deleteApplications(appIdsToDelete, true);
+    }
+
+    setSelectedIds([]);
+  };
 
   const openAppDetails = (app) => {
     setSelectedApp(app);
@@ -450,12 +487,52 @@ export default function AdminApplicationsTab() {
             </div>
           </div>
 
+          {/* Bulk Selection Actions Toolbar */}
+          {selectedIds.length > 0 && (
+            <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-300 dark:border-amber-700/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-fadeIn">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="material-symbols-outlined text-[20px] text-amber-700 dark:text-amber-400">checklist</span>
+                <span className="text-xs font-bold text-amber-950 dark:text-amber-200">
+                  Seçilib: <strong>{selectedIds.length}</strong> müraciət
+                </span>
+                <button
+                  type="button"
+                  onClick={handleToggleSelectAll}
+                  className="text-[11px] text-amber-800 dark:text-amber-300 font-semibold underline hover:text-amber-900 ml-2 cursor-pointer"
+                >
+                  {selectedIds.length === filteredApps.length ? 'Seçimi təmizlə' : 'Bütün görünənləri seç'}
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleBulkDelete}
+                  className="px-3.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer transition-colors"
+                  title="Seçilmiş müraciətləri birdəfəlik sil"
+                >
+                  <span className="material-symbols-outlined text-[16px]">delete_sweep</span>
+                  <span>Seçilənləri Toplu Sil ({selectedIds.length})</span>
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Applications Table */}
           <div className="rounded-xl border border-outline-variant/40 bg-surface-bright shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr className="border-b border-outline-variant/40 bg-surface-container/20 text-on-surface-variant uppercase tracking-wider text-[10px] font-bold">
+                    <th className="py-3 px-3 w-10 text-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.length === filteredApps.length && filteredApps.length > 0}
+                        onChange={handleToggleSelectAll}
+                        className="rounded border-outline-variant text-amber-600 focus:ring-amber-500 cursor-pointer"
+                        title="Bütün görünənləri seç"
+                      />
+                    </th>
                     <th className="py-3 px-4">Müraciət ID & Tarix</th>
                     <th className="py-3 px-4">İstifadəçi</th>
                     <th className="py-3 px-4">Proqram / Məzmun</th>
@@ -468,7 +545,7 @@ export default function AdminApplicationsTab() {
                 <tbody className="divide-y divide-outline-variant/20">
                   {filteredApps.length === 0 ? (
                     <tr>
-                      <td colSpan="7" className="text-center py-12 text-outline">
+                      <td colSpan="8" className="text-center py-12 text-outline">
                         <span className="material-symbols-outlined text-[36px] block mb-2">search_off</span>
                         Axtarış parametrlərinə uyğun müraciət tapılmadı.
                       </td>
@@ -485,7 +562,15 @@ export default function AdminApplicationsTab() {
                       };
 
                       return (
-                        <tr key={app.id} className="hover:bg-surface-container/20 transition-colors">
+                        <tr key={app.id} className={`hover:bg-surface-container/20 transition-colors ${selectedIds.includes(app.id) ? 'bg-amber-500/10' : ''}`}>
+                          <td className="py-3.5 px-3 text-center">
+                            <input
+                              type="checkbox"
+                              checked={selectedIds.includes(app.id)}
+                              onChange={() => handleToggleRow(app.id)}
+                              className="rounded border-outline-variant text-amber-600 focus:ring-amber-500 cursor-pointer"
+                            />
+                          </td>
                           <td className="py-3.5 px-4 font-mono font-medium">
                             <span className="text-primary font-bold block">#{app.id}</span>
                             <span className="text-[10px] text-outline">{app.appliedAt}</span>
@@ -702,11 +787,15 @@ export default function AdminApplicationsTab() {
                               {/* Delete button */}
                               <button
                                 onClick={() => {
-                                  if (window.confirm(`Müraciəti (${app.id}) arxivləşdirmək istədiyinizdən əminsiniz?`)) {
-                                    deleteApplication(app.id);
+                                  if (window.confirm(`Müraciəti (${app.id}) birdəfəlik silmək istədiyinizdən əminsiniz?\n\nBu əməliyyat bazadan və təyin edilmiş Kouç / Təqvim kabinetindən də silinəcək.`)) {
+                                    if (app.isBookingEntry) {
+                                      deleteBooking(app.id);
+                                    } else {
+                                      deleteApplication(app.id, true);
+                                    }
                                   }
                                 }}
-                                title="Arxivləşdir / Sil"
+                                title="Birdəfəlik Sil"
                                 className="w-7 h-7 rounded-lg text-outline hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition-colors"
                               >
                                 <span className="material-symbols-outlined text-[16px]">delete</span>
