@@ -623,7 +623,13 @@ export function AppProvider({ children }) {
   const [adminModalOpen, setAdminModalOpen] = useState(false);
   const [adminModalTab, setAdminModalTab] = useState('overview');
   const [profileModalOpen, setProfileModalOpen] = useState(false);
-  const [activeProfileTab, setActiveProfileTab] = useState('applications');
+  const [activeProfileTab, setActiveProfileTab] = useState(() => {
+    try {
+      const savedUser = JSON.parse(localStorage.getItem('monodoxia_user') || 'null');
+      if (savedUser?.role === 'Kouç') return 'expert_profile';
+    } catch(e) {}
+    return 'applications';
+  });
 
   // Application Modal
   const [applicationModalOpen, setApplicationModalOpen] = useState(false);

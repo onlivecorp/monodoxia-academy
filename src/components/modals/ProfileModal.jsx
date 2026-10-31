@@ -323,10 +323,87 @@ export default function ProfileModal() {
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex items-center gap-1.5 sm:gap-2 mt-6 border-b border-slate-200/80 -mb-5 sm:-mb-7 overflow-x-auto pb-0 text-xs scrollbar-none">
+          <div className="flex items-center gap-1.5 sm:gap-2 mt-6 border-b border-slate-200/80 -mb-5 sm:-mb-7 overflow-x-auto pb-0 text-xs scrollbar-thin">
+            {/* Expert Profile Tab FIRST for Kouç and Admin */}
+            {(currentUser?.role === 'Kouç' || currentUser?.role === 'Admin') && (() => {
+              const isAdm = currentUser?.role === 'Admin';
+              const myCoachProfile = coachesList.find(
+                c => (c.userId && String(c.userId) === String(currentUser?.id)) ||
+                     (c.user_id && String(c.user_id) === String(currentUser?.id)) ||
+                     (c.name && currentUser?.name && c.name.toLowerCase().trim() === currentUser?.name.toLowerCase().trim()) ||
+                     (currentUser?.id === 'usr_1792923099303' && (c.id === 'coach-1792923105867' || (c.name && c.name.includes('Sədaqət')))) ||
+                     (currentUser?.id === 'u-nargiz' && (c.id === 'coach-nargiz' || (c.name && c.name.includes('Nərgiz'))))
+              ) || (isAdm ? (coachesList[0] || null) : null);
+              if (!myCoachProfile && !isAdm) return null;
+              return (
+                <button
+                  onClick={() => {
+                    setActiveTab('expert_profile');
+                    if (refreshBookings) refreshBookings();
+                    if (!expertProfileInited) {
+                      setExpertBio(myCoachProfile.bio || myCoachProfile.experience || '');
+                      const specs = Array.isArray(myCoachProfile.specialties)
+                        ? myCoachProfile.specialties.join(', ')
+                        : (myCoachProfile.specialties || '');
+                      setExpertSpecialties(specs);
+                      const rawAvail = Array.isArray(myCoachProfile.availableSlots) ? myCoachProfile.availableSlots : (Array.isArray(myCoachProfile.available_slots) ? myCoachProfile.available_slots : []);
+                      const filteredAvail = rawAvail.filter(s => s !== 'Sabah 15:00' && s !== 'Cümə 18:00');
+                      setExpertSlots(filteredAvail);
+
+                      const rawSched = Array.isArray(myCoachProfile.scheduleSlots) ? myCoachProfile.scheduleSlots : [];
+                      const filteredSched = rawSched.filter(s => {
+                        const lbl = typeof s === 'string' ? s : s?.label;
+                        return lbl !== 'Sabah 15:00' && lbl !== 'Cümə 18:00';
+                      });
+
+                      const initialSched = filteredSched.length > 0
+                        ? filteredSched
+                        : filteredAvail.map((s, idx) => ({
+                            id: 'slot-init-' + idx,
+                            label: typeof s === 'string' ? s : (s.label || s.slot || 'Saat'),
+                            date: '',
+                            startTime: '',
+                            endTime: '',
+                            isBooked: false,
+                            note: ''
+                          }));
+                      setExpertSchedule(initialSched);
+                      setExpertProfileInited(true);
+                      setExpertImage(myCoachProfile.image || myCoachProfile.avatar || '');
+                    }
+                  }}
+                  className={`pb-3.5 px-3.5 font-semibold transition-all border-b-2 flex items-center gap-1.5 whitespace-nowrap text-xs shrink-0 ${
+                    activeTab === 'expert_profile'
+                      ? 'border-amber-600 text-amber-800 font-bold'
+                      : 'border-transparent text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-[17px] text-amber-600">manage_accounts</span>
+                  <span>Ekspert Profilim & Rezervasiyalar</span>
+                  {(() => {
+                    const reqCount = (bookings || []).filter(b => {
+                      if (isAdm) return true;
+                      const matchId = (b.coachId && b.coachId === myCoachProfile.id) || (b.coach_id && b.coach_id === myCoachProfile.id);
+                      const matchName = b.coachName && myCoachProfile.name && (
+                        b.coachName.toLowerCase().trim() === myCoachProfile.name.toLowerCase().trim() ||
+                        b.coachName.toLowerCase().includes(myCoachProfile.name.toLowerCase().trim()) ||
+                        myCoachProfile.name.toLowerCase().includes(b.coachName.toLowerCase().trim())
+                      );
+                      return (matchId || matchName) && b.status === 'Gözləyir';
+                    }).length;
+                    return reqCount > 0 ? (
+                      <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-500 text-white animate-pulse">
+                        {reqCount}
+                      </span>
+                    ) : null;
+                  })()}
+                </button>
+              );
+            })()}
+
             <button
               onClick={() => setActiveTab('profile')}
-              className={`pb-3.5 px-3.5 font-semibold transition-all border-b-2 flex items-center gap-1.5 whitespace-nowrap text-xs ${
+              className={`pb-3.5 px-3.5 font-semibold transition-all border-b-2 flex items-center gap-1.5 whitespace-nowrap text-xs shrink-0 ${
                 activeTab === 'profile'
                   ? 'border-amber-600 text-amber-800'
                   : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -408,83 +485,6 @@ export default function ProfileModal() {
               <span>Sertifikatlarım</span>
               {(() => { const n = certificatesList.filter(c => String(c.userId) === String(currentUser?.id) && c.status === 'Yayında').length; return n > 0 ? <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">{n}</span> : null; })()}
             </button>
-
-            {/* Expert Profile Tab - for Kouç and Admin */}
-            {(currentUser?.role === 'Kouç' || currentUser?.role === 'Admin') && (() => {
-              const isAdm = currentUser?.role === 'Admin';
-              const myCoachProfile = coachesList.find(
-                c => (c.userId && String(c.userId) === String(currentUser?.id)) ||
-                     (c.user_id && String(c.user_id) === String(currentUser?.id)) ||
-                     (c.name && currentUser?.name && c.name.toLowerCase().trim() === currentUser?.name.toLowerCase().trim()) ||
-                     (currentUser?.id === 'usr_1792923099303' && (c.id === 'coach-1792923105867' || (c.name && c.name.includes('Sədaqət')))) ||
-                     (currentUser?.id === 'u-nargiz' && (c.id === 'coach-nargiz' || (c.name && c.name.includes('Nərgiz'))))
-              ) || (isAdm ? (coachesList[0] || null) : null);
-              if (!myCoachProfile && !isAdm) return null;
-              return (
-                <button
-                  onClick={() => {
-                    setActiveTab('expert_profile');
-                    if (refreshBookings) refreshBookings();
-                    if (!expertProfileInited) {
-                      setExpertBio(myCoachProfile.bio || myCoachProfile.experience || '');
-                      const specs = Array.isArray(myCoachProfile.specialties)
-                        ? myCoachProfile.specialties.join(', ')
-                        : (myCoachProfile.specialties || '');
-                      setExpertSpecialties(specs);
-                      const rawAvail = Array.isArray(myCoachProfile.availableSlots) ? myCoachProfile.availableSlots : (Array.isArray(myCoachProfile.available_slots) ? myCoachProfile.available_slots : []);
-                      const filteredAvail = rawAvail.filter(s => s !== 'Sabah 15:00' && s !== 'Cümə 18:00');
-                      setExpertSlots(filteredAvail);
-
-                      const rawSched = Array.isArray(myCoachProfile.scheduleSlots) ? myCoachProfile.scheduleSlots : [];
-                      const filteredSched = rawSched.filter(s => {
-                        const lbl = typeof s === 'string' ? s : s?.label;
-                        return lbl !== 'Sabah 15:00' && lbl !== 'Cümə 18:00';
-                      });
-
-                      const initialSched = filteredSched.length > 0
-                        ? filteredSched
-                        : filteredAvail.map((s, idx) => ({
-                            id: 'slot-init-' + idx,
-                            label: typeof s === 'string' ? s : (s.label || s.slot || 'Saat'),
-                            date: '',
-                            startTime: '',
-                            endTime: '',
-                            isBooked: false,
-                            note: ''
-                          }));
-                      setExpertSchedule(initialSched);
-                      setExpertProfileInited(true);
-                      setExpertImage(myCoachProfile.image || myCoachProfile.avatar || '');
-                    }
-                  }}
-                  className={`pb-3.5 px-3.5 font-semibold transition-all border-b-2 flex items-center gap-1.5 whitespace-nowrap text-xs ${
-                    activeTab === 'expert_profile'
-                      ? 'border-amber-600 text-amber-800'
-                      : 'border-transparent text-slate-500 hover:text-slate-800'
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-[17px]">manage_accounts</span>
-                  <span>Ekspert Profilim</span>
-                  {(() => {
-                    const reqCount = (bookings || []).filter(b => {
-                      if (isAdm) return true;
-                      const matchId = (b.coachId && b.coachId === myCoachProfile.id) || (b.coach_id && b.coach_id === myCoachProfile.id);
-                      const matchName = b.coachName && myCoachProfile.name && (
-                        b.coachName.toLowerCase().trim() === myCoachProfile.name.toLowerCase().trim() ||
-                        b.coachName.toLowerCase().includes(myCoachProfile.name.toLowerCase().trim()) ||
-                        myCoachProfile.name.toLowerCase().includes(b.coachName.toLowerCase().trim())
-                      );
-                      return (matchId || matchName) && b.status === 'Gözləyir';
-                    }).length;
-                    return reqCount > 0 ? (
-                      <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-500 text-white animate-pulse">
-                        {reqCount}
-                      </span>
-                    ) : null;
-                  })()}
-                </button>
-              );
-            })()}
 
             <button
               onClick={() => setActiveTab('membership')}
@@ -1143,6 +1143,24 @@ export default function ProfileModal() {
                           <p className="text-xs text-slate-600 leading-relaxed break-words">
                             {notif.message}
                           </p>
+
+                          {/* Quick Action for Coach Booking Notification */}
+                          {(notif.type === 'booking' || (notif.title && notif.title.includes('Rezervasiya'))) && (currentUser?.role === 'Kouç' || currentUser?.role === 'Admin') && (
+                            <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setActiveTab('expert_profile');
+                                  if (refreshBookings) refreshBookings();
+                                }}
+                                className="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] flex items-center gap-1.5 shadow-sm cursor-pointer transition-all"
+                              >
+                                <span className="material-symbols-outlined text-[15px]">event_available</span>
+                                <span>Rezervasiyaya Bax & Cavabla (Qəbul / Rədd)</span>
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     );
