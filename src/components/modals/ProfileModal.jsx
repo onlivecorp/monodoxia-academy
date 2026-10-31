@@ -418,6 +418,7 @@ export default function ProfileModal() {
                 <button
                   onClick={() => {
                     setActiveTab('expert_profile');
+                    if (refreshBookings) refreshBookings();
                     if (!expertProfileInited) {
                       setExpertBio(myCoachProfile.bio || myCoachProfile.experience || '');
                       const specs = Array.isArray(myCoachProfile.specialties)
@@ -1346,6 +1347,15 @@ export default function ProfileModal() {
                         Müraciəti "Qəbul Et" kliklədikdə həmin saat avtomatik olaraq təqvimdə <strong>DOLU / REZERV OLUNMUŞ</strong> kimi qeyd edilir.
                       </p>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => refreshBookings && refreshBookings()}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-amber-50 border border-amber-300 text-amber-800 text-[11px] font-semibold hover:bg-amber-100 transition-all cursor-pointer shadow-2xs"
+                      title="Rezervasiyaları yenilə"
+                    >
+                      <span className="material-symbols-outlined text-[15px]">refresh</span>
+                      <span>Yenilə</span>
+                    </button>
                   </div>
 
                   {coachIncomingBookings.length === 0 ? (

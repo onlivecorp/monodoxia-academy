@@ -160,7 +160,133 @@ function getSessionUser($pdo) {
     }
     $stmt = $pdo->prepare("SELECT id, name, email, role, tier, status, joined_date FROM mdx_users WHERE id = ? LIMIT 1");
     $stmt->execute([$_SESSION['user_id']]);
-    return $stmt->fetch() ?: null;
+    $u = $stmt->fetch() ?: null;
+    if ($u) {
+        $_SESSION['user_role'] = $u['role'];
+        $_SESSION['role'] = $u['role'];
+        if (!empty($u['name'])) {
+            $_SESSION['name'] = $u['name'];
+        }
+    }
+    return $u;
+}
+
+function ensureCoachProfiles($pdo) {
+    try {
+        $pdo->exec("ALTER TABLE mdx_coaches ADD COLUMN user_id VARCHAR(50) DEFAULT NULL");
+    } catch (PDOException $e) {}
+
+    // Link Sedaqet Rzayeva
+    try {
+        $pdo->exec("UPDATE mdx_coaches SET user_id = 'usr_1792923099303' WHERE (user_id IS NULL OR user_id = '') AND (name LIKE '%Sədaqət%' OR name LIKE '%Sedaqet%')");
+    } catch (PDOException $e) {}
+
+    // Seed Nargiz, Farid, Leyla if missing
+    try {
+        $seedStmt = $pdo->prepare("
+            INSERT INTO mdx_coaches (id, user_id, name, title, bio, rating, reviews_count, hourly_rate, session_duration, specialties_json, is_active)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+            ON DUPLICATE KEY UPDATE 
+                user_id = COALESCE(user_id, VALUES(user_id)),
+                name = VALUES(name)
+        ");
+        $seedStmt->execute([
+            'coach-nargiz',
+            'u-nargiz',
+            'Nərgiz Qasımova',
+            'Münasibət Kouçu | Somatik Təlimçi',
+            'Cütlüklər və fərdlər üçün münasibət dinamikası, psixosomatika və affektiv tənzimləmə üzrə mütəxəssis.',
+            5.0,
+            18,
+            '120 ₼ / saat',
+            '60 dəqiqə',
+            json_encode(['Münasibətlər', 'Bədən-zihin harmoniyası', 'Özünü bağışlama'], JSON_UNESCAPED_UNICODE)
+        ]);
+        $seedStmt->execute([
+            'coach-farid',
+            NULL,
+            'Fərid Məmmədov',
+            'ICF MCC Kouç | EQ Master',
+            'Top menecerlər və sahibkarlar üçün ekzekyutiv kouçinq, böhran idarəçiliyi və emosional liderlik üzrə baş məsləhətçi.',
+            5.0,
+            24,
+            '150 ₼ / saat',
+            '60 dəqiqə',
+            json_encode(['EQ Liderlik', 'Karyera sıçrayışı', 'Stres menecmenti'], JSON_UNESCAPED_UNICODE)
+        ]);
+        $seedStmt->execute([
+            'coach-leyla',
+            NULL,
+            'Dr. Leyla Əliyeva',
+            'PhD Psixologiya | ICF PCC',
+            'Koqnitiv fərqindəlik və şüuraltı travmalar üzrə baş ekspert.',
+            5.0,
+            32,
+            '180 ₼ / saat',
+            '60 dəqiqə',
+            json_encode(['Travma terapiyası', 'Şüuraltı inanc dəyişimi', 'Mindfulness'], JSON_UNESCAPED_UNICODE)
+        ]);
+    } catch (PDOException $e) {}
+}
+
+function getBookingsForUser($pdo, $userId, $userRole, $userName = '') {
+    // 1. Admin gets ALL bookings
+    if ($userRole === 'Admin') {
+        $stmt = $pdo->query("SELECT * FROM mdx_bookings ORDER BY created_at DESC");
+        return $stmt ? $stmt->fetchAll() : [];
+    }
+
+    // 2. Resolve coach profile IDs
+    $coachIds = [];
+    if (!empty($userId)) {
+        try {
+            $cStmt = $pdo->prepare("SELECT id FROM mdx_coaches WHERE user_id = ?");
+            $cStmt->execute([$userId]);
+            $ids = $cStmt->fetchAll(PDO::FETCH_COLUMN);
+            if ($ids) $coachIds = array_merge($coachIds, $ids);
+        } catch (PDOException $e) {}
+    }
+    if (!empty($userName)) {
+        try {
+            $cStmt2 = $pdo->prepare("SELECT id FROM mdx_coaches WHERE name = ? OR name LIKE ?");
+            $cStmt2->execute([$userName, '%' . $userName . '%']);
+            $ids2 = $cStmt2->fetchAll(PDO::FETCH_COLUMN);
+            if ($ids2) $coachIds = array_merge($coachIds, $ids2);
+        } catch (PDOException $e) {}
+    }
+    // Hardcoded seed fallbacks
+    if ($userId === 'u-nargiz' || stripos($userName, 'Nərgiz') !== false) {
+        $coachIds[] = 'coach-nargiz';
+    }
+    if ($userId === 'usr_1792923099303' || stripos($userName, 'Sədaqət') !== false || stripos($userName, 'Sedaqet') !== false) {
+        $coachIds[] = 'coach-1792923105867';
+    }
+    $coachIds = array_values(array_unique(array_filter($coachIds)));
+
+    // 3. Build query
+    $whereClauses = ["user_id = ?"];
+    $params = [$userId];
+
+    if (!empty($coachIds)) {
+        $inPlaceholders = implode(',', array_fill(0, count($coachIds), '?'));
+        $whereClauses[] = "coach_id IN ($inPlaceholders)";
+        foreach ($coachIds as $cid) {
+            $params[] = $cid;
+        }
+    }
+    if (!empty($userName)) {
+        $whereClauses[] = "coach_name LIKE ?";
+        $params[] = '%' . $userName . '%';
+    }
+
+    $sql = "SELECT * FROM mdx_bookings WHERE (" . implode(' OR ', $whereClauses) . ") ORDER BY created_at DESC";
+    try {
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        return $stmt ? $stmt->fetchAll() : [];
+    } catch (PDOException $e) {
+        return [];
+    }
 }
 
 function requireAuthUser($pdo) {
@@ -401,6 +527,8 @@ if ($action === 'get_all') {
     $notifications = $safeQuery("SELECT * FROM mdx_notifications ORDER BY created_at DESC LIMIT 50");
     $categories = $safeQuery("SELECT * FROM mdx_categories ORDER BY created_at ASC");
     $roles = $safeQuery("SELECT * FROM mdx_roles ORDER BY is_system DESC, name ASC");
+
+    ensureCoachProfiles($pdo);
     $coaches = $safeQuery("SELECT * FROM mdx_coaches WHERE is_active = 1 ORDER BY created_at ASC");
     $defaultCoachAvatar = "/images/coaches/coach-sedaqet.jpg";
     foreach ($coaches as &$cItem) {
@@ -439,40 +567,18 @@ if ($action === 'get_all') {
     $student_progress = [];
     $student_certificates = [];
     $bookings = [];
-    if (!empty($_SESSION['user_id'])) {
+    $sessionUser = getSessionUser($pdo);
+    if ($sessionUser) {
         try {
             $pStmt = $pdo->prepare("SELECT course_id, completed_lessons_json, percent FROM mdx_student_progress WHERE user_id = ?");
-            $pStmt->execute([$_SESSION['user_id']]);
+            $pStmt->execute([$sessionUser['id']]);
             $student_progress = $pStmt->fetchAll();
 
             $cStmt = $pdo->prepare("SELECT * FROM mdx_student_certificates WHERE user_id = ? ORDER BY created_at DESC");
-            $cStmt->execute([$_SESSION['user_id']]);
+            $cStmt->execute([$sessionUser['id']]);
             $student_certificates = $cStmt->fetchAll();
 
-            if (!empty($_SESSION['role']) && $_SESSION['role'] === 'Admin') {
-                $bStmt = $pdo->query("SELECT * FROM mdx_bookings ORDER BY created_at DESC");
-                $rawBookings = $bStmt ? $bStmt->fetchAll() : [];
-            } else {
-                // Check if user is linked to a coach profile
-                $coachProfileId = null;
-                try {
-                    $coachStmt = $pdo->prepare("SELECT id FROM mdx_coaches WHERE user_id = ? LIMIT 1");
-                    $coachStmt->execute([$_SESSION['user_id']]);
-                    $coachRow = $coachStmt->fetch();
-                    if ($coachRow) $coachProfileId = $coachRow['id'];
-                } catch (PDOException $e) {}
-
-                if ($coachProfileId) {
-                    $bStmt = $pdo->prepare("SELECT * FROM mdx_bookings WHERE user_id = ? OR coach_id = ? OR coach_id = ? OR coach_name LIKE ? ORDER BY created_at DESC");
-                    $uName = $_SESSION['name'] ?? '';
-                    $bStmt->execute([$_SESSION['user_id'], $_SESSION['user_id'], $coachProfileId, '%' . $uName . '%']);
-                } else {
-                    $bStmt = $pdo->prepare("SELECT * FROM mdx_bookings WHERE user_id = ? OR coach_id = ? OR coach_name LIKE ? ORDER BY created_at DESC");
-                    $uName = $_SESSION['name'] ?? '';
-                    $bStmt->execute([$_SESSION['user_id'], $_SESSION['user_id'], '%' . $uName . '%']);
-                }
-                $rawBookings = $bStmt->fetchAll();
-            }
+            $rawBookings = getBookingsForUser($pdo, $sessionUser['id'], $sessionUser['role'], $sessionUser['name']);
             $bookings = array_map(function($b) {
                 return [
                     'id' => $b['id'],
@@ -498,10 +604,10 @@ if ($action === 'get_all') {
                     'user_phone' => $b['user_phone'] ?? '',
                     'userAddress' => $b['user_address'] ?? '',
                     'isGuest' => !empty($b['is_guest']),
-                    'userId' => $b['user_id'],
-                    'user_id' => $b['user_id'],
-                    'createdAt' => $b['created_at'],
-                    'date' => isset($b['created_at']) ? explode(' ', $b['created_at'])[0] : ''
+                    'userId' => $b['user_id'] ?? '',
+                    'user_id' => $b['user_id'] ?? '',
+                    'createdAt' => $b['created_at'] ?? '',
+                    'date' => !empty($b['created_at']) ? explode(' ', $b['created_at'])[0] : ''
                 ];
             }, $rawBookings);
         } catch (PDOException $e) {}
@@ -3208,21 +3314,35 @@ if ($action === 'save_booking' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    // Verify coach exists in database
+    // Verify & resolve coach info so neither coach_id nor coach_name is empty
+    ensureCoachProfiles($pdo);
     if ($coach_id) {
         try {
-            $coachChk = $pdo->prepare("SELECT id FROM mdx_coaches WHERE id = ? AND is_active = 1 LIMIT 1");
+            $coachChk = $pdo->prepare("SELECT id, name, user_id FROM mdx_coaches WHERE id = ? LIMIT 1");
             $coachChk->execute([$coach_id]);
-            if (!$coachChk->fetch()) {
-                // Try by name as fallback
-                if ($coach_name) {
-                    $coachNameChk = $pdo->prepare("SELECT id FROM mdx_coaches WHERE name = ? AND is_active = 1 LIMIT 1");
-                    $coachNameChk->execute([$coach_name]);
-                    $foundCoach = $coachNameChk->fetch();
-                    if ($foundCoach) {
-                        $coach_id = $foundCoach['id'];
-                    }
+            $foundC = $coachChk->fetch();
+            if ($foundC) {
+                if (empty($coach_name)) {
+                    $coach_name = $foundC['name'];
                 }
+            } else if ($coach_name) {
+                $coachNameChk = $pdo->prepare("SELECT id, name FROM mdx_coaches WHERE name = ? OR name LIKE ? LIMIT 1");
+                $coachNameChk->execute([$coach_name, '%' . $coach_name . '%']);
+                $foundCoach = $coachNameChk->fetch();
+                if ($foundCoach) {
+                    $coach_id = $foundCoach['id'];
+                    $coach_name = $foundCoach['name'];
+                }
+            }
+        } catch (PDOException $e) {}
+    } else if ($coach_name) {
+        try {
+            $coachNameChk = $pdo->prepare("SELECT id, name FROM mdx_coaches WHERE name = ? OR name LIKE ? LIMIT 1");
+            $coachNameChk->execute([$coach_name, '%' . $coach_name . '%']);
+            $foundCoach = $coachNameChk->fetch();
+            if ($foundCoach) {
+                $coach_id = $foundCoach['id'];
+                $coach_name = $foundCoach['name'];
             }
         } catch (PDOException $e) {}
     }
@@ -3435,31 +3555,8 @@ if ($action === 'update_booking_status' && $_SERVER['REQUEST_METHOD'] === 'POST'
 
 if ($action === 'get_bookings') {
     $authUser = requireAuthUser($pdo);
-    if ($authUser['role'] === 'Admin') {
-        $stmt = $pdo->query("SELECT * FROM mdx_bookings ORDER BY created_at DESC");
-    } else {
-        // Check if this user is linked to a coach profile
-        $coachProfileId = null;
-        try {
-            $coachStmt = $pdo->prepare("SELECT id FROM mdx_coaches WHERE user_id = ? LIMIT 1");
-            $coachStmt->execute([$authUser['id']]);
-            $coachRow = $coachStmt->fetch();
-            if ($coachRow) $coachProfileId = $coachRow['id'];
-        } catch (PDOException $e) {}
-
-        if ($coachProfileId) {
-            // Coach: see bookings assigned to their coach profile OR by their user_id OR by name
-            $stmt = $pdo->prepare("SELECT * FROM mdx_bookings WHERE user_id = ? OR coach_id = ? OR coach_id = ? OR coach_name LIKE ? ORDER BY created_at DESC");
-            $uName = $authUser['name'] ?? '';
-            $stmt->execute([$authUser['id'], $authUser['id'], $coachProfileId, '%' . $uName . '%']);
-        } else {
-            // Regular user: see their own bookings
-            $stmt = $pdo->prepare("SELECT * FROM mdx_bookings WHERE user_id = ? OR coach_name LIKE ? ORDER BY created_at DESC");
-            $uName = $authUser['name'] ?? '';
-            $stmt->execute([$authUser['id'], '%' . $uName . '%']);
-        }
-    }
-    $rawBookings = $stmt ? $stmt->fetchAll() : [];
+    ensureCoachProfiles($pdo);
+    $rawBookings = getBookingsForUser($pdo, $authUser['id'], $authUser['role'], $authUser['name'] ?? '');
     $mappedBookings = array_map(function($b) {
         return [
             'id' => $b['id'],
@@ -3485,10 +3582,10 @@ if ($action === 'get_bookings') {
             'user_phone' => $b['user_phone'] ?? '',
             'userAddress' => $b['user_address'] ?? '',
             'isGuest' => !empty($b['is_guest']),
-            'userId' => $b['user_id'],
-            'user_id' => $b['user_id'],
-            'createdAt' => $b['created_at'],
-            'date' => isset($b['created_at']) ? explode(' ', $b['created_at'])[0] : ''
+            'userId' => $b['user_id'] ?? '',
+            'user_id' => $b['user_id'] ?? '',
+            'createdAt' => $b['created_at'] ?? '',
+            'date' => !empty($b['created_at']) ? explode(' ', $b['created_at'])[0] : ''
         ];
     }, $rawBookings);
     echo json_encode(['status' => 'success', 'bookings' => $mappedBookings], JSON_UNESCAPED_UNICODE);

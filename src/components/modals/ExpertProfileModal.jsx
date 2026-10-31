@@ -544,7 +544,10 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
             {isExpertSelf && (
               <button
                 type="button"
-                onClick={() => setActiveTab('calendar')}
+                onClick={() => {
+                  setActiveTab('calendar');
+                  if (refreshBookings) refreshBookings();
+                }}
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                   activeTab === 'calendar'
                     ? 'bg-[#071326] text-[#e5c57d] shadow-sm'
