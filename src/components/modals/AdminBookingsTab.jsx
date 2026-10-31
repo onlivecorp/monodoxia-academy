@@ -12,6 +12,7 @@ export default function AdminBookingsTab() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterCoach, setFilterCoach] = useState('all');
+  const [approvalEndTimes, setApprovalEndTimes] = useState({});
 
   // Extract unique coach names
   const coachNames = Array.from(new Set(bookings.map(b => b.coachName || b.coach_name).filter(Boolean)));
@@ -186,17 +187,26 @@ export default function AdminBookingsTab() {
               </div>
 
               {/* Status Action Buttons */}
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-2 shrink-0 flex-wrap sm:flex-nowrap">
                 {b.status !== 'Təsdiqləndi' && (
-                  <button
-                    type="button"
-                    onClick={() => updateBookingStatus(b.id, 'Təsdiqləndi')}
-                    className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1 shadow-sm cursor-pointer transition-colors"
-                    title="Qəbul et və təsdiqlə"
-                  >
-                    <span className="material-symbols-outlined text-[15px]">check_circle</span>
-                    <span>Qəbul Et</span>
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    <input
+                      type="time"
+                      value={approvalEndTimes[b.id] || b.endTime || (b.startTime ? (() => { const [h,m] = (b.startTime||'00:00').split(':').map(Number); return `${String(h+1).padStart(2,'0')}:${String(m).padStart(2,'0')}`; })() : '15:00')}
+                      onChange={e => setApprovalEndTimes(prev => ({ ...prev, [b.id]: e.target.value }))}
+                      className="px-2 py-1 rounded-lg border border-slate-300 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-amber-500"
+                      title="Bitiş saatını təyin edin"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => updateBookingStatus(b.id, 'Təsdiqləndi', { endTime: approvalEndTimes[b.id] || b.endTime || (b.startTime ? (() => { const [h,m] = (b.startTime||'00:00').split(':').map(Number); return `${String(h+1).padStart(2,'0')}:${String(m).padStart(2,'0')}`; })() : '') })}
+                      className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1 shadow-sm cursor-pointer transition-colors"
+                      title="Qəbul et və təsdiqlə"
+                    >
+                      <span className="material-symbols-outlined text-[15px]">check_circle</span>
+                      <span>Qəbul Et</span>
+                    </button>
+                  </div>
                 )}
                 {b.status !== 'Ləğv edildi' && (
                   <button
@@ -217,3 +227,4 @@ export default function AdminBookingsTab() {
     </div>
   );
 }
+

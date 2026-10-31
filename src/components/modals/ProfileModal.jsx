@@ -37,6 +37,7 @@ export default function ProfileModal() {
     deleteCoachCertificate,
     updateCoach,
     updateBookingStatus,
+    updateBookingEndTime,
     refreshBookings,
   } = useApp();
 
@@ -72,6 +73,7 @@ export default function ProfileModal() {
   const [coachCertYear, setCoachCertYear] = useState(new Date().getFullYear().toString());
   const [coachCertId, setCoachCertId] = useState('');
   const [coachCertUrl, setCoachCertUrl] = useState('');
+  const [bookingEndTimes, setBookingEndTimes] = useState({});
 
   // Expert Profile Edit states
   const [expertBio, setExpertBio] = useState('');
@@ -1406,22 +1408,53 @@ export default function ProfileModal() {
 
                           <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
                             {b.status !== 'Təsdiqləndi' && (
-                              <button
-                                type="button"
-                                onClick={() => updateBookingStatus(b.id, 'Təsdiqləndi')}
-                                className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer transition-colors"
-                                title="Qəbul et və təqvimdə avtomatik dolu/rezerv olunmuş et"
-                              >
-                                <span className="material-symbols-outlined text-[16px]">check_circle</span>
-                                <span>Qəbul Et & Rezervlə</span>
-                              </button>
+                              <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
+                                <div className="flex items-center gap-1.5">
+                                  <label className="text-[10px] font-bold text-slate-600 whitespace-nowrap">Bitiş saatı:</label>
+                                  <input
+                                    type="time"
+                                    value={bookingEndTimes[b.id] || b.endTime || (b.startTime ? (() => { const [h,m] = (b.startTime||'00:00').split(':').map(Number); return `${String(h+1).padStart(2,'0')}:${String(m).padStart(2,'0')}`; })() : '15:00')}
+                                    onChange={e => setBookingEndTimes(prev => ({ ...prev, [b.id]: e.target.value }))}
+                                    className="px-2 py-1 rounded-lg border border-slate-300 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-amber-500"
+                                    title="Seans bitiş saatını təyin edin"
+                                  />
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => updateBookingStatus(b.id, 'Təsdiqləndi', { endTime: bookingEndTimes[b.id] || b.endTime || (b.startTime ? (() => { const [h,m] = (b.startTime||'00:00').split(':').map(Number); return `${String(h+1).padStart(2,'0')}:${String(m).padStart(2,'0')}`; })() : '') })}
+                                  className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer transition-colors"
+                                  title="Rezervasiyanı qəbul et və bitiş saatını təsdiqlə"
+                                >
+                                  <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                                  <span>Qəbul Et & Rezervlə</span>
+                                </button>
+                              </div>
+                            )}
+                            {b.status === 'Təsdiqləndi' && (
+                              <div className="flex items-center gap-1.5">
+                                <label className="text-[10px] font-bold text-slate-600 whitespace-nowrap">Bitiş saatı:</label>
+                                <input
+                                  type="time"
+                                  defaultValue={b.endTime || ''}
+                                  onChange={e => setBookingEndTimes(prev => ({ ...prev, [b.id]: e.target.value }))}
+                                  className="px-2 py-1 rounded-lg border border-amber-300 text-xs bg-amber-50 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => { const t = bookingEndTimes[b.id]; if (t) updateBookingEndTime(b.id, t); }}
+                                  className="px-2.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors"
+                                >
+                                  <span className="material-symbols-outlined text-[14px]">update</span>
+                                  <span>Yenilə</span>
+                                </button>
+                              </div>
                             )}
                             {b.status !== 'Ləğv edildi' && (
                               <button
                                 type="button"
                                 onClick={() => updateBookingStatus(b.id, 'Ləğv edildi')}
                                 className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 text-xs font-medium flex items-center gap-1 cursor-pointer transition-colors"
-                                title="Ləğv et"
+                                title="Ləğv et və saatı boşalt"
                               >
                                 <span className="material-symbols-outlined text-[15px]">close</span>
                                 <span>Ləğv Et</span>

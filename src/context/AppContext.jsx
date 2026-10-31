@@ -2224,7 +2224,11 @@ export function AppProvider({ children }) {
       return next;
     });
 
-    apiCall('update_booking_status', { id: bookingId, status: newStatus });
+    apiCall('update_booking_status', {
+      id: bookingId,
+      status: newStatus,
+      end_time: extraData.endTime || (targetBooking ? targetBooking.endTime : '')
+    });
 
     // When expert accepts: automatically reserve and mark the slot as booked/dolu in coach schedule
     if (newStatus === 'Təsdiqləndi' && targetBooking) {

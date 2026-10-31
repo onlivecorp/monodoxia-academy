@@ -168,28 +168,32 @@ export default function BookingModal() {
 
   // Check if selected time range is valid and available
   const conflictError = useMemo(() => {
-    if (!selectedStart || !selectedEnd) return null;
-    if (selectedStart >= selectedEnd) return 'Bitmə saatı başlama saatından sonra olmalıdır.';
+    if (!selectedStart) return null;
     if (selectedDate === today && selectedStart <= nowTime) return 'Keçmiş vaxt üçün rezervasiya etmək mümkün deyil.';
     if (selectedDate < today) return 'Keçmiş tarix üçün rezervasiya etmək mümkün deyil.';
+
+    // Slot 30m window default check
+    const [h, m] = selectedStart.split(':').map(Number);
+    const newM = m + 30;
+    const testEnd = `${String(h + Math.floor(newM / 60)).padStart(2, '0')}:${String(newM % 60).padStart(2, '0')}`;
 
     // Block conflict
     const blockHit = coachBlocks.find(tb => {
       if (tb.date !== selectedDate) return false;
-      return timesOverlap(selectedStart, selectedEnd, tb.startTime, tb.endTime);
+      return timesOverlap(selectedStart, testEnd, tb.startTime, tb.endTime);
     });
     if (blockHit) return `Bu vaxt aralığı ekspert tərəfindən bloklanıb${blockHit.reason ? ': ' + blockHit.reason : ''}.`;
 
     // Booking conflict
     const bookingHit = confirmedBookings.find(b => {
       if (b.selectedDate !== selectedDate || !b.startTime) return false;
-      const bEnd = b.endTime || selectedEnd;
-      return timesOverlap(selectedStart, selectedEnd, b.startTime, bEnd);
+      const bEnd = b.endTime || testEnd;
+      return timesOverlap(selectedStart, testEnd, b.startTime, bEnd);
     });
-    if (bookingHit) return 'Bu vaxt aralığı artıq başqa bir rezervasiya tərəfindən tutulub.';
+    if (bookingHit) return 'Bu saat artıq başqa bir rezervasiya tərəfindən tutulub.';
 
     return null;
-  }, [selectedStart, selectedEnd, selectedDate, today, nowTime, coachBlocks, confirmedBookings]);
+  }, [selectedStart, selectedDate, today, nowTime, coachBlocks, confirmedBookings]);
 
   // Available slots list for selected date (from coach schedule, if any defined slots for this date)
   const availableSlotsForDate = useMemo(() => {
@@ -249,7 +253,7 @@ export default function BookingModal() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (conflictError || !selectedStart || !selectedEnd) return;
+    if (conflictError || !selectedStart) return;
 
     if (!currentUser) {
       if (authChoice === 'login_register') {
@@ -266,7 +270,7 @@ export default function BookingModal() {
 
     setIsSubmitting(true);
     const formattedDate = formatDateAz(selectedDate);
-    const slotText = `${formattedDate} ${selectedStart} - ${selectedEnd}`;
+    const slotText = `${formattedDate} ${selectedStart}`;
 
     const clientName = currentUser
       ? (currentUser.name || `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim() || 'İstifadəçi')
@@ -281,7 +285,7 @@ export default function BookingModal() {
       slot: slotText,
       selectedDate,
       startTime: selectedStart,
-      endTime: selectedEnd,
+      endTime: '', // Seans bitiş saatını yalnız kouç təyin edir
       type,
       notes,
       userName: clientName,
@@ -298,7 +302,7 @@ export default function BookingModal() {
       setSubmitMessage(result?.message || 'Rezervasiya zamanı xəta baş verdi. Vaxt intervalı artıq tutulmuş ola bilər.');
     } else {
       setSubmitResult('success');
-      setSubmitMessage(`Rezervasiya müraciətiniz qeydə alındı! Ekspert tezliklə sizinlə əlaqə saxlayacaq.\n\nMüştəri: ${clientName}\nTel (WhatsApp): ${clientPhone || 'Qeyd edilməyib'}${clientAddress ? '\nÜnvan: ' + clientAddress : ''}\nTarix: ${formattedDate}\nSaat: ${selectedStart} – ${selectedEnd}\nFormat: ${type}`);
+      setSubmitMessage(`Rezervasiya müraciətiniz qeydə alındı! Ekspert tezliklə sizinlə əlaqə saxlayacaq və seans müddətini təsdiqləyəcək.\n\nMüştəri: ${clientName}\nTel (WhatsApp): ${clientPhone || 'Qeyd edilməyib'}${clientAddress ? '\nÜnvan: ' + clientAddress : ''}\nTarix: ${formattedDate}\nBaşlama saatı: ${selectedStart}\nFormat: ${type}`);
     }
   };
 
@@ -558,63 +562,25 @@ export default function BookingModal() {
               </div>
             </div>
 
-            {/* End time selector */}
-            {selectedStart && (
-              <div className="p-3.5 rounded-2xl bg-amber-50/50 border border-amber-200 space-y-2.5 animate-fadeIn">
-                <div className="flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-[15px] text-amber-600">timer</span>
-                  <span className="text-xs font-bold text-amber-900">
-                    Başlama saatı: <strong>{selectedStart}</strong> — Seansın Bitmə Saatı:
-                  </span>
-                </div>
-                <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5">
-                  {generateTimeSlots(8, 22, 30)
-                    .filter(t => t > selectedStart)
-                    .slice(0, 12)
-                    .map(endTime => {
-                      const isSelectedEnd = selectedEnd === endTime;
-                      const dur = (() => {
-                        const [sh, sm] = selectedStart.split(':').map(Number);
-                        const [eh, em] = endTime.split(':').map(Number);
-                        const mins = (eh * 60 + em) - (sh * 60 + sm);
-                        return mins >= 60 ? `${Math.floor(mins/60)}s${mins%60 ? ' ' + mins%60 + 'dq' : ''}` : `${mins}dq`;
-                      })();
-                      return (
-                        <button
-                          type="button"
-                          key={endTime}
-                          onClick={() => setSelectedEnd(endTime)}
-                          className={`py-1.5 rounded-lg text-[10px] font-semibold text-center transition-all cursor-pointer ${
-                            isSelectedEnd
-                              ? 'bg-amber-600 text-white border border-amber-500 ring-2 ring-amber-400 shadow-sm'
-                              : 'bg-white text-slate-700 border border-slate-200 hover:border-amber-400 hover:bg-amber-50'
-                          }`}
-                        >
-                          <div>{endTime}</div>
-                          <div className="text-[9px] opacity-75">{dur}</div>
-                        </button>
-                      );
-                    })
-                  }
-                </div>
+            {/* Conflict error */}
+            {conflictError && (
+              <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-1.5 animate-fadeIn">
+                <span className="material-symbols-outlined text-[16px] text-rose-600 shrink-0">error</span>
+                <span>{conflictError}</span>
+              </div>
+            )}
 
-                {/* Conflict error */}
-                {conflictError && (
-                  <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-1.5 animate-fadeIn">
-                    <span className="material-symbols-outlined text-[16px] text-rose-600 shrink-0">error</span>
-                    <span>{conflictError}</span>
-                  </div>
-                )}
-
-                {/* Selected interval summary */}
-                {selectedStart && selectedEnd && !conflictError && (
-                  <div className="p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-[15px] text-emerald-600 shrink-0">event_available</span>
-                    <span>
-                      Seçilmiş interval: <strong>{formatDateAz(selectedDate)} · {selectedStart} – {selectedEnd}</strong>
-                    </span>
-                  </div>
-                )}
+            {/* Selected slot note */}
+            {selectedStart && !conflictError && (
+              <div className="p-3 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-1 animate-fadeIn">
+                <div className="flex items-center gap-1.5 text-xs text-amber-950 font-bold">
+                  <span className="material-symbols-outlined text-[16px] text-amber-600 shrink-0">event_available</span>
+                  <span>Seçilmiş vaxt: <strong>{formatDateAz(selectedDate)} · {selectedStart}</strong></span>
+                </div>
+                <p className="text-[11px] text-amber-800 flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[13px] text-amber-600">info</span>
+                  Seansın bitmə saatı və dəqiq müddəti müraciətiniz qəbul edilərkən kouç tərəfindən təyin olunacaq.
+                </p>
               </div>
             )}
 
