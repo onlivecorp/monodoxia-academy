@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 
 // Tab Components
@@ -23,6 +23,7 @@ import AdminSettingsTab from './AdminSettingsTab';
 import AdminCertificatesTab from './AdminCertificatesTab';
 import AdminContactMessagesTab from './AdminContactMessagesTab';
 import AdminContactSettingsTab from './AdminContactSettingsTab';
+import AdminBookingsTab from './AdminBookingsTab';
 
 export default function AdminModal() {
   const {
@@ -31,6 +32,7 @@ export default function AdminModal() {
     setAdminModalOpen,
     platformSettings,
     applicationsList = [],
+    bookings = [],
     hasPermission,
     canAccessAdmin,
     adminModalTab,
@@ -85,6 +87,7 @@ export default function AdminModal() {
         group: 'İdarəetmə',
         items: [
           { id: 'contact_messages', icon: 'inbox', label: 'Əlaqə Mesajları', perm: 'contacts.view', badge: unreadContactMessagesCount > 0 ? unreadContactMessagesCount : null },
+          { id: 'bookings', icon: 'calendar_month', label: 'Rezervasiyalar', perm: 'applications.view', badge: (bookings || []).filter(b => b.status === 'Gözləyir').length || null },
           { id: 'applications', icon: 'assignment', label: 'Müraciətlər', perm: 'applications.view', badge: pendingAppsCount > 0 ? pendingAppsCount : null },
           { id: 'registrations', icon: 'how_to_reg', label: 'Qeydiyyatlar', perm: 'registrations.view' },
           { id: 'users', icon: 'group', label: 'İstifadəçilər', perm: 'users.view' },
@@ -477,6 +480,10 @@ export default function AdminModal() {
           <main className="admin-content admin-scroll flex-1 p-4 md:p-6 overflow-y-auto">
             {activeTab === 'overview' && (
               <AdminOverviewTab setActiveTab={setActiveTab} onQuickCreate={handleQuickCreate} />
+            )}
+
+            {activeTab === 'bookings' && (
+              <AdminBookingsTab />
             )}
 
             {activeTab === 'applications' && (

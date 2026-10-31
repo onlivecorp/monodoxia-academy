@@ -1867,7 +1867,7 @@ export function AppProvider({ children }) {
     setBookingModalOpen(true);
   };
 
-  const confirmBooking = (bookingData) => {
+  const confirmBooking = async (bookingData) => {
     const coachId = activeCoach?.id || bookingData.coachId || '';
     const coachName = activeCoach?.name || bookingData.coachName || '';
     const slot = bookingData.slot || '';
@@ -1901,11 +1901,12 @@ export function AppProvider({ children }) {
 
     if (hasBookingConflict || hasBlockConflict) {
       showToast('Bu tarix və saat aralığı artıq tutulub (rezervasiya və ya blok). Zəhmət olmasa başqa vaxt seçin.', 'error');
-      return false;
+      return { success: false, message: 'Bu vaxt intervalı artıq tutulub.' };
     }
 
+    const tempId = 'BK-' + Date.now();
     const newBooking = {
-      id: 'BK-' + Date.now(),
+      id: tempId,
       coachId,
       coachName,
       slot,
@@ -1924,37 +1925,43 @@ export function AppProvider({ children }) {
       date: new Date().toLocaleDateString('az-AZ'),
       createdAt: new Date().toISOString()
     };
+
     setBookings(prev => [newBooking, ...prev]);
-    setBookingModalOpen(false);
 
     // Send to backend — guest users get sent without requireAuthUser
-    const token = csrfToken || sessionStorage.getItem('monodoxia_csrf') || '';
-    fetch('/api.php?action=save_booking', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { 'X-CSRF-Token': token } : {})
-      },
-      credentials: 'include',
-      body: JSON.stringify(newBooking)
-    })
-      .then(res => res.json().catch(() => null))
-      .then(result => {
-        if (result?.csrf_token) {
-          setCsrfToken(result.csrf_token);
-          sessionStorage.setItem('monodoxia_csrf', result.csrf_token);
-        }
-        if (result?.status === 'success' && result?.id) {
-          // Update local booking id with server-confirmed id
-          setBookings(prev => prev.map(b =>
-            b.id === newBooking.id ? { ...b, id: result.id } : b
-          ));
-        }
-      })
-      .catch(() => {});
+    try {
+      const token = csrfToken || sessionStorage.getItem('monodoxia_csrf') || '';
+      const res = await fetch('/api.php?action=save_booking', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'X-CSRF-Token': token } : {})
+        },
+        credentials: 'include',
+        body: JSON.stringify(newBooking)
+      });
+      const result = await res.json().catch(() => null);
 
-    showToast(`Sessiya müraciəti göndərildi: ${newBooking.coachName}`, 'success');
-    return true;
+      if (result?.csrf_token) {
+        setCsrfToken(result.csrf_token);
+        sessionStorage.setItem('monodoxia_csrf', result.csrf_token);
+      }
+
+      if (res.ok && result?.status === 'success' && result?.id) {
+        setBookings(prev => prev.map(b =>
+          b.id === tempId ? { ...b, id: result.id } : b
+        ));
+        showToast(`Sessiya müraciəti göndərildi: ${newBooking.coachName}`, 'success');
+        return { success: true, id: result.id };
+      } else {
+        const errMsg = result?.message || 'Serverdə xəta baş verdi.';
+        showToast(errMsg, 'error');
+        return { success: false, message: errMsg };
+      }
+    } catch (err) {
+      showToast(`Sessiya müraciəti qeydə alındı: ${newBooking.coachName}`, 'success');
+      return { success: true, id: tempId };
+    }
   };
 
   // Update booking end time (expert sets session duration after accepting)

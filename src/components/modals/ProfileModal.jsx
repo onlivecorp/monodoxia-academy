@@ -407,13 +407,14 @@ export default function ProfileModal() {
               {(() => { const n = certificatesList.filter(c => String(c.userId) === String(currentUser?.id) && c.status === 'Yayında').length; return n > 0 ? <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">{n}</span> : null; })()}
             </button>
 
-            {/* Expert Profile Tab - only for Kouç/Admin */}
+            {/* Expert Profile Tab - for Kouç and Admin */}
             {(currentUser?.role === 'Kouç' || currentUser?.role === 'Admin') && (() => {
+              const isAdm = currentUser?.role === 'Admin';
               const myCoachProfile = coachesList.find(
                 c => (c.userId && String(c.userId) === String(currentUser?.id)) ||
                      (c.name && currentUser?.name && c.name.toLowerCase().trim() === currentUser?.name.toLowerCase().trim())
-              );
-              if (!myCoachProfile) return null;
+              ) || (isAdm ? (coachesList[0] || null) : null);
+              if (!myCoachProfile && !isAdm) return null;
               return (
                 <button
                   onClick={() => {
@@ -1229,14 +1230,16 @@ export default function ProfileModal() {
 
           {/* TAB: EXPERT PROFILE EDIT */}
           {activeTab === 'expert_profile' && (() => {
+            const isAdm = currentUser?.role === 'Admin';
             const myCoachProfile = coachesList.find(
               c => (c.userId && String(c.userId) === String(currentUser?.id)) ||
                    (c.name && currentUser?.name && c.name.toLowerCase().trim() === currentUser?.name.toLowerCase().trim())
-            );
-            if (!myCoachProfile) return null;
+            ) || (isAdm ? (coachesList[0] || null) : null);
+            if (!myCoachProfile && !isAdm) return null;
 
-            // Incoming booking requests for this coach
+            // Incoming booking requests for this coach (or all for Admin)
             const coachIncomingBookings = (bookings || []).filter(b => {
+              if (isAdm) return true;
               const matchId = (b.coachId && b.coachId === myCoachProfile.id) || (b.coach_id && b.coach_id === myCoachProfile.id);
               const matchName = b.coachName && myCoachProfile.name && b.coachName.toLowerCase().trim() === myCoachProfile.name.toLowerCase().trim();
               return matchId || matchName;

@@ -275,7 +275,7 @@ export default function BookingModal() {
     const clientPhone = currentUser ? (currentUser.phone || '') : guestPhone.trim();
     const clientAddress = currentUser ? (currentUser.address || '') : guestAddress.trim();
 
-    const result = confirmBooking({
+    const result = await confirmBooking({
       coachId: activeCoach.id,
       coachName: activeCoach.name,
       slot: slotText,
@@ -293,9 +293,9 @@ export default function BookingModal() {
     });
 
     setIsSubmitting(false);
-    if (result === false) {
+    if (!result || result.success === false) {
       setSubmitResult('error');
-      setSubmitMessage('Rezervasiya zamanı xəta baş verdi. Vaxt intervalı artıq tutulmuş ola bilər.');
+      setSubmitMessage(result?.message || 'Rezervasiya zamanı xəta baş verdi. Vaxt intervalı artıq tutulmuş ola bilər.');
     } else {
       setSubmitResult('success');
       setSubmitMessage(`Rezervasiya müraciətiniz qeydə alındı! Ekspert tezliklə sizinlə əlaqə saxlayacaq.\n\nMüştəri: ${clientName}\nTel (WhatsApp): ${clientPhone || 'Qeyd edilməyib'}${clientAddress ? '\nÜnvan: ' + clientAddress : ''}\nTarix: ${formattedDate}\nSaat: ${selectedStart} – ${selectedEnd}\nFormat: ${type}`);
