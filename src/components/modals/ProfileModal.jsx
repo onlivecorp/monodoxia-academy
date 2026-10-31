@@ -37,6 +37,7 @@ export default function ProfileModal() {
     deleteCoachCertificate,
     updateCoach,
     updateBookingStatus,
+    refreshBookings,
   } = useApp();
 
   const activeTab = activeProfileTab || 'profile';

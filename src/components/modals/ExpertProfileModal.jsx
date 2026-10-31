@@ -23,6 +23,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
     bookings = [],
     updateBookingStatus,
     updateBookingEndTime,
+    refreshBookings,
     timeBlocks = [],
     addTimeBlock,
     removeTimeBlock,
@@ -1267,22 +1268,34 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                     </p>
                   </div>
 
-                  {/* Filter Pills */}
-                  <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs self-start">
-                    {['all', 'Gözləyir', 'Təsdiqləndi', 'Ləğv edildi'].map(st => (
-                      <button
-                        key={st}
-                        type="button"
-                        onClick={() => setBookingFilter(st)}
-                        className={`px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer text-[11px] ${
-                          bookingFilter === st
-                            ? 'bg-white text-slate-900 shadow-xs font-bold'
-                            : 'text-slate-500 hover:text-slate-900'
-                        }`}
-                      >
-                        {st === 'all' ? 'Hamısı' : st}
-                      </button>
-                    ))}
+                  <div className="flex items-center gap-2 self-start flex-wrap">
+                    {/* Refresh button */}
+                    <button
+                      type="button"
+                      onClick={() => refreshBookings && refreshBookings()}
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-300 text-amber-800 text-[11px] font-semibold hover:bg-amber-100 transition-all cursor-pointer"
+                      title="Rezervasiyaları yenilə"
+                    >
+                      <span className="material-symbols-outlined text-[15px]">refresh</span>
+                      Yenilə
+                    </button>
+                    {/* Filter Pills */}
+                    <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs">
+                      {['all', 'Gözləyir', 'Təsdiqləndi', 'Ləğv edildi'].map(st => (
+                        <button
+                          key={st}
+                          type="button"
+                          onClick={() => setBookingFilter(st)}
+                          className={`px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer text-[11px] ${
+                            bookingFilter === st
+                              ? 'bg-white text-slate-900 shadow-xs font-bold'
+                              : 'text-slate-500 hover:text-slate-900'
+                          }`}
+                        >
+                          {st === 'all' ? 'Hamısı' : st}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
 

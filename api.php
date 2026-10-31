@@ -451,13 +451,59 @@ if ($action === 'get_all') {
 
             if (!empty($_SESSION['role']) && $_SESSION['role'] === 'Admin') {
                 $bStmt = $pdo->query("SELECT * FROM mdx_bookings ORDER BY created_at DESC");
-                $bookings = $bStmt ? $bStmt->fetchAll() : [];
+                $rawBookings = $bStmt ? $bStmt->fetchAll() : [];
             } else {
-                $bStmt = $pdo->prepare("SELECT * FROM mdx_bookings WHERE user_id = ? OR coach_id = ? OR coach_name LIKE ? ORDER BY created_at DESC");
-                $uName = $_SESSION['name'] ?? '';
-                $bStmt->execute([$_SESSION['user_id'], $_SESSION['user_id'], '%' . $uName . '%']);
-                $bookings = $bStmt->fetchAll();
+                // Check if user is linked to a coach profile
+                $coachProfileId = null;
+                try {
+                    $coachStmt = $pdo->prepare("SELECT id FROM mdx_coaches WHERE user_id = ? LIMIT 1");
+                    $coachStmt->execute([$_SESSION['user_id']]);
+                    $coachRow = $coachStmt->fetch();
+                    if ($coachRow) $coachProfileId = $coachRow['id'];
+                } catch (PDOException $e) {}
+
+                if ($coachProfileId) {
+                    $bStmt = $pdo->prepare("SELECT * FROM mdx_bookings WHERE user_id = ? OR coach_id = ? OR coach_id = ? OR coach_name LIKE ? ORDER BY created_at DESC");
+                    $uName = $_SESSION['name'] ?? '';
+                    $bStmt->execute([$_SESSION['user_id'], $_SESSION['user_id'], $coachProfileId, '%' . $uName . '%']);
+                } else {
+                    $bStmt = $pdo->prepare("SELECT * FROM mdx_bookings WHERE user_id = ? OR coach_id = ? OR coach_name LIKE ? ORDER BY created_at DESC");
+                    $uName = $_SESSION['name'] ?? '';
+                    $bStmt->execute([$_SESSION['user_id'], $_SESSION['user_id'], '%' . $uName . '%']);
+                }
+                $rawBookings = $bStmt->fetchAll();
             }
+            $bookings = array_map(function($b) {
+                return [
+                    'id' => $b['id'],
+                    'coachId' => $b['coach_id'],
+                    'coach_id' => $b['coach_id'],
+                    'coachName' => $b['coach_name'],
+                    'coach_name' => $b['coach_name'],
+                    'slot' => $b['slot'],
+                    'selectedDate' => $b['selected_date'] ?? '',
+                    'selected_date' => $b['selected_date'] ?? '',
+                    'startTime' => $b['start_time'] ?? '',
+                    'start_time' => $b['start_time'] ?? '',
+                    'endTime' => $b['end_time'] ?? '',
+                    'end_time' => $b['end_time'] ?? '',
+                    'format' => $b['format'],
+                    'notes' => $b['notes'],
+                    'status' => $b['status'],
+                    'userName' => $b['user_name'] ?? '',
+                    'user_name' => $b['user_name'] ?? '',
+                    'userEmail' => $b['user_email'] ?? '',
+                    'user_email' => $b['user_email'] ?? '',
+                    'userPhone' => $b['user_phone'] ?? '',
+                    'user_phone' => $b['user_phone'] ?? '',
+                    'userAddress' => $b['user_address'] ?? '',
+                    'isGuest' => !empty($b['is_guest']),
+                    'userId' => $b['user_id'],
+                    'user_id' => $b['user_id'],
+                    'createdAt' => $b['created_at'],
+                    'date' => isset($b['created_at']) ? explode(' ', $b['created_at'])[0] : ''
+                ];
+            }, $rawBookings);
         } catch (PDOException $e) {}
     }
 
@@ -948,6 +994,7 @@ if ($action === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $_SESSION['user_id'] = $user['id'];
     $_SESSION['user_email'] = $user['email'];
     $_SESSION['user_role'] = $user['role'];
+    $_SESSION['name'] = $user['name'];
 
     unset($user['password_hash']);
     $user['csrf_token'] = $_SESSION['csrf_token'];
@@ -3119,52 +3166,184 @@ if ($action === 'save_admin_certificate' && $_SERVER['REQUEST_METHOD'] === 'POST
 }
 
 if ($action === 'save_booking' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $authUser = requireAuthUser($pdo);
     verifyCsrfToken();
     $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+
+    // Determine user: authenticated or guest
+    $authUser = getSessionUser($pdo);
+    $is_guest = !empty($input['isGuest']) || !$authUser;
+
     $id = trim($input['id'] ?? ('BK-' . round(microtime(true) * 1000)));
     $coach_id = trim($input['coachId'] ?? ($input['coach_id'] ?? ''));
     $coach_name = trim($input['coachName'] ?? ($input['coach_name'] ?? ''));
     $slot = trim($input['slot'] ?? ($input['time'] ?? ''));
+    $selected_date = trim($input['selectedDate'] ?? ($input['selected_date'] ?? ''));
+    $start_time = trim($input['startTime'] ?? ($input['start_time'] ?? ''));
+    $end_time = trim($input['endTime'] ?? ($input['end_time'] ?? ''));
     $format = trim($input['format'] ?? 'Online (Google Meet)');
     $notes = trim($input['notes'] ?? '');
-    $status = trim($input['status'] ?? 'Gözləyir');
+    $status = 'Gözləyir'; // always start as pending
+
+    // User info: from session or guest form
+    $user_id = $authUser ? $authUser['id'] : ('guest-' . round(microtime(true) * 1000));
+    $user_name = trim($input['userName'] ?? ($authUser ? $authUser['name'] : ''));
+    $user_email = trim($input['userEmail'] ?? ($authUser ? $authUser['email'] : ''));
+    $user_phone = trim($input['userPhone'] ?? '');
+    $user_address = trim($input['userAddress'] ?? '');
+
+    // Validate required fields
+    if (!$coach_id && !$coach_name) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Ekspert seçilməyib.'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+    if (!$slot && !$selected_date) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Tarix və saat seçilməyib.'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+    if ($is_guest && (!$user_name || !$user_phone)) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Qonaq istifadəçilər üçün ad və telefon tələb olunur.'], JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+    // Verify coach exists in database
+    if ($coach_id) {
+        try {
+            $coachChk = $pdo->prepare("SELECT id FROM mdx_coaches WHERE id = ? AND is_active = 1 LIMIT 1");
+            $coachChk->execute([$coach_id]);
+            if (!$coachChk->fetch()) {
+                // Try by name as fallback
+                if ($coach_name) {
+                    $coachNameChk = $pdo->prepare("SELECT id FROM mdx_coaches WHERE name = ? AND is_active = 1 LIMIT 1");
+                    $coachNameChk->execute([$coach_name]);
+                    $foundCoach = $coachNameChk->fetch();
+                    if ($foundCoach) {
+                        $coach_id = $foundCoach['id'];
+                    }
+                }
+            }
+        } catch (PDOException $e) {}
+    }
+
+    // Ensure booking columns exist (backward-compatible migration)
+    try {
+        $extraCols = [
+            "ALTER TABLE mdx_bookings ADD COLUMN selected_date VARCHAR(20) DEFAULT NULL",
+            "ALTER TABLE mdx_bookings ADD COLUMN start_time VARCHAR(10) DEFAULT NULL",
+            "ALTER TABLE mdx_bookings ADD COLUMN end_time VARCHAR(10) DEFAULT NULL",
+            "ALTER TABLE mdx_bookings ADD COLUMN user_name VARCHAR(200) DEFAULT NULL",
+            "ALTER TABLE mdx_bookings ADD COLUMN user_email VARCHAR(200) DEFAULT NULL",
+            "ALTER TABLE mdx_bookings ADD COLUMN user_phone VARCHAR(100) DEFAULT NULL",
+            "ALTER TABLE mdx_bookings ADD COLUMN user_address VARCHAR(500) DEFAULT NULL",
+            "ALTER TABLE mdx_bookings ADD COLUMN is_guest TINYINT(1) DEFAULT 0",
+            "ALTER TABLE mdx_bookings MODIFY COLUMN user_id VARCHAR(100) NOT NULL DEFAULT ''",
+            "ALTER TABLE mdx_bookings ADD KEY idx_booking_coach (coach_id)",
+        ];
+        foreach ($extraCols as $col) {
+            try { $pdo->exec($col); } catch (PDOException $e) {}
+        }
+    } catch (PDOException $e) {}
 
     // Server-side Collision Protection: prevent booking a slot already confirmed for this coach
     if ($slot && ($coach_id || $coach_name)) {
-        $conflictQuery = $pdo->prepare("
-            SELECT id, slot FROM mdx_bookings
-            WHERE (coach_id = ? OR (coach_name = ? AND coach_name != ''))
-              AND slot = ?
-              AND status = 'Təsdiqləndi'
-              AND id != ?
-            LIMIT 1
+        try {
+            $conflictQuery = $pdo->prepare("
+                SELECT id, slot FROM mdx_bookings
+                WHERE (coach_id = ? OR (coach_name = ? AND coach_name != ''))
+                  AND slot = ?
+                  AND status = 'Təsdiqləndi'
+                  AND id != ?
+                LIMIT 1
+            ");
+            $conflictQuery->execute([$coach_id, $coach_name, $slot, $id]);
+            if ($conflictQuery->fetch()) {
+                http_response_code(409);
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Bu tarix və saat aralığı artıq təsdiqlənmiş başqa bir rezervasiya tərəfindən tutulub. Zəhmət olmasa başqa vaxt seçin.'
+                ], JSON_UNESCAPED_UNICODE);
+                exit();
+            }
+        } catch (PDOException $e) {}
+    }
+
+    try {
+        $stmt = $pdo->prepare("
+            INSERT INTO mdx_bookings (id, user_id, user_name, user_email, user_phone, user_address, is_guest, coach_id, coach_name, slot, selected_date, start_time, end_time, format, notes, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE 
+                user_name = COALESCE(VALUES(user_name), user_name),
+                user_email = COALESCE(VALUES(user_email), user_email),
+                user_phone = COALESCE(VALUES(user_phone), user_phone),
+                user_address = COALESCE(VALUES(user_address), user_address),
+                coach_id = VALUES(coach_id),
+                coach_name = VALUES(coach_name),
+                slot = VALUES(slot),
+                selected_date = VALUES(selected_date),
+                start_time = VALUES(start_time),
+                end_time = VALUES(end_time),
+                format = VALUES(format),
+                notes = VALUES(notes),
+                status = VALUES(status)
         ");
-        $conflictQuery->execute([$coach_id, $coach_name, $slot, $id]);
-        if ($conflictQuery->fetch()) {
-            http_response_code(409);
-            echo json_encode([
-                'status' => 'error',
-                'message' => 'Bu tarix və saat aralığı artıq təsdiqlənmiş başqa bir rezervasiya tərəfindən tutulub. Zəhmət olmasa başqa vaxt seçin.'
-            ], JSON_UNESCAPED_UNICODE);
+        $stmt->execute([$id, $user_id, $user_name, $user_email, $user_phone, $user_address, $is_guest ? 1 : 0, $coach_id, $coach_name, $slot, $selected_date, $start_time, $end_time, $format, $notes, $status]);
+    } catch (PDOException $e) {
+        // Fallback: try with only original columns if new columns don't exist yet
+        try {
+            $stmtFallback = $pdo->prepare("
+                INSERT INTO mdx_bookings (id, user_id, coach_id, coach_name, slot, format, notes, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE 
+                    coach_id = VALUES(coach_id),
+                    coach_name = VALUES(coach_name),
+                    slot = VALUES(slot),
+                    format = VALUES(format),
+                    notes = VALUES(notes),
+                    status = VALUES(status)
+            ");
+            $stmtFallback->execute([$id, $user_id, $coach_id, $coach_name, $slot, $format, $notes, $status]);
+        } catch (PDOException $e2) {
+            http_response_code(500);
+            error_log("Booking save error: " . $e->getMessage());
+            echo json_encode(['status' => 'error', 'message' => 'Rezervasiya yadda saxlanarkən xəta baş verdi.'], JSON_UNESCAPED_UNICODE);
             exit();
         }
     }
 
-    $stmt = $pdo->prepare("
-        INSERT INTO mdx_bookings (id, user_id, coach_id, coach_name, slot, format, notes, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ON DUPLICATE KEY UPDATE 
-            coach_id = VALUES(coach_id),
-            coach_name = VALUES(coach_name),
-            slot = VALUES(slot),
-            format = VALUES(format),
-            notes = VALUES(notes),
-            status = VALUES(status)
-    ");
-    $stmt->execute([$id, $authUser['id'], $coach_id, $coach_name, $slot, $format, $notes, $status]);
+    // Add notification for admin/coach
+    try {
+        $notifStmt = $pdo->prepare("
+            INSERT INTO mdx_notifications (id, user_id, title, message, type, is_read, created_at)
+            VALUES (?, 'admin', ?, ?, 'info', 0, NOW())
+        ");
+        $notifStmt->execute([
+            'notif-bk-' . uniqid(),
+            'Yeni Rezervasiya Müraciəti',
+            "{$user_name} tərəfindən {$coach_name} üçün yeni rezervasiya müraciəti: {$slot}"
+        ]);
+    } catch (PDOException $ne) {}
 
-    echo json_encode(['status' => 'success', 'message' => 'Kouçinq sessiyası rezervasiya edildi', 'id' => $id], JSON_UNESCAPED_UNICODE);
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'Kouçinq sessiyası rezervasiya edildi',
+        'id' => $id,
+        'booking' => [
+            'id' => $id,
+            'coachId' => $coach_id,
+            'coachName' => $coach_name,
+            'slot' => $slot,
+            'selectedDate' => $selected_date,
+            'startTime' => $start_time,
+            'endTime' => $end_time,
+            'status' => $status,
+            'userName' => $user_name,
+            'userEmail' => $user_email,
+            'userPhone' => $user_phone,
+            'isGuest' => (bool)$is_guest
+        ]
+    ], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
@@ -3191,7 +3370,18 @@ if ($action === 'update_booking_status' && $_SERVER['REQUEST_METHOD'] === 'POST'
     }
 
     if ($authUser['role'] !== 'Admin') {
-        $isAssignedCoach = ($curBooking['coach_id'] === $authUser['id'] || (!empty($curBooking['coach_name']) && stripos($curBooking['coach_name'], $authUser['name']) !== false));
+        // Direct coach_id match (coach_id in bookings = mdx_coaches.id)
+        $isAssignedCoachById = ($curBooking['coach_id'] && $curBooking['coach_id'] === $authUser['id']);
+        // Indirect: check if the logged-in user is linked to the coach record via mdx_coaches.user_id
+        $isAssignedCoachByUserId = false;
+        try {
+            $coachLinkStmt = $pdo->prepare("SELECT id FROM mdx_coaches WHERE user_id = ? AND id = ? LIMIT 1");
+            $coachLinkStmt->execute([$authUser['id'], $curBooking['coach_id']]);
+            if ($coachLinkStmt->fetch()) $isAssignedCoachByUserId = true;
+        } catch (PDOException $e) {}
+        // Name-based fallback (e.g. coach_name matches user's name)
+        $isAssignedCoachByName = (!empty($curBooking['coach_name']) && !empty($authUser['name']) && stripos($curBooking['coach_name'], $authUser['name']) !== false);
+        $isAssignedCoach = $isAssignedCoachById || $isAssignedCoachByUserId || $isAssignedCoachByName;
         $isBookingOwner = ($curBooking['user_id'] === $authUser['id']);
         if (!$isAssignedCoach && !$isBookingOwner) {
             http_response_code(403);
@@ -3230,7 +3420,16 @@ if ($action === 'update_booking_status' && $_SERVER['REQUEST_METHOD'] === 'POST'
 
     $stmt = $pdo->prepare("UPDATE mdx_bookings SET status = ? WHERE id = ?");
     $stmt->execute([$status, $id]);
-    echo json_encode(['status' => 'success', 'message' => 'Status yeniləndi', 'id' => $id, 'status' => $status], JSON_UNESCAPED_UNICODE);
+
+    // Optional: update end_time if provided
+    if (!empty($input['end_time'])) {
+        try {
+            $etStmt = $pdo->prepare("UPDATE mdx_bookings SET end_time = ? WHERE id = ?");
+            $etStmt->execute([trim($input['end_time']), $id]);
+        } catch (PDOException $e) {}
+    }
+
+    echo json_encode(['status' => 'success', 'message' => 'Status yeniləndi', 'id' => $id, 'new_status' => $status], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
@@ -3239,11 +3438,60 @@ if ($action === 'get_bookings') {
     if ($authUser['role'] === 'Admin') {
         $stmt = $pdo->query("SELECT * FROM mdx_bookings ORDER BY created_at DESC");
     } else {
-        $stmt = $pdo->prepare("SELECT * FROM mdx_bookings WHERE user_id = ? OR coach_id = ? OR coach_name LIKE ? ORDER BY created_at DESC");
-        $uName = $authUser['name'] ?? '';
-        $stmt->execute([$authUser['id'], $authUser['id'], '%' . $uName . '%']);
+        // Check if this user is linked to a coach profile
+        $coachProfileId = null;
+        try {
+            $coachStmt = $pdo->prepare("SELECT id FROM mdx_coaches WHERE user_id = ? LIMIT 1");
+            $coachStmt->execute([$authUser['id']]);
+            $coachRow = $coachStmt->fetch();
+            if ($coachRow) $coachProfileId = $coachRow['id'];
+        } catch (PDOException $e) {}
+
+        if ($coachProfileId) {
+            // Coach: see bookings assigned to their coach profile OR by their user_id OR by name
+            $stmt = $pdo->prepare("SELECT * FROM mdx_bookings WHERE user_id = ? OR coach_id = ? OR coach_id = ? OR coach_name LIKE ? ORDER BY created_at DESC");
+            $uName = $authUser['name'] ?? '';
+            $stmt->execute([$authUser['id'], $authUser['id'], $coachProfileId, '%' . $uName . '%']);
+        } else {
+            // Regular user: see their own bookings
+            $stmt = $pdo->prepare("SELECT * FROM mdx_bookings WHERE user_id = ? OR coach_name LIKE ? ORDER BY created_at DESC");
+            $uName = $authUser['name'] ?? '';
+            $stmt->execute([$authUser['id'], '%' . $uName . '%']);
+        }
     }
-    echo json_encode(['status' => 'success', 'bookings' => $stmt->fetchAll()], JSON_UNESCAPED_UNICODE);
+    $rawBookings = $stmt ? $stmt->fetchAll() : [];
+    $mappedBookings = array_map(function($b) {
+        return [
+            'id' => $b['id'],
+            'coachId' => $b['coach_id'],
+            'coach_id' => $b['coach_id'],
+            'coachName' => $b['coach_name'],
+            'coach_name' => $b['coach_name'],
+            'slot' => $b['slot'],
+            'selectedDate' => $b['selected_date'] ?? '',
+            'selected_date' => $b['selected_date'] ?? '',
+            'startTime' => $b['start_time'] ?? '',
+            'start_time' => $b['start_time'] ?? '',
+            'endTime' => $b['end_time'] ?? '',
+            'end_time' => $b['end_time'] ?? '',
+            'format' => $b['format'],
+            'notes' => $b['notes'],
+            'status' => $b['status'],
+            'userName' => $b['user_name'] ?? '',
+            'user_name' => $b['user_name'] ?? '',
+            'userEmail' => $b['user_email'] ?? '',
+            'user_email' => $b['user_email'] ?? '',
+            'userPhone' => $b['user_phone'] ?? '',
+            'user_phone' => $b['user_phone'] ?? '',
+            'userAddress' => $b['user_address'] ?? '',
+            'isGuest' => !empty($b['is_guest']),
+            'userId' => $b['user_id'],
+            'user_id' => $b['user_id'],
+            'createdAt' => $b['created_at'],
+            'date' => isset($b['created_at']) ? explode(' ', $b['created_at'])[0] : ''
+        ];
+    }, $rawBookings);
+    echo json_encode(['status' => 'success', 'bookings' => $mappedBookings], JSON_UNESCAPED_UNICODE);
     exit();
 }
 

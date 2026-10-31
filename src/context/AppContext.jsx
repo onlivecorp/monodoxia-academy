@@ -1253,12 +1253,23 @@ export function AppProvider({ children }) {
           if (data.bookings && data.bookings.length > 0) {
             setBookings(data.bookings.map(b => ({
               id: b.id,
-              coachId: b.coach_id,
-              coachName: b.coach_name,
-              slot: b.slot,
-              format: b.format,
-              notes: b.notes,
-              date: b.created_at ? b.created_at.split(' ')[0] : ''
+              coachId: b.coachId || b.coach_id || '',
+              coachName: b.coachName || b.coach_name || '',
+              slot: b.slot || '',
+              selectedDate: b.selectedDate || b.selected_date || '',
+              startTime: b.startTime || b.start_time || '',
+              endTime: b.endTime || b.end_time || '',
+              format: b.format || '',
+              notes: b.notes || '',
+              status: b.status || 'Gözləyir',
+              userName: b.userName || b.user_name || '',
+              userEmail: b.userEmail || b.user_email || '',
+              userPhone: b.userPhone || b.user_phone || '',
+              userAddress: b.userAddress || b.user_address || '',
+              isGuest: Boolean(b.isGuest || b.is_guest),
+              userId: b.userId || b.user_id || '',
+              date: b.date || (b.createdAt ? b.createdAt.split('T')[0] : (b.created_at ? b.created_at.split(' ')[0] : '')),
+              createdAt: b.createdAt || b.created_at || ''
             })));
           }
           if (data.applications && data.applications.length > 0) {
@@ -1900,18 +1911,45 @@ export function AppProvider({ children }) {
       endTime,
       format: bookingData.type || bookingData.format || 'Online (Google Meet)',
       notes: bookingData.notes || '',
-      userName: currentUser?.name || bookingData.userName || 'Qonaq İstifadəçi',
-      userEmail: currentUser?.email || bookingData.userEmail || '',
-      userPhone: currentUser?.phone || bookingData.userPhone || '',
+      userName: bookingData.userName || (currentUser ? (currentUser.name || '') : ''),
+      userEmail: bookingData.userEmail || (currentUser ? (currentUser.email || '') : ''),
+      userPhone: bookingData.userPhone || (currentUser ? (currentUser.phone || '') : ''),
       userAddress: bookingData.userAddress || '',
       isGuest: bookingData.isGuest !== undefined ? bookingData.isGuest : !currentUser,
+      userId: currentUser?.id || '',
       status: 'Gözləyir',
       date: new Date().toLocaleDateString('az-AZ'),
       createdAt: new Date().toISOString()
     };
     setBookings(prev => [newBooking, ...prev]);
     setBookingModalOpen(false);
-    apiCall('save_booking', newBooking);
+
+    // Send to backend — guest users get sent without requireAuthUser
+    const token = csrfToken || sessionStorage.getItem('monodoxia_csrf') || '';
+    fetch('/api.php?action=save_booking', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'X-CSRF-Token': token } : {})
+      },
+      credentials: 'include',
+      body: JSON.stringify(newBooking)
+    })
+      .then(res => res.json().catch(() => null))
+      .then(result => {
+        if (result?.csrf_token) {
+          setCsrfToken(result.csrf_token);
+          sessionStorage.setItem('monodoxia_csrf', result.csrf_token);
+        }
+        if (result?.status === 'success' && result?.id) {
+          // Update local booking id with server-confirmed id
+          setBookings(prev => prev.map(b =>
+            b.id === newBooking.id ? { ...b, id: result.id } : b
+          ));
+        }
+      })
+      .catch(() => {});
+
     showToast(`Sessiya müraciəti göndərildi: ${newBooking.coachName}`, 'success');
     return true;
   };
@@ -2029,6 +2067,38 @@ export function AppProvider({ children }) {
   const removeTimeBlock = (blockId) => {
     setTimeBlocks(prev => prev.filter(tb => tb.id !== blockId));
     showToast('Blok silindi, vaxt yenidən açıldı.', 'info');
+  };
+
+  // Refresh bookings from server (for coach panel reload)
+  const refreshBookings = async () => {
+    try {
+      const res = await fetch('/api.php?action=get_bookings', { credentials: 'include' });
+      const data = await res.json().catch(() => null);
+      if (data?.status === 'success' && Array.isArray(data.bookings)) {
+        const mapped = data.bookings.map(b => ({
+          id: b.id,
+          coachId: b.coachId || b.coach_id || '',
+          coachName: b.coachName || b.coach_name || '',
+          slot: b.slot || '',
+          selectedDate: b.selectedDate || b.selected_date || '',
+          startTime: b.startTime || b.start_time || '',
+          endTime: b.endTime || b.end_time || '',
+          format: b.format || '',
+          notes: b.notes || '',
+          status: b.status || 'Gözləyir',
+          userName: b.userName || b.user_name || '',
+          userEmail: b.userEmail || b.user_email || '',
+          userPhone: b.userPhone || b.user_phone || '',
+          userAddress: b.userAddress || b.user_address || '',
+          isGuest: Boolean(b.isGuest || b.is_guest),
+          userId: b.userId || b.user_id || '',
+          date: b.date || (b.createdAt ? b.createdAt.split('T')[0] : (b.created_at ? b.created_at.split(' ')[0] : '')),
+          createdAt: b.createdAt || b.created_at || ''
+        }));
+        setBookings(mapped);
+        try { localStorage.setItem('monodoxia_bookings', JSON.stringify(mapped)); } catch (e) {}
+      }
+    } catch (e) {}
   };
 
   const updateTimeBlock = (blockId, updates) => {
@@ -4544,7 +4614,7 @@ export function AppProvider({ children }) {
       activeCertificate,
       bookingModalOpen, setBookingModalOpen,
       bookingPreselectedSlot, setBookingPreselectedSlot,
-      activeCoach, openBooking, openBookingModal: openBooking, confirmBooking, updateBookingStatus, updateBookingEndTime,
+      activeCoach, openBooking, openBookingModal: openBooking, confirmBooking, updateBookingStatus, updateBookingEndTime, refreshBookings,
       timeBlocks, addTimeBlock, removeTimeBlock, updateTimeBlock,
       newTopicModalOpen, setNewTopicModalOpen,
       topicDetailModalOpen, setTopicDetailModalOpen,
