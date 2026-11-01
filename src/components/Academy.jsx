@@ -113,7 +113,7 @@ export default function Academy() {
                 onClick={() => navigateTo ? navigateTo('club') : null}
                 className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-[#070f1e] text-white text-xs font-semibold tracking-wide shadow-md hover:bg-[#112240] transition-colors"
               >
-                <span>Zənginlər Klubu ilə tanış ol</span>
+                <span>{t('academy_meet_club_btn') || 'Zənginlər Klubu ilə tanış ol'}</span>
                 <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
               </button>
             )}

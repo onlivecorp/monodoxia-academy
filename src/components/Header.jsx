@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useApp } from '../context/AppContext';
+import { translateRole } from '../i18n/localize';
 import FlagIcon from './common/FlagIcon';
 
 export default function Header() {
@@ -461,7 +462,7 @@ export default function Header() {
                   </div>
                   <div className="min-w-0">
                     <p className="text-xs font-bold text-[#070f1e] truncate">{currentUser.firstName} {currentUser.lastName}</p>
-                    <p className="text-[10px] text-[#775a19] font-semibold uppercase tracking-wider">{currentUser.role || t('nav_student_role')} • {userTier}</p>
+                    <p className="text-[10px] text-[#775a19] font-semibold uppercase tracking-wider">{translateRole(currentUser.role || 'Tələbə', lang)} • {userTier}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">

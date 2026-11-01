@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { getLocalized } from '../i18n/localize';
 import { useApp } from '../context/AppContext';
@@ -120,11 +120,13 @@ export default function Testimonials() {
             </div>
             <div>
               <span className="inline-block px-3 py-1 rounded-full bg-[#c5a059]/15 text-[#775a19] text-[10px] font-semibold tracking-widest uppercase mb-3">
-                Məzun Rəyləri
+                {t('testimonials_empty_tag') || 'Məzun Rəyləri'}
               </span>
-              <h3 className="font-serif text-2xl font-bold text-[#070f1e]">Tələbə Təcrübələri</h3>
+              <h3 className="font-serif text-2xl font-bold text-[#070f1e]">
+                {t('testimonials_empty_title') || 'Tələbə Təcrübələri'}
+              </h3>
               <p className="text-sm text-slate-600 mt-2 max-w-md mx-auto leading-relaxed font-normal">
-                Monodoxia Academy məzunlarının və klub Üzvlərinin yeni təcrübə paylaşımları tezliklə əlavə olunacaqdır.
+                {t('testimonials_empty_desc') || 'Monodoxia Academy məzunlarının və klub Üzvlərinin yeni təcrübə paylaşımları tezliklə əlavə olunacaqdır.'}
               </p>
             </div>
           </div>

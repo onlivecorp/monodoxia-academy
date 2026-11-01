@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { getLocalized } from '../i18n/localize';
 import { useApp } from '../context/AppContext';
@@ -176,17 +176,19 @@ export default function Events() {
               <span className="material-symbols-outlined text-[32px]">event_upcoming</span>
             </div>
             <span className="inline-block px-3 py-1 rounded-full bg-[#c5a059]/15 text-[#775a19] text-[10px] font-semibold tracking-widest uppercase mb-3">
-              Canlı Proqramlar
+              {t('events_empty_tag') || 'Canlı Proqramlar'}
             </span>
-            <h4 className="font-serif text-2xl font-bold text-[#070f1e] mb-2">Tezliklə Yeni Vebinar və Tədbirlər</h4>
+            <h4 className="font-serif text-2xl font-bold text-[#070f1e] mb-2">
+              {t('events_empty_title') || 'Tezliklə Yeni Vebinar və Tədbirlər'}
+            </h4>
             <p className="text-sm text-slate-600 max-w-md mx-auto leading-relaxed mb-6 font-normal">
-              Yaxın günlərdə yeni canlı ustad dərsləri, interaktiv sual-cavab vebinarları və ekspert seminarları elan olunacaqdır.
+              {t('events_empty_desc') || 'Yaxın günlərdə yeni canlı ustad dərsləri, interaktiv sual-cavab vebinarları və ekspert seminarları elan olunacaqdır.'}
             </p>
             <button
               onClick={() => navigateTo ? navigateTo('club') : null}
               className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-[#070f1e] text-white text-xs font-semibold tracking-wide shadow-md hover:bg-[#112240] transition-colors"
             >
-              <span>Zənginlər Klubu İcmasına Qoşul</span>
+              <span>{t('events_join_club_btn') || 'Zənginlər Klubu İcmasına Qoşul'}</span>
               <span className="material-symbols-outlined text-[16px] text-[#c5a059]">arrow_forward</span>
             </button>
           </div>

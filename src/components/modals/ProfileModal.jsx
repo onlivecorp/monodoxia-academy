@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { APPLICATION_STATUSES, TARGET_TYPE_MAP, INITIAL_FORM_FIELDS } from '../../data/applicationData';
 import { useLanguage } from '../../i18n/LanguageContext';
-import { getLocalized, translateStatus, translatePrice, translateTitle } from '../../i18n/localize';
+import { getLocalized, translateStatus, translatePrice, translateTitle, translateRole } from '../../i18n/localize';
 
 export default function ProfileModal() {
   const { currentLang, defaultLang, t } = useLanguage();
@@ -474,7 +474,7 @@ export default function ProfileModal() {
                     {userTier || currentUser.tier || 'Free'} {t('profile_member_label') || 'Üzv'}
                   </span>
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-                    {currentUser.role || t('nav_student_role') || 'Tələbə'}
+                    {translateRole(currentUser.role || 'Tələbə', currentLang)}
                   </span>
                 </div>
                 <span className="text-xs text-slate-500 block mt-1 font-mono">{currentUser.email}</span>

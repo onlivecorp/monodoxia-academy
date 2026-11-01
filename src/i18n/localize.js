@@ -205,8 +205,120 @@ export const STATIC_TITLE_MAP = {
     en: 'Start Topic',
     tr: 'Konu Başlat',
     ru: 'Начать тему'
+  },
+  'Canlı Proqramlar': {
+    az: 'Canlı Proqramlar',
+    en: 'Live Programs',
+    tr: 'Canlı Programlar',
+    ru: 'Живые Программы'
+  },
+  'Tezliklə Yeni Vebinar və Tədbirlər': {
+    az: 'Tezliklə Yeni Vebinar və Tədbirlər',
+    en: 'Upcoming Webinars & Events',
+    tr: 'Yakında Yeni Webinar ve Etkinlikler',
+    ru: 'Скоро Новые Вебинары и Мероприятия'
+  },
+  'Yaxın günlərdə yeni canlı ustad dərsləri, interaktiv sual-cavab vebinarları və ekspert seminarları elan olunacaqdır.': {
+    az: 'Yaxın günlərdə yeni canlı ustad dərsləri, interaktiv sual-cavab vebinarları və ekspert seminarları elan olunacaqdır.',
+    en: 'New live masterclasses, interactive Q&A webinars, and expert seminars will be announced in the coming days.',
+    tr: 'Yakın günlerde yeni canlı ustalık sınıfları, etkileşimli soru-cevap webinarları ve uzman seminerleri duyurulacaktır.',
+    ru: 'В ближайшие дни будут анонсированы новые живые мастер-классы, интерактивные вебинары «вопрос-ответ» и экспертные семинары.'
+  },
+  'Zənginlər Klubu İcmasına Qoşul': {
+    az: 'Zənginlər Klubu İcmasına Qoşul',
+    en: 'Join Wealth Club Community',
+    tr: 'Zenginler Kulübü Topluluğuna Katıl',
+    ru: 'Присоединиться к Сообществу Клуба Богатых'
+  },
+  'Zənginlər Klubu ilə tanış ol': {
+    az: 'Zənginlər Klubu ilə tanış ol',
+    en: 'Explore the Wealth Club',
+    tr: 'Zenginler Kulübü ile Tanışın',
+    ru: 'Познакомьтесь с Клубом Богатых'
+  },
+  'Başqa bir sualınız var?': {
+    az: 'Başqa bir sualınız var?',
+    en: 'Have another question?',
+    tr: 'Başka bir sorunuz var mı?',
+    ru: 'Остались вопросы?'
+  },
+  'Akademiya və fərdi kouçinq koordinatorlarımız sizə kömək etməkdən məmnun olar.': {
+    az: 'Akademiya və fərdi kouçinq koordinatorlarımız sizə kömək etməkdən məmnun olar.',
+    en: 'Our academy and coaching coordinators would be delighted to assist you.',
+    tr: 'Akademi ve koçluk koordinatörlerimiz size yardımcı olmaktan memnuniyet duyacaktır.',
+    ru: 'Координаторы Академии и менторы с радостью помогут вам сориентироваться.'
+  },
+  'Fərdi Məsləhət Al': {
+    az: 'Fərdi Məsləhət Al',
+    en: 'Get Personal Consultation',
+    tr: 'Bireysel Danışmanlık Al',
+    ru: 'Получить консультацию'
+  },
+  'Məzun Rəyləri': {
+    az: 'Məzun Rəyləri',
+    en: 'Graduate Reviews',
+    tr: 'Mezun Yorumları',
+    ru: 'Отзывы Выпускников'
+  },
+  'Tələbə Təcrübələri': {
+    az: 'Tələbə Təcrübələri',
+    en: 'Student Experiences',
+    tr: 'Öğrenci Deneyimleri',
+    ru: 'Опыт Студентов'
+  },
+  'Tələbə': {
+    az: 'Tələbə',
+    en: 'Student',
+    tr: 'Öğrenci',
+    ru: 'Студент'
   }
 };
+
+export const ROLE_TRANSLATION_MAP = {
+  'Tələbə': { az: 'Tələbə', en: 'Student', tr: 'Öğrenci', ru: 'Студент' },
+  'Student': { az: 'Tələbə', en: 'Student', tr: 'Öğrenci', ru: 'Студент' },
+  'Öğrenci': { az: 'Tələbə', en: 'Student', tr: 'Öğrenci', ru: 'Студент' },
+  'Студент': { az: 'Tələbə', en: 'Student', tr: 'Öğrenci', ru: 'Студент' },
+  'Kouç': { az: 'Kouç', en: 'Coach', tr: 'Koç', ru: 'Коуч' },
+  'Coach': { az: 'Kouç', en: 'Coach', tr: 'Koç', ru: 'Коуч' },
+  'Koç': { az: 'Kouç', en: 'Coach', tr: 'Koç', ru: 'Коуч' },
+  'Коуч': { az: 'Kouç', en: 'Coach', tr: 'Koç', ru: 'Коуч' },
+  'Kouç & Ekspert': { az: 'Kouç & Ekspert', en: 'Coach & Expert', tr: 'Koç & Uzman', ru: 'Коуч и Эксперт' },
+  'Kouç və Ekspert': { az: 'Kouç & Ekspert', en: 'Coach & Expert', tr: 'Koç & Uzman', ru: 'Коуч и Эксперт' },
+  'Admin': { az: 'Admin', en: 'Admin', tr: 'Admin', ru: 'Администратор' },
+  'Administrator': { az: 'Admin', en: 'Admin', tr: 'Admin', ru: 'Администратор' },
+  'Администратор': { az: 'Admin', en: 'Admin', tr: 'Admin', ru: 'Администратор' },
+  'Moderator': { az: 'Moderator', en: 'Moderator', tr: 'Moderatör', ru: 'Модератор' },
+  'Moderatör': { az: 'Moderator', en: 'Moderator', tr: 'Moderatör', ru: 'Модератор' },
+  'Модератор': { az: 'Moderator', en: 'Moderator', tr: 'Moderatör', ru: 'Модератор' },
+  'Üzv': { az: 'Üzv', en: 'Member', tr: 'Üye', ru: 'Участник' },
+  'Member': { az: 'Üzv', en: 'Member', tr: 'Üye', ru: 'Участник' },
+  'Üye': { az: 'Üzv', en: 'Member', tr: 'Üye', ru: 'Участник' },
+  'Участник': { az: 'Üzv', en: 'Member', tr: 'Üye', ru: 'Участник' },
+  'Məzun': { az: 'Məzun', en: 'Graduate', tr: 'Mezun', ru: 'Выпускник' },
+  'Graduate': { az: 'Məzun', en: 'Graduate', tr: 'Mezun', ru: 'Выпускник' },
+  'Mezun': { az: 'Məzun', en: 'Graduate', tr: 'Mezun', ru: 'Выпускник' },
+  'Выпускник': { az: 'Məzun', en: 'Graduate', tr: 'Mezun', ru: 'Выпускник' },
+  'İstifadəçi': { az: 'İstifadəçi', en: 'User', tr: 'Kullanıcı', ru: 'Пользователь' },
+  'User': { az: 'İstifadəçi', en: 'User', tr: 'Kullanıcı', ru: 'Пользователь' },
+  'Kullanıcı': { az: 'İstifadəçi', en: 'User', tr: 'Kullanıcı', ru: 'Пользователь' },
+  'Пользователь': { az: 'İstifadəçi', en: 'User', tr: 'Kullanıcı', ru: 'Пользователь' }
+};
+
+export function translateRole(role, lang = 'az') {
+  if (!role) return '';
+  const trimmed = String(role).trim();
+  if (ROLE_TRANSLATION_MAP[trimmed]?.[lang]) {
+    return ROLE_TRANSLATION_MAP[trimmed][lang];
+  }
+  const lower = trimmed.toLowerCase();
+  for (const [key, map] of Object.entries(ROLE_TRANSLATION_MAP)) {
+    if (key.toLowerCase() === lower && map[lang]) {
+      return map[lang];
+    }
+  }
+  return trimmed;
+}
 
 export const STATUS_TRANSLATION_MAP = {
   'Yeni': { az: 'Yeni', en: 'New', tr: 'Yeni', ru: 'Новая' },
@@ -399,6 +511,11 @@ export function getLocalized(item, field, currentLang = 'az', defaultLang = DEFA
       return COACH_TITLE_MAP['Kouç & Ekspert'][currentLang] || safeFallback;
     }
   }
+  if (field === 'role' || field === 'authorRole' || field === 'userRole') {
+    const rawR = item[field] !== undefined ? item[field] : (item.role !== undefined ? item.role : '');
+    const transRole = translateRole(rawR, currentLang);
+    if (transRole) return transRole;
+  }
   if (field === 'price') {
     const rawP = item[field] !== undefined ? item[field] : (item.price !== undefined ? item.price : '');
     return translatePrice(rawP, currentLang);
@@ -424,7 +541,12 @@ export function getLocalized(item, field, currentLang = 'az', defaultLang = DEFA
       if (field === 'title' && COACH_TITLE_MAP[rawVal]?.[currentLang]) {
         return COACH_TITLE_MAP[rawVal][currentLang];
       }
-      if (field === 'price') {
+      if (field === 'role' || field === 'authorRole' || field === 'userRole') {
+    const rawR = item[field] !== undefined ? item[field] : (item.role !== undefined ? item.role : '');
+    const transRole = translateRole(rawR, currentLang);
+    if (transRole) return transRole;
+  }
+  if (field === 'price') {
         return translatePrice(rawVal, currentLang);
       }
       if (field === 'status') {

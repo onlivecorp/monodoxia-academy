@@ -99,14 +99,14 @@ export default function FAQ() {
         {/* BOTTOM HELP STRIP */}
         <div className="mt-12 text-center p-6 rounded-2xl bg-white/60 border border-[#e2d9c8]/60 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="text-left">
-            <h4 className="font-serif text-base font-semibold text-[#070f1e]">Başqa bir sualınız var?</h4>
-            <p className="text-xs text-slate-500 mt-0.5">Akademiya və fərdi kouçinq koordinatorlarımız sizə kömək etməkdən məmnun olar.</p>
+            <h4 className="font-serif text-base font-semibold text-[#070f1e]">{t('faq_more_questions') || 'Başqa bir sualınız var?'}</h4>
+            <p className="text-xs text-slate-500 mt-0.5">{t('faq_more_questions_desc') || 'Akademiya və fərdi kouçinq koordinatorlarımız sizə kömək etməkdən məmnun olar.'}</p>
           </div>
           <button
             onClick={() => navigateTo ? navigateTo('coaching') : null}
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#070f1e] hover:bg-[#112240] text-white text-xs font-semibold tracking-wide border border-[#c5a059]/40 shadow-sm hover:shadow-md transition-all cursor-pointer whitespace-nowrap"
           >
-            <span>Fərdi Məsləhət Al</span>
+            <span>{t('faq_consultation_btn') || 'Fərdi Məsləhət Al'}</span>
             <span className="material-symbols-outlined text-[16px] text-[#c5a059]">arrow_forward</span>
           </button>
         </div>

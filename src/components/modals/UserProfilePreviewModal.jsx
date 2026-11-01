@@ -1,12 +1,13 @@
 import React from 'react';
 import { useLanguage } from '../../i18n/LanguageContext';
+import { translateRole } from '../../i18n/localize';
 
 export default function UserProfilePreviewModal({ user, isOpen, onClose }) {
-  const { t } = useLanguage();
+  const { t, currentLang } = useLanguage();
 
   if (!isOpen || !user) return null;
 
-  const role = user.role || t('nav_student_role') || 'Tələbə';
+  const role = user.role || 'Tələbə';
   const tier = user.tier || 'Basic';
   const joinedDate = user.joinedDate || user.joined_date || '';
 
@@ -36,11 +37,7 @@ export default function UserProfilePreviewModal({ user, isOpen, onClose }) {
   };
 
   const getRoleDisplayName = (r) => {
-    if (r === 'Admin') return t('role_admin') || 'Admin';
-    if (r === 'Kouç' || r === 'Kouç & Ekspert') return t('role_coach') || 'Kouç';
-    if (r === 'Moderator') return t('role_moderator') || 'Moderator';
-    if (r === 'Tələbə') return t('role_student') || 'Tələbə';
-    return r;
+    return translateRole(r || 'Tələbə', currentLang);
   };
 
   return (
@@ -107,7 +104,7 @@ export default function UserProfilePreviewModal({ user, isOpen, onClose }) {
               </span>
               <span className="font-semibold text-emerald-700 flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                <span>{role === 'Tələbə' ? t('user_profile_active_student') : t('user_profile_active_member')}</span>
+                <span>{['Tələbə', 'Student', 'Öğrenci', 'Студент'].includes(role) ? t('user_profile_active_student') : t('user_profile_active_member')}</span>
               </span>
             </div>
           </div>
