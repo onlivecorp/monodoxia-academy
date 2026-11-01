@@ -610,31 +610,88 @@ export function AppProvider({ children }) {
     return INITIAL_PILLARS;
   });
 
+  const isDummyAreaVal = (v) => {
+    if (!v || typeof v !== 'string') return true;
+    const s = v.trim();
+    return (
+      s === '' ||
+      s.startsWith('New Area') ||
+      s.startsWith('Yeni Sahə') ||
+      s.startsWith('Yeni Alan') ||
+      s.startsWith('Новая Сфера') ||
+      s.includes('/ PILLAR') ||
+      s.includes('/ ALAN') ||
+      s.includes('/ СФЕРА') ||
+      s.includes('Detailed information about this personal') ||
+      s.includes('gelişim boyutu ve tematik modül hakkında') ||
+      s.includes('направлении личностного роста')
+    );
+  };
+
+  const findCanonicalAreaForApp = (itm, idx) => {
+    if (!itm) return AREAS[idx] || AREAS[0];
+    const t = String(itm.title || itm.translations?.az?.title || '').toLowerCase();
+    if (t.includes('tanıma') || t.includes('fərqindəlik')) return AREAS[0];
+    if (t.includes('emosional') || t.includes('zəka') || t.includes('eq')) return AREAS[1];
+    if (t.includes('münasibət') || t.includes('ünsiyyət')) return AREAS[2];
+    if (t.includes('mənəvi') || t.includes('həyat')) return AREAS[7];
+    if (t.includes('məqsəd') || t.includes('motivasiya')) return AREAS[3];
+    if (t.includes('stress') || t.includes('tarazlıq') || t.includes('sükut') || t.includes('meditasiya')) return AREAS[4];
+    if (t.includes('özünəinam') || t.includes('sərhəd')) return AREAS[5];
+    if (t.includes('karyera') || t.includes('liderlik')) return AREAS[6];
+    if (itm.id) {
+      const byId = AREAS.find(a => a.id === itm.id);
+      if (byId) return byId;
+    }
+    return AREAS[idx] || AREAS[0];
+  };
+
+  const sanitizeAreasList = (list) => {
+    if (!Array.isArray(list) || list.length === 0) return AREAS;
+    return list.map((item, idx) => {
+      const canonical = findCanonicalAreaForApp(item, idx);
+      const itemTrans = item.translations || {};
+
+      const sanitizeLang = (langCode) => {
+        const transL = itemTrans[langCode] || {};
+        const canonL = canonical.translations?.[langCode] || {};
+        return {
+          number: !isDummyAreaVal(transL.number) ? transL.number : (canonL.number || item.number || canonical.number),
+          title: !isDummyAreaVal(transL.title) ? transL.title : (canonL.title || item.title || canonical.title),
+          desc: !isDummyAreaVal(transL.desc) ? transL.desc : (canonL.desc || item.desc || canonical.desc),
+          btnText: !isDummyAreaVal(transL.btnText) ? transL.btnText : (canonL.btnText || item.btnText || canonical.btnText || 'Kəşf et')
+        };
+      };
+
+      return {
+        ...canonical,
+        ...item,
+        title: item.title && !isDummyAreaVal(item.title) ? item.title : canonical.title,
+        number: item.number && !isDummyAreaVal(item.number) ? item.number : canonical.number,
+        desc: item.desc && !isDummyAreaVal(item.desc) ? item.desc : canonical.desc,
+        btnText: item.btnText && !isDummyAreaVal(item.btnText) ? item.btnText : (canonical.btnText || 'Kəşf et'),
+        translations: {
+          az: {
+            number: itemTrans.az?.number || item.number || canonical.number,
+            title: itemTrans.az?.title || item.title || canonical.title,
+            desc: itemTrans.az?.desc || item.desc || canonical.desc,
+            btnText: itemTrans.az?.btnText || item.btnText || canonical.btnText || 'Kəşf et'
+          },
+          en: sanitizeLang('en'),
+          tr: sanitizeLang('tr'),
+          ru: sanitizeLang('ru')
+        }
+      };
+    });
+  };
+
   const [areasList, setAreasList] = useState(() => {
     const saved = localStorage.getItem('monodoxia_areas');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const isDummy = (t) => !t || t.startsWith('New Area') || t.startsWith('Yeni Sahə');
-          return parsed.map((item, idx) => {
-            const canonical = AREAS.find(a => a.id === item.id) || AREAS[idx];
-            if (!canonical) return item;
-            const itemTrans = item.translations || {};
-            return {
-              ...canonical,
-              ...item,
-              number: isDummy(item.number) ? canonical.number : item.number,
-              title: isDummy(item.title) ? canonical.title : item.title,
-              desc: isDummy(item.desc) ? canonical.desc : item.desc,
-              translations: {
-                az: { ...(canonical.translations?.az || {}), ...(itemTrans.az || {}), title: isDummy(itemTrans.az?.title) ? canonical.translations?.az?.title : itemTrans.az?.title },
-                en: { ...(canonical.translations?.en || {}), ...(itemTrans.en || {}), title: isDummy(itemTrans.en?.title) ? canonical.translations?.en?.title : itemTrans.en?.title },
-                tr: { ...(canonical.translations?.tr || {}), ...(itemTrans.tr || {}), title: isDummy(itemTrans.tr?.title) ? canonical.translations?.tr?.title : itemTrans.tr?.title },
-                ru: { ...(canonical.translations?.ru || {}), ...(itemTrans.ru || {}), title: isDummy(itemTrans.ru?.title) ? canonical.translations?.ru?.title : itemTrans.ru?.title }
-              }
-            };
-          });
+          return sanitizeAreasList(parsed);
         }
       } catch (e) {}
     }
@@ -1471,10 +1528,7 @@ export function AppProvider({ children }) {
                 };
               });
               if (updatedContent.areas && Array.isArray(updatedContent.areas.items)) {
-                const hasDummy = updatedContent.areas.items.some(i => i.title && (i.title.startsWith('New Area') || i.title.startsWith('Yeni Sahə')));
-                if (hasDummy || updatedContent.areas.items.length === 0) {
-                  updatedContent.areas.items = AREAS;
-                }
+                updatedContent.areas.items = sanitizeAreasList(updatedContent.areas.items);
               }
               return updatedContent;
             });
@@ -4666,7 +4720,7 @@ export function AppProvider({ children }) {
   };
 
   const updateAllAreas = (newList) => {
-    setAreasList(newList);
+    setAreasList(sanitizeAreasList(newList));
   };
 
   // Coaches Operations

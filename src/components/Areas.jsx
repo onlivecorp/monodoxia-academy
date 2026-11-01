@@ -9,10 +9,40 @@ export default function Areas() {
   const { homeContent, areasList, navigateTo } = useApp();
   const areas = homeContent?.areas || {};
 
-  const isDummyArea = (item) => {
-    if (!item) return true;
-    const str = String(item.title || item.translations?.en?.title || item.translations?.az?.title || '');
-    return str.startsWith('New Area') || str.startsWith('Yeni Sahə');
+  const isDummyVal = (v) => {
+    if (!v || typeof v !== 'string') return true;
+    const s = v.trim();
+    return (
+      s === '' ||
+      s.startsWith('New Area') ||
+      s.startsWith('Yeni Sahə') ||
+      s.startsWith('Yeni Alan') ||
+      s.startsWith('Новая Сфера') ||
+      s.includes('/ PILLAR') ||
+      s.includes('/ ALAN') ||
+      s.includes('/ СФЕРА') ||
+      s.includes('Detailed information about this personal') ||
+      s.includes('gelişim boyutu ve tematik modül hakkında') ||
+      s.includes('направлении личностного роста')
+    );
+  };
+
+  const findCanonicalArea = (itm, idx) => {
+    if (!itm) return AREAS[idx] || AREAS[0];
+    const t = String(itm.title || itm.translations?.az?.title || '').toLowerCase();
+    if (t.includes('tanıma') || t.includes('fərqindəlik')) return AREAS[0];
+    if (t.includes('emosional') || t.includes('zəka') || t.includes('eq')) return AREAS[1];
+    if (t.includes('münasibət') || t.includes('ünsiyyət')) return AREAS[2];
+    if (t.includes('mənəvi') || t.includes('həyat')) return AREAS[7];
+    if (t.includes('məqsəd') || t.includes('motivasiya')) return AREAS[3];
+    if (t.includes('stress') || t.includes('tarazlıq') || t.includes('sükut') || t.includes('meditasiya')) return AREAS[4];
+    if (t.includes('özünəinam') || t.includes('sərhəd')) return AREAS[5];
+    if (t.includes('karyera') || t.includes('liderlik')) return AREAS[6];
+    if (itm.id) {
+      const byId = AREAS.find(a => a.id === itm.id);
+      if (byId) return byId;
+    }
+    return AREAS[idx] || AREAS[0];
   };
 
   const rawList = (areas?.items && Array.isArray(areas.items) && areas.items.length > 0)
@@ -20,18 +50,37 @@ export default function Areas() {
     : (areasList && areasList.length > 0 ? areasList : AREAS);
 
   const activeAreas = rawList.map((a, idx) => {
-    const canonical = AREAS[idx] || AREAS.find(c => c.id === a.id) || a;
-    if (isDummyArea(a) || !a.translations) {
-      return canonical;
-    }
+    const canonical = findCanonicalArea(a, idx);
+    const itemTrans = a.translations || {};
+
+    const sanitizeLang = (langCode) => {
+      const transL = itemTrans[langCode] || {};
+      const canonL = canonical.translations?.[langCode] || {};
+      return {
+        number: !isDummyVal(transL.number) ? transL.number : (canonL.number || a.number || canonical.number),
+        title: !isDummyVal(transL.title) ? transL.title : (canonL.title || a.title || canonical.title),
+        desc: !isDummyVal(transL.desc) ? transL.desc : (canonL.desc || a.desc || canonical.desc),
+        btnText: !isDummyVal(transL.btnText) ? transL.btnText : (canonL.btnText || a.btnText || canonical.btnText || 'Kəşf et')
+      };
+    };
+
     return {
       ...canonical,
       ...a,
+      title: a.title && !isDummyVal(a.title) ? a.title : canonical.title,
+      number: a.number && !isDummyVal(a.number) ? a.number : canonical.number,
+      desc: a.desc && !isDummyVal(a.desc) ? a.desc : canonical.desc,
+      btnText: a.btnText && !isDummyVal(a.btnText) ? a.btnText : (canonical.btnText || 'Kəşf et'),
       translations: {
-        az: { ...(canonical.translations?.az || {}), ...(a.translations?.az || {}) },
-        en: { ...(canonical.translations?.en || {}), ...(a.translations?.en || {}) },
-        tr: { ...(canonical.translations?.tr || {}), ...(a.translations?.tr || {}) },
-        ru: { ...(canonical.translations?.ru || {}), ...(a.translations?.ru || {}) }
+        az: {
+          number: itemTrans.az?.number || a.number || canonical.number,
+          title: itemTrans.az?.title || a.title || canonical.title,
+          desc: itemTrans.az?.desc || a.desc || canonical.desc,
+          btnText: itemTrans.az?.btnText || a.btnText || canonical.btnText || 'Kəşf et'
+        },
+        en: sanitizeLang('en'),
+        tr: sanitizeLang('tr'),
+        ru: sanitizeLang('ru')
       }
     };
   });

@@ -543,32 +543,46 @@ export function getLocalized(item, field, currentLang = 'az', defaultLang = DEFA
 
   const isDummyEnglishArea = (val) => {
     if (typeof val !== 'string') return false;
-    return val.startsWith('New Area') || val.includes('/ PILLAR') || val.startsWith('Detailed information about this personal') || val.startsWith('Yeni Sahə');
+    const s = val.trim();
+    return (
+      s.startsWith('New Area') ||
+      s.startsWith('Yeni Sahə') ||
+      s.startsWith('Yeni Alan') ||
+      s.startsWith('Новая Сфера') ||
+      s.includes('/ PILLAR') ||
+      s.includes('/ ALAN') ||
+      s.includes('/ СФЕРА') ||
+      s.startsWith('Detailed information about this personal') ||
+      s.includes('gelişim boyutu ve tematik modül hakkında') ||
+      s.includes('направлении личностного роста')
+    );
   };
 
-  // If this item is a dummy area ("New Area 1", etc.), resolve from canonical AREAS
-  if (item && (isDummyEnglishArea(item.title) || isDummyEnglishArea(item.number) || isDummyEnglishArea(item.desc))) {
-    let canonical = item.id ? AREAS.find(a => a.id === item.id) : null;
-    if (!canonical) {
-      const numMatch = (String(item.title || '') + ' ' + String(item.number || '')).match(/\d+/);
-      if (numMatch) {
-        const idx = parseInt(numMatch[0], 10) - 1;
-        if (AREAS[idx]) canonical = AREAS[idx];
-      }
+  const findCanonicalArea = (itm) => {
+    if (!itm) return null;
+    const t = String(itm.title || itm.translations?.az?.title || '').toLowerCase();
+    if (t.includes('tanıma') || t.includes('fərqindəlik')) return AREAS[0];
+    if (t.includes('emosional') || t.includes('zəka') || t.includes('eq')) return AREAS[1];
+    if (t.includes('münasibət') || t.includes('ünsiyyət')) return AREAS[2];
+    if (t.includes('mənəvi') || t.includes('həyat')) return AREAS[7];
+    if (t.includes('məqsəd') || t.includes('motivasiya')) return AREAS[3];
+    if (t.includes('stress') || t.includes('tarazlıq') || t.includes('sükut') || t.includes('meditasiya')) return AREAS[4];
+    if (t.includes('özünəinam') || t.includes('sərhəd')) return AREAS[5];
+    if (t.includes('karyera') || t.includes('liderlik')) return AREAS[6];
+    if (itm.id) {
+      const byId = AREAS.find(a => a.id === itm.id);
+      if (byId) return byId;
     }
-    if (canonical) {
-      if (canonical.translations?.[currentLang]?.[field]) {
-        return canonical.translations[currentLang][field];
-      }
-      if (currentLang === defaultLang && canonical[field]) {
-        return canonical[field];
-      }
-      if (field === 'btnText') {
-        const btnMap = { az: 'Kəşf et', en: 'Explore', tr: 'Keşfet', ru: 'Исследовать' };
-        return btnMap[currentLang] || 'Explore';
-      }
+    const numMatch = (String(itm.title || '') + ' ' + String(itm.number || '')).match(/\d+/);
+    if (numMatch) {
+      const idx = parseInt(numMatch[0], 10) - 1;
+      if (AREAS[idx]) return AREAS[idx];
     }
-  }
+    return null;
+  };
+
+  // If this item is an area or has dummy area placeholders, resolve canonical translations
+  const matchedCanonicalArea = findCanonicalArea(item);
 
   // 1. When viewing in default language (AZ)
   if (currentLang === defaultLang) {
@@ -594,20 +608,32 @@ export function getLocalized(item, field, currentLang = 'az', defaultLang = DEFA
         return item[defaultDirectKey];
       }
     }
+    if (matchedCanonicalArea && matchedCanonicalArea[field]) {
+      return matchedCanonicalArea[field];
+    }
     return safeFallback;
   }
 
   // 2. Nested translation object for non-default current language
   if (item.translations && item.translations[currentLang] && item.translations[currentLang][field] !== undefined) {
     const val = item.translations[currentLang][field];
-    if (typeof val === 'string' && val.trim() !== '' && !isCorrupted(val)) return val;
+    if (typeof val === 'string' && val.trim() !== '' && !isCorrupted(val) && !isDummyEnglishArea(val)) return val;
     if (typeof val === 'number') return String(val);
   }
 
   // 3. Direct property like title_en, desc_ru
   const directKey = `${field}_${currentLang}`;
-  if (item[directKey] !== undefined && typeof item[directKey] === 'string' && item[directKey].trim() !== '' && !isCorrupted(item[directKey])) {
+  if (item[directKey] !== undefined && typeof item[directKey] === 'string' && item[directKey].trim() !== '' && !isCorrupted(item[directKey]) && !isDummyEnglishArea(item[directKey])) {
     return item[directKey];
+  }
+
+  // If this is an area and translation was missing or dummy, resolve from matched canonical area
+  if (matchedCanonicalArea && matchedCanonicalArea.translations?.[currentLang]?.[field]) {
+    return matchedCanonicalArea.translations[currentLang][field];
+  }
+  if (matchedCanonicalArea && field === 'btnText') {
+    const btnMap = { az: 'Kəşf et', en: 'Explore', tr: 'Keşfet', ru: 'Исследовать' };
+    return btnMap[currentLang] || 'Explore';
   }
 
   // 4. Safe fallback for caller's localized dictionary text (avoids showing Azerbaijani on EN/TR/RU)

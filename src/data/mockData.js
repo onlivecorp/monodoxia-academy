@@ -2,123 +2,283 @@
 
 export const AREAS = [
   {
-    id: "psychology",
-    number: "01 / DƏRİNLİK",
-    title: "Psixologiya",
-    icon: "psychology_alt",
-    desc: "İnsanın daxili strukturu, qorxular, travmalar və şüuraltı mexanizmlərin elmi analizi.",
+    id: "self-discovery",
+    number: "01.",
+    title: "Özünü tanıma və fərqindəlik",
+    icon: "explore",
+    desc: "Düşüncələrini, dəyərlərini, emosiyalarını və davranışlarını daha dərindən anlamaq.",
     btnText: "Kəşf et",
-    link: "#haqqimizda",
+    link: "https://monodoxia.com/haqqimizda",
     translations: {
-      az: { title: "Psixologiya", number: "01 / DƏRİNLİK", desc: "İnsanın daxili strukturu, qorxular, travmalar və şüuraltı mexanizmlərin elmi analizi.", btnText: "Kəşf et" },
-      en: { title: "Psychology", number: "01 / DEPTH", desc: "Scientific analysis of the human inner structure, fears, traumas, and subconscious mechanisms.", btnText: "Explore" },
-      tr: { title: "Psikoloji", number: "01 / DERİNLİK", desc: "İnsanın iç yapısının, korkularının, travmalarının ve bilinçaltı mekanizmalarının bilimsel analizi.", btnText: "Keşfet" },
-      ru: { title: "Психология", number: "01 / ГЛУБИНА", desc: "Научный анализ внутренней структуры личности, страхов, травм и подсознательных механизмов.", btnText: "Исследовать" }
+      az: {
+        number: "01.",
+        title: "Özünü tanıma və fərqindəlik",
+        desc: "Düşüncələrini, dəyərlərini, emosiyalarını və davranışlarını daha dərindən anlamaq.",
+        btnText: "Kəşf et"
+      },
+      en: {
+        number: "01.",
+        title: "Self-Discovery and Awareness",
+        desc: "Deeply understanding your thoughts, values, emotions, and behavioral patterns.",
+        btnText: "Explore"
+      },
+      tr: {
+        number: "01.",
+        title: "Kendini Tanıma ve Farkındalık",
+        desc: "Düşüncelerinizi, değerlerinizi, duygularınızı ve davranışlarınızı daha derinden kavramak.",
+        btnText: "Keşfet"
+      },
+      ru: {
+        number: "01.",
+        title: "Самопознание и осознанность",
+        desc: "Глубокое понимание своих мыслей, ценностей, эмоций и моделей поведения.",
+        btnText: "Исследовать"
+      }
     }
   },
   {
-    id: "personal-growth",
-    number: "02 / İRƏLİLƏYİŞ",
-    title: "Şəxsi İnkişaf",
-    icon: "trending_up",
-    desc: "Məqsədyönlülük, intizam, vərdişlərin transformasiyası və potensialın tam realizasiyası.",
+    id: "emotional-intelligence",
+    number: "02.",
+    title: "Emosional zəka",
+    icon: "psychology",
+    desc: "Emosiyaları tanımaq, anlamaq və sağlam şəkildə idarə etmək bacarıqlarını inkişaf etdirmək.",
     btnText: "Kəşf et",
-    link: "#haqqimizda",
+    link: "https://monodoxia.com/haqqimizda",
     translations: {
-      az: { title: "Şəxsi İnkişaf", number: "02 / İRƏLİLƏYİŞ", desc: "Məqsədyönlülük, intizam, vərdişlərin transformasiyası və potensialın tam realizasiyası.", btnText: "Kəşf et" },
-      en: { title: "Personal Growth", number: "02 / PROGRESS", desc: "Goal-orientation, discipline, habit transformation and full realization of potential.", btnText: "Explore" },
-      tr: { title: "Kişisel Gelişim", number: "02 / İLERLEME", desc: "Hedef odaklılık, disiplin, alışkanlıkların dönüşümü ve potansiyelin tam gerçekleşmesi.", btnText: "Keşfet" },
-      ru: { title: "Личностный Рост", number: "02 / ПРОГРЕСС", desc: "Целеустремлённость, дисциплина, трансформация привычек и полная реализация потенциала.", btnText: "Исследовать" }
+      az: {
+        number: "02.",
+        title: "Emosional zəka",
+        desc: "Emosiyaları tanımaq, anlamaq və sağlam şəkildə idarə etmək bacarıqlarını inkişaf etdirmək.",
+        btnText: "Kəşf et"
+      },
+      en: {
+        number: "02.",
+        title: "Emotional Intelligence",
+        desc: "Cultivating the ability to recognize, understand, and healthily regulate emotions.",
+        btnText: "Explore"
+      },
+      tr: {
+        number: "02.",
+        title: "Duygusal Zeka",
+        desc: "Duyguları tanıma, anlama ve sağlıklı bir şekilde yönetme becerilerini geliştirmek.",
+        btnText: "Keşfet"
+      },
+      ru: {
+        number: "02.",
+        title: "Эмоциональный интеллект",
+        desc: "Развитие навыков распознавания, понимания и здорового управления эмоциями.",
+        btnText: "Исследовать"
+      }
     }
   },
   {
-    id: "spiritual",
-    number: "03 / MƏNƏVİYYAT",
-    title: "Spiritual Coaching",
-    icon: "self_improvement",
-    desc: "Həyatın ali məqsədi, ekzistensial suallar və daxili mənəvi güclə təmas.",
-    btnText: "Kəşf et",
-    link: "#haqqimizda",
-    translations: {
-      az: { title: "Spiritual Kouçinq", number: "03 / MƏNƏVİYYAT", desc: "Həyatın ali məqsədi, ekzistensial suallar və daxili mənəvi güclə təmas.", btnText: "Kəşf et" },
-      en: { title: "Spiritual Coaching", number: "03 / SPIRIT", desc: "The highest purpose of life, existential inquiries, and connecting with inner spiritual strength.", btnText: "Explore" },
-      tr: { title: "Spiritüel Koçluk", number: "03 / MANEVİYAT", desc: "Hayatın yüce amacı, varoluşsal sorular ve iç manevi güçle temas.", btnText: "Keşfet" },
-      ru: { title: "Духовный Коучинг", number: "03 / ДУХОВНОСТЬ", desc: "Высший смысл жизни, экзистенциальные вопросы и соприкосновение с внутренней духовной силой.", btnText: "Исследовать" }
-    }
-  },
-  {
-    id: "mindfulness",
-    number: "04 / FƏRQİNDƏLİK",
-    title: "Mindfulness",
-    icon: "nest_eco_leaf",
-    desc: "İndiki zamanda yaşamaq bacarığı, avtopilotdan çıxış və təmkinli baxış.",
-    btnText: "Kəşf et",
-    link: "#haqqimizda",
-    translations: {
-      az: { title: "Mindfulness", number: "04 / FƏRQİNDƏLİK", desc: "İndiki zamanda yaşamaq bacarığı, avtopilotdan çıxış və təmkinli baxış.", btnText: "Kəşf et" },
-      en: { title: "Mindfulness", number: "04 / AWARENESS", desc: "The skill of living in the present moment, breaking out of autopilot, and cultivating conscious perspective.", btnText: "Explore" },
-      tr: { title: "Farkındalık", number: "04 / FARKINDALIK", desc: "Şu anda yaşama becerisi, otomatik pilottan çıkış ve bilinçli bakış açısı.", btnText: "Keşfet" },
-      ru: { title: "Осознанность", number: "04 / ОСОЗНАННОСТЬ", desc: "Умение жить настоящим моментом, выход из режима автопилота и осознанный взгляд.", btnText: "Исследовать" }
-    }
-  },
-  {
-    id: "meditation",
-    number: "05 / SÜKUT",
-    title: "Meditasiya",
-    icon: "lens_blur",
-    desc: "Nəfəs texnikaları, bədən skanı və beynin neyron harmoniyasını bərpa edən praktika.",
-    btnText: "Kəşf et",
-    link: "#haqqimizda",
-    translations: {
-      az: { title: "Meditasiya", number: "05 / SÜKUT", desc: "Nəfəs texnikaları, bədən skanı və beynin neyron harmoniyasını bərpa edən praktika.", btnText: "Kəşf et" },
-      en: { title: "Meditation", number: "05 / SILENCE", desc: "Breathing techniques, body scan, and practices that restore the brain's neural harmony.", btnText: "Explore" },
-      tr: { title: "Meditasyon", number: "05 / SESSİZLİK", desc: "Nefes teknikleri, beden taraması ve beynin nöral uyumunu yenileyen uygulamalar.", btnText: "Keşfet" },
-      ru: { title: "Медитация", number: "05 / ТИШИНА", desc: "Дыхательные техники, сканирование тела и практики, восстанавливающие нейронную гармонию мозга.", btnText: "Исследовать" }
-    }
-  },
-  {
-    id: "relationships",
-    number: "06 / ƏLAQƏ",
-    title: "Münasibətlər",
+    id: "relationships-communication",
+    number: "03.",
+    title: "Münasibətlər və ünsiyyət",
     icon: "diversity_1",
-    desc: "Partnyor, ailə və cəmiyyətlə sağlam sərhədlər, güvən və dərin emosional bağ.",
+    desc: "Sağlam münasibətlər qurmaq, empatiyanı gücləndirmək və effektiv ünsiyyət bacarıqları qazanmaq.",
     btnText: "Kəşf et",
-    link: "#haqqimizda",
+    link: "https://monodoxia.com/haqqimizda",
     translations: {
-      az: { title: "Münasibətlər", number: "06 / ƏLAQƏ", desc: "Partnyor, ailə və cəmiyyətlə sağlam sərhədlər, güvən və dərin emosional bağ.", btnText: "Kəşf et" },
-      en: { title: "Relationships", number: "06 / CONNECTION", desc: "Healthy boundaries, trust, and deep emotional bonds with partners, family, and community.", btnText: "Explore" },
-      tr: { title: "İlişkiler", number: "06 / BAĞLANTI", desc: "Partner, aile ve toplumla sağlıklı sınırlar, güven ve derin duygusal bağ.", btnText: "Keşfet" },
-      ru: { title: "Отношения", number: "06 / СВЯЗЬ", desc: "Здоровые границы, доверие и глубокие эмоциональные связи с партнёром, семьёй и обществом.", btnText: "Исследовать" }
+      az: {
+        number: "03.",
+        title: "Münasibətlər və ünsiyyət",
+        desc: "Sağlam münasibətlər qurmaq, empatiyanı gücləndirmək və effektiv ünsiyyət bacarıqları qazanmaq.",
+        btnText: "Kəşf et"
+      },
+      en: {
+        number: "03.",
+        title: "Relationships and Communication",
+        desc: "Building healthy relationships, strengthening empathy, and mastering effective communication skills.",
+        btnText: "Explore"
+      },
+      tr: {
+        number: "03.",
+        title: "İlişkiler ve İletişim",
+        desc: "Sağlıklı ilişkiler kurmak, empatiyi güçlendirmek ve etkili iletişim becerileri kazanmak.",
+        btnText: "Keşfet"
+      },
+      ru: {
+        number: "03.",
+        title: "Отношения и общение",
+        desc: "Построение здоровых отношений, укрепление эмпатии и обретение навыков эффективной коммуникации.",
+        btnText: "Исследовать"
+      }
     }
   },
   {
-    id: "eq",
-    number: "07 / EQ",
-    title: "Emosional İntellekt",
-    icon: "favorite_border",
-    desc: "Emosiyaları tanımaq, adlandırmaq və idarə edərək müdrik qərarlar vermək sənəti.",
+    id: "goals-motivation",
+    number: "04.",
+    title: "Məqsədlər və motivasiya",
+    icon: "trending_up",
+    desc: "Şəxsi hədəfləri müəyyənləşdirmək, daxili motivasiyanı gücləndirmək və ardıcıl irəliləmək.",
     btnText: "Kəşf et",
-    link: "#haqqimizda",
+    link: "https://monodoxia.com/haqqimizda",
     translations: {
-      az: { title: "Emosional İntellekt", number: "07 / EQ", desc: "Emosiyaları tanımaq, adlandırmaq və idarə edərək müdrik qərarlar vermək sənəti.", btnText: "Kəşf et" },
-      en: { title: "Emotional Intelligence", number: "07 / EQ", desc: "The art of recognizing, naming and regulating emotions to make wise decisions.", btnText: "Explore" },
-      tr: { title: "Duygusal Zeka", number: "07 / EQ", desc: "Duyguları tanıma, adlandırma ve yöneterek bilge kararlar verme sanatı.", btnText: "Keşfet" },
-      ru: { title: "Эмоциональный Интеллект", number: "07 / EQ", desc: "Искусство распознавать, называть и регулировать эмоции для принятия мудрых решений.", btnText: "Исследовать" }
+      az: {
+        number: "04.",
+        title: "Məqsədlər və motivasiya",
+        desc: "Şəxsi hədəfləri müəyyənləşdirmək, daxili motivasiyanı gücləndirmək və ardıcıl irəliləmək.",
+        btnText: "Kəşf et"
+      },
+      en: {
+        number: "04.",
+        title: "Goals and Motivation",
+        desc: "Defining personal goals, strengthening internal motivation, and advancing consistently.",
+        btnText: "Explore"
+      },
+      tr: {
+        number: "04.",
+        title: "Hedefler ve Motivasyon",
+        desc: "Kişisel hedefleri belirlemek, içsel motivasyonu güçlendirmek ve istikrarlı ilerlemek.",
+        btnText: "Keşfet"
+      },
+      ru: {
+        number: "04.",
+        title: "Цели и мотивация",
+        desc: "Определение личных целей, укрепление внутренней мотивации и последовательное движение вперед.",
+        btnText: "Исследовать"
+      }
     }
   },
   {
-    id: "identity",
-    number: "08 / İDENTİKLİK",
-    title: "Özünü Tanıma",
-    icon: "fingerprint",
-    desc: "Maskalardan azad olaraq həqiqi dəyərlərini, istedadlarını və autentik kimliyini tapmaq.",
+    id: "stress-management",
+    number: "05.",
+    title: "Stressin idarə edilməsi və daxili tarazlıq",
+    icon: "self_improvement",
+    desc: "Gündəlik çətinliklərlə daha sağlam mübarizə aparmaq, rahatlama və özünütənzimləmə bacarıqlarını inkişaf etdirmək.",
     btnText: "Kəşf et",
-    link: "#haqqimizda",
+    link: "https://monodoxia.com/haqqimizda",
     translations: {
-      az: { title: "Özünü Tanıma", number: "08 / İDENTİKLİK", desc: "Maskalardan azad olaraq həqiqi dəyərlərini, istedadlarını və autentik kimliyini tapmaq.", btnText: "Kəşf et" },
-      en: { title: "Self-Discovery", number: "08 / IDENTITY", desc: "Freeing yourself from masks to find your true values, talents, and authentic identity.", btnText: "Explore" },
-      tr: { title: "Kendini Keşfetme", number: "08 / KİMLİK", desc: "Maskelerden sıyrılarak gerçek değerlerini, yeteneklerini ve özgün kimliğini bulmak.", btnText: "Keşfet" },
-      ru: { title: "Самопознание", number: "08 / ИДЕНТИЧНОСТЬ", desc: "Освобождение от масок, поиск истинных ценностей, талантов и подлинной идентичности.", btnText: "Исследовать" }
+      az: {
+        number: "05.",
+        title: "Stressin idarə edilməsi və daxili tarazlıq",
+        desc: "Gündəlik çətinliklərlə daha sağlam mübarizə aparmaq, rahatlama və özünütənzimləmə bacarıqlarını inkişaf etdirmək.",
+        btnText: "Kəşf et"
+      },
+      en: {
+        number: "05.",
+        title: "Stress Management and Inner Balance",
+        desc: "Coping with daily challenges in a healthier way, developing relaxation and self-regulation skills.",
+        btnText: "Explore"
+      },
+      tr: {
+        number: "05.",
+        title: "Stres Yönetimi ve İçsel Denge",
+        desc: "Günlük zorluklarla daha sağlıklı başa çıkmak, rahatlama ve öz-düzenleme becerileri geliştirmek.",
+        btnText: "Keşfet"
+      },
+      ru: {
+        number: "05.",
+        title: "Управление стрессом и внутренний баланс",
+        desc: "Эффективное преодоление повседневных трудностей, развитие навыков расслабления и саморегуляции.",
+        btnText: "Исследовать"
+      }
+    }
+  },
+  {
+    id: "confidence-boundaries",
+    number: "06.",
+    title: "Özünəinam və şəxsi sərhədlər",
+    icon: "verified_user",
+    desc: "Öz dəyərini anlamaq, qərarlarında daha inamlı olmaq və sağlam sərhədlər müəyyənləşdirmək.",
+    btnText: "Kəşf et",
+    link: "https://monodoxia.com/haqqimizda",
+    translations: {
+      az: {
+        number: "06.",
+        title: "Özünəinam və şəxsi sərhədlər",
+        desc: "Öz dəyərini anlamaq, qərarlarında daha inamlı olmaq və sağlam sərhədlər müəyyənləşdirmək.",
+        btnText: "Kəşf et"
+      },
+      en: {
+        number: "06.",
+        title: "Self-Confidence and Personal Boundaries",
+        desc: "Recognizing your self-worth, being confident in decisions, and establishing healthy personal boundaries.",
+        btnText: "Explore"
+      },
+      tr: {
+        number: "06.",
+        title: "Özgüven ve Kişisel Sınırlar",
+        desc: "Kendi değerini anlamak, kararlarda daha özgüvenli olmak ve sağlıklı sınırlar belirlemek.",
+        btnText: "Keşfet"
+      },
+      ru: {
+        number: "06.",
+        title: "Уверенность в себе и личные границы",
+        desc: "Осознание собственной ценности, уверенность в решениях и выстраивание здоровых личных границ.",
+        btnText: "Исследовать"
+      }
+    }
+  },
+  {
+    id: "career-leadership",
+    number: "07.",
+    title: "Karyera və liderlik inkişafı",
+    icon: "workspace_premium",
+    desc: "Peşəkar potensialı üzə çıxarmaq, qərarvermə, məsuliyyət və liderlik bacarıqlarını gücləndirmək.",
+    btnText: "Kəşf et",
+    link: "https://monodoxia.com/haqqimizda",
+    translations: {
+      az: {
+        number: "07.",
+        title: "Karyera və liderlik inkişafı",
+        desc: "Peşəkar potensialı üzə çıxarmaq, qərarvermə, məsuliyyət və liderlik bacarıqlarını gücləndirmək.",
+        btnText: "Kəşf et"
+      },
+      en: {
+        number: "07.",
+        title: "Career and Leadership Development",
+        desc: "Unlocking professional potential, strengthening decision-making, responsibility, and leadership skills.",
+        btnText: "Explore"
+      },
+      tr: {
+        number: "07.",
+        title: "Kariyer ve Liderlik Gelişimi",
+        desc: "Profesyonel potansiyeli açığa çıkarmak, karar alma, sorumluluk ve liderlik becerilerini güçlendirmek.",
+        btnText: "Keşfet"
+      },
+      ru: {
+        number: "07.",
+        title: "Карьера и развитие лидерства",
+        desc: "Раскрытие профессионального потенциала, развитие решимости, ответственности и лидерских качеств.",
+        btnText: "Исследовать"
+      }
+    }
+  },
+  {
+    id: "life-purpose-spiritual",
+    number: "08.",
+    title: "Həyat məqsədi və mənəvi inkişaf",
+    icon: "spa",
+    desc: "Şəxsi dəyərləri aydınlaşdırmaq, həyatın mənasını daha dərindən düşünmək və şüurlu həyat tərzi formalaşdırmaq.",
+    btnText: "Kəşf et",
+    link: "https://monodoxia.com/haqqimizda",
+    translations: {
+      az: {
+        number: "08.",
+        title: "Həyat məqsədi və mənəvi inkişaf",
+        desc: "Şəxsi dəyərləri aydınlaşdırmaq, həyatın mənasını daha dərindən düşünmək və şüurlu həyat tərzi formalaşdırmaq.",
+        btnText: "Kəşf et"
+      },
+      en: {
+        number: "08.",
+        title: "Life Purpose and Spiritual Growth",
+        desc: "Clarifying personal values, reflecting deeply on the meaning of life, and cultivating a mindful lifestyle.",
+        btnText: "Explore"
+      },
+      tr: {
+        number: "08.",
+        title: "Hayat Amacı ve Manevi Gelişim",
+        desc: "Kişisel değerleri netleştirmek, hayatın anlamını daha derinden kavramak ve bilinçli bir yaşam tarzı benimsemek.",
+        btnText: "Keşfet"
+      },
+      ru: {
+        number: "08.",
+        title: "Смысл жизни и духовное развитие",
+        desc: "Прояснение личных ценностей, глубокое осмысление жизни и формирование осознанного образа жизни.",
+        btnText: "Исследовать"
+      }
     }
   }
 ];

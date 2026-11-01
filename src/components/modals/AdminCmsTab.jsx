@@ -1091,51 +1091,75 @@ export default function AdminCmsTab() {
     return (pillarsList && pillarsList.length > 0) ? [...pillarsList] : [];
   });
 
+  const isDummyVal = (v) => {
+    if (!v || typeof v !== 'string') return true;
+    const s = v.trim();
+    return (
+      s === '' ||
+      s.startsWith('New Area') ||
+      s.startsWith('Yeni Sahə') ||
+      s.startsWith('Yeni Alan') ||
+      s.startsWith('Новая Сфера') ||
+      s.includes('/ PILLAR') ||
+      s.includes('/ ALAN') ||
+      s.includes('/ СФЕРА') ||
+      s.includes('Detailed information about this personal') ||
+      s.includes('gelişim boyutu ve tematik modül hakkında') ||
+      s.includes('направлении личностного роста')
+    );
+  };
+
+  const findCanonicalArea = (item, idx) => {
+    if (!item) return AREAS[idx] || AREAS[0];
+    const t = String(item.title || item.translations?.az?.title || '').toLowerCase();
+    if (t.includes('tanıma') || t.includes('fərqindəlik')) return AREAS[0];
+    if (t.includes('emosional') || t.includes('zəka') || t.includes('eq')) return AREAS[1];
+    if (t.includes('münasibət') || t.includes('ünsiyyət')) return AREAS[2];
+    if (t.includes('mənəvi') || t.includes('həyat')) return AREAS[7];
+    if (t.includes('məqsəd') || t.includes('motivasiya')) return AREAS[3];
+    if (t.includes('stress') || t.includes('tarazlıq') || t.includes('sükut') || t.includes('meditasiya')) return AREAS[4];
+    if (t.includes('özünəinam') || t.includes('sərhəd')) return AREAS[5];
+    if (t.includes('karyera') || t.includes('liderlik')) return AREAS[6];
+    return AREAS[idx] || AREAS.find(a => a.id === item.id) || AREAS[0];
+  };
+
   // Helper to ensure areas always have authentic defaults and full translations
   const mergeAreasListWithDefaults = (list) => {
     if (!list || !Array.isArray(list) || list.length === 0) {
-      return AREAS.map(a => ({
-        ...a,
-        btnText: a.btnText || 'Kəşf et',
-        link: a.link || '#haqqimizda',
-        translations: {
-          az: { btnText: 'Kəşf et', ...(a.translations?.az || {}) },
-          en: { btnText: 'Explore', ...(a.translations?.en || {}) },
-          tr: { btnText: 'Keşfet', ...(a.translations?.tr || {}) },
-          ru: { btnText: 'Исследовать', ...(a.translations?.ru || {}) }
-        }
-      }));
+      return AREAS;
     }
-    const isDummy = (item) => {
-      if (!item) return true;
-      const str = String(item.title || item.translations?.en?.title || item.translations?.az?.title || '');
-      return str.startsWith('New Area') || str.startsWith('Yeni Sahə');
-    };
     return list.map((item, idx) => {
-      const canonical = AREAS[idx] || AREAS.find(c => c.id === item.id) || item;
-      if (isDummy(item) || !item.translations) {
+      const canonical = findCanonicalArea(item, idx);
+      const itemTrans = item.translations || {};
+
+      const sanitizeLang = (langCode) => {
+        const transL = itemTrans[langCode] || {};
+        const canonL = canonical.translations?.[langCode] || {};
         return {
-          ...canonical,
-          btnText: canonical.btnText || 'Kəşf et',
-          link: item.link || canonical.link || '#haqqimizda',
-          translations: {
-            az: { btnText: 'Kəşf et', ...(canonical.translations?.az || {}) },
-            en: { btnText: 'Explore', ...(canonical.translations?.en || {}) },
-            tr: { btnText: 'Keşfet', ...(canonical.translations?.tr || {}) },
-            ru: { btnText: 'Исследовать', ...(canonical.translations?.ru || {}) }
-          }
+          number: !isDummyVal(transL.number) ? transL.number : (canonL.number || item.number || canonical.number),
+          title: !isDummyVal(transL.title) ? transL.title : (canonL.title || item.title || canonical.title),
+          desc: !isDummyVal(transL.desc) ? transL.desc : (canonL.desc || item.desc || canonical.desc),
+          btnText: !isDummyVal(transL.btnText) ? transL.btnText : (canonL.btnText || item.btnText || canonical.btnText || 'Kəşf et')
         };
-      }
+      };
+
       return {
         ...canonical,
         ...item,
-        btnText: item.btnText || canonical.btnText || 'Kəşf et',
-        link: item.link || canonical.link || '#haqqimizda',
+        title: item.title && !isDummyVal(item.title) ? item.title : canonical.title,
+        number: item.number && !isDummyVal(item.number) ? item.number : canonical.number,
+        desc: item.desc && !isDummyVal(item.desc) ? item.desc : canonical.desc,
+        btnText: item.btnText && !isDummyVal(item.btnText) ? item.btnText : (canonical.btnText || 'Kəşf et'),
         translations: {
-          az: { btnText: 'Kəşf et', ...(canonical.translations?.az || {}), ...(item.translations?.az || {}) },
-          en: { btnText: 'Explore', ...(canonical.translations?.en || {}), ...(item.translations?.en || {}) },
-          tr: { btnText: 'Keşfet', ...(canonical.translations?.tr || {}), ...(item.translations?.tr || {}) },
-          ru: { btnText: 'Исследовать', ...(canonical.translations?.ru || {}), ...(item.translations?.ru || {}) }
+          az: {
+            number: itemTrans.az?.number || item.number || canonical.number,
+            title: itemTrans.az?.title || item.title || canonical.title,
+            desc: itemTrans.az?.desc || item.desc || canonical.desc,
+            btnText: itemTrans.az?.btnText || item.btnText || canonical.btnText || 'Kəşf et'
+          },
+          en: sanitizeLang('en'),
+          tr: sanitizeLang('tr'),
+          ru: sanitizeLang('ru')
         }
       };
     });

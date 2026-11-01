@@ -716,18 +716,122 @@ if ($action === 'get_all') {
         }
     }
     unset($cItem);
+    function heal_areas_data(&$decoded) {
+        if (!is_array($decoded) || !isset($decoded['items']) || !is_array($decoded['items'])) {
+            return false;
+        }
+        $canonicals = [
+            0 => [
+                'number' => '01.', 'title' => 'Özünü tanıma və fərqindəlik', 'desc' => 'Düşüncələrini, dəyərlərini, emosiyalarını və davranışlarını daha dərindən anlamaq.', 'btnText' => 'Kəşf et',
+                'translations' => [
+                    'az' => ['number' => '01.', 'title' => 'Özünü tanıma və fərqindəlik', 'desc' => 'Düşüncələrini, dəyərlərini, emosiyalarını və davranışlarını daha dərindən anlamaq.', 'btnText' => 'Kəşf et'],
+                    'en' => ['number' => '01.', 'title' => 'Self-Discovery and Awareness', 'desc' => 'Deeply understanding your thoughts, values, emotions, and behavioral patterns.', 'btnText' => 'Explore'],
+                    'tr' => ['number' => '01.', 'title' => 'Kendini Tanıma ve Farkındalık', 'desc' => 'Düşüncelerinizi, değerlerinizi, duygularınızı ve davranışlarınızı daha derinden kavramak.', 'btnText' => 'Keşfet'],
+                    'ru' => ['number' => '01.', 'title' => 'Самопознание и осознанность', 'desc' => 'Глубокое понимание своих мыслей, ценностей, эмоций и моделей поведения.', 'btnText' => 'Исследовать']
+                ]
+            ],
+            1 => [
+                'number' => '02.', 'title' => 'Emosional zəka', 'desc' => 'Emosiyaları tanımaq, anlamaq və sağlam şəkildə idarə etmək bacarıqlarını inkişaf etdirmək.', 'btnText' => 'Kəşf et',
+                'translations' => [
+                    'az' => ['number' => '02.', 'title' => 'Emosional zəka', 'desc' => 'Emosiyaları tanımaq, anlamaq və sağlam şəkildə idarə etmək bacarıqlarını inkişaf etdirmək.', 'btnText' => 'Kəşf et'],
+                    'en' => ['number' => '02.', 'title' => 'Emotional Intelligence', 'desc' => 'Cultivating the ability to recognize, understand, and healthily regulate emotions.', 'btnText' => 'Explore'],
+                    'tr' => ['number' => '02.', 'title' => 'Duygusal Zeka', 'desc' => 'Duyguları tanıma, anlama ve sağlıklı bir şekilde yönetme becerilerini geliştirmek.', 'btnText' => 'Keşfet'],
+                    'ru' => ['number' => '02.', 'title' => 'Эмоциональный интеллект', 'desc' => 'Развитие навыков распознавания, понимания и здорового управления эмоциями.', 'btnText' => 'Исследовать']
+                ]
+            ],
+            2 => [
+                'number' => '03.', 'title' => 'Münasibətlər və ünsiyyət', 'desc' => 'Sağlam münasibətlər qurmaq, empatiyanı gücləndirmək və effektiv ünsiyyət bacarıqları qazanmaq.', 'btnText' => 'Kəşf et',
+                'translations' => [
+                    'az' => ['number' => '03.', 'title' => 'Münasibətlər və ünsiyyət', 'desc' => 'Sağlam münasibətlər qurmaq, empatiyanı gücləndirmək və effektiv ünsiyyət bacarıqları qazanmaq.', 'btnText' => 'Kəşf et'],
+                    'en' => ['number' => '03.', 'title' => 'Relationships and Communication', 'desc' => 'Building healthy relationships, strengthening empathy, and mastering effective communication skills.', 'btnText' => 'Explore'],
+                    'tr' => ['number' => '03.', 'title' => 'İlişkiler ve İletişim', 'desc' => 'Sağlıklı ilişkiler kurmak, empatiyi güçlendirmek ve etkili iletişim becerileri kazanmak.', 'btnText' => 'Keşfet'],
+                    'ru' => ['number' => '03.', 'title' => 'Отношения и общение', 'desc' => 'Построение здоровых отношений, укрепление эмпатии и обретение навыков эффективной коммуникации.', 'btnText' => 'Исследовать']
+                ]
+            ],
+            3 => [
+                'number' => '04.', 'title' => 'Məqsədlər və motivasiya', 'desc' => 'Şəxsi hədəfləri müəyyənləşdirmək, daxili motivasiyanı gücləndirmək və ardıcıl irəliləmək.', 'btnText' => 'Kəşf et',
+                'translations' => [
+                    'az' => ['number' => '04.', 'title' => 'Məqsədlər və motivasiya', 'desc' => 'Şəxsi hədəfləri müəyyənləşdirmək, daxili motivasiyanı gücləndirmək və ardıcıl irəliləmək.', 'btnText' => 'Kəşf et'],
+                    'en' => ['number' => '04.', 'title' => 'Goals and Motivation', 'desc' => 'Defining personal goals, strengthening internal motivation, and advancing consistently.', 'btnText' => 'Explore'],
+                    'tr' => ['number' => '04.', 'title' => 'Hedefler ve Motivasyon', 'desc' => 'Kişisel hedefleri belirlemek, içsel motivasyonu güçlendirmek ve istikrarlı ilerlemek.', 'btnText' => 'Keşfet'],
+                    'ru' => ['number' => '04.', 'title' => 'Цели и мотивация', 'desc' => 'Определение личных целей, укрепление внутренней мотивации и последовательное движение вперед.', 'btnText' => 'Исследовать']
+                ]
+            ],
+            4 => [
+                'number' => '05.', 'title' => 'Stressin idarə edilməsi və daxili tarazlıq', 'desc' => 'Gündəlik çətinliklərlə daha sağlam mübarizə aparmaq, rahatlama və özünütənzimləmə bacarıqlarını inkişaf etdirmək.', 'btnText' => 'Kəşf et',
+                'translations' => [
+                    'az' => ['number' => '05.', 'title' => 'Stressin idarə edilməsi və daxili tarazlıq', 'desc' => 'Gündəlik çətinliklərlə daha sağlam mübarizə aparmaq, rahatlama və özünütənzimləmə bacarıqlarını inkişaf etdirmək.', 'btnText' => 'Kəşf et'],
+                    'en' => ['number' => '05.', 'title' => 'Stress Management and Inner Balance', 'desc' => 'Coping with daily challenges in a healthier way, developing relaxation and self-regulation skills.', 'btnText' => 'Explore'],
+                    'tr' => ['number' => '05.', 'title' => 'Stres Yönetimi ve İçsel Denge', 'desc' => 'Günlük zorluklarla daha sağlıklı başa çıkmak, rahatlama ve öz-düzenleme becerileri geliştirmek.', 'btnText' => 'Keşfet'],
+                    'ru' => ['number' => '05.', 'title' => 'Управление стрессом и внутренний баланс', 'desc' => 'Эффективное преодоление повседневных трудностей, развитие навыков расслабления и саморегуляции.', 'btnText' => 'Исследовать']
+                ]
+            ],
+            5 => [
+                'number' => '06.', 'title' => 'Özünəinam və şəxsi sərhədlər', 'desc' => 'Öz dəyərini anlamaq, qərarlarında daha inamlı olmaq və sağlam sərhədlər müəyyənləşdirmək.', 'btnText' => 'Kəşf et',
+                'translations' => [
+                    'az' => ['number' => '06.', 'title' => 'Özünəinam və şəxsi sərhədlər', 'desc' => 'Öz dəyərini anlamaq, qərarlarında daha inamlı olmaq və sağlam sərhədlər müəyyənləşdirmək.', 'btnText' => 'Kəşf et'],
+                    'en' => ['number' => '06.', 'title' => 'Self-Confidence and Personal Boundaries', 'desc' => 'Recognizing your self-worth, being confident in decisions, and establishing healthy personal boundaries.', 'btnText' => 'Explore'],
+                    'tr' => ['number' => '06.', 'title' => 'Özgüven ve Kişisel Sınırlar', 'desc' => 'Kendi değerini anlamak, kararlarda daha özgüvenli olmak ve sağlıklı sınırlar belirlemek.', 'btnText' => 'Keşfet'],
+                    'ru' => ['number' => '06.', 'title' => 'Уверенность в себе и личные границы', 'desc' => 'Осознание собственной ценности, уверенность в решениях и выстраивание здоровых личных границ.', 'btnText' => 'Исследовать']
+                ]
+            ],
+            6 => [
+                'number' => '07.', 'title' => 'Karyera və liderlik inkişafı', 'desc' => 'Peşəkar potensialı üzə çıxarmaq, qərarvermə, məsuliyyət və liderlik bacarıqlarını gücləndirmək.', 'btnText' => 'Kəşf et',
+                'translations' => [
+                    'az' => ['number' => '07.', 'title' => 'Karyera və liderlik inkişafı', 'desc' => 'Peşəkar potensialı üzə çıxarmaq, qərarvermə, məsuliyyət və liderlik bacarıqlarını gücləndirmək.', 'btnText' => 'Kəşf et'],
+                    'en' => ['number' => '07.', 'title' => 'Career and Leadership Development', 'desc' => 'Unlocking professional potential, strengthening decision-making, responsibility, and leadership skills.', 'btnText' => 'Explore'],
+                    'tr' => ['number' => '07.', 'title' => 'Kariyer ve Liderlik Gelişimi', 'desc' => 'Profesyonel potansiyeli açığa çıkarmak, karar alma, sorumluluk ve liderlik becerilerini güçlendirmek.', 'btnText' => 'Keşfet'],
+                    'ru' => ['number' => '07.', 'title' => 'Карьера и развитие лидерства', 'desc' => 'Раскрытие профессионального потенциала, развитие решимости, ответственности и лидерских качеств.', 'btnText' => 'Исследовать']
+                ]
+            ],
+            7 => [
+                'number' => '08.', 'title' => 'Həyat məqsədi və mənəvi inkişaf', 'desc' => 'Şəxsi dəyərləri aydınlaşdırmaq, həyatın mənasını daha dərindən düşünmək və şüurlu həyat tərzi formalaşdırmaq.', 'btnText' => 'Kəşf et',
+                'translations' => [
+                    'az' => ['number' => '08.', 'title' => 'Həyat məqsədi və mənəvi inkişaf', 'desc' => 'Şəxsi dəyərləri aydınlaşdırmaq, həyatın mənasını daha dərindən düşünmək və şüurlu həyat tərzi formalaşdırmaq.', 'btnText' => 'Kəşf et'],
+                    'en' => ['number' => '08.', 'title' => 'Life Purpose and Spiritual Growth', 'desc' => 'Clarifying personal values, reflecting deeply on the meaning of life, and cultivating a mindful lifestyle.', 'btnText' => 'Explore'],
+                    'tr' => ['number' => '08.', 'title' => 'Hayat Amacı ve Manevi Gelişim', 'desc' => 'Kişisel değerleri netleştirmek, hayatın anlamını daha derinden kavramak ve bilinçli bir yaşam tarzı benimsemek.', 'btnText' => 'Keşfet'],
+                    'ru' => ['number' => '08.', 'title' => 'Смысл жизни и духовное развитие', 'desc' => 'Прояснение личных ценностей, глубокое осмысление жизни и формирование осознанного образа жизни.', 'btnText' => 'Исследовать']
+                ]
+            ]
+        ];
+        $hasChanged = false;
+        foreach ($decoded['items'] as $idx => &$item) {
+            $c = $canonicals[$idx] ?? null;
+            if (!$c) continue;
+            $enTitle = $item['translations']['en']['title'] ?? '';
+            $trTitle = $item['translations']['tr']['title'] ?? '';
+            $ruTitle = $item['translations']['ru']['title'] ?? '';
+            if (strpos($enTitle, 'New Area') !== false || strpos($trTitle, 'Yeni Alan') !== false || strpos($ruTitle, 'Новая Сфера') !== false || empty($enTitle) || empty($trTitle) || empty($ruTitle)) {
+                $hasChanged = true;
+                if (!isset($item['translations']) || !is_array($item['translations'])) {
+                    $item['translations'] = [];
+                }
+                $item['translations']['en'] = $c['translations']['en'];
+                $item['translations']['tr'] = $c['translations']['tr'];
+                $item['translations']['ru'] = $c['translations']['ru'];
+                if (!isset($item['translations']['az']) || !is_array($item['translations']['az'])) {
+                    $item['translations']['az'] = [
+                        'number' => $item['number'] ?? $c['number'],
+                        'title' => $item['title'] ?? $c['title'],
+                        'desc' => $item['desc'] ?? $c['desc'],
+                        'btnText' => $item['btnText'] ?? 'Kəşf et'
+                    ];
+                }
+            }
+        }
+        unset($item);
+        return $hasChanged;
+    }
+
     $cms_blocks = $safeQuery("SELECT block_key, content_json FROM mdx_cms_blocks");
     foreach ($cms_blocks as &$cb) {
         if ($cb['block_key'] === 'areas') {
-            if (strpos($cb['content_json'], 'New Area') !== false || strpos($cb['content_json'], 'Yeni Sahə') !== false) {
-                $decoded = json_decode($cb['content_json'], true);
-                if (is_array($decoded) && isset($decoded['items'])) {
-                    unset($decoded['items']);
-                    $cb['content_json'] = json_encode($decoded, JSON_UNESCAPED_UNICODE);
-                    try {
-                        $pdo->prepare("UPDATE mdx_cms_blocks SET content_json = ? WHERE block_key = 'areas'")->execute([$cb['content_json']]);
-                    } catch (PDOException $e) {}
-                }
+            $decoded = json_decode($cb['content_json'], true);
+            if (heal_areas_data($decoded)) {
+                $cb['content_json'] = json_encode($decoded, JSON_UNESCAPED_UNICODE);
+                try {
+                    $pdo->prepare("UPDATE mdx_cms_blocks SET content_json = ? WHERE block_key = 'areas'")->execute([$cb['content_json']]);
+                } catch (PDOException $e) {}
             }
         }
     }
@@ -3481,7 +3585,15 @@ if ($action === 'get_cms_content') {
         $rows = $stmt->fetchAll();
         $blocks = [];
         foreach ($rows as $r) {
-            $blocks[$r['block_key']] = json_decode($r['content_json'], true) ?: $r['content_json'];
+            $val = json_decode($r['content_json'], true) ?: $r['content_json'];
+            if ($r['block_key'] === 'areas' && is_array($val)) {
+                if (function_exists('heal_areas_data') && heal_areas_data($val)) {
+                    try {
+                        $pdo->prepare("UPDATE mdx_cms_blocks SET content_json = ? WHERE block_key = 'areas'")->execute([json_encode($val, JSON_UNESCAPED_UNICODE)]);
+                    } catch (PDOException $e) {}
+                }
+            }
+            $blocks[$r['block_key']] = $val;
         }
         echo json_encode(['status' => 'success', 'blocks' => $blocks], JSON_UNESCAPED_UNICODE);
     } catch (PDOException $e) {
