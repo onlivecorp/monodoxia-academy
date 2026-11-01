@@ -7,11 +7,13 @@ export const AREAS = [
     title: "Psixologiya",
     icon: "psychology_alt",
     desc: "İnsanın daxili strukturu, qorxular, travmalar və şüuraltı mexanizmlərin elmi analizi.",
+    btnText: "Kəşf et",
+    link: "#haqqimizda",
     translations: {
-      az: { title: "Psixologiya", number: "01 / DƏRİNLİK", desc: "İnsanın daxili strukturu, qorxular, travmalar və şüuraltı mexanizmlərin elmi analizi." },
-      en: { title: "Psychology", number: "01 / DEPTH", desc: "Scientific analysis of the human inner structure, fears, traumas, and subconscious mechanisms." },
-      tr: { title: "Psikoloji", number: "01 / DERİNLİK", desc: "İnsanın iç yapısının, korkularının, travmalarının ve bilinçaltı mekanizmalarının bilimsel analizi." },
-      ru: { title: "Психология", number: "01 / ГЛУБИНА", desc: "Научный анализ внутренней структуры личности, страхов, травм и подсознательных механизмов." }
+      az: { title: "Psixologiya", number: "01 / DƏRİNLİK", desc: "İnsanın daxili strukturu, qorxular, travmalar və şüuraltı mexanizmlərin elmi analizi.", btnText: "Kəşf et" },
+      en: { title: "Psychology", number: "01 / DEPTH", desc: "Scientific analysis of the human inner structure, fears, traumas, and subconscious mechanisms.", btnText: "Explore" },
+      tr: { title: "Psikoloji", number: "01 / DERİNLİK", desc: "İnsanın iç yapısının, korkularının, travmalarının ve bilinçaltı mekanizmalarının bilimsel analizi.", btnText: "Keşfet" },
+      ru: { title: "Психология", number: "01 / ГЛУБИНА", desc: "Научный анализ внутренней структуры личности, страхов, травм и подсознательных механизмов.", btnText: "Исследовать" }
     }
   },
   {
@@ -20,11 +22,13 @@ export const AREAS = [
     title: "Şəxsi İnkişaf",
     icon: "trending_up",
     desc: "Məqsədyönlülük, intizam, vərdişlərin transformasiyası və potensialın tam realizasiyası.",
+    btnText: "Kəşf et",
+    link: "#haqqimizda",
     translations: {
-      az: { title: "Şəxsi İnkişaf", number: "02 / İRƏLİLƏYİŞ", desc: "Məqsədyönlülük, intizam, vərdişlərin transformasiyası və potensialın tam realizasiyası." },
-      en: { title: "Personal Growth", number: "02 / PROGRESS", desc: "Goal-orientation, discipline, habit transformation and full realization of potential." },
-      tr: { title: "Kişisel Gelişim", number: "02 / İLERLEME", desc: "Hedef odaklılık, disiplin, alışkanlıkların dönüşümü ve potansiyelin tam gerçekleşmesi." },
-      ru: { title: "Личностный Рост", number: "02 / ПРОГРЕСС", desc: "Целеустремлённость, дисциплина, трансформация привычек и полная реализация потенциала." }
+      az: { title: "Şəxsi İnkişaf", number: "02 / İRƏLİLƏYİŞ", desc: "Məqsədyönlülük, intizam, vərdişlərin transformasiyası və potensialın tam realizasiyası.", btnText: "Kəşf et" },
+      en: { title: "Personal Growth", number: "02 / PROGRESS", desc: "Goal-orientation, discipline, habit transformation and full realization of potential.", btnText: "Explore" },
+      tr: { title: "Kişisel Gelişim", number: "02 / İLERLEME", desc: "Hedef odaklılık, disiplin, alışkanlıkların dönüşümü ve potansiyelin tam gerçekleşmesi.", btnText: "Keşfet" },
+      ru: { title: "Личностный Рост", number: "02 / ПРОГРЕСС", desc: "Целеустремлённость, дисциплина, трансформация привычек и полная реализация потенциала.", btnText: "Исследовать" }
     }
   },
   {
@@ -33,11 +37,13 @@ export const AREAS = [
     title: "Spiritual Coaching",
     icon: "self_improvement",
     desc: "Həyatın ali məqsədi, ekzistensial suallar və daxili mənəvi güclə təmas.",
+    btnText: "Kəşf et",
+    link: "#haqqimizda",
     translations: {
-      az: { title: "Spiritual Kouçinq", number: "03 / MƏNƏVİYYAT", desc: "Həyatın ali məqsədi, ekzistensial suallar və daxili mənəvi güclə təmas." },
-      en: { title: "Spiritual Coaching", number: "03 / SPIRIT", desc: "The highest purpose of life, existential inquiries, and connecting with inner spiritual strength." },
-      tr: { title: "Spiritüel Koçluk", number: "03 / MANEVİYAT", desc: "Hayatın yüce amacı, varoluşsal sorular ve iç manevi güçle temas." },
-      ru: { title: "Духовный Коучинг", number: "03 / ДУХОВНОСТЬ", desc: "Высший смысл жизни, экзистенциальные вопросы и соприкосновение с внутренней духовной силой." }
+      az: { title: "Spiritual Kouçinq", number: "03 / MƏNƏVİYYAT", desc: "Həyatın ali məqsədi, ekzistensial suallar və daxili mənəvi güclə təmas.", btnText: "Kəşf et" },
+      en: { title: "Spiritual Coaching", number: "03 / SPIRIT", desc: "The highest purpose of life, existential inquiries, and connecting with inner spiritual strength.", btnText: "Explore" },
+      tr: { title: "Spiritüel Koçluk", number: "03 / MANEVİYAT", desc: "Hayatın yüce amacı, varoluşsal sorular ve iç manevi güçle temas.", btnText: "Keşfet" },
+      ru: { title: "Духовный Коучинг", number: "03 / ДУХОВНОСТЬ", desc: "Высший смысл жизни, экзистенциальные вопросы и соприкосновение с внутренней духовной силой.", btnText: "Исследовать" }
     }
   },
   {
@@ -46,11 +52,13 @@ export const AREAS = [
     title: "Mindfulness",
     icon: "nest_eco_leaf",
     desc: "İndiki zamanda yaşamaq bacarığı, avtopilotdan çıxış və təmkinli baxış.",
+    btnText: "Kəşf et",
+    link: "#haqqimizda",
     translations: {
-      az: { title: "Mindfulness", number: "04 / FƏRQİNDƏLİK", desc: "İndiki zamanda yaşamaq bacarığı, avtopilotdan çıxış və təmkinli baxış." },
-      en: { title: "Mindfulness", number: "04 / AWARENESS", desc: "The skill of living in the present moment, breaking out of autopilot, and cultivating conscious perspective." },
-      tr: { title: "Farkındalık", number: "04 / FARKINDALIK", desc: "Şu anda yaşama becerisi, otomatik pilottan çıkış ve bilinçli bakış açısı." },
-      ru: { title: "Осознанность", number: "04 / ОСОЗНАННОСТЬ", desc: "Умение жить настоящим моментом, выход из режима автопилота и осознанный взгляд." }
+      az: { title: "Mindfulness", number: "04 / FƏRQİNDƏLİK", desc: "İndiki zamanda yaşamaq bacarığı, avtopilotdan çıxış və təmkinli baxış.", btnText: "Kəşf et" },
+      en: { title: "Mindfulness", number: "04 / AWARENESS", desc: "The skill of living in the present moment, breaking out of autopilot, and cultivating conscious perspective.", btnText: "Explore" },
+      tr: { title: "Farkındalık", number: "04 / FARKINDALIK", desc: "Şu anda yaşama becerisi, otomatik pilottan çıkış ve bilinçli bakış açısı.", btnText: "Keşfet" },
+      ru: { title: "Осознанность", number: "04 / ОСОЗНАННОСТЬ", desc: "Умение жить настоящим моментом, выход из режима автопилота и осознанный взгляд.", btnText: "Исследовать" }
     }
   },
   {
@@ -59,11 +67,13 @@ export const AREAS = [
     title: "Meditasiya",
     icon: "lens_blur",
     desc: "Nəfəs texnikaları, bədən skanı və beynin neyron harmoniyasını bərpa edən praktika.",
+    btnText: "Kəşf et",
+    link: "#haqqimizda",
     translations: {
-      az: { title: "Meditasiya", number: "05 / SÜKUT", desc: "Nəfəs texnikaları, bədən skanı və beynin neyron harmoniyasını bərpa edən praktika." },
-      en: { title: "Meditation", number: "05 / SILENCE", desc: "Breathing techniques, body scan, and practices that restore the brain's neural harmony." },
-      tr: { title: "Meditasyon", number: "05 / SESSİZLİK", desc: "Nefes teknikleri, beden taraması ve beynin nöral uyumunu yenileyen uygulamalar." },
-      ru: { title: "Медитация", number: "05 / ТИШИНА", desc: "Дыхательные техники, сканирование тела и практики, восстанавливающие нейронную гармонию мозга." }
+      az: { title: "Meditasiya", number: "05 / SÜKUT", desc: "Nəfəs texnikaları, bədən skanı və beynin neyron harmoniyasını bərpa edən praktika.", btnText: "Kəşf et" },
+      en: { title: "Meditation", number: "05 / SILENCE", desc: "Breathing techniques, body scan, and practices that restore the brain's neural harmony.", btnText: "Explore" },
+      tr: { title: "Meditasyon", number: "05 / SESSİZLİK", desc: "Nefes teknikleri, beden taraması ve beynin nöral uyumunu yenileyen uygulamalar.", btnText: "Keşfet" },
+      ru: { title: "Медитация", number: "05 / ТИШИНА", desc: "Дыхательные техники, сканирование тела и практики, восстанавливающие нейронную гармонию мозга.", btnText: "Исследовать" }
     }
   },
   {
@@ -72,11 +82,13 @@ export const AREAS = [
     title: "Münasibətlər",
     icon: "diversity_1",
     desc: "Partnyor, ailə və cəmiyyətlə sağlam sərhədlər, güvən və dərin emosional bağ.",
+    btnText: "Kəşf et",
+    link: "#haqqimizda",
     translations: {
-      az: { title: "Münasibətlər", number: "06 / ƏLAQƏ", desc: "Partnyor, ailə və cəmiyyətlə sağlam sərhədlər, güvən və dərin emosional bağ." },
-      en: { title: "Relationships", number: "06 / CONNECTION", desc: "Healthy boundaries, trust, and deep emotional bonds with partners, family, and community." },
-      tr: { title: "İlişkiler", number: "06 / BAĞLANTI", desc: "Partner, aile ve toplumla sağlıklı sınırlar, güven ve derin duygusal bağ." },
-      ru: { title: "Отношения", number: "06 / СВЯЗЬ", desc: "Здоровые границы, доверие и глубокие эмоциональные связи с партнёром, семьёй и обществом." }
+      az: { title: "Münasibətlər", number: "06 / ƏLAQƏ", desc: "Partnyor, ailə və cəmiyyətlə sağlam sərhədlər, güvən və dərin emosional bağ.", btnText: "Kəşf et" },
+      en: { title: "Relationships", number: "06 / CONNECTION", desc: "Healthy boundaries, trust, and deep emotional bonds with partners, family, and community.", btnText: "Explore" },
+      tr: { title: "İlişkiler", number: "06 / BAĞLANTI", desc: "Partner, aile ve toplumla sağlıklı sınırlar, güven ve derin duygusal bağ.", btnText: "Keşfet" },
+      ru: { title: "Отношения", number: "06 / СВЯЗЬ", desc: "Здоровые границы, доверие и глубокие эмоциональные связи с партнёром, семьёй и обществом.", btnText: "Исследовать" }
     }
   },
   {
@@ -85,11 +97,13 @@ export const AREAS = [
     title: "Emosional İntellekt",
     icon: "favorite_border",
     desc: "Emosiyaları tanımaq, adlandırmaq və idarə edərək müdrik qərarlar vermək sənəti.",
+    btnText: "Kəşf et",
+    link: "#haqqimizda",
     translations: {
-      az: { title: "Emosional İntellekt", number: "07 / EQ", desc: "Emosiyaları tanımaq, adlandırmaq və idarə edərək müdrik qərarlar vermək sənəti." },
-      en: { title: "Emotional Intelligence", number: "07 / EQ", desc: "The art of recognizing, naming and regulating emotions to make wise decisions." },
-      tr: { title: "Duygusal Zeka", number: "07 / EQ", desc: "Duyguları tanıma, adlandırma ve yöneterek bilge kararlar verme sanatı." },
-      ru: { title: "Эмоциональный Интеллект", number: "07 / EQ", desc: "Искусство распознавать, называть и регулировать эмоции для принятия мудрых решений." }
+      az: { title: "Emosional İntellekt", number: "07 / EQ", desc: "Emosiyaları tanımaq, adlandırmaq və idarə edərək müdrik qərarlar vermək sənəti.", btnText: "Kəşf et" },
+      en: { title: "Emotional Intelligence", number: "07 / EQ", desc: "The art of recognizing, naming and regulating emotions to make wise decisions.", btnText: "Explore" },
+      tr: { title: "Duygusal Zeka", number: "07 / EQ", desc: "Duyguları tanıma, adlandırma ve yöneterek bilge kararlar verme sanatı.", btnText: "Keşfet" },
+      ru: { title: "Эмоциональный Интеллект", number: "07 / EQ", desc: "Искусство распознавать, называть и регулировать эмоции для принятия мудрых решений.", btnText: "Исследовать" }
     }
   },
   {
@@ -98,11 +112,13 @@ export const AREAS = [
     title: "Özünü Tanıma",
     icon: "fingerprint",
     desc: "Maskalardan azad olaraq həqiqi dəyərlərini, istedadlarını və autentik kimliyini tapmaq.",
+    btnText: "Kəşf et",
+    link: "#haqqimizda",
     translations: {
-      az: { title: "Özünü Tanıma", number: "08 / İDENTİKLİK", desc: "Maskalardan azad olaraq həqiqi dəyərlərini, istedadlarını və autentik kimliyini tapmaq." },
-      en: { title: "Self-Discovery", number: "08 / IDENTITY", desc: "Freeing yourself from masks to find your true values, talents, and authentic identity." },
-      tr: { title: "Kendini Keşfetme", number: "08 / KİMLİK", desc: "Maskelerden sıyrılarak gerçek değerlerini, yeteneklerini ve özgün kimliğini bulmak." },
-      ru: { title: "Самопознание", number: "08 / ИДЕНТИЧНОСТЬ", desc: "Освобождение от масок, поиск истинных ценностей, талантов и подлинной идентичности." }
+      az: { title: "Özünü Tanıma", number: "08 / İDENTİKLİK", desc: "Maskalardan azad olaraq həqiqi dəyərlərini, istedadlarını və autentik kimliyini tapmaq.", btnText: "Kəşf et" },
+      en: { title: "Self-Discovery", number: "08 / IDENTITY", desc: "Freeing yourself from masks to find your true values, talents, and authentic identity.", btnText: "Explore" },
+      tr: { title: "Kendini Keşfetme", number: "08 / KİMLİK", desc: "Maskelerden sıyrılarak gerçek değerlerini, yeteneklerini ve özgün kimliğini bulmak.", btnText: "Keşfet" },
+      ru: { title: "Самопознание", number: "08 / ИДЕНТИЧНОСТЬ", desc: "Освобождение от масок, поиск истинных ценностей, талантов и подлинной идентичности.", btnText: "Исследовать" }
     }
   }
 ];
@@ -1956,11 +1972,13 @@ export const INITIAL_HOME_CONTENT = {
     badge: "Fundamental Sahələr",
     title: "8 Fərdi İnkişaf İstiqaməti",
     desc: "Şəxsiyyətin hər bir qatını dərindən anlamaq və harmoniyaya çatdırmaq üçün hazırlanmış tematik modullar.",
+    btnText: "Kəşf et",
+    items: AREAS,
     translations: {
-      az: { badge: "Fundamental Sahələr", title: "8 Fərdi İnkişaf İstiqaməti", desc: "Şəxsiyyətin hər bir qatını dərindən anlamaq və harmoniyaya çatdırmaq üçün hazırlanmış tematik modullar." },
-      en: { badge: "Core Pillars", title: "8 Dimensions of Personal Growth", desc: "Thematic modules crafted to deeply understand and harmonize every layer of your personality." },
-      tr: { badge: "Temel Alanlar", title: "8 Bireysel Gelişim Boyutu", desc: "Kişiliğin her katmanını derinden kavramak ve dengeye ulaştırmak için hazırlanmış modüller." },
-      ru: { badge: "Фундаментальные сферы", title: "8 направлений личностного роста", desc: "Тематические модули для глубокого понимания и гармонизации каждого уровня личности." }
+      az: { badge: "Fundamental Sahələr", title: "8 Fərdi İnkişaf İstiqaməti", desc: "Şəxsiyyətin hər bir qatını dərindən anlamaq və harmoniyaya çatdırmaq üçün hazırlanmış tematik modullar.", btnText: "Kəşf et" },
+      en: { badge: "Core Pillars", title: "8 Dimensions of Personal Growth", desc: "Thematic modules crafted to deeply understand and harmonize every layer of your personality.", btnText: "Explore" },
+      tr: { badge: "Temel Alanlar", title: "8 Bireysel Gelişim Boyutu", desc: "Kişiliğin her katmanını derinden kavramak ve dengeye ulaştırmak için hazırlanmış modüller.", btnText: "Keşfet" },
+      ru: { badge: "Фундаментальные сферы", title: "8 направлений личностного роста", desc: "Тематические модули для глубокого понимания и гармонизации каждого уровня личности.", btnText: "Исследовать" }
     }
   },
   academy: {

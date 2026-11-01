@@ -3,8 +3,9 @@ import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../i18n/LanguageContext';
 import AdminConfirmModal from './AdminConfirmModal';
 import { getHeroMediaStyles, getAboutMediaStyles, parseVideoUrl } from '../../utils/heroMediaHelper';
-import { INITIAL_HOME_CONTENT } from '../../data/mockData';
+import { INITIAL_HOME_CONTENT, AREAS } from '../../data/mockData';
 import AdminNavigationTab from './AdminNavigationTab';
+import AdminInlineTranslator from './AdminInlineTranslator';
 
 
 const CmsFieldContext = createContext({
@@ -1090,13 +1091,65 @@ export default function AdminCmsTab() {
     return (pillarsList && pillarsList.length > 0) ? [...pillarsList] : [];
   });
 
+  // Helper to ensure areas always have authentic defaults and full translations
+  const mergeAreasListWithDefaults = (list) => {
+    if (!list || !Array.isArray(list) || list.length === 0) {
+      return AREAS.map(a => ({
+        ...a,
+        btnText: a.btnText || 'Kəşf et',
+        link: a.link || '#haqqimizda',
+        translations: {
+          az: { btnText: 'Kəşf et', ...(a.translations?.az || {}) },
+          en: { btnText: 'Explore', ...(a.translations?.en || {}) },
+          tr: { btnText: 'Keşfet', ...(a.translations?.tr || {}) },
+          ru: { btnText: 'Исследовать', ...(a.translations?.ru || {}) }
+        }
+      }));
+    }
+    const isDummy = (item) => {
+      if (!item) return true;
+      const str = String(item.title || item.translations?.en?.title || item.translations?.az?.title || '');
+      return str.startsWith('New Area') || str.startsWith('Yeni Sahə');
+    };
+    return list.map((item, idx) => {
+      const canonical = AREAS[idx] || AREAS.find(c => c.id === item.id) || item;
+      if (isDummy(item) || !item.translations) {
+        return {
+          ...canonical,
+          btnText: canonical.btnText || 'Kəşf et',
+          link: item.link || canonical.link || '#haqqimizda',
+          translations: {
+            az: { btnText: 'Kəşf et', ...(canonical.translations?.az || {}) },
+            en: { btnText: 'Explore', ...(canonical.translations?.en || {}) },
+            tr: { btnText: 'Keşfet', ...(canonical.translations?.tr || {}) },
+            ru: { btnText: 'Исследовать', ...(canonical.translations?.ru || {}) }
+          }
+        };
+      }
+      return {
+        ...canonical,
+        ...item,
+        btnText: item.btnText || canonical.btnText || 'Kəşf et',
+        link: item.link || canonical.link || '#haqqimizda',
+        translations: {
+          az: { btnText: 'Kəşf et', ...(canonical.translations?.az || {}), ...(item.translations?.az || {}) },
+          en: { btnText: 'Explore', ...(canonical.translations?.en || {}), ...(item.translations?.en || {}) },
+          tr: { btnText: 'Keşfet', ...(canonical.translations?.tr || {}), ...(item.translations?.tr || {}) },
+          ru: { btnText: 'Исследовать', ...(canonical.translations?.ru || {}), ...(item.translations?.ru || {}) }
+        }
+      };
+    });
+  };
+
   // Areas states & direct fields
   const [cmsAreasList, setCmsAreasList] = useState(() => {
     if (homeContent?.areas?.items && Array.isArray(homeContent.areas.items) && homeContent.areas.items.length > 0) {
-      return homeContent.areas.items;
+      return mergeAreasListWithDefaults(homeContent.areas.items);
     }
-    return (areasList && areasList.length > 0) ? [...areasList] : [];
+    return mergeAreasListWithDefaults(areasList);
   });
+  const [openAreaTranslators, setOpenAreaTranslators] = useState({});
+  const [areaActiveLangs, setAreaActiveLangs] = useState({});
 
   // Delete Confirmation State
   const [itemToDelete, setItemToDelete] = useState(null); // { type: 'coach'|'pillar'|'testimonial'|'faq', item }
@@ -1124,9 +1177,9 @@ export default function AdminCmsTab() {
       }
 
       if (homeContent.areas?.items && Array.isArray(homeContent.areas.items) && homeContent.areas.items.length > 0) {
-        setCmsAreasList(homeContent.areas.items);
+        setCmsAreasList(mergeAreasListWithDefaults(homeContent.areas.items));
       } else if (areasList && areasList.length > 0) {
-        setCmsAreasList(areasList);
+        setCmsAreasList(mergeAreasListWithDefaults(areasList));
       }
     }
   }, [homeContent, pillarsList, areasList]);
@@ -1199,6 +1252,11 @@ export default function AdminCmsTab() {
     };
     setCmsAreasList(prev => [...prev, newArea]);
     showToast('Yeni inkişaf sahəsi əlavə edildi', 'success');
+  };
+
+  const resetAreasToDefaults = () => {
+    setCmsAreasList(mergeAreasListWithDefaults([]));
+    showToast('Fundamental sahələr və 4 dildəki bütün tərcümələri uğurla bərpa edildi!', 'success');
   };
 
   const saveBlock = (blockKey, data) => {
@@ -4523,129 +4581,192 @@ export default function AdminCmsTab() {
                   Fundamental Sahələr – İnkişaf İstiqamətləri ({cmsAreasList.length} Sahə)
                 </h5>
                 <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0 0' }}>
-                  Ana səhifədə qrid şəklində göstərilən bütün inkişaf sahələrini birbaşa redaktə edin və ya yenilərini əlavə edin
+                  Ana səhifədə qrid şəklində göstərilən bütün inkişaf sahələrini birbaşa redaktə edin və ya yenilərini əlavə edin (Bütün dillər: AZ, EN, TR, RU)
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={addNewAreaCard}
-                className="admin-btn-secondary"
-                style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#b45309' }}>add</span>
-                <span>Yeni Sahə Əlavə Et</span>
-              </button>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={resetAreasToDefaults}
+                  className="admin-btn-secondary"
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}
+                  title="Orijinal 8 sahəni və bütün 4 dildəki rəsmi tərcümələri bərpa et"
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#2563eb' }}>restart_alt</span>
+                  <span>Orijinal 8 Sahə & Tərcümələri Bərpa Et</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={addNewAreaCard}
+                  className="admin-btn-secondary"
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#b45309' }}>add</span>
+                  <span>Yeni Sahə Əlavə Et</span>
+                </button>
+              </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
-              {cmsAreasList.map((a, idx) => (
-                <div
-                  key={a.id || idx}
-                  style={{
-                    padding: '14px',
-                    background: '#f8fafc',
-                    border: '1.5px solid #e2e8f0',
-                    borderRadius: '10px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '12px'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '6px', borderBottom: '1px solid #e2e8f0' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{
-                        fontSize: '11px',
-                        fontWeight: 700,
-                        color: '#b45309',
-                        background: '#fef3c7',
-                        padding: '2px 8px',
-                        borderRadius: '4px'
-                      }}>
-                        Sahə #{idx + 1}
-                      </span>
-                      <span style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>
-                        {a.title || `Sahə ${idx + 1}`}
-                      </span>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '16px' }}>
+              {cmsAreasList.map((a, idx) => {
+                const isTranslatorOpen = Boolean(openAreaTranslators[a.id || idx]);
+                const areaLang = areaActiveLangs[a.id || idx] || cmsLang || 'az';
+                const trans = a.translations || {};
+
+                return (
+                  <div
+                    key={a.id || idx}
+                    style={{
+                      padding: '16px',
+                      background: '#f8fafc',
+                      border: '1.5px solid #e2e8f0',
+                      borderRadius: '12px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '12px',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0', flexWrap: 'wrap', gap: '6px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          color: '#b45309',
+                          background: '#fef3c7',
+                          padding: '2px 8px',
+                          borderRadius: '4px'
+                        }}>
+                          Sahə #{idx + 1}
+                        </span>
+                        <span style={{ fontSize: '13px', fontWeight: 700, color: '#1e293b' }}>
+                          {a.title || `Sahə ${idx + 1}`}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#ffffff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
+                          {['az', 'en', 'tr', 'ru'].map(langCode => {
+                            const hasTrans = Boolean(trans[langCode]?.title || (langCode === 'az' && a.title));
+                            return (
+                              <span
+                                key={langCode}
+                                title={`${langCode.toUpperCase()}: ${hasTrans ? 'Doldurulub' : 'Boşdur'}`}
+                                style={{
+                                  fontSize: '9px',
+                                  fontWeight: 700,
+                                  textTransform: 'uppercase',
+                                  color: hasTrans ? '#16a34a' : '#94a3b8'
+                                }}
+                              >
+                                {langCode}
+                              </span>
+                            );
+                          })}
+                        </div>
+                        {cmsAreasList.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeAreaAt(idx)}
+                            className="admin-btn-danger"
+                            style={{ padding: '2px 8px', fontSize: '11px' }}
+                            title="Bu sahəni sil"
+                          >
+                            Sil
+                          </button>
+                        )}
+                      </div>
                     </div>
-                    {cmsAreasList.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeAreaAt(idx)}
-                        className="admin-btn-danger"
-                        style={{ padding: '2px 8px', fontSize: '11px' }}
-                        title="Bu sahəni sil"
-                      >
-                        Sil
-                      </button>
-                    )}
-                  </div>
 
-                  {/* Nömrə / Kod Sahəsi (Məs: 01 / DƏRİNLİK) */}
-                  <Field
-                    label="Nömrə / Kod (Məs: 01 / DƏRİNLİK)"
-                    block={a}
-                    setBlock={updater => updateAreaAt(idx, updater)}
-                    fieldKey="number"
-                  />
-
-                  {/* İkon Sahəsi */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <label className="admin-label" style={{ margin: 0 }}>İkon (Material Symbols)</label>
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: '22px', color: '#b45309', background: '#ffffff', padding: '6px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
-                        {a.icon || 'explore'}
-                      </span>
-                      <input
-                        type="text"
-                        value={a.icon || ''}
-                        onChange={e => updateAreaAt(idx, prev => ({ ...prev, icon: e.target.value }))}
-                        className="admin-input"
-                        placeholder="Məs: psychology, trending_up, self_improvement, nest_eco_leaf, fingerprint..."
-                        style={{ flex: 1 }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Sahə Adı (Başlıq) */}
-                  <Field
-                    label="Sahə Adı (Başlıq)"
-                    block={a}
-                    setBlock={updater => updateAreaAt(idx, updater)}
-                    fieldKey="title"
-                  />
-
-                  {/* Sahə İzahı (Təsvir) */}
-                  <Field
-                    label="Sahə İzahı (Təsvir)"
-                    block={a}
-                    setBlock={updater => updateAreaAt(idx, updater)}
-                    fieldKey="desc"
-                    multiline
-                    rows={3}
-                  />
-
-                  {/* Düymə Mətni və Linki */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px' }}>
+                    {/* Nömrə / Kod Sahəsi (Məs: 01 / DƏRİNLİK) */}
                     <Field
-                      label="Düymə Mətni (fərdi)"
+                      label="Nömrə / Kod (Məs: 01 / DƏRİNLİK)"
                       block={a}
                       setBlock={updater => updateAreaAt(idx, updater)}
-                      fieldKey="btnText"
-                      placeholder="Məs: Kəşf et (boşdursa ümumi)"
+                      fieldKey="number"
                     />
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                      <label className="admin-label" style={{ margin: 0 }}>Keçid Linki (fərdi)</label>
-                      <input
-                        type="text"
-                        value={a.link || ''}
-                        onChange={e => updateAreaAt(idx, prev => ({ ...prev, link: e.target.value }))}
-                        className="admin-input"
-                        placeholder="Məs: #akademiya, /courses"
-                      />
+
+                    {/* İkon Sahəsi */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label className="admin-label" style={{ margin: 0 }}>İkon (Material Symbols)</label>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: '22px', color: '#b45309', background: '#ffffff', padding: '6px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
+                          {a.icon || 'explore'}
+                        </span>
+                        <input
+                          type="text"
+                          value={a.icon || ''}
+                          onChange={e => updateAreaAt(idx, prev => ({ ...prev, icon: e.target.value }))}
+                          className="admin-input"
+                          placeholder="Məs: psychology, trending_up, self_improvement, nest_eco_leaf, fingerprint..."
+                          style={{ flex: 1 }}
+                        />
+                      </div>
                     </div>
+
+                    {/* Sahə Adı (Başlıq) */}
+                    <Field
+                      label="Sahə Adı (Başlıq)"
+                      block={a}
+                      setBlock={updater => updateAreaAt(idx, updater)}
+                      fieldKey="title"
+                    />
+
+                    {/* Sahə İzahı (Təsvir) */}
+                    <Field
+                      label="Sahə İzahı (Təsvir)"
+                      block={a}
+                      setBlock={updater => updateAreaAt(idx, updater)}
+                      fieldKey="desc"
+                      multiline
+                      rows={3}
+                    />
+
+                    {/* Düymə Mətni və Linki */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px' }}>
+                      <Field
+                        label="Düymə Mətni (fərdi)"
+                        block={a}
+                        setBlock={updater => updateAreaAt(idx, updater)}
+                        fieldKey="btnText"
+                        placeholder="Məs: Kəşf et (boşdursa ümumi)"
+                      />
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                        <label className="admin-label" style={{ margin: 0 }}>Keçid Linki (fərdi)</label>
+                        <input
+                          type="text"
+                          value={a.link || ''}
+                          onChange={e => updateAreaAt(idx, prev => ({ ...prev, link: e.target.value }))}
+                          className="admin-input"
+                          placeholder="Məs: #akademiya, /courses"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Çoxdilli Tərcümə Paneli (AZ, EN, TR, RU) */}
+                    <AdminInlineTranslator
+                      item={a}
+                      fields={[
+                        { key: 'number', label: 'Nömrə / Kod (01 / DƏRİNLİK)' },
+                        { key: 'title', label: 'Sahə Adı (Başlıq)', required: true },
+                        { key: 'desc', label: 'Sahə İzahı (Təsvir)', type: 'textarea' },
+                        { key: 'btnText', label: 'Düymə Mətni (Kəşf et)' }
+                      ]}
+                      activeLang={areaLang}
+                      setActiveLang={lang => setAreaActiveLangs(p => ({ ...p, [a.id || idx]: lang }))}
+                      onUpdate={updates => updateAreaAt(idx, prev => ({
+                        ...prev,
+                        ...updates,
+                        translations: {
+                          ...(prev.translations || {}),
+                          ...(updates.translations || {})
+                        }
+                      }))}
+                      isOpen={isTranslatorOpen}
+                      setIsOpen={open => setOpenAreaTranslators(p => ({ ...p, [a.id || idx]: open }))}
+                    />
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <div style={{ paddingTop: '8px', display: 'flex', gap: '10px' }}>
