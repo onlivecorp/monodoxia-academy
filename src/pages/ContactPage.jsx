@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import DOMPurify from 'dompurify';
 import { useLanguage } from '../i18n/LanguageContext';
+import { getLocalized } from '../i18n/localize';
 import { useApp } from '../context/AppContext';
 import PageHero from '../components/PageHero';
 
@@ -16,12 +17,12 @@ export default function ContactPage() {
   const isPageActive = platformSettings?.contactPageActive !== false && platformSettings?.contact_page_active !== false && platformSettings?.contact_page_active !== '0';
   const showCards = platformSettings?.contactCardsVisible !== false && platformSettings?.contact_cards_visible !== false && platformSettings?.contact_cards_visible !== '0';
 
-  const title = platformSettings?.contactTitle || platformSettings?.contact_title || 'Bizimlə əlaqə saxlayın';
-  const subtitle = platformSettings?.contactSubtitle || platformSettings?.contact_subtitle || 'Sual, təklif və əməkdaşlıq üçün bizimlə əlaqə saxlayın. Komandamız ən qısa zamanda sizə cavab verəcəkdir.';
+  const title = getLocalized(platformSettings, 'contactTitle', currentLang, defaultLang, t('contact_title')) || platformSettings?.contactTitle || platformSettings?.contact_title || t('contact_title') || 'Bizimlə əlaqə saxlayın';
+  const subtitle = getLocalized(platformSettings, 'contactSubtitle', currentLang, defaultLang, t('contact_subtitle')) || platformSettings?.contactSubtitle || platformSettings?.contact_subtitle || t('contact_subtitle') || 'Sual, təklif və əməkdaşlıq üçün bizimlə əlaqə saxlayın. Komandamız ən qısa zamanda sizə cavab verəcəkdir.';
   const phone = platformSettings?.contactPhone || platformSettings?.contact_phone || '+994 (12) 490 88 00';
   const email = platformSettings?.contactEmail || platformSettings?.contact_email || 'contact@monodoxia.academy';
-  const address = platformSettings?.contactAddress || platformSettings?.contact_address || 'Nizami küçəsi 142, İntellektual İnkişaf Mərkəzi, Bakı, Azərbaycan';
-  const workHours = platformSettings?.contactWorkHours || platformSettings?.contact_work_hours || 'Bazar ertəsi – Şənbə: 09:00 – 19:00';
+  const address = getLocalized(platformSettings, 'contactAddress', currentLang, defaultLang) || platformSettings?.contactAddress || platformSettings?.contact_address || 'Nizami küçəsi 142, İntellektual İnkişaf Mərkəzi, Bakı, Azərbaycan';
+  const workHours = getLocalized(platformSettings, 'contactWorkHours', currentLang, defaultLang) || platformSettings?.contactWorkHours || platformSettings?.contact_work_hours || 'Bazar ertəsi – Şənbə: 09:00 – 19:00';
   const mapEmbed = platformSettings?.contactMapEmbed || platformSettings?.contact_map_embed || '';
 
   const formConfig = platformSettings?.contactFormSettings || {};
