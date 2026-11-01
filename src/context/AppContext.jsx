@@ -1418,52 +1418,50 @@ export function AppProvider({ children }) {
   // LocalStorage Sync
   useEffect(() => {
     if (currentUser) {
-      localStorage.setItem('monodoxia_user', JSON.stringify(currentUser));
+      safeSetLocalStorage('monodoxia_user', currentUser);
     } else {
-      localStorage.removeItem('monodoxia_user');
+      try { localStorage.removeItem('monodoxia_user'); } catch (e) {}
     }
   }, [currentUser]);
 
   useEffect(() => {
-    localStorage.setItem('monodoxia_admin_roles', JSON.stringify(rolesList));
+    safeSetLocalStorage('monodoxia_admin_roles', rolesList);
   }, [rolesList]);
 
   useEffect(() => {
-    localStorage.setItem('monodoxia_progress', JSON.stringify(progress));
+    safeSetLocalStorage('monodoxia_progress', progress);
   }, [progress]);
 
   useEffect(() => {
-    localStorage.setItem('monodoxia_certificates', JSON.stringify(certificates));
+    safeSetLocalStorage('monodoxia_certificates', certificates);
   }, [certificates]);
 
   useEffect(() => {
-    localStorage.setItem('monodoxia_bookings', JSON.stringify(bookings));
+    safeSetLocalStorage('monodoxia_bookings', bookings);
   }, [bookings]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('monodoxia_time_blocks', JSON.stringify(timeBlocks));
-    } catch (e) {}
+    safeSetLocalStorage('monodoxia_time_blocks', timeBlocks);
   }, [timeBlocks]);
 
   useEffect(() => {
-    localStorage.setItem('monodoxia_tier', userTier);
+    safeSetLocalStorage('monodoxia_tier', userTier);
   }, [userTier]);
 
   useEffect(() => {
-    localStorage.setItem('monodoxia_admin_users', JSON.stringify(usersList));
+    safeSetLocalStorage('monodoxia_admin_users', usersList);
   }, [usersList]);
 
   useEffect(() => {
-    localStorage.setItem('monodoxia_admin_courses', JSON.stringify(coursesList));
+    safeSetLocalStorage('monodoxia_admin_courses', coursesList);
   }, [coursesList]);
 
   useEffect(() => {
-    localStorage.setItem('monodoxia_admin_categories', JSON.stringify(categoriesList));
+    safeSetLocalStorage('monodoxia_admin_categories', categoriesList);
   }, [categoriesList]);
 
   useEffect(() => {
-    localStorage.setItem('monodoxia_admin_tiers', JSON.stringify(clubTiersList));
+    safeSetLocalStorage('monodoxia_admin_tiers', clubTiersList);
   }, [clubTiersList]);
 
   useEffect(() => {
@@ -1471,51 +1469,51 @@ export function AppProvider({ children }) {
   }, [eventsList]);
 
   useEffect(() => {
-    localStorage.setItem('monodoxia_admin_topics', JSON.stringify(communityTopics));
+    safeSetLocalStorage('monodoxia_admin_topics', communityTopics);
   }, [communityTopics]);
 
   useEffect(() => {
-    localStorage.setItem('monodoxia_admin_settings', JSON.stringify(platformSettings));
+    safeSetLocalStorage('monodoxia_admin_settings', platformSettings);
   }, [platformSettings]);
 
   useEffect(() => {
-    localStorage.setItem('monodoxia_sql_config', JSON.stringify(sqlConfig));
+    safeSetLocalStorage('monodoxia_sql_config', sqlConfig);
   }, [sqlConfig]);
 
   useEffect(() => {
-    localStorage.setItem('monodoxia_home_content', JSON.stringify(homeContent));
+    safeSetLocalStorage('monodoxia_home_content', homeContent);
   }, [homeContent]);
 
   useEffect(() => {
-    localStorage.setItem('monodoxia_pillars', JSON.stringify(pillarsList));
+    safeSetLocalStorage('monodoxia_pillars', pillarsList);
   }, [pillarsList]);
 
   useEffect(() => {
-    localStorage.setItem('monodoxia_areas', JSON.stringify(areasList));
+    safeSetLocalStorage('monodoxia_areas', areasList);
   }, [areasList]);
 
   useEffect(() => {
-    localStorage.setItem('monodoxia_coaches', JSON.stringify(coachesList));
+    safeSetLocalStorage('monodoxia_coaches', coachesList);
   }, [coachesList]);
 
   useEffect(() => {
-    localStorage.setItem('monodoxia_testimonials', JSON.stringify(testimonialsList));
+    safeSetLocalStorage('monodoxia_testimonials', testimonialsList);
   }, [testimonialsList]);
 
   useEffect(() => {
-    localStorage.setItem('monodoxia_faqs', JSON.stringify(faqsList));
+    safeSetLocalStorage('monodoxia_faqs', faqsList);
   }, [faqsList]);
 
   useEffect(() => {
-    localStorage.setItem('monodoxia_applications', JSON.stringify(applicationsList));
+    safeSetLocalStorage('monodoxia_applications', applicationsList);
   }, [applicationsList]);
 
   useEffect(() => {
-    localStorage.setItem('monodoxia_form_fields', JSON.stringify(formFieldsList));
+    safeSetLocalStorage('monodoxia_form_fields', formFieldsList);
   }, [formFieldsList]);
 
   useEffect(() => {
-    localStorage.setItem('monodoxia_notifications', JSON.stringify(userNotifications));
+    safeSetLocalStorage('monodoxia_notifications', userNotifications);
   }, [userNotifications]);
 
   // Real-time Multi-Tab Synchronization

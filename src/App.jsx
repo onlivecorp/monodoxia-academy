@@ -39,6 +39,7 @@ function AppContent() {
     platformSettings,
     currentUser,
     setAuthModalOpen,
+    authModalOpen,
     canAccessAdmin,
     adminModalOpen,
     setAdminModalOpen,
@@ -46,7 +47,15 @@ function AppContent() {
     certViewModalOpen,
     homeContent,
     searchModalOpen,
-    setSearchModalOpen
+    setSearchModalOpen,
+    onboardingOpen,
+    playerModalOpen,
+    certificateModalOpen,
+    bookingModalOpen,
+    newTopicModalOpen,
+    profileModalOpen,
+    applicationModalOpen,
+    topicDetailModalOpen
   } = useApp();
   const [adminBypass, setAdminBypass] = useState(() => {
     return sessionStorage.getItem('monodoxia_admin_bypass') === 'true';
@@ -253,10 +262,10 @@ function AppContent() {
             }
           }} 
         />
-        <AuthModal />
+        {authModalOpen && <AuthModal />}
         <Suspense fallback={null}>
-          <AdminModal />
-          <CertificateViewModal />
+          {adminModalOpen && <AdminModal />}
+          {certViewModalOpen && <CertificateViewModal />}
         </Suspense>
       </div>
     );
@@ -335,18 +344,18 @@ function AppContent() {
       <Footer />
 
       {/* Modals */}
-      <AuthModal />
+      {authModalOpen && <AuthModal />}
       <Suspense fallback={null}>
-        <OnboardingModal />
-        <PlayerModal />
-        <CertificateModal />
-        <BookingModal />
-        <AdminModal />
-        <NewTopicModal />
-        <ProfileModal />
-        <ApplicationModal />
-        <CertificateViewModal />
-        <TopicDetailModal />
+        {onboardingOpen && <OnboardingModal />}
+        {playerModalOpen && <PlayerModal />}
+        {certificateModalOpen && <CertificateModal />}
+        {bookingModalOpen && <BookingModal />}
+        {adminModalOpen && <AdminModal />}
+        {newTopicModalOpen && <NewTopicModal />}
+        {profileModalOpen && <ProfileModal />}
+        {applicationModalOpen && <ApplicationModal />}
+        {certViewModalOpen && <CertificateViewModal />}
+        {topicDetailModalOpen && <TopicDetailModal />}
       </Suspense>
       <GlobalSearchModal
         isOpen={Boolean(searchModalOpen)}

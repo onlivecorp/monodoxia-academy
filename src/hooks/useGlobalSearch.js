@@ -124,9 +124,23 @@ export default function useGlobalSearch(initialQuery = '', initialCategory = 'al
         console.warn('API search failed, relying on local search data:', err);
       }
     } finally {
-      setLoading(false);
+      if (!abortControllerRef.current?.signal.aborted) {
+        setLoading(false);
+      }
     }
   }, [coursesList, coachesList, usersList, eventsList, communityTopics, currentLang]);
+
+  // Cleanup abort controller and debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
 
   // Debounced search trigger
   useEffect(() => {

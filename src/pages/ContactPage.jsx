@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import DOMPurify from 'dompurify';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useApp } from '../context/AppContext';
 import PageHero from '../components/PageHero';
@@ -614,7 +615,12 @@ export default function ContactPage() {
                   {mapEmbed.includes('<iframe') ? (
                     <div
                       className="w-full h-full [&>iframe]:w-full [&>iframe]:h-full [&>iframe]:border-0"
-                      dangerouslySetInnerHTML={{ __html: mapEmbed }}
+                      dangerouslySetInnerHTML={{
+                        __html: DOMPurify.sanitize(mapEmbed, {
+                          ADD_TAGS: ['iframe'],
+                          ADD_ATTR: ['allowfullscreen', 'frameborder', 'loading', 'referrerpolicy', 'src', 'width', 'height', 'style', 'title']
+                        })
+                      }}
                     />
                   ) : (
                     <iframe
