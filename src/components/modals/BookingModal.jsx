@@ -609,13 +609,13 @@ export default function BookingModal() {
                   <span className="material-symbols-outlined text-[18px] text-emerald-600">verified_user</span>
                   <div>
                     <span className="font-bold text-emerald-950 block">
-                      Daxil olmusunuz: {currentUser.name || `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim()}
+                      {t('book_logged_in_as') || 'Daxil olmusunuz: '}{currentUser.name || `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim()}
                     </span>
                     <span className="text-[11px] text-emerald-700">{currentUser.email || currentUser.phone || ''}</span>
                   </div>
                 </div>
                 <span className="text-[10px] bg-emerald-200/80 text-emerald-900 px-2 py-0.5 rounded-full font-bold">
-                  Hesabla Giriş
+                  {t('book_logged_in_account_badge') || 'Hesabla Giriş'}
                 </span>
               </div>
             ) : (

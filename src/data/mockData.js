@@ -1221,25 +1221,25 @@ export const COACHES = [
       az: {
         title: "Kouç & Ekspert",
         experience: "10+ il",
-        bio: "Sədaqət Rzayeva — Monodoxia Academy fərdi inkişaf və kouçinq ekspertidir.",
+        bio: "Sədaqət Rzayeva — Monodoxia Academy fərdi inkişaf və kouçinq ekspertidir. Fərdi inkişaf, emosional balans və hədəf yönümlü kouçinq üzrə ixtisaslaşmışdır.",
         specialties: ["Fərdi İnkişaf", "Psixologiya", "Həyat Balansı"]
       },
       en: {
         title: "Coach & Expert",
         experience: "10+ yrs",
-        bio: "Sedaqet Rzayeva — Personal development and coaching expert at Monodoxia Academy.",
+        bio: "Sedaqet Rzayeva — Personal development and coaching expert at Monodoxia Academy. Specialized in personal growth, emotional balance, and goal-oriented coaching.",
         specialties: ["Personal Growth", "Psychology", "Life Balance"]
       },
       tr: {
         title: "Koç & Uzman",
         experience: "10+ yıl",
-        bio: "Sedaqet Rzayeva — Monodoxia Academy kişisel gelişim ve koçluk uzmanıdır.",
+        bio: "Sedaqet Rzayeva — Monodoxia Academy kişisel gelişim ve koçluk uzmanıdır. Kişisel gelişim, duygusal denge ve hedef odaklı koçluk alanlarında uzmanlaşmıştır.",
         specialties: ["Kişisel Gelişim", "Psikoloji", "Yaşam Dengesi"]
       },
       ru: {
         title: "Коуч и Эксперт",
         experience: "10+ лет",
-        bio: "Седагат Рзаева — эксперт по личностному развитию и коучингу Monodoxia Academy.",
+        bio: "Седагат Рзаева — эксперт по личностному развитию и коучингу Monodoxia Academy. Специализируется на личностном росте, эмоциональном балансе и целеполагании.",
         specialties: ["Личностное развитие", "Психология", "Жизненный баланс"]
       }
     }

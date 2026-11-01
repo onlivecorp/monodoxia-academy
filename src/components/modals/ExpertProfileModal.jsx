@@ -107,8 +107,38 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
     coachDisplayImage = liveCoach.id === 'coach-farid' ? '/images/coaches/coach-farid.jpg' : (liveCoach.id === 'coach-nargiz' ? '/images/coaches/coach-nargiz.jpg' : '/images/coaches/coach-sedaqet.jpg');
   }
 
-  const coachTitle = liveCoach ? (getLocalized(liveCoach, 'title', currentLang, defaultLang) || liveCoach.title || 'Kouç & Ekspert') : '';
-  const coachBio = liveCoach ? (getLocalized(liveCoach, 'bio', currentLang, defaultLang) || liveCoach.bio || '') : '';
+  let coachTitle = liveCoach ? (getLocalized(liveCoach, 'title', currentLang, defaultLang) || liveCoach.title || '') : '';
+  if (!coachTitle || coachTitle === 'Kouç & Ekspert') {
+    coachTitle = t('expert_coach_expert') || 'Kouç & Ekspert';
+  }
+
+  let coachBio = liveCoach ? (getLocalized(liveCoach, 'bio', currentLang, defaultLang) || liveCoach.bio || '') : '';
+  if (coachBio && currentLang !== 'az' && coachBio.includes('Monodoxia Academy fərdi inkişaf və kouçinq ekspertidir.')) {
+    coachBio = coachBio.replace('Monodoxia Academy fərdi inkişaf və kouçinq ekspertidir.', t('coach_default_bio_text') || 'Monodoxia Academy fərdi inkişaf və kouçinq ekspertidir.');
+  }
+
+  const getBookingStatusText = (status) => {
+    if (!status) return t('status_pending') || 'Gözləyir';
+    const s = String(status).toLowerCase();
+    if (s.includes('təsdiq') || s.includes('confirm') || s.includes('onay') || s.includes('подтвержд')) {
+      return t('booking_status_confirmed') || 'Təsdiqləndi';
+    }
+    if (s.includes('ləğv') || s.includes('cancel') || s.includes('iptal') || s.includes('отмен')) {
+      return t('booking_status_cancelled') || 'Ləğv edildi';
+    }
+    if (s.includes('gözlə') || s.includes('wait') || s.includes('pend') || s.includes('bekle') || s.includes('ожида')) {
+      return t('status_pending') || 'Gözləyir';
+    }
+    return status;
+  };
+
+  const getBookingFormatText = (format) => {
+    if (!format) return t('booking_format_online') || 'Online (Təhlükəsiz Video Otaq)';
+    if (String(format).toLowerCase().includes('online') || String(format).toLowerCase().includes('onlayn')) {
+      return t('booking_format_online') || 'Online (Təhlükəsiz Video Otaq)';
+    }
+    return format;
+  };
   const coachExp = liveCoach ? (getLocalized(liveCoach, 'experience', currentLang, defaultLang) || liveCoach.experience || '') : '';
   const rawSpecialties = liveCoach ? getLocalizedArray(liveCoach, 'specialties', currentLang, defaultLang) : [];
   const specialties = rawSpecialties.length > 0
@@ -572,7 +602,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
               {saveSuccess && (
                 <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2 animate-fadeIn">
                   <span className="material-symbols-outlined text-[18px]">check_circle</span>
-                  Məlumatlarınız uğurla yadda saxlanıldı!
+                  {t('expert_profile_save_success') || 'Məlumatlarınız uğurla yadda saxlanıldı!'}
                 </div>
               )}
 
@@ -584,7 +614,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                     className="px-3.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-[#775a19] border border-amber-500/30 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
                   >
                     <span className="material-symbols-outlined text-[16px]">edit</span>
-                    <span>Məlumatları Redaktə Et</span>
+                    <span>{t('expert_edit_profile_btn') || 'Məlumatları Redaktə Et'}</span>
                   </button>
                 </div>
               )}
@@ -595,7 +625,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                   <div className="flex items-center justify-between pb-2 border-b border-amber-200/60">
                     <span className="text-xs font-bold text-[#775a19] uppercase tracking-wider flex items-center gap-1.5 font-mono">
                       <span className="material-symbols-outlined text-[17px]">edit_note</span>
-                      Profil Məlumatlarını Redaktə Et
+                      {t('expert_edit_profile_heading') || 'Profil Məlumatlarını Redaktə Et'}
                     </span>
                     <button
                       type="button"
@@ -603,7 +633,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                       className="text-slate-400 hover:text-slate-600 text-xs flex items-center gap-0.5 cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-[16px]">close</span>
-                      Ləğv et
+                      {t('common_cancel') || 'Ləğv et'}
                     </button>
                   </div>
 
@@ -611,7 +641,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                   <div className="p-3 bg-white rounded-xl border border-amber-200/80 space-y-2">
                     <label className="block text-xs font-bold text-[#775a19] flex items-center gap-1.5">
                       <span className="material-symbols-outlined text-[15px]">photo_camera</span>
-                      Profil Şəkli
+                      {t('profile_field_photo') || 'Profil Şəkli'}
                     </label>
                     <div className="flex items-center gap-3">
                       <div className="w-14 h-14 rounded-xl border-2 border-amber-500/40 overflow-hidden shrink-0 bg-slate-100 flex items-center justify-center relative shadow-xs">
@@ -630,7 +660,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                             }}
                           />
                         ) : (
-                          <span className="text-xs text-slate-400 font-bold">Şəkil yoxdur</span>
+                          <span className="text-xs text-slate-400 font-bold">{t('not_specified') || 'Şəkil yoxdur'}</span>
                         )}
                       </div>
                       <div className="flex-1 space-y-1.5 min-w-0">
@@ -648,7 +678,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                             <span className="material-symbols-outlined text-[14px]">
                               {isUploadingImage ? 'hourglass_top' : 'upload'}
                             </span>
-                            <span>{isUploadingImage ? 'Yüklənir...' : 'Fayl Yüklə'}</span>
+                            <span>{isUploadingImage ? (t('common_uploading') || 'Yüklənir...') : (t('profile_upload_file_btn') || 'Fayl Yüklə')}</span>
                             <input
                               type="file"
                               accept="image/*"
@@ -700,7 +730,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                               onClick={() => setEditImage('')}
                               className="text-[11px] text-rose-500 hover:text-rose-700 underline cursor-pointer"
                             >
-                              Sil
+                              {t('common_delete') || 'Sil'}
                             </button>
                           )}
                         </div>
@@ -712,13 +742,13 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                   <div>
                     <label className="block text-xs font-bold text-[#775a19] mb-1 flex items-center gap-1.5">
                       <span className="material-symbols-outlined text-[15px]">psychology</span>
-                      Metodologiya və Təcrübə (Haqqında)
+                      {t('expert_methodology_form_label') || 'Metodologiya və Təcrübə (Haqqında)'}
                     </label>
                     <textarea
                       rows={4}
                       value={editBio}
                       onChange={e => setEditBio(e.target.value)}
-                      placeholder="Metodologiyanız, yanaşmanız və təcrübəniz haqqında yazın..."
+                      placeholder={t('expert_methodology_ph') || 'Metodologiyanız, yanaşmanız və təcrübəniz haqqında yazın...'}
                       className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-slate-800 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all resize-none"
                     />
                   </div>
@@ -727,13 +757,13 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                   <div>
                     <label className="block text-xs font-bold text-[#775a19] mb-1 flex items-center gap-1.5">
                       <span className="material-symbols-outlined text-[15px]">category</span>
-                      İxtisaslaşdığı Sahələr (Vergüllə ayırın)
+                      {t('expert_specialties_field_label') || 'İxtisaslaşdığı Sahələr (Vergüllə ayırın)'}
                     </label>
                     <input
                       type="text"
                       value={editSpecialties}
                       onChange={e => setEditSpecialties(e.target.value)}
-                      placeholder="Məs: Fərdi İnkişaf, Psixologiya, Liderlik"
+                      placeholder={t('expert_specialties_ph') || 'Məs: Fərdi İnkişaf, Psixologiya, Liderlik'}
                       className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-slate-800 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all"
                     />
                     {editSpecialties && (
@@ -751,16 +781,16 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                   <div className="space-y-3 pt-2 border-t border-amber-200/60">
                     <label className="block text-xs font-bold text-[#775a19] flex items-center gap-1.5 font-mono uppercase tracking-wider">
                       <span className="material-symbols-outlined text-[16px]">calendar_month</span>
-                      Təqvim: Dolu / Rezerv Olunmuş və Mövcud Saatlar
+                      {t('expert_schedule_section_title') || 'Təqvim: Dolu / Rezerv Olunmuş və Mövcud Saatlar'}
                     </label>
                     <p className="text-[11px] text-slate-500">
-                      Tarix və saat aralığı (neçədən-neçəyə) seçərək Dolu və ya Mövcud kimi qeyd edin. Dolu olanlar saytda seçilə bilməz.
+                      {t('expert_schedule_section_desc') || 'Tarix və saat aralığı (neçədən-neçəyə) seçərək Dolu və ya Mövcud kimi qeyd edin. Dolu olanlar saytda seçilə bilməz.'}
                     </p>
 
                     <div className="p-3.5 rounded-2xl bg-white border border-amber-200 space-y-2.5">
                       <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
                         <div>
-                          <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Tarix</label>
+                          <label className="block text-[10px] font-bold text-slate-600 mb-0.5">{t('common_date') || 'Tarix'}</label>
                           <input
                             type="date"
                             min={new Date().toISOString().split('T')[0]}
@@ -770,7 +800,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                           />
                         </div>
                         <div>
-                          <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Başlama Saatı</label>
+                          <label className="block text-[10px] font-bold text-slate-600 mb-0.5">{t('field_start_time') || 'Başlama Saatı'}</label>
                           <input
                             type="time"
                             value={modalSlotStart}
@@ -779,7 +809,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                           />
                         </div>
                         <div>
-                          <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Bitmə Saatı</label>
+                          <label className="block text-[10px] font-bold text-slate-600 mb-0.5">{t('field_end_time') || 'Bitmə Saatı'}</label>
                           <input
                             type="time"
                             value={modalSlotEnd}
@@ -788,14 +818,14 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                           />
                         </div>
                         <div>
-                          <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Vəziyyət</label>
+                          <label className="block text-[10px] font-bold text-slate-600 mb-0.5">{t('common_status') || 'Vəziyyət'}</label>
                           <select
                             value={modalSlotStatus}
                             onChange={e => setModalSlotStatus(e.target.value)}
                             className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold"
                           >
-                            <option value="Dolu">🔴 Dolu / Rezerv</option>
-                            <option value="Mövcud">🟢 Mövcud / Boş</option>
+                            <option value="Dolu">🔴 {t('expert_slot_status_booked_badge') || 'Dolu / Rezerv'}</option>
+                            <option value="Mövcud">🟢 {t('expert_slot_status_available') || 'Mövcud / Boş'}</option>
                           </select>
                         </div>
                       </div>
@@ -805,7 +835,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                           type="text"
                           value={modalSlotNote}
                           onChange={e => setModalSlotNote(e.target.value)}
-                          placeholder="Qeyd (istəyə bağlı)..."
+                          placeholder={t('expert_slot_note_ph') || 'Qeyd (istəyə bağlı)...'}
                           className="flex-1 px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
                         />
                         <button
@@ -814,7 +844,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                           className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold flex items-center gap-1 cursor-pointer shrink-0"
                         >
                           <span className="material-symbols-outlined text-[15px]">add</span>
-                          Əlavə et
+                          {t('common_add') || 'Əlavə et'}
                         </button>
                       </div>
 
@@ -830,21 +860,21 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                           >
                             <span>{s.label}</span>
                             <span className="text-[10px] opacity-75 font-normal">
-                              ({s.isBooked ? 'Dolu' : 'Boş'})
+                              ({s.isBooked ? (t('expert_booked_slots_status') || 'Dolu') : (t('expert_available_slots_status') || 'Boş')})
                             </span>
                             <button
                               type="button"
                               onClick={() => handleToggleModalSlot(s.id)}
                               className="text-[10px] underline ml-1 hover:text-amber-900 cursor-pointer"
-                              title="Vəziyyəti dəyiş"
+                              title={t('common_change') || 'Vəziyyəti dəyiş'}
                             >
-                              Dəyiş
+                              {t('common_change') || 'Dəyiş'}
                             </button>
                             <button
                               type="button"
                               onClick={() => handleRemoveModalSlot(s.id)}
                               className="text-slate-400 hover:text-red-600 ml-0.5 cursor-pointer"
-                              title="Sil"
+                              title={t('common_delete') || 'Sil'}
                             >
                               <span className="material-symbols-outlined text-[13px]">close</span>
                             </button>
@@ -861,14 +891,14 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                       onClick={() => setIsEditingProfile(false)}
                       className="px-3.5 py-1.5 text-xs text-slate-600 hover:bg-slate-200/50 rounded-xl cursor-pointer"
                     >
-                      Ləğv et
+                      {t('common_cancel') || 'Ləğv et'}
                     </button>
                     <button
                       type="submit"
                       className="px-4 py-1.5 text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 rounded-xl shadow-sm cursor-pointer flex items-center gap-1.5"
                     >
                       <span className="material-symbols-outlined text-[15px]">save</span>
-                      Yadda Saxla
+                      {t('common_save') || 'Yadda Saxla'}
                     </button>
                   </div>
                 </form>
@@ -879,10 +909,10 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                   <div>
                     <h3 className="text-xs uppercase tracking-wider font-bold text-[#775a19] mb-2 flex items-center gap-1.5">
                       <span className="material-symbols-outlined text-[16px]">psychology</span>
-                      <span>Metodologiya və Təcrübə</span>
+                      <span>{t('expert_methodology_and_exp') || 'Metodologiya və Təcrübə'}</span>
                     </h3>
                     <p className="text-sm text-[#334155] leading-relaxed font-light whitespace-pre-line">
-                      {coachBio || 'Hələlik metodologiya məlumatı daxil edilməyib.'}
+                      {coachBio || (t('expert_no_methodology') || 'Hələlik metodologiya məlumatı daxil edilməyib.')}
                     </p>
                   </div>
 
@@ -891,7 +921,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                     <div>
                       <h3 className="text-xs uppercase tracking-wider font-bold text-[#775a19] mb-2.5 flex items-center gap-1.5">
                         <span className="material-symbols-outlined text-[16px]">category</span>
-                        <span>İxtisaslaşdığı Sahələr</span>
+                        <span>{t('expert_specialties_title') || 'İxtisaslaşdığı Sahələr'}</span>
                       </h3>
                       <div className="flex flex-wrap gap-2">
                         {specialties.map((spec, idx) => (
@@ -906,18 +936,16 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                     </div>
                   )}
 
-
-
                   {/* Available / Scheduled Slots Display */}
                   {(scheduleSlots.length > 0 || availableSlots.length > 0) && (
                     <div>
                       <h3 className="text-xs uppercase tracking-wider font-bold text-[#775a19] mb-2 flex items-center justify-between">
                         <span className="flex items-center gap-1.5">
                           <span className="material-symbols-outlined text-[16px]">schedule</span>
-                          <span>Yaxın Tarixlər üçün Saat Cədvəli</span>
+                          <span>{t('expert_upcoming_schedule_title') || 'Yaxın Tarixlər üçün Saat Cədvəli'}</span>
                         </span>
                         <span className="text-[10px] font-normal text-slate-400 normal-case">
-                          🟢 Boş = rezerv edə bilərsiniz • 🔴 Dolu = tutulub
+                          {t('expert_schedule_legend') || '🟢 Boş = rezerv edə bilərsiniz • 🔴 Dolu = tutulub'}
                         </span>
                       </h3>
                       <div className="flex flex-wrap gap-2">
@@ -926,24 +954,24 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                             s.isBooked ? (
                               <span
                                 key={s.id}
-                                title="Bu saat artıq rezerv olunub"
+                                title={t('expert_slot_status_busy') || 'Bu saat artıq rezerv olunub'}
                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold bg-rose-50 text-rose-400 border-rose-200 opacity-70 cursor-not-allowed select-none"
                               >
                                 <span className="material-symbols-outlined text-[14px]">event_busy</span>
                                 <span>{s.label}</span>
-                                <span className="text-[10px] font-bold px-1.5 rounded bg-rose-200/60 text-rose-900">Dolu</span>
+                                <span className="text-[10px] font-bold px-1.5 rounded bg-rose-200/60 text-rose-900">{t('expert_booked_slots_status') || 'Dolu'}</span>
                               </span>
                             ) : (
                               <button
                                 key={s.id}
                                 type="button"
                                 onClick={() => { onClose(); openBooking(liveCoach.id, s.label); }}
-                                title="Bu saat üçün rezervasiya et"
+                                title={t('expert_book_slot_btn') || 'Bu saat üçün rezervasiya et'}
                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100 hover:border-emerald-500 hover:shadow-sm transition-all cursor-pointer"
                               >
                                 <span className="material-symbols-outlined text-[14px]">event_available</span>
                                 <span>{s.label}</span>
-                                <span className="text-[10px] font-bold px-1.5 rounded bg-emerald-200/60 text-emerald-900">Rezerv Et</span>
+                                <span className="text-[10px] font-bold px-1.5 rounded bg-emerald-200/60 text-emerald-900">{t('expert_book_slot_btn') || 'Rezerv Et'}</span>
                               </button>
                             )
                           ))
@@ -953,12 +981,12 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                               key={sIdx}
                               type="button"
                               onClick={() => { onClose(); openBooking(liveCoach.id, slot); }}
-                              title="Bu saat üçün rezervasiya et"
+                              title={t('expert_book_slot_btn') || 'Bu saat üçün rezervasiya et'}
                               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100 hover:border-emerald-500 hover:shadow-sm transition-all cursor-pointer"
                             >
                               <span className="material-symbols-outlined text-[14px]">event_available</span>
                               <span>{slot}</span>
-                              <span className="text-[10px] font-bold px-1.5 rounded bg-emerald-200/60 text-emerald-900">Rezerv Et</span>
+                              <span className="text-[10px] font-bold px-1.5 rounded bg-emerald-200/60 text-emerald-900">{t('expert_book_slot_btn') || 'Rezerv Et'}</span>
                             </button>
                           ))
                         )}
@@ -977,10 +1005,10 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                 <div>
                   <h3 className="text-sm font-bold text-[#071326] flex items-center gap-2">
                     <span className="material-symbols-outlined text-[20px] text-[#c5a059]">verified</span>
-                    <span>Sertifikatlar və Lisenziyalar</span>
+                    <span>{t('expert_certs_licenses_title') || 'Sertifikatlar və Lisenziyalar'}</span>
                   </h3>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Admin tərəfindən verilən rəsmi və ekspertin şəxsi peşəkar sertifikatları
+                    {t('expert_certs_licenses_desc') || 'Admin tərəfindən verilən rəsmi və ekspertin şəxsi peşəkar sertifikatları'}
                   </p>
                 </div>
 
@@ -991,7 +1019,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                     className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#071326] to-[#0c2242] text-[#e5c57d] hover:text-white text-xs font-bold flex items-center gap-1.5 shadow-md cursor-pointer transition-all"
                   >
                     <span className="material-symbols-outlined text-[16px]">add</span>
-                    <span>Sertifikat Əlavə Et</span>
+                    <span>{t('expert_add_cert_btn') || 'Sertifikat Əlavə Et'}</span>
                   </button>
                 )}
               </div>
@@ -1002,21 +1030,21 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="text-xs font-bold uppercase tracking-wider text-amber-900 flex items-center gap-1.5">
                       <span className="material-symbols-outlined text-[16px]">add_task</span>
-                      <span>Yeni Sertifikat Əlavə Et</span>
+                      <span>{t('expert_add_new_slot') ? t('expert_add_cert_btn') || 'Yeni Sertifikat Əlavə Et' : 'Yeni Sertifikat Əlavə Et'}</span>
                     </h4>
                     <button
                       type="button"
                       onClick={() => setShowAddCertModal(false)}
                       className="text-slate-400 hover:text-slate-600 text-xs"
                     >
-                      Bağla
+                      {t('common_close') || 'Bağla'}
                     </button>
                   </div>
                   <form onSubmit={handleAddCustomCert} className="space-y-3">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                          Sertifikatın Adı *
+                          {t('cert_field_name_req') || 'Sertifikatın Adı *'}
                         </label>
                         <input
                           type="text"
@@ -1029,7 +1057,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                       </div>
                       <div>
                         <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                          Verən Təşkilat / İnstitut *
+                          {t('cert_field_issuer_req') || 'Verən Təşkilat / İnstitut *'}
                         </label>
                         <input
                           type="text"
@@ -1045,7 +1073,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div>
                         <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                          İl / Tarix
+                          {t('cert_field_year_or_date') || 'İl / Tarix'}
                         </label>
                         <input
                           type="text"
@@ -1057,7 +1085,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                       </div>
                       <div>
                         <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                          Sertifikat Nömrəsi (ID)
+                          {t('cert_field_credential_id') || 'Sertifikat Nömrəsi (ID)'}
                         </label>
                         <input
                           type="text"
@@ -1069,7 +1097,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                       </div>
                       <div>
                         <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                          Yoxlama Linki (URL)
+                          {t('cert_field_verify_url') || 'Yoxlama Linki (URL)'}
                         </label>
                         <input
                           type="url"
@@ -1087,13 +1115,13 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                         onClick={() => setShowAddCertModal(false)}
                         className="px-3 py-1.5 text-xs rounded-lg text-slate-600 hover:bg-slate-200/60"
                       >
-                        Ləğv et
+                        {t('common_cancel') || 'Ləğv et'}
                       </button>
                       <button
                         type="submit"
                         className="px-4 py-1.5 text-xs rounded-lg bg-[#c5a059] hover:bg-[#b08d47] text-white font-bold shadow"
                       >
-                        Yadda Saxla
+                        {t('common_save') || 'Yadda Saxla'}
                       </button>
                     </div>
                   </form>
@@ -1105,16 +1133,16 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                 <div className="flex items-center gap-2 mb-3">
                   <span className="material-symbols-outlined text-[18px] text-[#c5a059]">verified_user</span>
                   <h4 className="text-xs font-bold uppercase tracking-wider text-[#071326]">
-                    Monodoxia Rəsmi Sertifikatları ({adminIssuedCerts.length})
+                    {t('expert_monodoxia_official_certs') || 'Monodoxia Rəsmi Sertifikatları'} ({adminIssuedCerts.length})
                   </h4>
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                    Akademiya Tərəfindən Təsdiqlənmiş
+                    {t('expert_verified_by_academy') || 'Akademiya Tərəfindən Təsdiqlənmiş'}
                   </span>
                 </div>
 
                 {adminIssuedCerts.length === 0 ? (
                   <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-500 italic">
-                    Hələlik bu ekspert üçün akademiya daxili verilmiş rəsmi sertifikat yoxdur.
+                    {t('expert_no_admin_certs') || 'Hələlik bu ekspert üçün akademiya daxili verilmiş rəsmi sertifikat yoxdur.'}
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 gap-3">
@@ -1130,7 +1158,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-mono text-[11px] font-bold text-[#c5a059]">{cert.number}</span>
                             <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                              ✓ Doğrulanmış
+                              {t('cert_verified_badge') || '✓ Doğrulanmış'}
                             </span>
                             <span className="text-[11px] text-slate-500">
                               {cert.fields?.dateValue || cert.issuedAt}
@@ -1140,7 +1168,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                             {cert.fields?.courseName || 'Monodoxia Sertifikatı'}
                           </h5>
                           <p className="text-[11px] text-slate-600 mt-0.5">
-                            Verildi: <span className="font-semibold text-slate-800">{cert.userName || cert.fields?.recipientName}</span>
+                            {t('cert_issued_to_prefix') || 'Verildi:'} <span className="font-semibold text-slate-800">{cert.userName || cert.fields?.recipientName}</span>
                           </p>
                         </div>
                         <div className="shrink-0 flex items-center gap-1.5 self-center">
@@ -1155,7 +1183,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                             className="px-3 py-1.5 rounded-lg bg-[#071326] hover:bg-[#0c2242] text-[#e5c57d] text-xs font-semibold flex items-center gap-1 cursor-pointer shadow-sm transition-colors"
                           >
                             <span className="material-symbols-outlined text-[14px]">visibility</span>
-                            <span>Bax</span>
+                            <span>{t('common_view') || 'Bax'}</span>
                           </button>
                         </div>
                       </div>
@@ -1169,13 +1197,13 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                 <div className="flex items-center gap-2 mb-3">
                   <span className="material-symbols-outlined text-[18px] text-[#775a19]">school</span>
                   <h4 className="text-xs font-bold uppercase tracking-wider text-[#071326]">
-                    Beynəlxalq və Peşəkar Sertifikatlar ({customCerts.length})
+                    {t('expert_intl_pro_certs') || 'Beynəlxalq və Peşəkar Sertifikatlar'} ({customCerts.length})
                   </h4>
                 </div>
 
                 {customCerts.length === 0 ? (
                   <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-500 italic">
-                    Ekspert tərəfindən əlavə edilmiş digər sertifikat tapılmadı.
+                    {t('expert_no_custom_certs') || 'Ekspert tərəfindən əlavə edilmiş digər sertifikat tapılmadı.'}
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1189,7 +1217,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                             type="button"
                             onClick={() => deleteCoachCertificate(liveCoach.id, cert.id)}
                             className="absolute top-3 right-3 text-slate-400 hover:text-red-500 p-1 rounded transition-colors"
-                            title="Sertifikatı sil"
+                            title={t('common_delete') || 'Sertifikatı sil'}
                           >
                             <span className="material-symbols-outlined text-[16px]">delete</span>
                           </button>
@@ -1210,7 +1238,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                         </div>
 
                         <div className="flex items-center justify-between pt-3 mt-2 border-t border-slate-100 text-[11px] text-slate-500">
-                          <span>{cert.issueDate ? `${cert.issueDate} ili` : 'Təsdiqlənmiş'}</span>
+                          <span>{cert.issueDate ? `${cert.issueDate}` : (t('common_verified') || 'Təsdiqlənmiş')}</span>
                           {cert.credentialUrl && (
                             <a
                               href={cert.credentialUrl}
@@ -1218,7 +1246,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                               rel="noopener noreferrer"
                               className="text-[#c5a059] hover:text-[#775a19] font-semibold flex items-center gap-0.5"
                             >
-                              <span>Doğrula</span>
+                              <span>{t('cert_verify_action') || 'Doğrula'}</span>
                               <span className="material-symbols-outlined text-[13px]">open_in_new</span>
                             </a>
                           )}
@@ -1238,23 +1266,23 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm text-center">
                   <div className="text-xl font-serif font-bold text-[#071326]">{modalSchedule.length}</div>
-                  <div className="text-[10px] uppercase tracking-wider font-semibold text-slate-500 mt-0.5">Ümumi Saatlar</div>
+                  <div className="text-[10px] uppercase tracking-wider font-semibold text-slate-500 mt-0.5">{t('expert_total_slots') || 'Ümumi Saatlar'}</div>
                 </div>
                 <div className="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200 shadow-sm text-center">
                   <div className="text-xl font-serif font-bold text-emerald-800">
                     {modalSchedule.filter(s => !s.isBooked).length}
                   </div>
-                  <div className="text-[10px] uppercase tracking-wider font-semibold text-emerald-700 mt-0.5">🟢 Mövcud (Boş)</div>
+                  <div className="text-[10px] uppercase tracking-wider font-semibold text-emerald-700 mt-0.5">🟢 {t('expert_available_slots_status') || 'Mövcud (Boş)'}</div>
                 </div>
                 <div className="p-3.5 rounded-2xl bg-rose-50/70 border border-rose-200 shadow-sm text-center">
                   <div className="text-xl font-serif font-bold text-rose-800">
                     {modalSchedule.filter(s => s.isBooked).length}
                   </div>
-                  <div className="text-[10px] uppercase tracking-wider font-semibold text-rose-700 mt-0.5">🔴 Dolu (Rezerv)</div>
+                  <div className="text-[10px] uppercase tracking-wider font-semibold text-rose-700 mt-0.5">🔴 {t('expert_booked_slots_status') || 'Dolu (Rezerv)'}</div>
                 </div>
                 <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200 shadow-sm text-center">
                   <div className="text-xl font-serif font-bold text-amber-900">{pendingBookingsCount}</div>
-                  <div className="text-[10px] uppercase tracking-wider font-semibold text-amber-800 mt-0.5">⏳ Gözləyən Rezervasiya</div>
+                  <div className="text-[10px] uppercase tracking-wider font-semibold text-amber-800 mt-0.5">⏳ {t('expert_pending_bookings_stat') || 'Gözləyən Rezervasiya'}</div>
                 </div>
               </div>
 
@@ -1264,10 +1292,10 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                   <div>
                     <h4 className="text-sm font-bold text-[#071326] flex items-center gap-1.5 font-mono uppercase tracking-wider">
                       <span className="material-symbols-outlined text-[18px] text-amber-600">inbox</span>
-                      Gələn Rezervasiya Müraciətləri
+                      {t('expert_incoming_bookings_title') || 'Gələn Rezervasiya Müraciətləri'}
                     </h4>
                     <p className="text-[11px] text-slate-500 mt-0.5">
-                      Sayt üzərindən sizin adınıza edilmiş rezervasiyalar. Qəbul etdikdə saat təqvimdə avtomatik <strong>dolu</strong> olur.
+                      {t('expert_incoming_bookings_desc') || 'Sayt üzərindən sizin adınıza edilmiş rezervasiyalar. Qəbul etdikdə saat təqvimdə avtomatik dolu olur.'}
                     </p>
                   </div>
 
@@ -1277,10 +1305,10 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                       type="button"
                       onClick={() => refreshBookings && refreshBookings()}
                       className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-300 text-amber-800 text-[11px] font-semibold hover:bg-amber-100 transition-all cursor-pointer"
-                      title="Rezervasiyaları yenilə"
+                      title={t('common_refresh') || 'Yenilə'}
                     >
                       <span className="material-symbols-outlined text-[15px]">refresh</span>
-                      Yenilə
+                      {t('common_refresh') || 'Yenilə'}
                     </button>
                     {/* Filter Pills */}
                     <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs">
@@ -1310,7 +1338,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                 {filteredBookings.length === 0 ? (
                   <div className="p-6 text-center text-xs text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
                     <span className="material-symbols-outlined text-3xl block text-slate-300 mb-1">event_busy</span>
-                    Bu kateqoriyada heç bir rezervasiya müraciəti yoxdur.
+                    {t('expert_no_bookings_in_category') || 'Bu kateqoriyada heç bir rezervasiya müraciəti yoxdur.'}
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -1331,7 +1359,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                               b.status === 'Ləğv edildi' ? 'bg-rose-100 text-rose-800 border border-rose-300' :
                               'bg-amber-100 text-amber-800 border border-amber-300'
                             }`}>
-                              {b.status || 'Gözləyir'}
+                              {getBookingStatusText(b.status)}
                             </span>
                             <span className="text-[10px] text-slate-400 font-mono">#{b.id}</span>
                           </div>
@@ -1341,11 +1369,11 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                               <span className="material-symbols-outlined text-[13px]">schedule</span>
                               {b.slot || `${b.selectedDate || ''} ${b.startTime || ''}-${b.endTime || ''}`}
                             </span>
-                            <span className="text-slate-500">• {b.format}</span>
+                            <span className="text-slate-500">• {getBookingFormatText(b.format)}</span>
                             {b.userEmail && <span className="text-slate-500 text-[11px]">({b.userEmail})</span>}
                             {b.userPhone && <span className="text-slate-600 text-[11px] font-medium flex items-center gap-0.5"><span className="material-symbols-outlined text-[13px] text-emerald-600">call</span> {b.userPhone}</span>}
                             {b.userAddress && <span className="text-slate-600 text-[11px] font-medium flex items-center gap-0.5"><span className="material-symbols-outlined text-[13px] text-amber-600">location_on</span> {b.userAddress}</span>}
-                            {b.isGuest && <span className="text-[10px] bg-amber-100 text-amber-900 border border-amber-300 px-1.5 py-0.2 rounded font-semibold">Qonaq Formu</span>}
+                            {b.isGuest && <span className="text-[10px] bg-amber-100 text-amber-900 border border-amber-300 px-1.5 py-0.2 rounded font-semibold">{t('booking_guest_form_badge') || 'Qonaq Formu'}</span>}
                           </div>
 
                           {b.notes && (
@@ -1360,29 +1388,29 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                             <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
                               {/* End time input for approval */}
                               <div className="flex items-center gap-1.5">
-                                <label className="text-[10px] font-bold text-slate-600 whitespace-nowrap">Bitmə vaxtı:</label>
+                                <label className="text-[10px] font-bold text-slate-600 whitespace-nowrap">{t('booking_end_time_colon') || 'Bitmə vaxtı:'}</label>
                                 <input
                                   type="time"
                                   value={approvalEndTimes[b.id] || b.endTime || (b.startTime ? (() => { const [h,m] = (b.startTime||'00:00').split(':').map(Number); return `${String(h+1).padStart(2,'0')}:${String(m).padStart(2,'0')}`; })() : '15:00')}
                                   onChange={e => setApprovalEndTimes(prev => ({ ...prev, [b.id]: e.target.value }))}
                                   className="px-2 py-1 rounded-lg border border-slate-300 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-amber-500"
-                                  title="Seans bitmə vaxtını təyin edin"
+                                  title={t('expert_change_end_time') || 'Seans bitmə vaxtını təyin edin'}
                                 />
                               </div>
                               <button
                                 type="button"
                                 onClick={() => updateBookingStatus(b.id, 'Təsdiqləndi', { endTime: approvalEndTimes[b.id] || b.endTime || '' })}
                                 className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer transition-colors"
-                                title="Rezervasiyanı qəbul et və bitmə vaxtını təyin et"
+                                title={t('expert_accept_and_book_btn') || 'Rezervasiyanı qəbul et və bitmə vaxtını təyin et'}
                               >
                                 <span className="material-symbols-outlined text-[16px]">check_circle</span>
-                                <span>Qəbul Et & Rezervlə</span>
+                                <span>{t('expert_accept_and_book_btn') || 'Qəbul Et & Rezervlə'}</span>
                               </button>
                             </div>
                           )}
                           {b.status === 'Təsdiqləndi' && (
                             <div className="flex items-center gap-1.5">
-                              <label className="text-[10px] font-bold text-slate-600 whitespace-nowrap">Bitmə vaxtını dəyiş:</label>
+                              <label className="text-[10px] font-bold text-slate-600 whitespace-nowrap">{t('expert_change_end_time') || 'Bitmə vaxtını dəyiş:'}</label>
                               <input
                                 type="time"
                                 defaultValue={b.endTime || ''}
@@ -1391,11 +1419,11 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                               />
                               <button
                                 type="button"
-                                onClick={() => { const t = approvalEndTimes[b.id]; if (t) updateBookingEndTime(b.id, t); }}
+                                onClick={() => { const tVal = approvalEndTimes[b.id]; if (tVal) updateBookingEndTime(b.id, tVal); }}
                                 className="px-2.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors"
                               >
                                 <span className="material-symbols-outlined text-[14px]">update</span>
-                                <span>Yenilə</span>
+                                <span>{t('common_refresh') || 'Yenilə'}</span>
                               </button>
                             </div>
                           )}
@@ -1404,10 +1432,10 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                               type="button"
                               onClick={() => updateBookingStatus(b.id, 'Ləğv edildi')}
                               className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 text-xs font-medium flex items-center gap-1 cursor-pointer transition-colors"
-                              title="Ləğv et və saatı yenidən boşalt"
+                              title={t('expert_cancel_and_free_slot') || 'Ləğv et və saatı yenidən boşalt'}
                             >
                               <span className="material-symbols-outlined text-[15px]">close</span>
-                              <span>Ləğv Et & Saatı Boşalt</span>
+                              <span>{t('expert_cancel_and_free_slot') || 'Ləğv Et & Saatı Boşalt'}</span>
                             </button>
                           )}
                         </div>
@@ -1423,10 +1451,10 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                   <div>
                     <h4 className="text-sm font-bold text-[#071326] flex items-center gap-1.5 font-mono uppercase tracking-wider">
                       <span className="material-symbols-outlined text-[18px] text-[#775a19]">calendar_month</span>
-                      Şəxsi Təqvim və Saat Cədvəlinin İdarə Edilməsi
+                      {t('expert_calendar_mgmt_title') || 'Şəxsi Təqvim və Saat Cədvəlinin İdarə Edilməsi'}
                     </h4>
                     <p className="text-[11px] text-slate-500 mt-0.5">
-                      Tarix və saat aralıqlarını qeyd edin. Dolu olanlar saytda müştərilərə deaktiv görünür, mövcud olanlara rezervasiya verilə bilir.
+                      {t('expert_calendar_mgmt_desc') || 'Tarix və saat aralıqlarını qeyd edin. Dolu olanlar saytda müştərilərə deaktiv görünür, mövcud olanlara rezervasiya verilə bilir.'}
                     </p>
                   </div>
                 </div>
@@ -1434,11 +1462,11 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                 {/* Form to Add New Slot */}
                 <div className="p-4 rounded-2xl bg-amber-50/40 border border-amber-200/80 space-y-3">
                   <span className="text-[11px] font-bold text-[#775a19] uppercase tracking-wider block">
-                    + Yeni Saat Aralığı Əlavə Et
+                    + {t('expert_add_new_slot') || 'Yeni Saat Aralığı Əlavə Et'}
                   </span>
                   <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Tarix</label>
+                      <label className="block text-[10px] font-bold text-slate-600 mb-0.5">{t('common_date') || 'Tarix'}</label>
                       <input
                         type="date"
                         min={new Date().toISOString().split('T')[0]}
@@ -1448,7 +1476,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Başlama Saatı</label>
+                      <label className="block text-[10px] font-bold text-slate-600 mb-0.5">{t('field_start_time') || 'Başlama Saatı'}</label>
                       <input
                         type="time"
                         value={modalSlotStart}
@@ -1457,7 +1485,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Bitmə Saatı</label>
+                      <label className="block text-[10px] font-bold text-slate-600 mb-0.5">{t('field_end_time') || 'Bitmə Saatı'}</label>
                       <input
                         type="time"
                         value={modalSlotEnd}
@@ -1466,14 +1494,14 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Saat Vəziyyəti</label>
+                      <label className="block text-[10px] font-bold text-slate-600 mb-0.5">{t('field_slot_status') || 'Saat Vəziyyəti'}</label>
                       <select
                         value={modalSlotStatus}
                         onChange={e => setModalSlotStatus(e.target.value)}
                         className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-bold"
                       >
-                        <option value="Dolu">🔴 Dolu / Məşğul</option>
-                        <option value="Mövcud">🟢 Mövcud / Boş</option>
+                        <option value="Dolu">🔴 {t('expert_slot_status_busy') || 'Dolu / Məşğul'}</option>
+                        <option value="Mövcud">🟢 {t('expert_slot_status_available') || 'Mövcud / Boş'}</option>
                       </select>
                     </div>
                   </div>
@@ -1483,7 +1511,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                       type="text"
                       value={modalSlotNote}
                       onChange={e => setModalSlotNote(e.target.value)}
-                      placeholder="Qeyd (məs: Şəxsi görüş, Fərdi seans və s. - istəyə bağlı)"
+                      placeholder={t('expert_slot_note_ph') || 'Qeyd (məs: Şəxsi görüş, Fərdi seans və s. - istəyə bağlı)'}
                       className="flex-1 w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-800"
                     />
                     <button
@@ -1492,7 +1520,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                       className="w-full sm:w-auto px-4 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold flex items-center justify-center gap-1 cursor-pointer transition-colors shrink-0 shadow-xs"
                     >
                       <span className="material-symbols-outlined text-[15px]">add_circle</span>
-                      <span>+ Cədvələ Əlavə Et</span>
+                      <span>+ {t('expert_add_to_schedule_btn') || 'Cədvələ Əlavə Et'}</span>
                     </button>
                   </div>
                 </div>
@@ -1500,12 +1528,12 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                 {/* Slots List */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs font-bold text-slate-700">
-                    <span>Mövcud Saat Aralıqları ({modalSchedule.length})</span>
-                    <span className="text-[10px] font-normal text-slate-400">Dəyişikliklər avtomatik yadda saxlanılır</span>
+                    <span>{t('expert_available_slots_list_title') || 'Mövcud Saat Aralıqları'} ({modalSchedule.length})</span>
+                    <span className="text-[10px] font-normal text-slate-400">{t('expert_changes_saved_auto') || 'Dəyişikliklər avtomatik yadda saxlanılır'}</span>
                   </div>
 
                   {modalSchedule.length === 0 ? (
-                    <p className="text-xs text-slate-400 italic py-2">Hələ heç bir saat aralığı təyin edilməyib.</p>
+                    <p className="text-xs text-slate-400 italic py-2">{t('expert_no_slots_defined') || 'Hələ heç bir saat aralığı təyin edilməyib.'}</p>
                   ) : (
                     <div className="space-y-1.5 max-h-72 overflow-y-auto pr-1">
                       {modalSchedule.map(s => (
@@ -1525,7 +1553,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                                   ? 'bg-rose-200 text-rose-900 border border-rose-300'
                                   : 'bg-emerald-200 text-emerald-900 border border-emerald-300'
                               }`}>
-                                {s.isBooked ? 'Dolu / Rezerv' : 'Mövcud / Boş'}
+                                {s.isBooked ? (t('expert_slot_status_booked_badge') || 'Dolu / Rezerv') : (t('expert_slot_status_available') || 'Mövcud / Boş')}
                               </span>
                             </div>
                             {(s.note || s.clientName) && (
@@ -1547,13 +1575,13 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                               }`}
                               title="Vəziyyəti dəyiş"
                             >
-                              {s.isBooked ? 'Boş et' : 'Dolu et'}
+                              {s.isBooked ? (t('expert_make_free_btn') || 'Boş et') : (t('expert_make_booked_btn') || 'Dolu et')}
                             </button>
                             <button
                               type="button"
                               onClick={() => handleRemoveModalSlot(s.id)}
                               className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-white transition-colors cursor-pointer"
-                              title="Sil"
+                              title={t('common_delete') || 'Sil'}
                             >
                               <span className="material-symbols-outlined text-[16px]">delete</span>
                             </button>
@@ -1571,14 +1599,14 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                   <div>
                     <h4 className="text-sm font-bold text-[#071326] flex items-center gap-1.5 font-mono uppercase tracking-wider">
                       <span className="material-symbols-outlined text-[18px] text-purple-600">block</span>
-                      Vaxtı Blokla (Şəxsi / Manual)
+                      {t('expert_block_time_title') || 'Vaxtı Blokla (Şəxsi / Manual)'}
                     </h4>
                     <p className="text-[11px] text-slate-500 mt-0.5">
-                      Şəxsi iş, görüş və ya istənilən səbəblə vaxt aralığını bağlayın. Bloklanmış vaxtlar müştərilərə əlçatmaz görünür.
+                      {t('expert_block_time_desc') || 'Şəxsi iş, görüş və ya istənilən səbəblə vaxt aralığını bağlayın. Bloklanmış vaxtlar müştərilərə əlçatmaz görünür.'}
                     </p>
                   </div>
                   <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200">
-                    {coachTimeBlocks.length} blok aktiv
+                    {(t('expert_blocks_active_count') || '{count} blok aktiv').replace('{count}', coachTimeBlocks.length)}
                   </span>
                 </div>
 
@@ -1586,11 +1614,11 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                 <div className="p-4 rounded-2xl bg-purple-50/40 border border-purple-200/80 space-y-3">
                   <span className="text-[11px] font-bold text-purple-800 uppercase tracking-wider block flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-[15px]">add_circle</span>
-                    {editingBlockId ? 'Bloku Redaktə Et' : 'Yeni Blok Əlavə Et'}
+                    {editingBlockId ? (t('expert_edit_block') || 'Bloku Redaktə Et') : (t('expert_add_new_block') || 'Yeni Blok Əlavə Et')}
                   </span>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Tarix</label>
+                      <label className="block text-[10px] font-bold text-slate-600 mb-0.5">{t('common_date') || 'Tarix'}</label>
                       <input
                         type="date"
                         min={new Date().toISOString().split('T')[0]}
@@ -1600,7 +1628,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Başlama Saatı</label>
+                      <label className="block text-[10px] font-bold text-slate-600 mb-0.5">{t('field_start_time') || 'Başlama Saatı'}</label>
                       <input
                         type="time"
                         value={blockStart}
@@ -1609,7 +1637,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Bitmə Saatı</label>
+                      <label className="block text-[10px] font-bold text-slate-600 mb-0.5">{t('field_end_time') || 'Bitmə Saatı'}</label>
                       <input
                         type="time"
                         value={blockEnd}
@@ -1618,12 +1646,12 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Bloklama Səbəbi (istəyə bağlı)</label>
+                      <label className="block text-[10px] font-bold text-slate-600 mb-0.5">{t('expert_block_reason_label') || 'Bloklama Səbəbi (istəyə bağlı)'}</label>
                       <input
                         type="text"
                         value={blockReason}
                         onChange={e => setBlockReason(e.target.value)}
-                        placeholder="Məs: Şəxsi iş, Görüş..."
+                        placeholder={t('expert_block_reason_ph') || 'Məs: Şəxsi iş, Görüş...'}
                         className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-purple-500"
                       />
                     </div>
@@ -1644,7 +1672,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                       className="px-4 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors shadow-xs"
                     >
                       <span className="material-symbols-outlined text-[15px]">{editingBlockId ? 'save' : 'block'}</span>
-                      <span>{editingBlockId ? 'Bloku Yadda Saxla' : 'Vaxtı Blokla'}</span>
+                      <span>{editingBlockId ? (t('expert_save_block_btn') || 'Bloku Yadda Saxla') : (t('expert_block_btn') || 'Vaxtı Blokla')}</span>
                     </button>
                     {editingBlockId && (
                       <button
@@ -1652,7 +1680,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                         onClick={() => { setEditingBlockId(null); setBlockReason(''); }}
                         className="px-3 py-1.5 rounded-lg bg-white border border-slate-300 text-slate-600 text-xs cursor-pointer"
                       >
-                        Ləğv Et
+                        {t('common_cancel') || 'Ləğv Et'}
                       </button>
                     )}
                   </div>
@@ -1661,14 +1689,14 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                 {/* Existing Blocks List */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs font-bold text-slate-700">
-                    <span>Aktiv Bloklar ({coachTimeBlocks.length})</span>
-                    <span className="text-[10px] font-normal text-slate-400">🟣 = Manual Blok · 🔴 = Rezervasiya</span>
+                    <span>{t('expert_active_blocks_title') || 'Aktiv Bloklar'} ({coachTimeBlocks.length})</span>
+                    <span className="text-[10px] font-normal text-slate-400">🟣 = {t('expert_manual_block_badge') || 'Manual Blok'} · 🔴 = {t('expert_booked_slots_status') || 'Rezervasiya'}</span>
                   </div>
 
                   {coachTimeBlocks.length === 0 ? (
                     <div className="p-4 rounded-xl bg-purple-50/50 border border-dashed border-purple-200 text-center">
                       <span className="material-symbols-outlined text-2xl text-purple-300 block mb-1">block</span>
-                      <p className="text-xs text-slate-400">Heç bir manual blok yoxdur. Yuxarıdakı forma ilə əlavə edin.</p>
+                      <p className="text-xs text-slate-400">{t('expert_no_manual_blocks') || 'Heç bir manual blok yoxdur. Yuxarıdakı forma ilə əlavə edin.'}</p>
                     </div>
                   ) : (
                     <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
@@ -1683,7 +1711,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                                 🟣 {tb.date.split('-').reverse().join('.')} · {tb.startTime}–{tb.endTime}
                               </span>
                               <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-purple-200 text-purple-900 border border-purple-300 uppercase tracking-wider">
-                                Manual Blok
+                                {t('expert_manual_block_badge') || 'Manual Blok'}
                               </span>
                             </div>
                             {tb.reason && (
@@ -1701,7 +1729,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                                 setBlockReason(tb.reason || '');
                               }}
                               className="p-1 rounded-lg text-slate-400 hover:text-purple-600 hover:bg-white transition-colors cursor-pointer"
-                              title="Redaktə et"
+                              title={t('expert_edit_block') || 'Redaktə et'}
                             >
                               <span className="material-symbols-outlined text-[16px]">edit</span>
                             </button>
@@ -1709,7 +1737,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                               type="button"
                               onClick={() => removeTimeBlock(tb.id)}
                               className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-white transition-colors cursor-pointer"
-                              title="Bloku sil"
+                              title={t('common_delete') || 'Bloku sil'}
                             >
                               <span className="material-symbols-outlined text-[16px]">delete</span>
                             </button>
@@ -1740,7 +1768,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                       ))}
                     </div>
                     <p className="text-xs text-slate-600 mt-1 font-medium">
-                      Ümumi <strong className="text-slate-900">{totalReviewsCount}</strong> istifadəçi rəyi əsasında
+                      {(t('expert_reviews_based_on') || 'Ümumi {count} istifadəçi rəyi əsasında').replace('{count}', String(totalReviewsCount))}
                     </p>
                   </div>
                 </div>
@@ -1748,7 +1776,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                 <div className="text-center sm:text-right">
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold">
                     <span className="material-symbols-outlined text-[15px] text-emerald-600">verified</span>
-                    <span>100% Müsbət Təcrübə</span>
+                    <span>{t('expert_positive_experience') || '100% Müsbət Təcrübə'}</span>
                   </span>
                 </div>
               </div>
@@ -1757,14 +1785,14 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
               <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-[#071326] mb-3 flex items-center gap-1.5">
                   <span className="material-symbols-outlined text-[16px] text-amber-500">rate_review</span>
-                  <span>Ekspertə Ulduz Ver və Rəy Yaz</span>
+                  <span>{t('expert_rate_and_review') || 'Ekspertə Ulduz Ver və Rəy Yaz'}</span>
                 </h4>
 
                 <form onSubmit={handleReviewSubmit} className="space-y-3">
                   {/* Star rating selector */}
                   <div>
                     <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                      Qiymətləndirməniz:
+                      {t('expert_your_rating_label') || 'Qiymətləndirməniz:'}
                     </label>
                     <div className="flex items-center gap-1.5">
                       {[1, 2, 3, 4, 5].map((s) => (
@@ -1787,7 +1815,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                         </button>
                       ))}
                       <span className="text-xs font-bold text-amber-600 ml-2">
-                        {userRating === 5 ? 'Əla (5/5)' : userRating === 4 ? 'Çox Yaxşı (4/5)' : userRating === 3 ? 'Yaxşı (3/5)' : `${userRating} Ulduz`}
+                        {userRating === 5 ? `${t('rating_excellent') || 'Əla'} (5/5)` : userRating === 4 ? `${t('rating_very_good') || 'Çox Yaxşı'} (4/5)` : userRating === 3 ? `${t('rating_good') || 'Yaxşı'} (3/5)` : `${userRating} ${t('rating_stars') || 'Ulduz'}`}
                       </span>
                     </div>
                   </div>
@@ -1795,7 +1823,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                   {!currentUser && (
                     <div>
                       <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                        Adınız və Soyadınız
+                        {t('expert_reviewer_fullname') || 'Adınız və Soyadınız'}
                       </label>
                       <input
                         type="text"
@@ -1809,14 +1837,14 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
 
                   <div>
                     <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                      Rəyiniz və Təəssüratınız *
+                      {t('expert_review_comment_label') || 'Rəyiniz və Təəssüratınız *'}
                     </label>
                     <textarea
                       required
                       rows={3}
                       value={reviewComment}
                       onChange={(e) => setReviewComment(e.target.value)}
-                      placeholder="Ekspertlə seans təcrübəniz, əldə etdiyiniz nəticələr və tövsiyələriniz barədə yazın..."
+                      placeholder={t('expert_review_placeholder') || 'Ekspertlə seans təcrübəniz, əldə etdiyiniz nəticələr və tövsiyələriniz barədə yazın...'}
                       className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#c5a059] resize-none"
                     />
                   </div>
@@ -1828,7 +1856,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                       className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#071326] to-[#0c2242] text-white hover:text-[#e5c57d] text-xs font-bold tracking-wider uppercase shadow-md transition-all flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-[16px] text-[#e5c57d]">send</span>
-                      <span>Rəyi Paylaş</span>
+                      <span>{t('expert_share_review_btn') || 'Rəyi Paylaş'}</span>
                     </button>
                   </div>
                 </form>
@@ -1837,14 +1865,14 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
               {/* Reviews List */}
               <div className="space-y-3">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                  İstifadəçi Rəyləri ({expertReviews.length})
+                  {t('expert_user_reviews_heading') || 'İstifadəçi Rəyləri'} ({expertReviews.length})
                 </h4>
 
                 {expertReviews.length === 0 ? (
                   <div className="p-8 rounded-2xl bg-[#faf8f5] border border-slate-200 text-center">
                     <span className="material-symbols-outlined text-[36px] text-amber-300">chat</span>
                     <p className="text-xs text-slate-500 mt-2">
-                      İlk rəy yazan siz olun! Yuxarıdakı form vasitəsilə təəssüratlarınızı bölüşün.
+                      {t('expert_first_review_prompt') || 'İlk rəy yazan siz olun! Yuxarıdakı form vasitəsilə təəssüratlarınızı bölüşün.'}
                     </p>
                   </div>
                 ) : (
@@ -1869,7 +1897,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                                 )}
                               </div>
                               <div className="text-[10px] text-slate-400">
-                                {rev.createdAt ? new Date(rev.createdAt).toLocaleDateString('az-AZ') : 'Yaxın zamanda'}
+                                {rev.createdAt ? new Date(rev.createdAt).toLocaleDateString(currentLang === 'az' ? 'az-AZ' : (currentLang === 'ru' ? 'ru-RU' : (currentLang === 'tr' ? 'tr-TR' : 'en-US'))) : (t('time_recently') || 'Yaxın zamanda')}
                               </div>
                             </div>
                           </div>
@@ -1901,7 +1929,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
               onClick={onClose}
               className="w-full sm:w-auto px-5 py-3 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold cursor-pointer transition-colors"
             >
-              Bağla
+              {t('common_close') || 'Bağla'}
             </button>
 
             <button
@@ -1910,7 +1938,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
               className="w-full sm:flex-1 py-3.5 px-6 rounded-xl bg-gradient-to-r from-[#071326] to-[#0c2242] text-white hover:text-[#e5c57d] text-xs font-bold tracking-wider uppercase shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <span className="material-symbols-outlined text-[18px] text-[#e5c57d]">calendar_today</span>
-              <span>Fərdi Kouçinq Rezervasiya Et</span>
+              <span>{t('expert_book_coaching_btn') || 'Fərdi Kouçinq Rezervasiya Et'}</span>
             </button>
           </div>
         </div>

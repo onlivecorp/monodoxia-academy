@@ -27,7 +27,7 @@ export default function AdminApplicationsTab() {
     showToast
   } = useApp();
 
-  const { supportedLangs = [] } = useLanguage();
+  const { t, supportedLangs = [] } = useLanguage();
   const langList = (supportedLangs && supportedLangs.length > 0 ? supportedLangs : ['az', 'en', 'tr', 'ru']).map(l => {
     if (typeof l === 'string') return { code: l, name: l.toUpperCase() };
     return {
@@ -125,7 +125,7 @@ export default function AdminApplicationsTab() {
           'Ekspert / Kouç': coachDisplayName,
           'Seans Vaxtı (Slot)': slotTime,
           'Format': b.format || 'Online (Google Meet)',
-          'Ünvan / Ərazi': clientAddress || 'Qeyd olunmayıb',
+          'Ünvan / Ərazi': clientAddress || (t ? (t('not_specified') || 'Qeyd olunmayıb') : 'Qeyd olunmayıb'),
           'İstifadəçi Növü': b.isGuest ? 'Saytdan Qonaq Rezervasiyası' : 'Qeydiyyatlı İstifadəçi'
         }
       };
@@ -633,7 +633,7 @@ export default function AdminApplicationsTab() {
                               {app.status}
                             </span>
                             {app.adminNote && (
-                              <span className="material-symbols-outlined text-[14px] text-secondary ml-1 inline-block align-middle" title={`Qeyd: ${app.adminNote}`}>
+                              <span className="material-symbols-outlined text-[14px] text-secondary ml-1 inline-block align-middle" title={app.adminNote === 'Admin paneldən təsdiqləndi.' ? (t ? (t('admin_approved_note') || app.adminNote) : app.adminNote) : `Qeyd: ${app.adminNote}`}>
                                 comment
                               </span>
                             )}
@@ -745,7 +745,7 @@ export default function AdminApplicationsTab() {
                                       updateApplicationStatus(
                                         app.id,
                                         'Təsdiqləndi',
-                                        'Admin paneldən təsdiqləndi.',
+                                        t ? (t('admin_approved_note') || 'Admin paneldən təsdiqləndi.') : 'Admin paneldən təsdiqləndi.',
                                         isTopic ? 'Tələb olunmur' : 'Ödənildi',
                                         isTopic ? 'Tələb olunmur' : 'İştirak edəcək'
                                       );

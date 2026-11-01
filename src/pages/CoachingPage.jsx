@@ -119,8 +119,14 @@ export default function CoachingPage() {
           {/* Coaches Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
             {filteredCoaches.map((c) => {
-              const coachTitle = getLocalized(c, 'title', currentLang, defaultLang) || c.title;
-              const coachBio = getLocalized(c, 'bio', currentLang, defaultLang) || c.bio;
+              let coachTitle = getLocalized(c, 'title', currentLang, defaultLang) || c.title;
+              if (!coachTitle || coachTitle === 'Kouç & Ekspert') {
+                coachTitle = t('expert_coach_expert') || 'Kouç & Ekspert';
+              }
+              let coachBio = getLocalized(c, 'bio', currentLang, defaultLang) || c.bio;
+              if (coachBio && currentLang !== 'az' && coachBio.includes('Monodoxia Academy fərdi inkişaf və kouçinq ekspertidir.')) {
+                coachBio = coachBio.replace('Monodoxia Academy fərdi inkişaf və kouçinq ekspertidir.', t('coach_default_bio_text') || 'Monodoxia Academy fərdi inkişaf və kouçinq ekspertidir.');
+              }
               const coachExp = getLocalized(c, 'experience', currentLang, defaultLang) || c.experience;
               const rawSpecialties = getLocalizedArray(c, 'specialties', currentLang, defaultLang);
               const specialtiesList = rawSpecialties.length > 0

@@ -783,7 +783,7 @@ export default function ProfileModal() {
                 <form onSubmit={handleSaveProfile} className="space-y-4 p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">Ad *</label>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">{t('auth_first_name_label') || 'Ad'} *</label>
                       <input
                         type="text"
                         value={profileForm.firstName}
@@ -793,7 +793,7 @@ export default function ProfileModal() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">Soyad</label>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">{t('auth_last_name_label') || 'Soyad'}</label>
                       <input
                         type="text"
                         value={profileForm.lastName}
@@ -802,7 +802,7 @@ export default function ProfileModal() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">E-poçt Ünvanı *</label>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">{t('profile_field_email_full') || t('profile_field_email') || 'E-poçt Ünvanı'} *</label>
                       <input
                         type="email"
                         value={profileForm.email}
@@ -812,7 +812,7 @@ export default function ProfileModal() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">Telefon / WhatsApp</label>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">{t('profile_field_phone_wa') || 'Telefon / WhatsApp'}</label>
                       <input
                         type="text"
                         value={profileForm.phone}
@@ -888,7 +888,7 @@ export default function ProfileModal() {
                       className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold shadow-md shadow-amber-500/20 flex items-center gap-1.5 transition-all"
                     >
                       <span className="material-symbols-outlined text-[16px]">save</span>
-                      <span>Yadda Saxla</span>
+                      <span>{t('common_save') || 'Yadda Saxla'}</span>
                     </button>
                   </div>
                 </form>
@@ -906,7 +906,7 @@ export default function ProfileModal() {
                       <strong className="text-slate-900 font-mono">{currentUser.email}</strong>
                     </div>
                     <div className="p-4 rounded-2xl border border-slate-200/80 bg-white hover:border-amber-300 transition-colors shadow-sm">
-                      <span className="text-[10px] uppercase font-mono tracking-wider text-slate-500 block mb-1">{t('contact_phone_label') || 'Telefon'} / WhatsApp</span>
+                      <span className="text-[10px] uppercase font-mono tracking-wider text-slate-500 block mb-1">{t('profile_field_phone_wa') || `${t('contact_phone_label') || 'Telefon'} / WhatsApp`}</span>
                       <strong className="text-slate-900">{currentUser.phone || `+994 ${t('profile_loc_not_specified') || '(qeyd edilməyib)'}`}</strong>
                     </div>
                     <div className="p-4 rounded-2xl border border-slate-200/80 bg-white hover:border-amber-300 transition-colors shadow-sm">
@@ -1315,7 +1315,11 @@ export default function ProfileModal() {
                               <span className="material-symbols-outlined text-[14px]">admin_panel_settings</span>
                               {t('admin_note_label') || 'Administrator Qeydi:'}
                             </span>
-                            <p className="text-slate-700 italic">{app.adminNote}</p>
+                            <p className="text-slate-700 italic">
+                              {app.adminNote === 'Admin paneldən təsdiqləndi.'
+                                ? (t('admin_approved_note') || app.adminNote)
+                                : app.adminNote}
+                            </p>
                           </div>
                         )}
 
@@ -2212,7 +2216,7 @@ export default function ProfileModal() {
                                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100 transition-colors cursor-pointer"
                               >
                                 <span className="material-symbols-outlined text-[14px]">visibility</span>
-                                Bax / Yüklə
+                                {t('cert_view_download') || 'Bax / Yüklə'}
                               </button>
                               {verifyUrl && (
                                 <button
@@ -2220,7 +2224,7 @@ export default function ProfileModal() {
                                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100 transition-colors cursor-pointer"
                                 >
                                   <span className="material-symbols-outlined text-[14px]">link</span>
-                                  Link Kopyala
+                                  {t('cert_copy_link') || 'Link Kopyala'}
                                 </button>
                               )}
                               {verifyUrl && (
@@ -2231,7 +2235,7 @@ export default function ProfileModal() {
                                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100 transition-colors"
                                 >
                                   <span className="material-symbols-outlined text-[14px]">qr_code_2</span>
-                                  Doğrula
+                                  {t('cert_verify_action') || 'Doğrula'}
                                 </a>
                               )}
                             </div>
@@ -2308,7 +2312,7 @@ export default function ProfileModal() {
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                               <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                                Sertifikatın Adı *
+                                {t('cert_field_name_req') || 'Sertifikatın Adı *'}
                               </label>
                               <input
                                 type="text"
@@ -2321,7 +2325,7 @@ export default function ProfileModal() {
                             </div>
                             <div>
                               <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                                Təşkilat / İnstitut *
+                                {t('cert_field_issuer_req') || 'Təşkilat / İnstitut *'}
                               </label>
                               <input
                                 type="text"
@@ -2337,7 +2341,7 @@ export default function ProfileModal() {
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                             <div>
                               <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                                Verilmə Tarixi / İli
+                                {t('cert_field_date') || 'Verilmə Tarixi / İli'}
                               </label>
                               <input
                                 type="text"
@@ -2349,7 +2353,7 @@ export default function ProfileModal() {
                             </div>
                             <div>
                               <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                                Qeydiyyat Nömrəsi (ID)
+                                {t('cert_field_id') || 'Qeydiyyat Nömrəsi (ID)'}
                               </label>
                               <input
                                 type="text"
@@ -2361,7 +2365,7 @@ export default function ProfileModal() {
                             </div>
                             <div>
                               <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                                Onlayn Təsdiq Linki
+                                {t('cert_field_url') || 'Onlayn Təsdiq Linki'}
                               </label>
                               <input
                                 type="url"
@@ -2379,13 +2383,13 @@ export default function ProfileModal() {
                               onClick={() => setShowCoachCertForm(false)}
                               className="px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-200/60 rounded-lg cursor-pointer"
                             >
-                              Ləğv et
+                              {t('common_cancel') || 'Ləğv et'}
                             </button>
                             <button
                               type="submit"
                               className="px-4 py-1.5 text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 rounded-lg shadow-sm cursor-pointer"
                             >
-                              Yadda Saxla
+                              {t('common_save') || 'Yadda Saxla'}
                             </button>
                           </div>
                         </form>
