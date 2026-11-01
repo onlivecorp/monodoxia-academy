@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../i18n/LanguageContext';
+import { getLocalized } from '../../i18n/localize';
 import { TARGET_TYPE_MAP, APPLICATION_STATUSES } from '../../data/applicationData';
 
 export default function ApplicationModal() {
-  const { lang, t } = useLanguage();
+  const { lang, currentLang, defaultLang, t } = useLanguage();
   const {
     applicationModalOpen,
     setApplicationModalOpen,
@@ -176,7 +177,11 @@ export default function ApplicationModal() {
               )}
             </div>
             <h3 className="font-headline-sm text-lg sm:text-xl font-serif text-primary leading-snug">
-              {activeApplicationTarget.title}
+              {activeApplicationTarget.item
+                ? (getLocalized(activeApplicationTarget.item, 'title', currentLang, defaultLang) ||
+                   getLocalized(activeApplicationTarget.item, 'name', currentLang, defaultLang) ||
+                   activeApplicationTarget.title)
+                : activeApplicationTarget.title}
             </h3>
             {(activeApplicationTarget.speaker || activeApplicationTarget.instructor || activeApplicationTarget.duration) && (
               <p className="text-xs text-on-surface-variant mt-1">

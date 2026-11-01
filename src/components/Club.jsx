@@ -31,9 +31,9 @@ export default function Club() {
   const isOfferDisabled = activePopularTier?.offerDisabled;
   const tierOffer = isOfferDisabled
     ? ''
-    : (activePopularTier?.offer !== undefined && activePopularTier?.offer !== null && String(activePopularTier.offer).trim() !== ''
-      ? activePopularTier.offer
-      : (getLocalized(club, 'tierOffer', currentLang, defaultLang) || 'İlk ödənişə 2 ay HƏDİYYƏ'));
+    : (activePopularTier
+      ? (getLocalized(activePopularTier, 'offer', currentLang, defaultLang) || activePopularTier.offer || getLocalized(club, 'tierOffer', currentLang, defaultLang) || t('club_tier_offer') || 'İlk ödənişə 2 ay HƏDİYYƏ')
+      : (getLocalized(club, 'tierOffer', currentLang, defaultLang) || t('club_tier_offer') || 'İlk ödənişə 2 ay HƏDİYYƏ'));
 
   const popularFeatures = activePopularTier ? getLocalizedArray(activePopularTier, 'features', currentLang, defaultLang) : [];
   const clubFeatures = getLocalizedArray(club, 'tierFeatures', currentLang, defaultLang);

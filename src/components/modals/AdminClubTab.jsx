@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../i18n/LanguageContext';
 import AdminInlineTranslator from './AdminInlineTranslator';
@@ -71,6 +71,7 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
 
   // Add Tier State with automatic default period translations
   const [newTierName, setNewTierName] = useState('');
+  const [newTierDesc, setNewTierDesc] = useState('');
   const [newTierPrice, setNewTierPrice] = useState('65');
   const [newTierAnnualPrice, setNewTierAnnualPrice] = useState('');
   const [newTierOffer, setNewTierOffer] = useState('İlk ödənişə 2 ay HƏDİYYƏ');
@@ -174,7 +175,13 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
     const autoTrans = PERIOD_TRANSLATIONS[newTierPeriod] || {};
     const mergedTranslations = {
       ...newTierTranslations,
-      az: { ...(newTierTranslations.az || {}), period: newTierTranslations.az?.period || autoTrans.az || newTierPeriod },
+      az: {
+        ...(newTierTranslations.az || {}),
+        name: newTierName.trim(),
+        desc: newTierDesc.trim(),
+        offer: newTierOfferDisabled ? '' : newTierOffer.trim(),
+        period: newTierTranslations.az?.period || autoTrans.az || newTierPeriod
+      },
       en: { ...(newTierTranslations.en || {}), period: newTierTranslations.en?.period || autoTrans.en || newTierPeriod },
       tr: { ...(newTierTranslations.tr || {}), period: newTierTranslations.tr?.period || autoTrans.tr || newTierPeriod },
       ru: { ...(newTierTranslations.ru || {}), period: newTierTranslations.ru?.period || autoTrans.ru || newTierPeriod }
@@ -182,6 +189,7 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
 
     addClubTier({
       name: newTierName.trim(),
+      desc: newTierDesc.trim(),
       price: newTierPrice.trim(),
       annualPrice: newTierAnnualPrice.trim(),
       offer: newTierOfferDisabled ? '' : newTierOffer.trim(),
@@ -192,6 +200,7 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
       translations: mergedTranslations
     });
     setNewTierName('');
+    setNewTierDesc('');
     setNewTierPrice('65');
     setNewTierAnnualPrice('');
     setNewTierOffer('İlk ödənişə 2 ay HƏDİYYƏ');
@@ -214,6 +223,7 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
     if (!editingTier) return;
     updateClubTier(editingTier.id, {
       name: editingTier.name,
+      desc: editingTier.desc || '',
       price: editingTier.price,
       annualPrice: editingTier.annualPrice || '',
       offer: editingTier.offerDisabled ? '' : (editingTier.offer || ''),
@@ -395,6 +405,16 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
                 />
               </div>
               <div>
+                <label className="admin-label">Paket Təsviri (Qısa)</label>
+                <input
+                  type="text"
+                  placeholder="Məs: Bütün masterklaslar, qapalı icma..."
+                  value={editingTier.desc || ''}
+                  onChange={(e) => setEditingTier({ ...editingTier, desc: e.target.value })}
+                  className="admin-input"
+                />
+              </div>
+              <div>
                 <label className="admin-label">Məbləğ (₼) *</label>
                 <input
                   type="text"
@@ -489,7 +509,9 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
               item={editingTier}
               fields={[
                 { key: 'name', label: 'Paketin Adı' },
+                { key: 'desc', label: 'Paket Təsviri (Qısa)' },
                 { key: 'price', label: 'Qiymət (mətn / valyuta)' },
+                { key: 'offer', label: 'Xüsusi Təklif / Endirim Qeydi' },
                 {
                   key: 'period',
                   label: 'Ödəniş Dövrü',
@@ -539,6 +561,16 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
                 placeholder="məsələn: Mastermind Üzv"
                 value={newTierName}
                 onChange={(e) => setNewTierName(e.target.value)}
+                className="admin-input"
+              />
+            </div>
+            <div>
+              <label className="admin-label">Paket Təsviri (Qısa)</label>
+              <input
+                type="text"
+                placeholder="məsələn: Bütün masterklaslar və VIP icma"
+                value={newTierDesc}
+                onChange={(e) => setNewTierDesc(e.target.value)}
                 className="admin-input"
               />
             </div>
@@ -637,14 +669,18 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
           <AdminInlineTranslator
             item={{
               name: newTierName,
+              desc: newTierDesc,
               price: newTierPrice,
+              offer: newTierOffer,
               period: newTierPeriod,
               features: newTierFeatures,
               translations: newTierTranslations
             }}
             fields={[
               { key: 'name', label: 'Paketin Adı' },
+              { key: 'desc', label: 'Paket Təsviri (Qısa)' },
               { key: 'price', label: 'Qiymət (mətn / valyuta)' },
+              { key: 'offer', label: 'Xüsusi Təklif / Endirim Qeydi' },
               {
                 key: 'period',
                 label: 'Ödəniş Dövrü',

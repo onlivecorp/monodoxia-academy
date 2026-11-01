@@ -116,6 +116,7 @@ const INITIAL_CLUB_TIERS = [
   {
     id: "free",
     name: "Giriş (Free)",
+    desc: "İctimai müzakirələrə və vebinarlara dinləyici kimi giriş",
     price: "0",
     period: "Ömürlük",
     features: ["Açıq bloq yazılarına və ictimai müzakirələrə giriş", "Aylıq ümumi vebinarlara dinləyici qismində qatılmaq", "Bülleten və psixoloji bələdçi bildirişləri"],
@@ -123,21 +124,25 @@ const INITIAL_CLUB_TIERS = [
     translations: {
       az: {
         name: "Giriş (Free)",
+        desc: "İctimai müzakirələrə və vebinarlara dinləyici kimi giriş",
         period: "Ömürlük",
         features: ["Açıq bloq yazılarına və ictimai müzakirələrə giriş", "Aylıq ümumi vebinarlara dinləyici qismində qatılmaq", "Bülleten və psixoloji bələdçi bildirişləri"]
       },
       en: {
         name: "Intro (Free)",
+        desc: "Access to public discussions and webinars as an attendee",
         period: "Lifetime",
         features: ["Access to public blog posts and community discussions", "Attend monthly general webinars as a listener", "Newsletter and psychological guide updates"]
       },
       tr: {
         name: "Giriş (Ücretsiz)",
+        desc: "Halka açık tartışmalara ve webinarlara dinleyici olarak erişim",
         period: "Ömür boyu",
         features: ["Açık blog yazılarına ve topluluk tartışmalarına erişim", "Aylık genel webinarlara dinleyici olarak katılma", "Bülten ve psikolojik rehber bildirimleri"]
       },
       ru: {
         name: "Вводный (Free)",
+        desc: "Доступ к открытым статьям, обсуждениям и вебинарам в качестве слушателя",
         period: "Бессрочно",
         features: ["Доступ к открытым статьям блога и обсуждениям", "Участие в ежемесячных вебинарах в качестве слушателя", "Рассылка и уведомления психологических гидов"]
       }
@@ -146,6 +151,7 @@ const INITIAL_CLUB_TIERS = [
   {
     id: "basic",
     name: "Basic Üzv",
+    desc: "Aylıq ümumi sessiyalar, rəqəmsal materiallar və qrup",
     price: "45",
     period: "/ aylıq",
     features: ["Zənginlər Klubu standart müzakirə platforması", "20+ saatlıq səsli meditasiya kitabxanası", "Kurslara 10% daimi tələbə endirimi", "Ayda 1 canlı sual-cavab sessiyası"],
@@ -153,21 +159,25 @@ const INITIAL_CLUB_TIERS = [
     translations: {
       az: {
         name: "Basic Üzv",
+        desc: "Aylıq ümumi sessiyalar, rəqəmsal materiallar və qrup",
         period: "/ aylıq",
         features: ["Zənginlər Klubu standart müzakirə platforması", "20+ saatlıq səsli meditasiya kitabxanası", "Kurslara 10% daimi tələbə endirimi", "Ayda 1 canlı sual-cavab sessiyası"]
       },
       en: {
         name: "Basic Resident",
+        desc: "Monthly community sessions, digital resources, and group discussions",
         period: "/ monthly",
         features: ["Zənginlər Klubu standard discussion platform", "20+ hours of audio meditation library", "10% permanent student discount on courses", "1 live Q&A session per month"]
       },
       tr: {
         name: "Basic Üye",
+        desc: "Aylık topluluk oturumları, dijital materyaller ve grup etkileşimi",
         period: "/ aylık",
         features: ["Zənginlər Klubu standart tartışma platformu", "20+ saatlik sesli meditasyon kütüphanesi", "Kurslarda %10 sürekli öğrenci indirimi", "Ayda 1 canlı soru-cevap oturumu"]
       },
       ru: {
         name: "Базовый резидент",
+        desc: "Ежемесячные общие сессии, библиотека материалов и общение в группе",
         period: "/ месяц",
         features: ["Стандартная дискуссионная платформа Zənginlər Klubu", "20+ часов аудиомедитаций в библиотеке", "Постоянная скидка 10% на курсы", "1 живая сессия вопросов и ответов в месяц"]
       }
@@ -176,30 +186,40 @@ const INITIAL_CLUB_TIERS = [
   {
     id: "premium",
     name: "Premium Üzv",
+    desc: "Bütün masterklaslar, qapalı icma və VIP şəbəkə",
     price: "95",
     period: "/ aylıq",
     popular: true,
+    offer: "İlk ödənişə 2 ay HƏDİYYƏ",
     features: ["Bütün canlı klub tədbirləri və masterklaslar", "Telegram VIP məxfi müzakirə otağı", "Kurslara 25% fərdi endirim", "Aylıq 1 fərdi diaqnostik orientasiya", "Tam 100+ saatlıq meditasiya və video arxivi"],
     active: true,
     translations: {
       az: {
         name: "Premium Üzv",
+        desc: "Bütün masterklaslar, qapalı icma və VIP şəbəkə",
         period: "/ aylıq",
+        offer: "İlk ödənişə 2 ay HƏDİYYƏ",
         features: ["Bütün canlı klub tədbirləri və masterklaslar", "Telegram VIP məxfi müzakirə otağı", "Kurslara 25% fərdi endirim", "Aylıq 1 fərdi diaqnostik orientasiya", "Tam 100+ saatlıq meditasiya və video arxivi"]
       },
       en: {
         name: "Premium Resident",
+        desc: "All masterclasses, private community, and exclusive VIP network",
         period: "/ monthly",
+        offer: "2 months free with initial billing",
         features: ["All live club events and masterclasses", "Telegram VIP private discussion group", "25% personal discount on courses", "1 monthly individual diagnostic orientation", "Full 100+ hours meditation and video archive"]
       },
       tr: {
         name: "Premium Üye",
+        desc: "Tüm masterclass'lar, kapalı topluluk ve özel VIP ağı",
         period: "/ aylık",
+        offer: "İlk ödemede 2 ay HEDİYE",
         features: ["Tüm canlı kulüp etkinlikleri ve masterclasslar", "Telegram VIP gizli tartışma odası", "Kurslarda %25 kişisel indirim", "Ayda 1 bireysel diagnostik oryantasyon", "Tam 100+ saatlik meditasyon ve video arşivi"]
       },
       ru: {
         name: "Премиум резидент",
+        desc: "Все мастер-классы, закрытое сообщество и приватная VIP-сеть",
         period: "/ месяц",
+        offer: "2 месяца в подарок при первой оплате",
         features: ["Все живые клубные мероприятия и мастер-классы", "Закрытая VIP группа в Telegram", "Персональная скидка 25% на курсы", "1 индивидуальная диагностическая ориентация в месяц", "Полный архив 100+ часов медитаций и видео"]
       }
     }
@@ -207,6 +227,7 @@ const INITIAL_CLUB_TIERS = [
   {
     id: "vip",
     name: "VIP Salon",
+    desc: "Fərdi kouçinq sessiyaları və təsisçi ilə birbaşa əlaqə",
     price: "250",
     period: "/ aylıq",
     features: ["Bütün Premium imtiyazlar daxil", "Hər ay 2 fərdi ICF kouçinq sessiyası", "Oflayn illik retreat və düşərgələrə prioritet giriş", "Şəxsi inkişaf mentoru və 24/7 dəstək xətti"],
@@ -214,21 +235,25 @@ const INITIAL_CLUB_TIERS = [
     translations: {
       az: {
         name: "VIP Salon",
+        desc: "Fərdi kouçinq sessiyaları və təsisçi ilə birbaşa əlaqə",
         period: "/ aylıq",
         features: ["Bütün Premium imtiyazlar daxil", "Hər ay 2 fərdi ICF kouçinq sessiyası", "Oflayn illik retreat və düşərgələrə prioritet giriş", "Şəxsi inkişaf mentoru və 24/7 dəstək xətti"]
       },
       en: {
         name: "VIP Lounge",
+        desc: "1-on-1 coaching sessions and direct mentorship with founders",
         period: "/ monthly",
         features: ["All Premium benefits included", "2 personal ICF coaching sessions each month", "Priority access to annual offline retreats and camps", "Personal development mentor and 24/7 support line"]
       },
       tr: {
         name: "VIP Salon",
+        desc: "Birebir koçluk seansları ve kurucu mentörlerle doğrudan temas",
         period: "/ aylık",
         features: ["Tüm Premium ayrıcalıklar dahil", "Her ay 2 bireysel ICF koçluk seansı", "Yıllık inziva ve kamplara öncelikli erişim", "Kişisel gelişim mentoru ve 7/24 destek hattı"]
       },
       ru: {
         name: "VIP Салон",
+        desc: "Индивидуальные коуч-сессии и прямое наставничество основателей",
         period: "/ месяц",
         features: ["Все привилегии Premium включены", "2 индивидуальные сессии ICF-коучинга каждый месяц", "Приоритетный доступ к ежегодным выездным ретритам", "Персональный ментор развития и поддержка 24/7"]
       }
@@ -1148,6 +1173,7 @@ export function AppProvider({ children }) {
                 period: t.period,
                 popular: Boolean(Number(t.popular)),
                 active: t.active !== undefined ? Boolean(Number(t.active)) : true,
+                desc: t.desc || '',
                 features: parsedFeatures,
                 translations: parsedTranslations
               };
@@ -3840,12 +3866,16 @@ export function AppProvider({ children }) {
 
           const azTrans = { ...(updated.translations?.az || {}) };
           if (updates.name !== undefined) azTrans.name = updates.name;
+          if (updates.desc !== undefined) azTrans.desc = updates.desc;
           if (updates.period !== undefined) azTrans.period = updates.period;
+          if (updates.offer !== undefined) azTrans.offer = updates.offer;
           if (updates.features !== undefined) azTrans.features = updated.features;
 
           if (updates.translations?.az) {
             if (updates.translations.az.name !== undefined) updated.name = updates.translations.az.name;
+            if (updates.translations.az.desc !== undefined) updated.desc = updates.translations.az.desc;
             if (updates.translations.az.period !== undefined) updated.period = updates.translations.az.period;
+            if (updates.translations.az.offer !== undefined) updated.offer = updates.translations.az.offer;
             if (updates.translations.az.features !== undefined) updated.features = updates.translations.az.features;
           }
 
@@ -3873,6 +3903,7 @@ export function AppProvider({ children }) {
     const tier = {
       id: 'tier-' + Date.now(),
       name: newTier.name,
+      desc: newTier.desc || '',
       price: newTier.price,
       annualPrice: newTier.annualPrice || '',
       offer: newTier.offer !== undefined ? newTier.offer : '',
@@ -3884,7 +3915,9 @@ export function AppProvider({ children }) {
         az: {
           ...(newTier.translations?.az || {}),
           name: newTier.name,
+          desc: newTier.desc || '',
           period: newTier.period || '/ aylıq',
+          offer: newTier.offer || '',
           features: Array.isArray(newTier.features)
             ? newTier.features
             : (newTier.features || '').split('\n').map(s => s.trim()).filter(Boolean)

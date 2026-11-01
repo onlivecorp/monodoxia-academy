@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { getLocalized } from '../i18n/localize';
+import { getLocalized, getLocalizedArray } from '../i18n/localize';
 import { useApp } from '../context/AppContext';
 import PageHero from '../components/PageHero';
 
@@ -137,7 +137,7 @@ export default function ClubPage() {
                     <div className="absolute top-0 right-0">
                       <div className="px-4 py-1.5 rounded-bl-2xl bg-gradient-to-r from-[#c5a059] via-[#e5c57d] to-[#b38f46] text-[#071326] text-[10px] font-bold tracking-[0.2em] uppercase shadow-md flex items-center gap-1">
                         <span className="material-symbols-outlined text-[12px]">auto_awesome</span>
-                        <span>Ən Çox Seçilən</span>
+                        <span>{t('club_popular_badge') || 'Ən Çox Seçilən'}</span>
                       </div>
                     </div>
                   )}
@@ -180,7 +180,7 @@ export default function ClubPage() {
 
                     {/* Features List */}
                     <div className="space-y-3.5 mb-8">
-                      {(tier.features || []).map((feat, fIdx) => (
+                      {getLocalizedArray(tier, 'features', currentLang, defaultLang).map((feat, fIdx) => (
                         <div key={fIdx} className="flex items-start gap-2.5 text-xs">
                           <span className={`material-symbols-outlined text-[17px] shrink-0 mt-0.5 ${isPopular ? 'text-[#e5c57d]' : 'text-[#775a19]'}`}>
                             check_circle
