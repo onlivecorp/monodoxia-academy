@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import AdminInlineTranslator from './AdminInlineTranslator';
 import AdminConfirmModal from './AdminConfirmModal';
@@ -27,6 +27,7 @@ export default function AdminCommunityTab() {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Add Topic State
   const [newTopicTitle, setNewTopicTitle] = useState('');
@@ -48,6 +49,7 @@ export default function AdminCommunityTab() {
 
   // Delete Confirmation State
   const [topicToDelete, setTopicToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const communityCategories = (categoriesList || []).filter(c => c.type === 'community' || c.type === 'all');
 
@@ -69,63 +71,84 @@ export default function AdminCommunityTab() {
     return filteredTopics.slice(start, start + ITEMS_PER_PAGE);
   }, [filteredTopics, currentPage]);
 
-  const handleCreateTopic = (e) => {
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    }
+  }, [totalPages, currentPage]);
+
+  const handleCreateTopic = async (e) => {
     e?.preventDefault();
     if (!newTopicTitle.trim() || !newTopicContent.trim()) {
       showToast('Zəhmət olmasa məqalə başlığını və məzmununu daxil edin', 'warning');
       return;
     }
-    addTopic(
-      newTopicTitle.trim(),
-      newTopicContent.trim(),
-      newTopicCategory,
-      newTopicAuthor,
-      newTopicTranslations,
-      {
-        coverImage: newTopicCoverImage.trim(),
-        readTime: newTopicReadTime.trim() || '4 dəq',
-        status: newTopicStatus,
-        category: newTopicCategory
-      }
-    );
-    setNewTopicTitle('');
-    setNewTopicContent('');
-    setNewTopicCoverImage('');
-    setNewTopicReadTime('4 dəq');
-    setNewTopicStatus('published');
-    setNewTopicTranslations({});
-    setNewTopicTransOpen(false);
-    setShowAddForm(false);
+    setIsSubmitting(true);
+    try {
+      await addTopic(
+        newTopicTitle.trim(),
+        newTopicContent.trim(),
+        newTopicCategory,
+        newTopicAuthor,
+        newTopicTranslations,
+        {
+          coverImage: newTopicCoverImage.trim(),
+          readTime: newTopicReadTime.trim() || '4 dəq',
+          status: newTopicStatus,
+          category: newTopicCategory
+        }
+      );
+      setNewTopicTitle('');
+      setNewTopicContent('');
+      setNewTopicCoverImage('');
+      setNewTopicReadTime('4 dəq');
+      setNewTopicStatus('published');
+      setNewTopicTranslations({});
+      setNewTopicTransOpen(false);
+      setShowAddForm(false);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleSaveEditTopic = (e) => {
+  const handleSaveEditTopic = async (e) => {
     e?.preventDefault();
-    if (!editingTopic) return;
+    if (!editingTopic || isSubmitting) return;
     const bodyContent = editingTopic.content || editingTopic.snippet || '';
     const cleanSnippet = bodyContent
       ? bodyContent.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 220)
       : (editingTopic.snippet || '');
 
-    updateTopic(editingTopic.id, {
-      title: editingTopic.title,
-      badge: editingTopic.badge,
-      category: editingTopic.category || editingTopic.badge,
-      author: editingTopic.author,
-      content: bodyContent,
-      snippet: cleanSnippet,
-      desc: cleanSnippet,
-      coverImage: editingTopic.coverImage || editingTopic.cover_image || '',
-      readTime: editingTopic.readTime || editingTopic.read_time || '4 dəq',
-      status: editingTopic.status || 'published',
-      translations: editingTopic.translations || {}
-    });
-    setEditingTopic(null);
+    setIsSubmitting(true);
+    try {
+      await updateTopic(editingTopic.id, {
+        title: editingTopic.title,
+        badge: editingTopic.badge,
+        category: editingTopic.category || editingTopic.badge,
+        author: editingTopic.author,
+        content: bodyContent,
+        snippet: cleanSnippet,
+        desc: cleanSnippet,
+        coverImage: editingTopic.coverImage || editingTopic.cover_image || '',
+        readTime: editingTopic.readTime || editingTopic.read_time || '4 dəq',
+        status: editingTopic.status || 'published',
+        translations: editingTopic.translations || {}
+      });
+      setEditingTopic(null);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const confirmDelete = () => {
-    if (topicToDelete) {
-      deleteTopic(topicToDelete.id);
-      setTopicToDelete(null);
+  const confirmDelete = async () => {
+    if (topicToDelete && !isDeleting) {
+      setIsDeleting(true);
+      try {
+        await deleteTopic(topicToDelete.id);
+      } finally {
+        setIsDeleting(false);
+        setTopicToDelete(null);
+      }
     }
   };
 
@@ -137,9 +160,9 @@ export default function AdminCommunityTab() {
         title="İcma Mövzusunu Sil"
         message="Bu mövzunu və ona aid bütün müzakirəni silmək istədiyinizə əminsiniz?"
         itemName={topicToDelete ? topicToDelete.title : ''}
-        confirmText="Bəli, Mövzunu Sil"
+        confirmText={isDeleting ? 'Silinir...' : 'Bəli, Mövzunu Sil'}
         onConfirm={confirmDelete}
-        onCancel={() => setTopicToDelete(null)}
+        onCancel={() => !isDeleting && setTopicToDelete(null)}
       />
 
       {/* Header */}

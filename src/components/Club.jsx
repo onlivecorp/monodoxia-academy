@@ -26,15 +26,15 @@ export default function Club() {
   const tierSubtitle = getLocalized(club, 'tierSubtitle', currentLang, defaultLang) || 'Aylıq və ya illik ödəniş əsasında';
   const tierPrice = activePopularTier ? activePopularTier.price : ((club.tierPrice !== undefined && club.tierPrice !== null && String(club.tierPrice).trim() !== '') ? club.tierPrice : '75');
   const tierPeriod = activePopularTier ? getLocalized(activePopularTier, 'period', currentLang, defaultLang) : (getLocalized(club, 'tierPeriod', currentLang, defaultLang) || (t('club_tier_period') || '/ aylıq'));
-  
+
   // Xüsusi təklif / endirim qeydi (deaktiv edilibsə və ya dəyişdirilibsə)
   const isOfferDisabled = activePopularTier?.offerDisabled;
   const tierOffer = isOfferDisabled
     ? ''
     : (activePopularTier?.offer !== undefined && activePopularTier?.offer !== null && String(activePopularTier.offer).trim() !== ''
-        ? activePopularTier.offer
-        : (getLocalized(club, 'tierOffer', currentLang, defaultLang) || 'İlk ödənişə 2 ay HƏDİYYƏ'));
-  
+      ? activePopularTier.offer
+      : (getLocalized(club, 'tierOffer', currentLang, defaultLang) || 'İlk ödənişə 2 ay HƏDİYYƏ'));
+
   const popularFeatures = activePopularTier ? getLocalizedArray(activePopularTier, 'features', currentLang, defaultLang) : [];
   const clubFeatures = getLocalizedArray(club, 'tierFeatures', currentLang, defaultLang);
   const tierFeatures = (popularFeatures && popularFeatures.length > 0)
@@ -68,8 +68,8 @@ export default function Club() {
   const leftBtnText = isSamePlan
     ? (getLocalized(club, 'ctaBtnActiveText', currentLang, defaultLang) || club.ctaBtnActiveText || 'Statusunuz Aktivdir')
     : (userClubApp && userClubApp.status !== 'Ləğv edildi' && userClubApp.status !== 'Rədd edildi'
-        ? `Müraciət: ${userClubApp.status}` 
-        : 'Plana qoşulmaq üçün müraciət et');
+      ? `Müraciət: ${userClubApp.status}`
+      : 'Plana qoşulmaq üçün müraciət et');
 
   const leftBtnLink = isSamePlan
     ? (getLocalized(club, 'ctaBtnActiveLink', currentLang, defaultLang) || club.ctaBtnActiveLink)
@@ -101,8 +101,8 @@ export default function Club() {
   const rightBtnText = isSamePlan
     ? (getLocalized(club, 'tierCtaActiveText', currentLang, defaultLang) || club.tierCtaActiveText || 'Statusunuz Aktivdir')
     : (userClubApp && userClubApp.status !== 'Ləğv edildi' && userClubApp.status !== 'Rədd edildi'
-        ? `Müraciət: ${userClubApp.status}` 
-        : (getLocalized(club, 'tierCtaText', currentLang, defaultLang) || club.tierCtaText || tierCtaText || 'PAKETİ SEÇİN'));
+      ? `Müraciət: ${userClubApp.status}`
+      : (getLocalized(club, 'tierCtaText', currentLang, defaultLang) || club.tierCtaText || tierCtaText || 'PAKETİ SEÇİN'));
 
   const rightBtnLink = isSamePlan
     ? (getLocalized(club, 'tierCtaActiveLink', currentLang, defaultLang) || club.tierCtaActiveLink)
@@ -136,7 +136,7 @@ export default function Club() {
       <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
         <div className="absolute top-1/4 -right-32 w-[34rem] h-[34rem] rounded-full bg-gradient-to-bl from-[#c5a059]/15 via-[#c5a059]/5 to-transparent blur-3xl" />
         <div className="absolute -bottom-32 -left-32 w-[34rem] h-[34rem] rounded-full bg-gradient-to-tr from-[#c5a059]/10 via-[#0a192f]/20 to-transparent blur-3xl" />
-        <div 
+        <div
           className="absolute inset-0 opacity-[0.03]"
           style={{
             backgroundImage: `radial-gradient(circle at 1px 1px, #ffffff 1px, transparent 0)`,
@@ -189,11 +189,10 @@ export default function Club() {
               <button
                 disabled={isSamePlan}
                 onClick={handleLeftBtnClick}
-                className={`group relative inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-xs tracking-wider uppercase shadow-lg transition-all duration-300 font-semibold overflow-hidden ${
-                  isSamePlan
+                className={`group relative inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-xs tracking-wider uppercase shadow-lg transition-all duration-300 font-semibold overflow-hidden ${isSamePlan
                     ? 'bg-gradient-to-r from-[#d4af37]/60 via-[#e9c176]/60 to-[#c5a059]/60 text-[#070f1e]/80 cursor-not-allowed select-none opacity-85 shadow-none'
                     : 'bg-gradient-to-r from-[#d4af37] via-[#e9c176] to-[#c5a059] hover:from-[#c5a059] hover:to-[#b98d2c] text-[#070f1e] shadow-[#c5a059]/25 hover:shadow-xl hover:shadow-[#c5a059]/35 hover:-translate-y-0.5 cursor-pointer'
-                }`}
+                  }`}
               >
                 <span>
                   {leftBtnText}
@@ -261,11 +260,10 @@ export default function Club() {
               <button
                 disabled={isSamePlan}
                 onClick={handleRightBtnClick}
-                className={`w-full py-4 text-center rounded-xl text-xs font-semibold uppercase tracking-[0.16em] border transition-all duration-300 ${
-                  isSamePlan
+                className={`w-full py-4 text-center rounded-xl text-xs font-semibold uppercase tracking-[0.16em] border transition-all duration-300 ${isSamePlan
                     ? 'bg-slate-100 text-slate-500 border-slate-300 cursor-not-allowed select-none opacity-80'
                     : 'bg-[#070f1e] hover:bg-[#112240] text-white border-[#c5a059]/40 shadow-lg shadow-[#070f1e]/25 hover:-translate-y-0.5 cursor-pointer'
-                }`}
+                  }`}
               >
                 {rightBtnText}
               </button>

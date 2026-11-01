@@ -11,10 +11,9 @@ if (basename($_SERVER['SCRIPT_FILENAME'] ?? '') === basename(__FILE__)) {
     exit('Direct access forbidden.');
 }
 
-// Support .env file loading from parent or current directory
-$envPath = file_exists(__DIR__ . '/.env') ? (__DIR__ . '/.env') : (file_exists(dirname(__DIR__) . '/.env') ? (dirname(__DIR__) . '/.env') : null);
-if ($envPath) {
-    $envLines = @file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+// Support .env file loading if present
+if (file_exists(__DIR__ . '/.env')) {
+    $envLines = @file(__DIR__ . '/.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     if ($envLines) {
         foreach ($envLines as $line) {
             $line = trim($line);

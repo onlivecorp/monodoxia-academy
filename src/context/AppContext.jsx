@@ -420,13 +420,13 @@ export function AppProvider({ children }) {
 
   const [communityTopics, setCommunityTopics] = useState(() => {
     const saved = localStorage.getItem('monodoxia_admin_topics');
-    if (saved) {
+    if (saved !== null) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) return parsed;
       } catch (e) {}
     }
-    return (COMMUNITY_TOPICS && Array.isArray(COMMUNITY_TOPICS) && COMMUNITY_TOPICS.length > 0) ? COMMUNITY_TOPICS : [];
+    return (COMMUNITY_TOPICS && Array.isArray(COMMUNITY_TOPICS)) ? COMMUNITY_TOPICS : [];
   });
 
   const [platformSettings, setPlatformSettings] = useState(() => {
@@ -804,6 +804,9 @@ export function AppProvider({ children }) {
   // Centralized Authenticated API Call Helper with 401 Session Interceptor
   const apiCall = async (action, data = null, method = 'POST') => {
     const token = csrfToken || sessionStorage.getItem('monodoxia_csrf') || '';
+    const payload = (data && typeof data === 'object' && !Array.isArray(data))
+      ? { ...data, ...(token ? { csrf_token: token } : {}) }
+      : data;
     const options = {
       method,
       headers: {
@@ -812,8 +815,8 @@ export function AppProvider({ children }) {
       },
       credentials: 'include'
     };
-    if (data && method !== 'GET') {
-      options.body = JSON.stringify(data);
+    if (payload && method !== 'GET') {
+      options.body = JSON.stringify(payload);
     }
     try {
       const res = await fetch(`/api.php?action=${action}`, options);
@@ -1066,7 +1069,7 @@ export function AppProvider({ children }) {
             setEventsList(mappedEvents);
             safeSetLocalStorage('monodoxia_admin_events', mappedEvents);
           }
-          if (data.community && data.community.length > 0) {
+          if (Array.isArray(data.community)) {
             const mappedCommunity = data.community.map(p => {
               const defaultMatch = (COMMUNITY_TOPICS && Array.isArray(COMMUNITY_TOPICS))
                 ? COMMUNITY_TOPICS.find(ct => ct.id === p.id)
@@ -2629,7 +2632,7 @@ export function AppProvider({ children }) {
     return true;
   };
 
-  const addTopic = (title, content, badge = "İcma Müzakirəsi", author = null, translations = {}, extraData = {}) => {
+  const addTopic = async (title, content, badge = "İcma Müzakirəsi", author = null, translations = {}, extraData = {}) => {
     const rawSnippet = content ? content.replace(/<[^>]*>?/gm, '').slice(0, 180) : '';
     const newT = {
       id: 'topic-' + Date.now(),
@@ -2659,18 +2662,73 @@ export function AppProvider({ children }) {
       return next;
     });
     setNewTopicModalOpen(false);
-    apiCall('save_community_post', newT);
-    showToast(newT.status === 'draft' ? 'Qaralama olaraq yadda saxlanıldı.' : 'Məzmun uğurla dərc edildi.', 'success');
+    const res = await apiCall('save_community_post', newT);
+    if (res && res.status === 'success') {
+      showToast(newT.status === 'draft' ? 'Qaralama olaraq yadda saxlanıldı.' : 'Məzmun uğurla dərc edildi.', 'success');
+      return { success: true, topic: newT };
+    } else {
+      showToast(res?.message || 'Yadda saxlanılarkən xəta baş verdi', 'warning');
+      return { success: false, error: res?.message };
+    }
   };
 
-  const deleteTopic = (topicId) => {
-    setCommunityTopics(prev => {
-      const next = prev.filter(t => t.id !== topicId);
-      safeSetLocalStorage('monodoxia_admin_topics', next);
-      return next;
-    });
-    apiCall('delete_community_post', { id: topicId });
-    showToast('Mövzu uğurla silindi', 'info');
+  const deleteTopic = async (topicId) => {
+    if (!topicId) return { success: false, error: 'ID yoxdur' };
+
+    const previousTopics = [...communityTopics];
+    const previousLocal = localStorage.getItem('monodoxia_admin_topics');
+
+    // Optimistically update frontend state and cache
+    const next = communityTopics.filter(t => t.id !== topicId);
+    setCommunityTopics(next);
+    safeSetLocalStorage('monodoxia_admin_topics', next);
+
+    // If deleted topic was weeklyTopic, clear weeklyTopicId in homeContent
+    if (homeContent?.community?.weeklyTopicId === topicId) {
+      setHomeContent(prev => {
+        const nextContent = {
+          ...prev,
+          community: {
+            ...(prev?.community || {}),
+            weeklyTopicId: null
+          }
+        };
+        try {
+          localStorage.setItem('monodoxia_home_content', JSON.stringify(nextContent));
+        } catch (e) {}
+        apiCall('save_cms_block', { block_key: 'community', content: nextContent.community }).catch(() => {});
+        return nextContent;
+      });
+    }
+
+    try {
+      const res = await apiCall('delete_community_post', { id: topicId });
+      if (res && res.status === 'success') {
+        showToast('Mövzu uğurla silindi', 'success');
+        return { success: true };
+      } else {
+        // Rollback state on failure
+        setCommunityTopics(previousTopics);
+        if (previousLocal !== null) {
+          try {
+            safeSetLocalStorage('monodoxia_admin_topics', JSON.parse(previousLocal));
+          } catch (e) {}
+        }
+        const errMsg = res?.message || 'Mövzunu silmək mümkün olmadı';
+        showToast(errMsg, 'error');
+        return { success: false, error: errMsg };
+      }
+    } catch (err) {
+      // Rollback state on network exception
+      setCommunityTopics(previousTopics);
+      if (previousLocal !== null) {
+        try {
+          safeSetLocalStorage('monodoxia_admin_topics', JSON.parse(previousLocal));
+        } catch (e) {}
+      }
+      showToast('Serverlə əlaqə xətası baş verdi', 'error');
+      return { success: false, error: err.message };
+    }
   };
 
   const setWeeklyTopic = (topicId) => {
@@ -4002,7 +4060,7 @@ export function AppProvider({ children }) {
     showToast('Kateqoriya silindi', 'info');
   };
 
-  const updateTopic = (id, updates) => {
+  const updateTopic = async (id, updates) => {
     let updatedItem = null;
     setCommunityTopics(prev => {
       const next = prev.map(t => {
@@ -4022,9 +4080,16 @@ export function AppProvider({ children }) {
       return next;
     });
     if (updatedItem) {
-      apiCall('save_community_post', updatedItem);
+      const res = await apiCall('save_community_post', updatedItem);
+      if (res && res.status === 'success') {
+        showToast('İcma mövzusu yeniləndi', 'success');
+        return { success: true, item: updatedItem };
+      } else {
+        showToast(res?.message || 'Yenilənərkən xəta baş verdi', 'warning');
+        return { success: false, error: res?.message };
+      }
     }
-    showToast('İcma mövzusu yeniləndi', 'success');
+    return { success: false };
   };
 
   const updatePlatformSettings = (newSettings) => {
