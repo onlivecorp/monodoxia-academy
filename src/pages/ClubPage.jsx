@@ -117,7 +117,7 @@ export default function ClubPage() {
               const displayPrice = billingCycle === 'annual' && rawPrice > 0
                 ? (customAnnual && customAnnual > 0 ? customAnnual : Math.round(rawPrice * 10))
                 : rawPrice;
-              const periodText = billingCycle === 'annual' && rawPrice > 0 ? '/ illik' : (tier.period || '/ aylıq');
+              const periodText = billingCycle === 'annual' && rawPrice > 0 ? (t('club_tier_period_annual') || '/ illik') : (getLocalized(tier, 'period', currentLang, defaultLang) || tier.period || t('club_tier_period') || '/ aylıq');
               const tierName = getLocalized(tier, 'name', currentLang, defaultLang) || tier.name || tier.id || 'Klub Üzvlüyü';
               const userTierApp = currentUser && Array.isArray(applicationsList)
                 ? applicationsList.find(a => a.userId === currentUser.id && a.targetId === tier.id && !a.archived)
@@ -154,10 +154,12 @@ export default function ClubPage() {
                         {tierName}
                       </h3>
                       <p className={`text-xs mt-1.5 leading-relaxed font-light ${isPopular ? 'text-[#cbd5e1]' : 'text-[#64748b]'}`}>
-                        {tier.id === 'free' && 'İctimai müzakirələrə və vebinarlara dinləyici kimi giriş'}
-                        {tier.id === 'basic' && 'Aylıq ümumi sessiyalar, rəqəmsal materiallar və qrup'}
-                        {tier.id === 'premium' && 'Bütün masterklaslar, qapalı icma və VIP şəbəkə'}
-                        {tier.id === 'vip' && 'Fərdi kouçinq sessiyaları və təsisçi ilə birbaşa əlaqə'}
+                        {getLocalized(tier, 'desc', currentLang, defaultLang) || (
+                          tier.id === 'free' ? (t('club_tier_free_desc') || 'İctimai müzakirələrə və vebinarlara dinləyici kimi giriş') :
+                          tier.id === 'basic' ? (t('club_tier_basic_desc') || 'Aylıq ümumi sessiyalar, rəqəmsal materiallar və qrup') :
+                          tier.id === 'premium' ? (t('club_tier_premium_desc') || 'Bütün masterklaslar, qapalı icma və VIP şəbəkə') :
+                          (t('club_tier_vip_desc') || 'Fərdi kouçinq sessiyaları və təsisçi ilə birbaşa əlaqə')
+                        )}
                       </p>
                     </div>
 
@@ -171,7 +173,7 @@ export default function ClubPage() {
                       </div>
                       {billingCycle === 'annual' && rawPrice > 0 && (
                         <span className="text-[11px] text-emerald-500 font-medium block mt-1.5">
-                          Aylıq cəmi ~₼ {Math.round(displayPrice / 12)}
+                          {t('club_monthly_approx_prefix') || 'Aylıq cəmi ~₼'} {Math.round(displayPrice / 12)}
                         </span>
                       )}
                     </div>

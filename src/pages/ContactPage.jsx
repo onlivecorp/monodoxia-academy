@@ -161,24 +161,24 @@ export default function ContactPage() {
     <div className="min-h-screen bg-[#faf8f5] text-[#071326]">
       {/* Page Hero */}
       <PageHero
-        badge="ƏLAQƏ & DƏSTƏK"
+        badge={getLocalized(platformSettings, 'contactBadge', currentLang, defaultLang) || t('contact_badge') || "ƏLAQƏ & DƏSTƏK"}
         title={title}
         description={subtitle}
-        breadcrumbs={[{ label: 'Əlaqə' }]}
+        breadcrumbs={[{ label: t('nav_contact') || 'Əlaqə' }]}
         adminCmsBlock="contact"
       >
         <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-6 pt-4 border-t border-[#c5a059]/20">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
             <span className="material-symbols-outlined text-[#775a19] text-[17px]">verified_user</span>
-            <span className="font-medium">Konfidensiallıq Zəmanəti</span>
+            <span className="font-medium">{t('contact_hero_badge1') || 'Konfidensiallıq Zəmanəti'}</span>
           </div>
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
             <span className="material-symbols-outlined text-[#775a19] text-[17px]">bolt</span>
-            <span className="font-medium">Operativ Cavablandırma</span>
+            <span className="font-medium">{t('contact_hero_badge2') || 'Operativ Cavablandırma'}</span>
           </div>
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
             <span className="material-symbols-outlined text-[#775a19] text-[17px]">support_agent</span>
-            <span className="font-medium">Akademik Dəstək Komandası</span>
+            <span className="font-medium">{t('contact_hero_badge3') || 'Akademik Dəstək Komandası'}</span>
           </div>
         </div>
       </PageHero>
@@ -194,8 +194,8 @@ export default function ContactPage() {
                 <div className="w-12 h-12 rounded-xl bg-amber-50 border border-[#c5a059]/30 text-[#b45309] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <span className="material-symbols-outlined text-[24px]">call</span>
                 </div>
-                <h3 className="font-bold text-slate-900 text-base mb-1">Telefon</h3>
-                <p className="text-xs text-slate-500 mb-3">Birbaşa zəng və ya mesaj</p>
+                <h3 className="font-bold text-slate-900 text-base mb-1">{t('contact_card_phone_title') || 'Telefon'}</h3>
+                <p className="text-xs text-slate-500 mb-3">{t('contact_card_phone_desc') || 'Birbaşa zəng və ya mesaj'}</p>
                 <a
                   href={`tel:${phone.replace(/\s+/g, '')}`}
                   className="text-sm font-semibold text-[#05224a] hover:text-[#b45309] transition-colors break-words block"
@@ -206,7 +206,7 @@ export default function ContactPage() {
               <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
                 <span className="inline-flex items-center gap-1.5 text-emerald-600 font-medium">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  Xətt açıqdır
+                  {t('contact_card_phone_status') || 'Xətt açıqdır'}
                 </span>
                 <button
                   type="button"
@@ -227,8 +227,8 @@ export default function ContactPage() {
                 <div className="w-12 h-12 rounded-xl bg-amber-50 border border-[#c5a059]/30 text-[#b45309] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <span className="material-symbols-outlined text-[24px]">mail</span>
                 </div>
-                <h3 className="font-bold text-slate-900 text-base mb-1">E-poçt</h3>
-                <p className="text-xs text-slate-500 mb-3">Rəsmi yazışma və təkliflər</p>
+                <h3 className="font-bold text-slate-900 text-base mb-1">{t('contact_card_email_title') || 'E-poçt'}</h3>
+                <p className="text-xs text-slate-500 mb-3">{t('contact_card_email_desc') || 'Rəsmi yazışma və təkliflər'}</p>
                 <a
                   href={`mailto:${email}`}
                   className="text-sm font-semibold text-[#05224a] hover:text-[#b45309] transition-colors break-all block"
@@ -237,7 +237,7 @@ export default function ContactPage() {
                 </a>
               </div>
               <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                <span>24 saat ərzində cavab</span>
+                <span>{t('contact_card_email_status') || '24 saat ərzində cavab'}</span>
                 <button
                   type="button"
                   onClick={() => handleCopy(email, 'email')}
@@ -257,14 +257,14 @@ export default function ContactPage() {
                 <div className="w-12 h-12 rounded-xl bg-amber-50 border border-[#c5a059]/30 text-[#b45309] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <span className="material-symbols-outlined text-[24px]">location_on</span>
                 </div>
-                <h3 className="font-bold text-slate-900 text-base mb-1">Fiziki Ünvan</h3>
-                <p className="text-xs text-slate-500 mb-3">Mərkəzi ofis və tədris zalı</p>
+                <h3 className="font-bold text-slate-900 text-base mb-1">{t('contact_card_address_title') || 'Fiziki Ünvan'}</h3>
+                <p className="text-xs text-slate-500 mb-3">{t('contact_card_address_desc') || 'Mərkəzi ofis və tədris zalı'}</p>
                 <p className="text-sm font-medium text-slate-700 leading-snug">
                   {address}
                 </p>
               </div>
               <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                <span>Bakı, Azərbaycan</span>
+                <span>{t('contact_card_address_city') || 'Bakı, Azərbaycan'}</span>
                 <button
                   type="button"
                   onClick={() => handleCopy(address, 'address')}
@@ -284,14 +284,14 @@ export default function ContactPage() {
                 <div className="w-12 h-12 rounded-xl bg-amber-50 border border-[#c5a059]/30 text-[#b45309] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <span className="material-symbols-outlined text-[24px]">schedule</span>
                 </div>
-                <h3 className="font-bold text-slate-900 text-base mb-1">İş Rejimi</h3>
-                <p className="text-xs text-slate-500 mb-3">Qəbul və kouçinq saatları</p>
+                <h3 className="font-bold text-slate-900 text-base mb-1">{t('contact_card_hours_title') || 'İş Rejimi'}</h3>
+                <p className="text-xs text-slate-500 mb-3">{t('contact_card_hours_desc') || 'Qəbul və kouçinq saatları'}</p>
                 <p className="text-sm font-medium text-slate-700 leading-snug">
                   {workHours}
                 </p>
               </div>
               <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                <span>Bazar: İstirahət günü</span>
+                <span>{t('contact_card_hours_sunday') || 'Bazar: İstirahət günü'}</span>
                 <span className="material-symbols-outlined text-[16px] text-slate-400">event_available</span>
               </div>
             </div>
@@ -567,10 +567,10 @@ export default function ContactPage() {
               <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-7 shadow-sm">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="material-symbols-outlined text-[#775a19] text-[20px]">share</span>
-                  <h3 className="font-bold text-slate-900 text-lg">Sosial Şəbəkələrimiz</h3>
+                  <h3 className="font-bold text-slate-900 text-lg">{t('contact_social_title') || 'Sosial Şəbəkələrimiz'}</h3>
                 </div>
                 <p className="text-xs text-slate-500 mb-5 leading-relaxed">
-                  Monodoxia Academy-nin gündəlik psixoloji qeydləri, analitik məqalələri və canlı yayımlarını izləyin.
+                  {t('contact_social_desc') || 'Monodoxia Academy-nin gündəlik psixoloji qeydləri, analitik məqalələri və canlı yayımlarını izləyin.'}
                 </p>
 
                 <div className="flex flex-wrap gap-2.5">
@@ -601,10 +601,10 @@ export default function ContactPage() {
                 <div className="flex items-center justify-between gap-2 mb-3">
                   <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-[#775a19] text-[20px]">map</span>
-                    <h3 className="font-bold text-slate-900 text-base">Xəritədə Məkanımız</h3>
+                    <h3 className="font-bold text-slate-900 text-base">{t('contact_map_title') || 'Xəritədə Məkanımız'}</h3>
                   </div>
                   <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">
-                    Bakı Mərkəzi
+                    {t('contact_map_center') || 'Bakı Mərkəzi'}
                   </span>
                 </div>
                 <p className="text-xs text-slate-500 mb-4 leading-snug">
@@ -641,13 +641,13 @@ export default function ContactPage() {
               <div className="absolute top-0 right-0 w-32 h-32 bg-[#c5a059]/15 rounded-full blur-2xl pointer-events-none" />
               <div className="relative z-10">
                 <span className="inline-block px-2.5 py-0.5 rounded-md bg-[#c5a059]/20 text-[#e5c57d] text-[10px] font-bold tracking-wider uppercase mb-2">
-                  Fərdi Sessiya
+                  {t('contact_consult_badge') || 'Fərdi Sessiya'}
                 </span>
                 <h4 className="text-lg font-bold mb-1.5">
-                  Koç ilə Fərdi Seans Təyin Edin
+                  {t('contact_consult_title') || 'Koç ilə Fərdi Seans Təyin Edin'}
                 </h4>
                 <p className="text-xs text-slate-300 leading-relaxed mb-4">
-                  Sizə ən uyğun vaxtı seçərək ICF sertifikatlı kouçlarımızla birbaşa onlayn görüş rezervasiya edə bilərsiniz.
+                  {t('contact_consult_desc') || 'Sizə ən uyğun vaxtı seçərək ICF sertifikatlı kouçlarımızla birbaşa onlayn görüş rezervasiya edə bilərsiniz.'}
                 </p>
                 <button
                   type="button"
@@ -655,7 +655,7 @@ export default function ContactPage() {
                   className="px-4 py-2 rounded-xl bg-[#c5a059] hover:bg-[#b08b46] text-[#05224a] text-xs font-bold transition-all shadow-sm inline-flex items-center gap-1.5 cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[16px]">calendar_month</span>
-                  <span>Kouçinq Cədvəlinə Bax</span>
+                  <span>{t('contact_consult_btn') || 'Kouçinq Cədvəlinə Bax'}</span>
                 </button>
               </div>
             </div>

@@ -225,7 +225,7 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
                 type="button"
                 onClick={() => setQuery('')}
                 className="p-1 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 transition-colors"
-                title="Təmizlə"
+                title={t('search_clear_btn') || 'Təmizlə'}
               >
                 <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
@@ -341,7 +341,7 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
                 <div className="p-3.5 rounded-2xl bg-[#faf8f5] border border-[#e2e8f0] text-xs text-[#64748b] flex items-center justify-between flex-wrap gap-2">
                   <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-[#775a19] text-[18px]">lightbulb</span>
-                    <span>İstənilən vaxt axtarış üçün <strong>⌘K</strong> və ya <strong>Ctrl+K</strong> qısayolunu istifadə edin.</span>
+                    <span>{t('search_shortcut_tip') || <span>İstənilən vaxt axtarış üçün <strong>⌘K</strong> və ya <strong>Ctrl+K</strong> qısayolunu istifadə edin.</span>}</span>
                   </div>
                 </div>
               </div>

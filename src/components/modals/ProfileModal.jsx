@@ -267,19 +267,19 @@ export default function ProfileModal() {
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     if (!passwordForm.currentPassword) {
-      setPasswordStatus({ type: 'error', text: 'Cari şifrənizi daxil edin!' });
+      setPasswordStatus({ type: 'error', text: t('profile_err_current_pass') || 'Cari şifrənizi daxil edin!' });
       return;
     }
     if (!passwordForm.newPassword || passwordForm.newPassword.length < 8) {
-      setPasswordStatus({ type: 'error', text: 'Yeni şifrə ən azı 8 simvoldan ibarət olmalıdır!' });
+      setPasswordStatus({ type: 'error', text: t('profile_err_min_pass') || 'Yeni şifrə ən azı 8 simvoldan ibarət olmalıdır!' });
       return;
     }
     if (!/[A-Za-z]/.test(passwordForm.newPassword) || !/[0-9]/.test(passwordForm.newPassword)) {
-      setPasswordStatus({ type: 'error', text: 'Yeni şifrədə ən azı bir hərf və bir rəqəm olmalıdır!' });
+      setPasswordStatus({ type: 'error', text: t('profile_err_format_pass') || 'Yeni şifrədə ən azı bir hərf və bir rəqəm olmalıdır!' });
       return;
     }
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      setPasswordStatus({ type: 'error', text: 'Təkrar şifrə uyğun gəlmir!' });
+      setPasswordStatus({ type: 'error', text: t('profile_err_match_pass') || 'Təkrar şifrə uyğun gəlmir!' });
       return;
     }
 
@@ -296,17 +296,17 @@ export default function ProfileModal() {
       const data = await res.json();
       if (res.ok && data.status === 'success') {
         updateCurrentUser({ password: passwordForm.newPassword });
-        setPasswordStatus({ type: 'success', text: 'Şifrəniz bazada təhlükəsiz şəkildə yeniləndi!' });
+        setPasswordStatus({ type: 'success', text: t('profile_success_pass_db') || 'Şifrəniz bazada təhlükəsiz şəkildə yeniləndi!' });
         setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-        showToast('Şifrə uğurla dəyişdirildi', 'success');
+        showToast(t('profile_password_updated') || 'Şifrə uğurla dəyişdirildi', 'success');
       } else {
         setPasswordStatus({ type: 'error', text: data.message || 'Cari şifrə yanlışdır və ya xəta baş verdi!' });
       }
     } catch (err) {
       updateCurrentUser({ password: passwordForm.newPassword });
-      setPasswordStatus({ type: 'success', text: 'Şifrəniz yerli profildə yeniləndi!' });
+      setPasswordStatus({ type: 'success', text: t('profile_success_pass_local') || 'Şifrəniz yerli profildə yeniləndi!' });
       setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      showToast('Şifrə yeniləndi', 'success');
+      showToast(t('profile_password_updated') || 'Şifrə yeniləndi', 'success');
     }
   };
 
@@ -338,7 +338,7 @@ export default function ProfileModal() {
                 </div>
                 <label className="absolute inset-0 rounded-2xl bg-slate-900/60 text-amber-300 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all cursor-pointer backdrop-blur-[2px]">
                   <span className="material-symbols-outlined text-[20px]">photo_camera</span>
-                  <span className="text-[9px] font-bold tracking-wider uppercase mt-0.5">Dəyiş</span>
+                  <span className="text-[9px] font-bold tracking-wider uppercase mt-0.5">{t('profile_change_avatar') || 'Dəyiş'}</span>
                   <input type="file" accept="image/*" onChange={handleAvatarFile} className="hidden" />
                 </label>
               </div>
@@ -349,10 +349,10 @@ export default function ProfileModal() {
                     {currentUser.firstName || currentUser.name} {currentUser.lastName || ''}
                   </h3>
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300 tracking-wide uppercase">
-                    {userTier || currentUser.tier || 'Free'} Üzv
+                    {userTier || currentUser.tier || 'Free'} {t('profile_member_label') || 'Üzv'}
                   </span>
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-                    {currentUser.role || 'Tələbə'}
+                    {currentUser.role || t('nav_student_role') || 'Tələbə'}
                   </span>
                 </div>
                 <span className="text-xs text-slate-500 block mt-1 font-mono">{currentUser.email}</span>
@@ -367,7 +367,7 @@ export default function ProfileModal() {
                       className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 transition-all flex items-center gap-1 shadow-sm"
                     >
                       <span className="material-symbols-outlined text-[12px]">admin_panel_settings</span>
-                      <span>İdarəetmə Paneli</span>
+                      <span>{t('nav_admin') || 'İdarəetmə Paneli'}</span>
                     </button>
                   )}
                 </div>
@@ -377,7 +377,8 @@ export default function ProfileModal() {
             <button
               onClick={() => setProfileModalOpen(false)}
               className="text-slate-400 hover:text-slate-700 transition-colors p-2 rounded-xl hover:bg-slate-100 border border-transparent hover:border-slate-200"
-              title="Bağla"
+              title={t('common_close') || 'Bağla'}
+              aria-label={t('common_close') || 'Bağla'}
             >
               <span className="material-symbols-outlined text-[22px]">close</span>
             </button>
@@ -440,7 +441,7 @@ export default function ProfileModal() {
                   }`}
                 >
                   <span className="material-symbols-outlined text-[17px] text-amber-600">manage_accounts</span>
-                  <span>Ekspert Profilim & Rezervasiyalar</span>
+                  <span>{t('profile_tab_my_expert') || 'Ekspert Profilim & Rezervasiyalar'}</span>
                   {(() => {
                     const reqCount = (bookings || []).filter(b => {
                       if (isAdm) return true;
@@ -471,7 +472,7 @@ export default function ProfileModal() {
               }`}
             >
               <span className="material-symbols-outlined text-[17px]">account_circle</span>
-              <span>Profil Məlumatlarım</span>
+              <span>{t('profile_tab_profile') || 'Profil Məlumatlarım'}</span>
             </button>
 
             <button
@@ -483,7 +484,7 @@ export default function ProfileModal() {
               }`}
             >
               <span className="material-symbols-outlined text-[17px]">lock_reset</span>
-              <span>Təhlükəsizlik & Şifrə</span>
+              <span>{t('profile_tab_security') || 'Təhlükəsizlik & Şifrə'}</span>
             </button>
 
             <button
@@ -495,7 +496,7 @@ export default function ProfileModal() {
               }`}
             >
               <span className="material-symbols-outlined text-[17px]">assignment</span>
-              <span>Müraciətlər & Qeydiyyat</span>
+              <span>{t('profile_tab_applications') || 'Müraciətlər & Qeydiyyat'}</span>
               <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
                 {totalApplicationsCount}
               </span>
@@ -513,7 +514,7 @@ export default function ProfileModal() {
               }`}
             >
               <span className="material-symbols-outlined text-[17px]">notifications</span>
-              <span>Bildirişlər</span>
+              <span>{t('profile_tab_notifications') || 'Bildirişlər'}</span>
               {unreadCount > 0 && (
                 <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-rose-500 text-white animate-pulse">
                   {unreadCount}
@@ -530,7 +531,7 @@ export default function ProfileModal() {
               }`}
             >
               <span className="material-symbols-outlined text-[17px]">workspace_premium</span>
-              <span>Tədris & Kouçinq</span>
+              <span>{t('profile_learning_coaching') || 'Tədris & Kouçinq'}</span>
             </button>
 
             {/* Certificates Tab */}
@@ -543,7 +544,7 @@ export default function ProfileModal() {
               }`}
             >
               <span className="material-symbols-outlined text-[17px]">card_membership</span>
-              <span>Sertifikatlarım</span>
+              <span>{t('profile_tab_certificates') || 'Sertifikatlarım'}</span>
               {(() => { const n = certificatesList.filter(c => String(c.userId) === String(currentUser?.id) && c.status === 'Yayında').length; return n > 0 ? <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">{n}</span> : null; })()}
             </button>
 
@@ -556,7 +557,7 @@ export default function ProfileModal() {
               }`}
             >
               <span className="material-symbols-outlined text-[17px]">card_membership</span>
-              <span>Üzvlük (Paket)</span>
+              <span>{t('profile_tab_membership') || 'Üzvlük (Paket)'}</span>
             </button>
           </div>
         </div>
@@ -570,10 +571,10 @@ export default function ProfileModal() {
                 <div>
                   <h4 className="text-xs font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1.5 font-mono">
                     <span className="material-symbols-outlined text-[16px]">badge</span>
-                    Şəxsi Profil Məlumatları
+                    {t('profile_personal_info') || 'Şəxsi Profil Məlumatları'}
                   </h4>
                   <p className="text-[11px] text-slate-500 mt-0.5">
-                    Hesab rekvizitlərinizi və ictimai profilinizi tənzimləyin
+                    {t('profile_manage_sub') || 'Hesab rekvizitlərinizi və ictimai profilinizi tənzimləyin'}
                   </p>
                 </div>
                 {!editingProfile ? (
@@ -582,14 +583,14 @@ export default function ProfileModal() {
                     className="px-3.5 py-1.5 rounded-xl border border-amber-300 bg-amber-50/80 text-amber-900 hover:bg-amber-100 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
                   >
                     <span className="material-symbols-outlined text-[15px]">edit</span>
-                    <span>Profili Redaktə Et</span>
+                    <span>{t('profile_edit_btn') || 'Profili Redaktə Et'}</span>
                   </button>
                 ) : (
                   <button
                     onClick={() => setEditingProfile(false)}
                     className="px-3 py-1.5 rounded-xl text-xs text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
                   >
-                    Ləğv Et
+                    {t('profile_cancel_btn') || 'Ləğv Et'}
                   </button>
                 )}
               </div>
@@ -606,14 +607,14 @@ export default function ProfileModal() {
                   )}
                 </div>
                 <div className="flex-1 text-center sm:text-left space-y-1">
-                  <div className="font-semibold text-slate-800 text-xs">Profil Şəkli / Avatar</div>
+                  <div className="font-semibold text-slate-800 text-xs">{t('profile_avatar_title') || 'Profil Şəkli / Avatar'}</div>
                   <p className="text-[11px] text-slate-500">
-                    JPG, PNG və ya WebM formatında maksimum 5MB fayl yükləyə bilərsiniz.
+                    {t('profile_avatar_note') || 'JPG, PNG və ya WebM formatında maksimum 5MB fayl yükləyə bilərsiniz.'}
                   </p>
                   <div className="flex items-center gap-2 pt-1 justify-center sm:justify-start">
                     <label className="cursor-pointer px-3 py-1 rounded-xl bg-amber-100/70 hover:bg-amber-200/70 text-amber-900 border border-amber-300 text-xs font-semibold flex items-center gap-1 transition-all">
                       <span className="material-symbols-outlined text-[15px]">upload</span>
-                      <span>Yeni Şəkil Yüklə</span>
+                      <span>{t('profile_upload_new_img') || 'Yeni Şəkil Yüklə'}</span>
                       <input type="file" accept="image/*" onChange={handleAvatarFile} className="hidden" />
                     </label>
                     {profileForm.avatar && (
@@ -625,7 +626,7 @@ export default function ProfileModal() {
                         }}
                         className="text-rose-600 hover:text-rose-800 text-xs font-semibold px-2 py-1 transition-colors"
                       >
-                        Şəkli Sil
+                        {t('profile_delete_img') || 'Şəkli Sil'}
                       </button>
                     )}
                   </div>
@@ -675,7 +676,7 @@ export default function ProfileModal() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">Ölkə</label>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">{t('profile_field_country') || 'Ölkə'}</label>
                       <input
                         type="text"
                         value={profileForm.country}
@@ -684,7 +685,7 @@ export default function ProfileModal() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">Şəhər</label>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">{t('profile_field_city') || 'Şəhər'}</label>
                       <input
                         type="text"
                         value={profileForm.city}
@@ -695,19 +696,19 @@ export default function ProfileModal() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">Haqqında / Bio</label>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">{t('profile_field_bio') || 'Haqqında / Bio'}</label>
                     <textarea
                       rows={3}
                       value={profileForm.bio}
                       onChange={(e) => setProfileForm(prev => ({ ...prev, bio: e.target.value }))}
-                      placeholder="Özünüz haqqında qısa məlumat, peşə və maraq sahələriniz..."
+                      placeholder={t('profile_field_bio_ph') || 'Özünüz haqqında qısa məlumat, peşə və maraq sahələriniz...'}
                       className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
                     />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">LinkedIn Profili</label>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">{t('profile_field_linkedin') || 'LinkedIn Profili'}</label>
                       <input
                         type="text"
                         placeholder="https://linkedin.com/in/..."
@@ -717,7 +718,7 @@ export default function ProfileModal() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">Instagram Profili</label>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">{t('profile_field_instagram') || 'Instagram Profili'}</label>
                       <input
                         type="text"
                         placeholder="https://instagram.com/..."
@@ -734,7 +735,7 @@ export default function ProfileModal() {
                       onClick={() => setEditingProfile(false)}
                       className="px-4 py-2 rounded-xl text-xs text-slate-500 hover:text-slate-800 transition-colors"
                     >
-                      İmtina
+                      {t('profile_cancel_btn') || 'İmtina'}
                     </button>
                     <button
                       type="submit"
@@ -749,35 +750,35 @@ export default function ProfileModal() {
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
                     <div className="p-4 rounded-2xl border border-slate-200/80 bg-white hover:border-amber-300 transition-colors shadow-sm">
-                      <span className="text-[10px] uppercase font-mono tracking-wider text-slate-500 block mb-1">Tam Ad</span>
+                      <span className="text-[10px] uppercase font-mono tracking-wider text-slate-500 block mb-1">{t('auth_first_name_label') || 'Ad'}</span>
                       <strong className="text-slate-900 text-sm sm:text-base font-serif font-semibold">
                         {currentUser.firstName} {currentUser.lastName}
                       </strong>
                     </div>
                     <div className="p-4 rounded-2xl border border-slate-200/80 bg-white hover:border-amber-300 transition-colors shadow-sm">
-                      <span className="text-[10px] uppercase font-mono tracking-wider text-slate-500 block mb-1">E-poçt</span>
+                      <span className="text-[10px] uppercase font-mono tracking-wider text-slate-500 block mb-1">{t('profile_field_email') || 'E-poçt'}</span>
                       <strong className="text-slate-900 font-mono">{currentUser.email}</strong>
                     </div>
                     <div className="p-4 rounded-2xl border border-slate-200/80 bg-white hover:border-amber-300 transition-colors shadow-sm">
-                      <span className="text-[10px] uppercase font-mono tracking-wider text-slate-500 block mb-1">Telefon / WhatsApp</span>
-                      <strong className="text-slate-900">{currentUser.phone || '+994 (qeyd edilməyib)'}</strong>
+                      <span className="text-[10px] uppercase font-mono tracking-wider text-slate-500 block mb-1">{t('contact_phone_label') || 'Telefon'} / WhatsApp</span>
+                      <strong className="text-slate-900">{currentUser.phone || `+994 ${t('profile_loc_not_specified') || '(qeyd edilməyib)'}`}</strong>
                     </div>
                     <div className="p-4 rounded-2xl border border-slate-200/80 bg-white hover:border-amber-300 transition-colors shadow-sm">
-                      <span className="text-[10px] uppercase font-mono tracking-wider text-slate-500 block mb-1">Məkan</span>
+                      <span className="text-[10px] uppercase font-mono tracking-wider text-slate-500 block mb-1">{t('profile_field_city') || 'Məkan'}</span>
                       <strong className="text-slate-900">{currentUser.city || 'Bakı'}, {currentUser.country || 'Azərbaycan'}</strong>
                     </div>
                   </div>
 
                   {currentUser.bio && (
                     <div className="p-4 rounded-2xl border border-slate-200/80 bg-white text-xs shadow-sm">
-                      <span className="text-[10px] uppercase font-mono tracking-wider text-slate-500 block mb-1.5">Haqqında / Bio</span>
+                      <span className="text-[10px] uppercase font-mono tracking-wider text-slate-500 block mb-1.5">{t('profile_field_bio') || 'Haqqında / Bio'}</span>
                       <p className="text-slate-700 leading-relaxed">{currentUser.bio}</p>
                     </div>
                   )}
 
                   {(currentUser.linkedin || currentUser.instagram) && (
                     <div className="p-4 rounded-2xl border border-slate-200/80 bg-white text-xs flex items-center gap-4 flex-wrap shadow-sm">
-                      <span className="text-[10px] uppercase font-mono tracking-wider text-slate-500">Sosial Profillər:</span>
+                      <span className="text-[10px] uppercase font-mono tracking-wider text-slate-500">{t('profile_social_profiles') || 'Sosial Profillər:'}</span>
                       {currentUser.linkedin && (
                         <a href={currentUser.linkedin} target="_blank" rel="noreferrer" className="text-amber-700 hover:text-amber-900 font-medium flex items-center gap-1 transition-colors">
                           <span className="material-symbols-outlined text-[15px]">link</span>
@@ -796,7 +797,7 @@ export default function ProfileModal() {
               )}
 
               <div className="pt-4 border-t border-slate-200/80 flex justify-between items-center text-xs flex-wrap gap-2">
-                <span className="text-slate-500 font-mono">Platforma İstifadəçi ID: #{currentUser.id}</span>
+                <span className="text-slate-500 font-mono">{t('profile_user_id_label') || 'Platforma İstifadəçi ID:'} #{currentUser.id}</span>
                 <button
                   onClick={() => {
                     setProfileModalOpen(false);
@@ -805,7 +806,7 @@ export default function ProfileModal() {
                   className="text-amber-700 hover:text-amber-900 flex items-center gap-1.5 font-semibold transition-colors"
                 >
                   <span className="material-symbols-outlined text-[16px]">tune</span>
-                  <span>Fərdi İnkişaf Xəritəsini Yenilə</span>
+                  <span>{t('profile_update_roadmap') || 'Fərdi İnkişaf Xəritəsini Yenilə'}</span>
                 </button>
               </div>
             </div>
@@ -817,10 +818,10 @@ export default function ProfileModal() {
               <div>
                 <h4 className="text-xs font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1.5 font-mono">
                   <span className="material-symbols-outlined text-[16px]">security</span>
-                  Hesab Təhlükəsizliyi və Şifrə Yeniləmə
+                  {t('profile_sec_title') || 'Hesab Təhlükəsizliyi və Şifrə Yeniləmə'}
                 </h4>
                 <p className="text-[11px] text-slate-500 mt-0.5">
-                  Hesabınızın təhlükəsizliyini təmin etmək üçün mütəmadi olaraq şifrənizi yeniləyin
+                  {t('profile_sec_desc') || 'Hesabınızın təhlükəsizliyini təmin etmək üçün mütəmadi olaraq şifrənizi yeniləyin'}
                 </p>
               </div>
 
@@ -839,7 +840,7 @@ export default function ProfileModal() {
 
               <form onSubmit={handlePasswordChange} className="space-y-4 p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm max-w-lg">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Cari Şifrə (Köhnə)</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">{t('profile_curr_pass') || 'Cari Şifrə (Köhnə)'}</label>
                   <input
                     type="password"
                     placeholder="••••••••"
@@ -850,7 +851,7 @@ export default function ProfileModal() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Yeni Şifrə (Minimum 8 simvol, hərf və rəqəm) *</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">{t('profile_new_pass') || 'Yeni Şifrə (Minimum 8 simvol, hərf və rəqəm)'} *</label>
                   <input
                     type="password"
                     placeholder="••••••••"
@@ -862,7 +863,7 @@ export default function ProfileModal() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Yeni Şifrə Təkrarı *</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">{t('profile_new_pass_confirm') || 'Yeni Şifrə Təkrarı'} *</label>
                   <input
                     type="password"
                     placeholder="••••••••"
@@ -879,7 +880,7 @@ export default function ProfileModal() {
                     className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold shadow-md shadow-amber-500/20 flex items-center gap-1.5 transition-all"
                   >
                     <span className="material-symbols-outlined text-[16px]">lock_reset</span>
-                    <span>Şifrəni Yenilə</span>
+                    <span>{t('profile_update_pass_btn') || 'Şifrəni Yenilə'}</span>
                   </button>
                 </div>
               </form>
@@ -887,10 +888,10 @@ export default function ProfileModal() {
               <div className="p-4 rounded-2xl border border-emerald-200 bg-emerald-50/70 text-xs space-y-1.5">
                 <div className="flex items-center gap-2 text-emerald-800 font-bold">
                   <span className="material-symbols-outlined text-[18px]">verified_user</span>
-                  <span>Hesab Təhlükəsizlik Statusu: Aktiv & Qorunur</span>
+                  <span>{t('profile_sec_status') || 'Hesab Təhlükəsizlik Statusu: Aktiv & Qorunur'}</span>
                 </div>
                 <p className="text-slate-600 text-[11px] leading-relaxed">
-                  Hesabınız 256-bit SSL şifrələməsi və qorunan sessiya protokolu ilə təmin olunmuşdur. Şübhəli daxilolma cəhdləri qeydə alındıqda dərhal e-poçt bildirişi alacaqsınız.
+                  {t('profile_sec_note') || 'Hesabınız 256-bit SSL şifrələməsi və qorunan sessiya protokolu ilə təmin olunmuşdur. Şübhəli daxilolma cəhdləri qeydə alındıqda dərhal e-poçt bildirişi alacaqsınız.'}
                 </p>
               </div>
             </div>
@@ -902,10 +903,10 @@ export default function ProfileModal() {
               <div>
                 <h4 className="text-xs font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1.5 font-mono">
                   <span className="material-symbols-outlined text-[16px]">assignment</span>
-                  Bütün Müraciət və Qeydiyyat Tarixçəsi
+                  {t('profile_apps_history_title') || 'Bütün Müraciət və Qeydiyyat Tarixçəsi'}
                 </h4>
                 <p className="text-[11px] text-slate-500 mt-0.5">
-                  Kurslar, klublar, fərdi kouçinq və tədbirlər üçün olan müraciətlərin aktual vəziyyəti
+                  {t('profile_apps_history_desc') || 'Kurslar, klublar, fərdi kouçinq və tədbirlər üçün olan müraciətlərin aktual vəziyyəti'}
                 </p>
               </div>
 
@@ -916,28 +917,28 @@ export default function ProfileModal() {
                     <div>
                       <h4 className="text-xs font-bold uppercase tracking-wider text-amber-900 dark:text-amber-300 flex items-center gap-1.5 font-mono">
                         <span className="material-symbols-outlined text-[17px] text-amber-600">psychology</span>
-                        Saytdan Gələn Fərdi Kouçinq Rezervasiyaları ({coachIncomingBookings.length})
+                        {t('profile_coach_incoming_title') || 'Saytdan Gələn Fərdi Kouçinq Rezervasiyaları'} ({coachIncomingBookings.length})
                       </h4>
                       <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5">
-                        Ziyarətçi və tələbələrinizin sizin üçün göndərdiyi seans müraciətləri
+                        {t('profile_coach_incoming_desc') || 'Ziyarətçi və tələbələrinizin sizin üçün göndərdiyi seans müraciətləri'}
                       </p>
                     </div>
                     <button
                       type="button"
                       onClick={() => refreshBookings && refreshBookings()}
                       className="px-2.5 py-1 rounded-lg bg-amber-200/60 hover:bg-amber-200 text-amber-900 text-[11px] font-semibold flex items-center gap-1 cursor-pointer transition-colors"
-                      title="Siyahını yenilə"
+                      title={t('profile_refresh_list') || 'Siyahını yenilə'}
                     >
                       <span className="material-symbols-outlined text-[14px]">refresh</span>
-                      <span>Yenilə</span>
+                      <span>{t('profile_refresh_btn') || 'Yenilə'}</span>
                     </button>
                   </div>
 
                   {coachIncomingBookings.length === 0 ? (
                     <div className="text-center py-6 border border-dashed border-amber-300/60 rounded-xl bg-white/70">
                       <span className="material-symbols-outlined text-3xl text-amber-500 mb-1">event_available</span>
-                      <p className="text-xs font-semibold text-slate-700">Hələ yeni kouçinq rezervasiyası daxil olmayıb.</p>
-                      <p className="text-[11px] text-slate-500 mt-0.5">Ziyarətçilər və tələbələr saytdan sizin üçün fərdi seans rezervasiya etdikdə müraciətlər dərhal burada görünəcək.</p>
+                      <p className="text-xs font-semibold text-slate-700">{t('profile_no_coach_bookings') || 'Hələ yeni kouçinq rezervasiyası daxil olmayıb.'}</p>
+                      <p className="text-[11px] text-slate-500 mt-0.5">{t('profile_no_coach_bookings_sub') || 'Ziyarətçilər və tələbələr saytdan sizin üçün fərdi seans rezervasiya etdikdə müraciətlər dərhal burada görünəcək.'}</p>
                     </div>
                   ) : (
                     <div className="space-y-3">
@@ -948,7 +949,7 @@ export default function ProfileModal() {
                       >
                         <div className="space-y-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-xs font-bold text-slate-900">{b.userName || b.user_name || 'İstifadəçi'}</span>
+                            <span className="text-xs font-bold text-slate-900">{b.userName || b.user_name || (t('profile_booking_user_fallback') || 'İstifadəçi')}</span>
                             <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                               b.status === 'Təsdiqləndi' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' :
                               b.status === 'Ləğv edildi' ? 'bg-rose-100 text-rose-800 border border-rose-300' :
@@ -1052,7 +1053,7 @@ export default function ProfileModal() {
               {totalApplicationsCount === 0 && currentUser?.role !== 'Kouç' && (
                 <div className="text-center py-14 border border-dashed border-slate-300 rounded-2xl bg-white">
                   <span className="material-symbols-outlined text-[44px] text-slate-400 mb-2">inbox</span>
-                  <p className="text-xs text-slate-700 font-medium">Hələ heç bir müraciətiniz yoxdur.</p>
+                  <p className="text-xs text-slate-700 font-medium">{t('profile_no_applications') || 'Hələ heç bir müraciətiniz yoxdur.'}</p>
                   <p className="text-[11px] text-slate-500 mt-1">
                     Kurs və ya tədbir seçərək qeydiyyatdan keçə bilərsiniz.
                   </p>
@@ -1280,7 +1281,7 @@ export default function ProfileModal() {
                     className="text-xs text-rose-600 hover:text-rose-800 flex items-center gap-1 cursor-pointer transition-colors px-2 py-1 rounded-lg hover:bg-rose-50"
                   >
                     <span className="material-symbols-outlined text-[14px]">delete_sweep</span>
-                    <span>Təmizlə</span>
+                    <span>{t('profile_clear_notifications') || 'Təmizlə'}</span>
                   </button>
                 )}
               </div>
@@ -1288,7 +1289,7 @@ export default function ProfileModal() {
               {myNotifications.length === 0 ? (
                 <div className="text-center py-14 border border-dashed border-slate-300 rounded-2xl bg-white">
                   <span className="material-symbols-outlined text-[44px] text-slate-400 mb-2">notifications_off</span>
-                  <p className="text-xs text-slate-700 font-medium">Hələ heç bir bildirişiniz yoxdur.</p>
+                  <p className="text-xs text-slate-700 font-medium">{t('profile_no_notifications') || 'Hələ heç bir bildirişiniz yoxdur.'}</p>
                 </div>
               ) : (
                 <div className="space-y-2.5">

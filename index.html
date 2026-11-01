@@ -271,6 +271,33 @@
       var n = document.getElementById('name');
       if (!sp) return;
 
+      // Dynamic localization for Splash Screen based on saved language preference
+      var userLang = 'az';
+      try {
+        userLang = localStorage.getItem('monodoxia_user_lang') || 'az';
+      } catch (e) {}
+
+      var splashTags = {
+        az: 'Fərdi İnkişaf və Psixologiya Mərkəzi',
+        en: 'Center for Personal Development and Psychology',
+        tr: 'Kişisel Gelişim ve Psikoloji Merkezi',
+        ru: 'Центр личностного развития и психологии'
+      };
+      var splashLoads = {
+        az: 'Yüklənir...',
+        en: 'Loading...',
+        tr: 'Yükleniyor...',
+        ru: 'Загрузка...'
+      };
+
+      var tagEl = sp.querySelector('.tag');
+      if (tagEl && splashTags[userLang]) {
+        tagEl.textContent = splashTags[userLang];
+      }
+      if (splashLoads[userLang]) {
+        sp.setAttribute('aria-label', splashLoads[userLang]);
+      }
+
       var dismissed = false;
       function dismissSplash() {
         if (dismissed) return;

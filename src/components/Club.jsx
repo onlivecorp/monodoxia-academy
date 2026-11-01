@@ -66,10 +66,10 @@ export default function Club() {
 
   // Left button text & link
   const leftBtnText = isSamePlan
-    ? (getLocalized(club, 'ctaBtnActiveText', currentLang, defaultLang) || club.ctaBtnActiveText || 'Statusunuz Aktivdir')
+    ? (getLocalized(club, 'ctaBtnActiveText', currentLang, defaultLang) || club.ctaBtnActiveText || t('club_active_status') || 'Statusunuz Aktivdir')
     : (userClubApp && userClubApp.status !== 'Ləğv edildi' && userClubApp.status !== 'Rədd edildi'
-      ? `Müraciət: ${userClubApp.status}`
-      : 'Plana qoşulmaq üçün müraciət et');
+      ? `${t('profile_app_card_status') || 'Müraciət'}: ${userClubApp.status}`
+      : (t('club_apply_membership') || 'Plana qoşulmaq üçün müraciət et'));
 
   const leftBtnLink = isSamePlan
     ? (getLocalized(club, 'ctaBtnActiveLink', currentLang, defaultLang) || club.ctaBtnActiveLink)

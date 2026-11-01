@@ -436,7 +436,7 @@ export default function BookingModal() {
                   type="button"
                   onClick={prevMonth}
                   className="p-1 rounded-lg hover:bg-slate-200 text-slate-600 cursor-pointer transition-colors"
-                  aria-label="Əvvəlki ay"
+                  aria-label={t('book_prev_month') || "Əvvəlki ay"}
                 >
                   <span className="material-symbols-outlined text-[18px]">chevron_left</span>
                 </button>
@@ -447,7 +447,7 @@ export default function BookingModal() {
                   type="button"
                   onClick={nextMonth}
                   className="p-1 rounded-lg hover:bg-slate-200 text-slate-600 cursor-pointer transition-colors"
-                  aria-label="Növbəti ay"
+                  aria-label={t('book_next_month') || "Növbəti ay"}
                 >
                   <span className="material-symbols-outlined text-[18px]">chevron_right</span>
                 </button>
@@ -505,9 +505,9 @@ export default function BookingModal() {
 
               {/* Legend */}
               <div className="px-3.5 py-1.5 border-t border-slate-100 flex items-center gap-3.5 text-[10px] text-slate-500 flex-wrap bg-slate-50/30">
-                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"/> Boş gün</span>
-                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block"/> Qismən dolu</span>
-                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-slate-300 inline-block"/> Keçmiş</span>
+                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"/> {t('book_legend_free') || 'Boş gün'}</span>
+                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block"/> {t('book_legend_partial') || 'Qismən dolu'}</span>
+                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-slate-300 inline-block"/> {t('book_legend_past') || 'Keçmiş'}</span>
               </div>
             </div>
 
@@ -530,9 +530,9 @@ export default function BookingModal() {
                   {t('book_time')}
                 </label>
                 <div className="flex items-center gap-2.5 text-[10px] text-slate-500">
-                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-emerald-200 inline-block border border-emerald-400"/> Boş</span>
-                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-rose-100 inline-block border border-rose-300"/> Rezerv</span>
-                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-purple-100 inline-block border border-purple-300"/> Blok</span>
+                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-emerald-200 inline-block border border-emerald-400"/> {t('book_slot_free') || 'Boş'}</span>
+                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-rose-100 inline-block border border-rose-300"/> {t('book_slot_busy') || 'Rezerv'}</span>
+                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-purple-100 inline-block border border-purple-300"/> {t('book_slot_blocked_tip') || 'Blok'}</span>
                 </div>
               </div>
 
@@ -567,10 +567,10 @@ export default function BookingModal() {
                         ${isSelected ? 'bg-amber-600 text-white border border-amber-500 ring-2 ring-amber-400 shadow-sm' : ''}
                       `}
                       title={
-                        status === 'past' ? 'Keçmiş vaxt' :
-                        status === 'booked' ? 'Rezervasiya edilib' :
-                        status === 'blocked' ? 'Bloklanmış vaxt' :
-                        'Seçmək üçün klikləyin'
+                        status === 'past' ? (t('book_slot_past_tip') || 'Keçmiş vaxt') :
+                        status === 'booked' ? (t('book_slot_busy') || 'Rezervasiya edilib') :
+                        status === 'blocked' ? (t('book_slot_blocked_tip') || 'Bloklanmış vaxt') :
+                        (t('book_slot_click_tip') || 'Seçmək üçün klikləyin')
                       }
                     >
                       {slotTime}
@@ -593,11 +593,11 @@ export default function BookingModal() {
               <div className="p-3 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-1 animate-fadeIn">
                 <div className="flex items-center gap-1.5 text-xs text-amber-950 font-bold">
                   <span className="material-symbols-outlined text-[16px] text-amber-600 shrink-0">event_available</span>
-                  <span>Seçilmiş vaxt: <strong>{formatDateAz(selectedDate)} · {selectedStart}</strong></span>
+                  <span>{t('book_selected_time') || 'Seçilmiş vaxt:'} <strong>{formatDateAz(selectedDate)} · {selectedStart}</strong></span>
                 </div>
                 <p className="text-[11px] text-amber-800 flex items-center gap-1">
                   <span className="material-symbols-outlined text-[13px] text-amber-600">info</span>
-                  Seansın bitmə saatı və dəqiq müddəti müraciətiniz qəbul edilərkən kouç tərəfindən təyin olunacaq.
+                  {t('book_time_note') || 'Seansın bitmə saatı və dəqiq müddəti müraciətiniz qəbul edilərkən kouç tərəfindən təyin olunacaq.'}
                 </p>
               </div>
             )}
@@ -623,10 +623,10 @@ export default function BookingModal() {
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-[17px] text-amber-600">how_to_reg</span>
-                    Rezervasiya Üçün Seçim Edin
+                    {t('book_auth_choice_title') || 'Rezervasiya Üçün Seçim Edin'}
                   </label>
                   <span className="text-[10px] text-amber-900 bg-amber-100/90 px-2 py-0.5 rounded-full font-bold border border-amber-200">
-                    Giriş edilməyib
+                    {t('book_auth_not_logged') || 'Giriş edilməyib'}
                   </span>
                 </div>
 
@@ -645,9 +645,9 @@ export default function BookingModal() {
                       account_circle
                     </span>
                     <div>
-                      <span className="text-xs font-bold block">a) Sayta Giriş / Qeydiyyat</span>
+                      <span className="text-xs font-bold block">{t('book_auth_choice_login_title') || 'a) Sayta Giriş / Qeydiyyat'}</span>
                       <span className={`text-[10px] block leading-tight ${authChoice === 'login_register' ? 'text-amber-100' : 'text-slate-500'}`}>
-                        Hesabınıza daxil olaraq və ya qeydiyyatdan keçərək seansı izləyin
+                        {t('book_auth_choice_login_desc') || 'Hesabınıza daxil olaraq və ya qeydiyyatdan keçərək seansı izləyin'}
                       </span>
                     </div>
                   </button>
@@ -665,9 +665,9 @@ export default function BookingModal() {
                       assignment
                     </span>
                     <div>
-                      <span className="text-xs font-bold block">b) Formu Doldurub Müraciət Göndər</span>
+                      <span className="text-xs font-bold block">{t('book_auth_choice_guest_title') || 'b) Formu Doldurub Müraciət Göndər'}</span>
                       <span className={`text-[10px] block leading-tight ${authChoice === 'guest_form' ? 'text-amber-100' : 'text-slate-500'}`}>
-                        Qeydiyyatsız birbaşa əlaqə məlumatlarını yazaraq göndərin
+                        {t('book_auth_choice_guest_desc') || 'Qeydiyyatsız birbaşa əlaqə məlumatlarını yazaraq göndərin'}
                       </span>
                     </div>
                   </button>
@@ -677,7 +677,7 @@ export default function BookingModal() {
                 {authChoice === 'login_register' && (
                   <div className="p-3.5 bg-white rounded-xl border border-slate-200 text-center space-y-2.5 animate-fadeIn">
                     <p className="text-xs text-slate-600 leading-relaxed">
-                      Monodoxia Academy hesabınıza daxil olun və ya yeni hesab yaradaraq rezervasiyalarınızı şəxsi kabinetdə izləyin:
+                      {t('book_guest_box_desc') || 'Monodoxia Academy hesabınıza daxil olun və ya yeni hesab yaradaraq rezervasiyalarınızı şəxsi kabinetdə izləyin:'}
                     </p>
                     <div className="flex gap-2 justify-center pt-0.5">
                       <button
@@ -686,7 +686,7 @@ export default function BookingModal() {
                         className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1.5"
                       >
                         <span className="material-symbols-outlined text-[16px]">login</span>
-                        Daxil Ol
+                        {t('auth_login_tab') || 'Daxil Ol'}
                       </button>
                       <button
                         type="button"
@@ -694,7 +694,7 @@ export default function BookingModal() {
                         className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition-all border border-slate-300 cursor-pointer flex items-center gap-1.5"
                       >
                         <span className="material-symbols-outlined text-[16px]">person_add</span>
-                        Qeydiyyatdan Keç
+                        {t('auth_register_tab') || 'Qeydiyyatdan Keç'}
                       </button>
                     </div>
                   </div>
@@ -706,25 +706,25 @@ export default function BookingModal() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       <div>
                         <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                          Ad <span className="text-rose-500">*</span>
+                          {t('auth_first_name_label') || 'Ad'} <span className="text-rose-500">*</span>
                         </label>
                         <input
                           type="text"
                           value={guestFirstName}
                           onChange={(e) => setGuestFirstName(e.target.value)}
-                          placeholder="Adınız"
+                          placeholder={t('book_guest_first_name_ph') || 'Adınız'}
                           className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500"
                         />
                       </div>
                       <div>
                         <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                          Soyad <span className="text-rose-500">*</span>
+                          {t('auth_last_name_label') || 'Soyad'} <span className="text-rose-500">*</span>
                         </label>
                         <input
                           type="text"
                           value={guestLastName}
                           onChange={(e) => setGuestLastName(e.target.value)}
-                          placeholder="Soyadınız"
+                          placeholder={t('book_guest_last_name_ph') || 'Soyadınız'}
                           className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500"
                         />
                       </div>
@@ -733,7 +733,7 @@ export default function BookingModal() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       <div>
                         <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1">
-                          <span>Telefon (WhatsApp)</span> <span className="text-rose-500">*</span>
+                          <span>{t('contact_phone_label') || 'Telefon'} (WhatsApp)</span> <span className="text-rose-500">*</span>
                         </label>
                         <input
                           type="tel"
@@ -745,13 +745,13 @@ export default function BookingModal() {
                       </div>
                       <div>
                         <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                          Ünvan <span className="text-rose-500">*</span>
+                          {t('book_guest_address_label') || 'Ünvan'} <span className="text-rose-500">*</span>
                         </label>
                         <input
                           type="text"
                           value={guestAddress}
                           onChange={(e) => setGuestAddress(e.target.value)}
-                          placeholder="Şəhər, rayon, küçə ünvanınız"
+                          placeholder={t('book_guest_address_ph') || 'Şəhər, rayon, küçə ünvanınız'}
                           className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500"
                         />
                       </div>
@@ -819,32 +819,32 @@ export default function BookingModal() {
                   {isSubmitting ? (
                     <>
                       <span className="material-symbols-outlined text-[17px] animate-spin">autorenew</span>
-                      <span>Göndərilir...</span>
+                      <span>{t('book_btn_submitting') || 'Göndərilir...'}</span>
                     </>
                   ) : !selectedStart ? (
                     <>
                       <span className="material-symbols-outlined text-[17px]">schedule</span>
-                      <span>Başlama Saatı Seçin</span>
+                      <span>{t('book_btn_select_start') || 'Başlama Saatı Seçin'}</span>
                     </>
                   ) : !selectedEnd ? (
                     <>
                       <span className="material-symbols-outlined text-[17px]">timer</span>
-                      <span>Bitmə Saatı Seçin</span>
+                      <span>{t('book_btn_select_end') || 'Bitmə Saatı Seçin'}</span>
                     </>
                   ) : conflictError ? (
                     <>
                       <span className="material-symbols-outlined text-[17px]">block</span>
-                      <span>Bu Vaxt Əlçatmaz</span>
+                      <span>{t('book_btn_unavailable') || 'Bu Vaxt Əlçatmaz'}</span>
                     </>
                   ) : !currentUser && authChoice === 'login_register' ? (
                     <>
                       <span className="material-symbols-outlined text-[17px]">login</span>
-                      <span>Sayta Giriş / Qeydiyyat</span>
+                      <span>{t('book_btn_login_prompt') || 'Sayta Giriş / Qeydiyyat'}</span>
                     </>
                   ) : guestFormIncomplete ? (
                     <>
                       <span className="material-symbols-outlined text-[17px]">edit</span>
-                      <span>Formu Doldurun (Ad, Soyad, Tel, Ünvan)</span>
+                      <span>{t('book_btn_fill_form') || 'Formu Doldurun (Ad, Soyad, Tel, Ünvan)'}</span>
                     </>
                   ) : (
                     <>

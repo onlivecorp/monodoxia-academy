@@ -5,7 +5,7 @@ import { useApp } from '../../context/AppContext';
 import { COACHES } from '../../data/mockData';
 
 export default function ExpertProfileModal({ coach, isOpen, onClose }) {
-  const { currentLang, defaultLang } = useLanguage();
+  const { t, currentLang, defaultLang } = useLanguage();
   const {
     openBooking,
     currentUser,
@@ -418,7 +418,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
         <button
           onClick={onClose}
           className="absolute top-5 right-5 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-[#071326] flex items-center justify-center transition-colors cursor-pointer z-10"
-          aria-label="Bağla"
+          aria-label={t('common_close') || 'Bağla'}
         >
           <span className="material-symbols-outlined text-[20px]">close</span>
         </button>
@@ -444,7 +444,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
               )}
               <span 
                 className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 border-white shadow-sm flex items-center justify-center" 
-                title="Aktiv Qəbul"
+                title={t('expert_active_intake') || 'Aktiv Qəbul'}
               >
                 <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
               </span>
@@ -453,12 +453,12 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
             <div className="text-center sm:text-left min-w-0 flex-1">
               <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
                 <span className="px-2.5 py-0.5 rounded-full bg-[#c5a059]/15 border border-[#c5a059]/30 text-[#775a19] text-[11px] font-bold uppercase tracking-wider">
-                  Ekspert Kouç
+                  {t('expert_badge_coach') || 'Ekspert Kouç'}
                 </span>
                 {coachExp && (
                   <span className="inline-flex items-center gap-1 text-[11px] text-[#64748b] font-medium">
                     <span className="material-symbols-outlined text-[14px] text-[#c5a059]">verified</span>
-                    <span>{coachExp} təcrübə</span>
+                    <span>{coachExp} {t('expert_exp_suffix') || 'təcrübə'}</span>
                   </span>
                 )}
               </div>
@@ -479,7 +479,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                 >
                   <span className="material-symbols-outlined text-[16px]">star</span>
                   <span className="text-sm">{currentRating}</span>
-                  <span className="text-slate-500 font-normal">({totalReviewsCount} rəy)</span>
+                  <span className="text-slate-500 font-normal">({totalReviewsCount} {t('community_comments') || 'rəy'})</span>
                 </button>
                 <span>•</span>
                 <button
@@ -488,7 +488,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                   className="flex items-center gap-1 text-emerald-700 hover:text-emerald-800 font-medium cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[16px] text-emerald-600">workspace_premium</span>
-                  <span>{adminIssuedCerts.length + customCerts.length} Sertifikat</span>
+                  <span>{adminIssuedCerts.length + customCerts.length} {t('expert_tab_certificates') || 'Sertifikat'}</span>
                 </button>
               </div>
             </div>
@@ -506,7 +506,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
               }`}
             >
               <span className="material-symbols-outlined text-[16px]">person</span>
-              <span>Profil & Haqqında</span>
+              <span>{t('expert_tab_overview') || 'Profil & Haqqında'}</span>
             </button>
 
             <button
@@ -519,7 +519,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
               }`}
             >
               <span className="material-symbols-outlined text-[16px]">workspace_premium</span>
-              <span>Sertifikatlar</span>
+              <span>{t('expert_tab_certificates') || 'Sertifikatlar'}</span>
               <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-[#c5a059]/20 text-[#775a19]">
                 {adminIssuedCerts.length + customCerts.length}
               </span>
@@ -535,7 +535,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
               }`}
             >
               <span className="material-symbols-outlined text-[16px]">star</span>
-              <span>Ulduzlar & Rəylər</span>
+              <span>{t('expert_tab_reviews') || 'Ulduzlar & Rəylər'}</span>
               <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
                 {totalReviewsCount}
               </span>
@@ -555,7 +555,7 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                 }`}
               >
                 <span className="material-symbols-outlined text-[16px]">calendar_month</span>
-                <span>Təqvim & Rezervasiyalar</span>
+                <span>{t('expert_tab_calendar') || 'Təqvim & Rezervasiyalar'}</span>
                 {pendingBookingsCount > 0 && (
                   <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-500 text-white animate-pulse">
                     {pendingBookingsCount}
@@ -1284,18 +1284,23 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
                     </button>
                     {/* Filter Pills */}
                     <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs">
-                      {['all', 'Gözləyir', 'Təsdiqləndi', 'Ləğv edildi'].map(st => (
+                      {[
+                        { id: 'all', label: t('event_all') || 'Hamısı' },
+                        { id: 'Gözləyir', label: t('expert_status_pending') || 'Gözləyir' },
+                        { id: 'Təsdiqləndi', label: t('expert_status_confirmed') || 'Təsdiqləndi' },
+                        { id: 'Ləğv edildi', label: t('expert_status_cancelled') || 'Ləğv edildi' }
+                      ].map(st => (
                         <button
-                          key={st}
+                          key={st.id}
                           type="button"
-                          onClick={() => setBookingFilter(st)}
+                          onClick={() => setBookingFilter(st.id)}
                           className={`px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer text-[11px] ${
-                            bookingFilter === st
+                            bookingFilter === st.id
                               ? 'bg-white text-slate-900 shadow-xs font-bold'
                               : 'text-slate-500 hover:text-slate-900'
                           }`}
                         >
-                          {st === 'all' ? 'Hamısı' : st}
+                          {st.label}
                         </button>
                       ))}
                     </div>
