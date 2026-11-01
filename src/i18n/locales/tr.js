@@ -916,5 +916,11 @@ export default {
   "cert_field_issuer": "Kuruluş / Enstitü",
   "cert_field_date": "Verilme Tarihi / Yılı",
   "cert_field_id": "Kayıt Numarası (ID)",
-  "cert_field_url": "Çevrimiçi Doğrulama Linki"
+  "cert_field_url": "Çevrimiçi Doğrulama Linki",
+  "expert_academic_accreditation": "Akademik Akreditasyon",
+  "expert_experience_word": "deneyim",
+  "role_admin": "Yönetici",
+  "role_coach": "Koç",
+  "role_moderator": "Moderatör",
+  "role_student": "Öğrenci"
 };

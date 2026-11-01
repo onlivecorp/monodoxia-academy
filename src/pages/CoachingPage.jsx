@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { getLocalized, getLocalizedArray } from '../i18n/localize';
+import { getLocalized, getLocalizedArray, localizeCoach } from '../i18n/localize';
 import { useApp } from '../context/AppContext';
 import PageHero from '../components/PageHero';
 import ExpertProfileModal from '../components/modals/ExpertProfileModal';
@@ -119,19 +119,11 @@ export default function CoachingPage() {
           {/* Coaches Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
             {filteredCoaches.map((c) => {
-              let coachTitle = getLocalized(c, 'title', currentLang, defaultLang) || c.title;
-              if (!coachTitle || coachTitle === 'Kouç & Ekspert') {
-                coachTitle = t('expert_coach_expert') || 'Kouç & Ekspert';
-              }
-              let coachBio = getLocalized(c, 'bio', currentLang, defaultLang) || c.bio;
-              if (coachBio && currentLang !== 'az' && coachBio.includes('Monodoxia Academy fərdi inkişaf və kouçinq ekspertidir.')) {
-                coachBio = coachBio.replace('Monodoxia Academy fərdi inkişaf və kouçinq ekspertidir.', t('coach_default_bio_text') || 'Monodoxia Academy fərdi inkişaf və kouçinq ekspertidir.');
-              }
-              const coachExp = getLocalized(c, 'experience', currentLang, defaultLang) || c.experience;
-              const rawSpecialties = getLocalizedArray(c, 'specialties', currentLang, defaultLang);
-              const specialtiesList = rawSpecialties.length > 0
-                ? rawSpecialties
-                : (Array.isArray(c.specialties) ? c.specialties : (c.specialties || '').split(',').map(s => s.trim()).filter(Boolean));
+              const locCoach = localizeCoach(c, currentLang, defaultLang, t);
+              const coachTitle = locCoach.title;
+              const coachBio = locCoach.bio;
+              const coachExp = locCoach.experience;
+              const specialtiesList = locCoach.specialties;
 
               return (
                 <div
@@ -195,7 +187,7 @@ export default function CoachingPage() {
                         })()}
                         <span 
                           className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white shadow-sm flex items-center justify-center" 
-                          title="Aktiv Qəbul"
+                          title={t('expert_active_intake') || 'Aktiv Qəbul'}
                         >
                           <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                         </span>
@@ -211,7 +203,7 @@ export default function CoachingPage() {
                         {coachExp && (
                           <div className="inline-flex items-center gap-1 mt-1 text-[11px] text-[#64748b]">
                             <span className="material-symbols-outlined text-[13px] text-[#c5a059]">verified</span>
-                            <span>{coachExp} təcrübə</span>
+                            <span>{coachExp} {t('expert_experience_word') || 'təcrübə'}</span>
                           </div>
                         )}
                       </div>
@@ -248,7 +240,7 @@ export default function CoachingPage() {
                       className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-[#071326] to-[#0c2242] text-white hover:text-[#e5c57d] text-xs font-semibold tracking-wider uppercase shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer group/btn"
                     >
                       <span className="material-symbols-outlined text-[17px] text-[#e5c57d] group-hover/btn:scale-110 transition-transform">calendar_today</span>
-                      <span>Fərdi Seans Rezervasiya Et</span>
+                      <span>{t('expert_book_coaching_btn')}</span>
                     </button>
                     <button
                       type="button"
@@ -256,7 +248,7 @@ export default function CoachingPage() {
                       className="w-full py-2 px-3 rounded-xl border border-[#c5a059]/35 hover:border-[#c5a059] bg-[#faf8f5] hover:bg-[#f5efe6] text-[#775a19] text-[11px] font-semibold tracking-wide transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-[15px]">badge</span>
-                      <span>Haqqında & Profil Məlumatı</span>
+                      <span>{t('expert_view_profile')}</span>
                     </button>
                   </div>
                 </div>

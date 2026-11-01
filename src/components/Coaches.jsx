@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { getLocalized, getLocalizedArray } from '../i18n/localize';
+import { getLocalized, getLocalizedArray, localizeCoach } from '../i18n/localize';
 import { useApp } from '../context/AppContext';
 import ExpertProfileModal from './modals/ExpertProfileModal';
 import { COACHES } from '../data/mockData';
@@ -52,9 +52,10 @@ export default function Coaches() {
         {coachesList && coachesList.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {coachesList.map(c => {
-              const coachTitle = getLocalized(c, 'title', currentLang, defaultLang);
-              const coachBio = getLocalized(c, 'bio', currentLang, defaultLang);
-              const specialties = getLocalizedArray(c, 'specialties', currentLang, defaultLang);
+              const locCoach = localizeCoach(c, currentLang, defaultLang, t);
+              const coachTitle = locCoach.title;
+              const coachBio = locCoach.bio;
+              const specialties = locCoach.specialties;
 
               return (
                 <div
@@ -168,7 +169,7 @@ export default function Coaches() {
                       className="w-full py-2 px-3 rounded-lg border border-[#c5a059]/35 hover:border-[#c5a059] bg-[#faf8f5] hover:bg-white text-[#775a19] text-[11px] font-semibold tracking-wide transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-[15px]">badge</span>
-                      <span>Haqqında & Profil Məlumatı</span>
+                      <span>{t('expert_view_profile')}</span>
                     </button>
                   </div>
                 </div>
@@ -182,11 +183,11 @@ export default function Coaches() {
             </div>
             <div>
               <span className="inline-block px-3 py-1 rounded-full bg-[#c5a059]/15 text-[#775a19] text-[10px] font-semibold tracking-widest uppercase mb-3">
-                Akademik Akkreditasiya
+                {t('expert_academic_accreditation') || 'Akademik Akkreditasiya'}
               </span>
-              <h3 className="font-serif text-2xl font-bold text-[#070f1e]">Ekspert Heyəti Formalaşdırılır</h3>
+              <h3 className="font-serif text-2xl font-bold text-[#070f1e]">{t('expert_forming_title') || 'Ekspert Heyəti Formalaşdırılır'}</h3>
               <p className="text-sm text-slate-600 mt-2 max-w-md mx-auto leading-relaxed font-normal">
-                Monodoxia Academy ekspert heyəti qeydiyyatdan keçmiş və beynəlxalq sertifikatlaşdırılmış mütəxəssis üzvlər arasından təyin olunur. Tezliklə təsdiqlənmiş kouçlarımız burada təqdim olunacaqdır.
+                {t('expert_forming_desc') || 'Monodoxia Academy ekspert heyəti qeydiyyatdan keçmiş və beynəlxalq sertifikatlaşdırılmış mütəxəssis üzvlər arasından təyin olunur. Tezliklə təsdiqlənmiş kouçlarımız burada təqdim olunacaqdır.'}
               </p>
             </div>
           </div>

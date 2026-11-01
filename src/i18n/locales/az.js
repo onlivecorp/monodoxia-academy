@@ -916,5 +916,11 @@ export default {
   "cert_field_issuer": "Təşkilat / İnstitut",
   "cert_field_date": "Verilmə Tarixi / İli",
   "cert_field_id": "Qeydiyyat Nömrəsi (ID)",
-  "cert_field_url": "Onlayn Təsdiq Linki"
+  "cert_field_url": "Onlayn Təsdiq Linki",
+  "expert_academic_accreditation": "Akademik Akkreditasiya",
+  "expert_experience_word": "təcrübə",
+  "role_admin": "Admin",
+  "role_coach": "Kouç",
+  "role_moderator": "Moderator",
+  "role_student": "Tələbə"
 };

@@ -916,5 +916,11 @@ export default {
   "cert_field_issuer": "Организация / Институт",
   "cert_field_date": "Дата / Год выдачи",
   "cert_field_id": "Регистрационный номер (ID)",
-  "cert_field_url": "Ссылка онлайн-проверки"
+  "cert_field_url": "Ссылка онлайн-проверки",
+  "expert_academic_accreditation": "Академическая аккредитация",
+  "expert_experience_word": "опыта",
+  "role_admin": "Администратор",
+  "role_coach": "Коуч",
+  "role_moderator": "Модератор",
+  "role_student": "Студент"
 };

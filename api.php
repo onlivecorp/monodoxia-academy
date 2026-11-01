@@ -191,6 +191,38 @@ function ensureCoachProfiles($pdo) {
         $pdo->exec("UPDATE mdx_coaches SET user_id = 'usr_1792923099303' WHERE (user_id IS NULL OR user_id = '') AND (name LIKE '%Sədaqət%' OR name LIKE '%Sedaqet%')");
     } catch (PDOException $e) {}
 
+    // Ensure 4-language translations for Sedaqet Rzayeva and default coaches
+    try {
+        $sedaqetTranslations = [
+            'az' => [
+                'title' => 'Kouç & Ekspert',
+                'experience' => '10+ il',
+                'bio' => 'Sədaqət Rzayeva — Monodoxia Academy fərdi inkişaf və kouçinq ekspertidir. Fərdi inkişaf, emosional balans və hədəf yönümlü kouçinq üzrə ixtisaslaşmışdır.',
+                'specialties' => ['Fərdi İnkişaf', 'Psixologiya', 'Həyat Balansı']
+            ],
+            'en' => [
+                'title' => 'Coach & Expert',
+                'experience' => '10+ yrs',
+                'bio' => 'Sedaqet Rzayeva — Personal development and coaching expert at Monodoxia Academy. Specialized in personal growth, emotional balance, and goal-oriented coaching.',
+                'specialties' => ['Personal Growth', 'Psychology', 'Life Balance']
+            ],
+            'tr' => [
+                'title' => 'Koç & Uzman',
+                'experience' => '10+ yıl',
+                'bio' => 'Sedaqet Rzayeva — Monodoxia Academy kişisel gelişim ve koçluk uzmanıdır. Kişisel gelişim, duygusal denge ve hedef odaklı koçluk alanlarında uzmanlaşmıştır.',
+                'specialties' => ['Kişisel Gelişim', 'Psikoloji', 'Yaşam Dengesi']
+            ],
+            'ru' => [
+                'title' => 'Коуч и Эксперт',
+                'experience' => '10+ лет',
+                'bio' => 'Седагат Рзаева — эксперт по личностному развитию и коучингу Monodoxia Academy. Специализируется на личностном росте, эмоциональном балансе и целеполагании.',
+                'specialties' => ['Личностное развитие', 'Психология', 'Жизненный баланс']
+            ]
+        ];
+        $srJson = json_encode($sedaqetTranslations, JSON_UNESCAPED_UNICODE);
+        $pdo->prepare("UPDATE mdx_coaches SET translations_json = ? WHERE (name LIKE '%Sədaqət%' OR name LIKE '%Sedaqet%') AND (translations_json IS NULL OR translations_json = '' OR translations_json = '{}')")->execute([$srJson]);
+    } catch (PDOException $e) {}
+
     // Seed ONLY if table is completely empty (first install) so deleted coaches do not re-spawn
     try {
         $cnt = (int)$pdo->query("SELECT COUNT(*) FROM mdx_coaches")->fetchColumn();

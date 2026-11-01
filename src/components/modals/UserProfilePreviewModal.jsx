@@ -35,6 +35,14 @@ export default function UserProfilePreviewModal({ user, isOpen, onClose }) {
     }
   };
 
+  const getRoleDisplayName = (r) => {
+    if (r === 'Admin') return t('role_admin') || 'Admin';
+    if (r === 'Kouç' || r === 'Kouç & Ekspert') return t('role_coach') || 'Kouç';
+    if (r === 'Moderator') return t('role_moderator') || 'Moderator';
+    if (r === 'Tələbə') return t('role_student') || 'Tələbə';
+    return r;
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
       {/* Backdrop */}
@@ -76,7 +84,7 @@ export default function UserProfilePreviewModal({ user, isOpen, onClose }) {
 
           <div className="flex items-center justify-center gap-2 mb-5 flex-wrap">
             <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${getRoleBadgeClass(role)}`}>
-              {role}
+              {getRoleDisplayName(role)}
             </span>
             <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${getTierBadgeClass(tier)}`}>
               {tier} {t('profile_member_label')}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../i18n/LanguageContext';
-import { getLocalized, getLocalizedArray } from '../../i18n/localize';
+import { getLocalized, getLocalizedArray, localizeCoach } from '../../i18n/localize';
 import { useApp } from '../../context/AppContext';
 import { COACHES } from '../../data/mockData';
 
@@ -107,15 +107,11 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
     coachDisplayImage = liveCoach.id === 'coach-farid' ? '/images/coaches/coach-farid.jpg' : (liveCoach.id === 'coach-nargiz' ? '/images/coaches/coach-nargiz.jpg' : '/images/coaches/coach-sedaqet.jpg');
   }
 
-  let coachTitle = liveCoach ? (getLocalized(liveCoach, 'title', currentLang, defaultLang) || liveCoach.title || '') : '';
-  if (!coachTitle || coachTitle === 'Kouç & Ekspert') {
-    coachTitle = t('expert_coach_expert') || 'Kouç & Ekspert';
-  }
-
-  let coachBio = liveCoach ? (getLocalized(liveCoach, 'bio', currentLang, defaultLang) || liveCoach.bio || '') : '';
-  if (coachBio && currentLang !== 'az' && coachBio.includes('Monodoxia Academy fərdi inkişaf və kouçinq ekspertidir.')) {
-    coachBio = coachBio.replace('Monodoxia Academy fərdi inkişaf və kouçinq ekspertidir.', t('coach_default_bio_text') || 'Monodoxia Academy fərdi inkişaf və kouçinq ekspertidir.');
-  }
+  const locCoach = liveCoach ? localizeCoach(liveCoach, currentLang, defaultLang, t) : null;
+  const coachTitle = locCoach ? locCoach.title : (liveCoach?.title || '');
+  const coachBio = locCoach ? locCoach.bio : (liveCoach?.bio || '');
+  const coachExp = locCoach ? locCoach.experience : (liveCoach?.experience || '');
+  const specialties = locCoach ? locCoach.specialties : [];
 
   const getBookingStatusText = (status) => {
     if (!status) return t('status_pending') || 'Gözləyir';
@@ -139,11 +135,6 @@ export default function ExpertProfileModal({ coach, isOpen, onClose }) {
     }
     return format;
   };
-  const coachExp = liveCoach ? (getLocalized(liveCoach, 'experience', currentLang, defaultLang) || liveCoach.experience || '') : '';
-  const rawSpecialties = liveCoach ? getLocalizedArray(liveCoach, 'specialties', currentLang, defaultLang) : [];
-  const specialties = rawSpecialties.length > 0
-    ? rawSpecialties
-    : (Array.isArray(liveCoach?.specialties) ? liveCoach.specialties : (liveCoach?.specialties || '').split(',').map(s => s.trim()).filter(Boolean));
 
   const availableSlots = (Array.isArray(liveCoach?.availableSlots)
     ? liveCoach.availableSlots

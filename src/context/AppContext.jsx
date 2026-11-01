@@ -672,7 +672,12 @@ export function AppProvider({ children }) {
               coachImage = seed?.image || '/images/coaches/coach-sedaqet.jpg';
             }
             return {
+              ...seed,
               ...c,
+              translations: {
+                ...(seed?.translations || {}),
+                ...(c.translations || {})
+              },
               availableSlots: cleanAvail,
               scheduleSlots: cleanSched,
               image: coachImage,
@@ -1413,7 +1418,9 @@ export function AppProvider({ children }) {
               if (!img || img.includes('googleusercontent.com')) {
                 img = seed?.image || (c.id === 'coach-farid' ? '/images/coaches/coach-farid.jpg' : (c.id === 'coach-nargiz' ? '/images/coaches/coach-nargiz.jpg' : '/images/coaches/coach-sedaqet.jpg'));
               }
+              const parsedTranslations = typeof c.translations_json === 'string' ? JSON.parse(c.translations_json || '{}') : (c.translations_json || {});
               return {
+                ...seed,
                 id: c.id,
                 name: c.name,
                 title: c.title,
@@ -1429,7 +1436,10 @@ export function AppProvider({ children }) {
                 specialties: typeof c.specialties_json === 'string' ? JSON.parse(c.specialties_json || '[]') : (c.specialties_json || []),
                 languages: typeof c.languages_json === 'string' ? JSON.parse(c.languages_json || '[]') : (c.languages_json || []),
                 availableSlots: (typeof c.available_slots_json === 'string' ? JSON.parse(c.available_slots_json || '[]') : (c.available_slots_json || [])).filter(s => s !== 'Sabah 15:00' && s !== 'Cümə 18:00'),
-                translations: typeof c.translations_json === 'string' ? JSON.parse(c.translations_json || '{}') : (c.translations_json || {})
+                translations: {
+                  ...(seed?.translations || {}),
+                  ...parsedTranslations
+                }
               };
             });
             setCoachesList(serverCoaches);

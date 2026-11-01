@@ -916,5 +916,11 @@ export default {
   "cert_field_issuer": "Organization / Institute",
   "cert_field_date": "Date / Year of Issue",
   "cert_field_id": "Registration Number (ID)",
-  "cert_field_url": "Online Verification Link"
+  "cert_field_url": "Online Verification Link",
+  "expert_academic_accreditation": "Academic Accreditation",
+  "expert_experience_word": "experience",
+  "role_admin": "Admin",
+  "role_coach": "Coach",
+  "role_moderator": "Moderator",
+  "role_student": "Student"
 };

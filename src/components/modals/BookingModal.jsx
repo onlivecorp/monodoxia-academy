@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../i18n/LanguageContext';
+import { localizeCoach } from '../../i18n/localize';
 import { COACHES } from '../../data/mockData';
 
 // Generate time slots for a day in 30-min increments
@@ -28,7 +29,7 @@ function timesOverlap(aStart, aEnd, bStart, bEnd) {
 }
 
 export default function BookingModal() {
-  const { t, lang } = useLanguage();
+  const { t, lang, currentLang, defaultLang } = useLanguage();
   const {
     bookingModalOpen,
     setBookingModalOpen,
@@ -43,6 +44,11 @@ export default function BookingModal() {
     setAuthModalOpen,
     setAuthModalTab
   } = useApp();
+
+  const curLang = currentLang || lang || 'az';
+  const localizedCoach = useMemo(() => {
+    return activeCoach ? localizeCoach(activeCoach, curLang, defaultLang, t) : null;
+  }, [activeCoach, curLang, defaultLang, t]);
 
   const localeMap = { az: 'az-AZ', en: 'en-US', tr: 'tr-TR', ru: 'ru-RU' };
   const activeLocale = localeMap[lang] || 'az-AZ';
@@ -409,7 +415,7 @@ export default function BookingModal() {
               <h4 id="booking-modal-title" className="font-serif text-base text-slate-900 font-bold truncate leading-tight mt-0.5">
                 {activeCoach.name}
               </h4>
-              <span className="text-[11px] text-slate-500 truncate block leading-tight">{activeCoach.title}</span>
+              <span className="text-[11px] text-slate-500 truncate block leading-tight">{localizedCoach?.title || activeCoach.title}</span>
             </div>
           </div>
 
