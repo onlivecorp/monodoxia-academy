@@ -39,26 +39,31 @@ export default function AdminContactMessagesTab() {
 
   const loadData = useCallback(async () => {
     setLoading(true);
-    const params = {
-      page,
-      limit,
-      search: searchTerm.trim(),
-      status: statusFilter !== 'all' ? statusFilter : ''
-    };
-    if (unreadOnly) {
-      params.is_read = '0';
-    }
-
-    const res = await fetchContactMessages(params);
-    if (res?.status === 'success') {
-      setMessages(res.messages || []);
-      setTotalCount(res.total || 0);
-      if (res.counts) {
-        setCounts(res.counts);
+    try {
+      const params = {
+        page,
+        limit,
+        search: searchTerm.trim(),
+        status: statusFilter !== 'all' ? statusFilter : ''
+      };
+      if (unreadOnly) {
+        params.is_read = '0';
       }
+
+      const res = await fetchContactMessages(params);
+      if (res?.status === 'success') {
+        setMessages(res.messages || []);
+        setTotalCount(res.total || 0);
+        if (res.counts) {
+          setCounts(res.counts);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load contact messages:', err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  }, [fetchContactMessages, page, limit, searchTerm, statusFilter, unreadOnly]);
+  }, [page, limit, searchTerm, statusFilter, unreadOnly]);
 
   useEffect(() => {
     loadData();
@@ -66,7 +71,8 @@ export default function AdminContactMessagesTab() {
 
   const handleToggleRead = async (msg, e) => {
     if (e) e.stopPropagation();
-    const newIsRead = msg.is_read ? 0 : 1;
+    const isReadBool = Number(msg.is_read) === 1;
+    const newIsRead = isReadBool ? 0 : 1;
     const newStatus = newIsRead === 1 && msg.status === 'Yeni' ? 'Oxundu' : msg.status;
 
     const ok = await updateContactMessage(msg.id, {
@@ -76,6 +82,10 @@ export default function AdminContactMessagesTab() {
 
     if (ok) {
       setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, is_read: newIsRead, status: newStatus } : m));
+      setCounts(prev => ({
+        ...prev,
+        unread: Math.max(0, newIsRead === 1 ? prev.unread - 1 : prev.unread + 1)
+      }));
       if (selectedMsg && selectedMsg.id === msg.id) {
         setSelectedMsg(prev => ({ ...prev, is_read: newIsRead, status: newStatus }));
       }
@@ -102,7 +112,7 @@ export default function AdminContactMessagesTab() {
     setAdminNoteInput(msg.admin_notes || '');
 
     // Auto mark as read if currently unread
-    if (!msg.is_read) {
+    if (Number(msg.is_read) !== 1) {
       handleToggleRead(msg);
     }
   };
@@ -287,7 +297,7 @@ export default function AdminContactMessagesTab() {
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         {loading ? (
           <div className="py-16 text-center text-slate-400 flex flex-col items-center justify-center gap-2">
-            <div className="w-8 h-8 border-3 border-[#b45309] border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-[#b45309] border-t-transparent rounded-full animate-spin" />
             <span className="text-xs">Mesajlar yüklənir...</span>
           </div>
         ) : messages.length === 0 ? (
@@ -314,29 +324,31 @@ export default function AdminContactMessagesTab() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {messages.map((msg) => (
-                  <tr
-                    key={msg.id}
-                    onClick={() => handleOpenDetail(msg)}
-                    className={`hover:bg-slate-50/80 transition-colors cursor-pointer group ${
-                      !msg.is_read ? 'bg-amber-50/40 font-medium' : ''
-                    }`}
-                  >
-                    {/* Read indicator */}
-                    <td className="py-3.5 px-4 text-center" onClick={(e) => e.stopPropagation()}>
-                      <button
-                        type="button"
-                        onClick={(e) => handleToggleRead(msg, e)}
-                        className="cursor-pointer"
-                        title={msg.is_read ? 'Oxunmamış kimi işarələ' : 'Oxunmuş kimi işarələ'}
-                      >
-                        <span className={`material-symbols-outlined text-[18px] ${
-                          msg.is_read ? 'text-slate-300 hover:text-slate-500' : 'text-amber-500 fill-current'
-                        }`}>
-                          {msg.is_read ? 'drafts' : 'mark_email_unread'}
-                        </span>
-                      </button>
-                    </td>
+                {messages.map((msg) => {
+                  const isRead = Number(msg.is_read) === 1;
+                  return (
+                    <tr
+                      key={msg.id}
+                      onClick={() => handleOpenDetail(msg)}
+                      className={`hover:bg-slate-50/80 transition-colors cursor-pointer group ${
+                        !isRead ? 'bg-amber-50/40 font-medium' : ''
+                      }`}
+                    >
+                      {/* Read indicator */}
+                      <td className="py-3.5 px-4 text-center" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          type="button"
+                          onClick={(e) => handleToggleRead(msg, e)}
+                          className="cursor-pointer"
+                          title={isRead ? 'Oxunmamış kimi işarələ' : 'Oxunmuş kimi işarələ'}
+                        >
+                          <span className={`material-symbols-outlined text-[18px] ${
+                            isRead ? 'text-slate-300 hover:text-slate-500' : 'text-amber-500 fill-current'
+                          }`}>
+                            {isRead ? 'drafts' : 'mark_email_unread'}
+                          </span>
+                        </button>
+                      </td>
 
                     {/* Sender */}
                     <td className="py-3.5 px-4">
@@ -418,8 +430,9 @@ export default function AdminContactMessagesTab() {
                         </button>
                       </div>
                     </td>
-                  </tr>
-                ))}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

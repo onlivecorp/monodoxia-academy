@@ -4401,14 +4401,15 @@ export function AppProvider({ children }) {
     }
   };
 
-  const fetchContactMessages = async (params = {}) => {
+  const fetchContactMessages = useCallback(async (params = {}) => {
     const qs = new URLSearchParams(params).toString();
     try {
       const res = await apiCall(`get_contact_messages&${qs}`, null, 'GET');
       if (res?.status === 'success') {
         setContactMessagesList(res.messages || []);
         if (res.counts?.unread !== undefined) {
-          setUnreadContactMessagesCount(res.counts.unread);
+          const newUnread = Number(res.counts.unread);
+          setUnreadContactMessagesCount(prev => (prev !== newUnread ? newUnread : prev));
         }
         return res;
       }
@@ -4416,9 +4417,9 @@ export function AppProvider({ children }) {
     } catch (e) {
       return null;
     }
-  };
+  }, []);
 
-  const updateContactMessage = async (id, updates = {}) => {
+  const updateContactMessage = useCallback(async (id, updates = {}) => {
     try {
       const res = await apiCall('update_contact_message', { id, ...updates });
       if (res?.status === 'success') {
@@ -4435,9 +4436,9 @@ export function AppProvider({ children }) {
       showToast('Şəbəkə xətası', 'error');
       return false;
     }
-  };
+  }, []);
 
-  const deleteContactMessage = async (id) => {
+  const deleteContactMessage = useCallback(async (id) => {
     try {
       const res = await apiCall('delete_contact_message', { id });
       if (res?.status === 'success') {
@@ -4451,7 +4452,7 @@ export function AppProvider({ children }) {
       showToast('Şəbəkə xətası', 'error');
       return false;
     }
-  };
+  }, []);
 
   const updateSqlConfig = (newConfig) => {
     setSqlConfig(prev => ({ ...prev, ...newConfig }));

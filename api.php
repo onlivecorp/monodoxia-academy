@@ -2214,72 +2214,89 @@ if ($action === 'get_contact_messages') {
     requireAdminUser($pdo);
     ensureContactMessagesTable($pdo);
 
-    $status = trim($_GET['status'] ?? 'all');
-    $search = trim($_GET['search'] ?? '');
-    $is_read = isset($_GET['is_read']) && $_GET['is_read'] !== '' ? intval($_GET['is_read']) : null;
-    $page = max(1, intval($_GET['page'] ?? 1));
-    $limit = min(100, max(1, intval($_GET['limit'] ?? 20)));
-    $offset = ($page - 1) * $limit;
+    try {
+        $status = trim($_GET['status'] ?? 'all');
+        $search = trim($_GET['search'] ?? '');
+        $is_read = isset($_GET['is_read']) && $_GET['is_read'] !== '' ? intval($_GET['is_read']) : null;
+        $page = max(1, intval($_GET['page'] ?? 1));
+        $limit = min(100, max(1, intval($_GET['limit'] ?? 20)));
+        $offset = ($page - 1) * $limit;
 
-    $whereClauses = ["1=1"];
-    $params = [];
+        $whereClauses = ["1=1"];
+        $params = [];
 
-    if ($status !== 'all' && !empty($status)) {
-        $whereClauses[] = "status = ?";
-        $params[] = $status;
+        if ($status !== 'all' && !empty($status)) {
+            $whereClauses[] = "status = ?";
+            $params[] = $status;
+        }
+
+        if ($is_read !== null) {
+            $whereClauses[] = "is_read = ?";
+            $params[] = $is_read;
+        }
+
+        if (!empty($search)) {
+            $whereClauses[] = "(name LIKE ? OR email LIKE ? OR phone LIKE ? OR subject LIKE ? OR message LIKE ?)";
+            $searchTerm = "%{$search}%";
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+        }
+
+        $whereSql = implode(" AND ", $whereClauses);
+
+        // Get total count
+        $countStmt = $pdo->prepare("SELECT COUNT(*) FROM mdx_contact_messages WHERE {$whereSql}");
+        $countStmt->execute($params);
+        $total = (int)$countStmt->fetchColumn();
+
+        // Get paginated items
+        $sql = "SELECT id, name, email, phone, subject, message, ip_address, status, is_read, admin_notes, created_at, updated_at 
+                FROM mdx_contact_messages 
+                WHERE {$whereSql} 
+                ORDER BY created_at DESC 
+                LIMIT {$limit} OFFSET {$offset}";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        $messages = $stmt->fetchAll();
+
+        // Cast is_read to integer
+        foreach ($messages as &$msg) {
+            $msg['is_read'] = (int)($msg['is_read'] ?? 0);
+        }
+        unset($msg);
+
+        // Get status counts and unread count
+        $counts = [
+            'all' => (int)$pdo->query("SELECT COUNT(*) FROM mdx_contact_messages")->fetchColumn(),
+            'unread' => (int)$pdo->query("SELECT COUNT(*) FROM mdx_contact_messages WHERE is_read = 0")->fetchColumn(),
+            'yeni' => (int)$pdo->query("SELECT COUNT(*) FROM mdx_contact_messages WHERE status = 'Yeni'")->fetchColumn(),
+            'oxundu' => (int)$pdo->query("SELECT COUNT(*) FROM mdx_contact_messages WHERE status = 'Oxundu'")->fetchColumn(),
+            'cavablandirildi' => (int)$pdo->query("SELECT COUNT(*) FROM mdx_contact_messages WHERE status = 'Cavablandırıldı'")->fetchColumn(),
+            'arxiv' => (int)$pdo->query("SELECT COUNT(*) FROM mdx_contact_messages WHERE status = 'Arxiv'")->fetchColumn(),
+        ];
+
+        echo json_encode([
+            'status' => 'success',
+            'messages' => $messages,
+            'total' => $total,
+            'page' => $page,
+            'limit' => $limit,
+            'counts' => $counts
+        ], JSON_UNESCAPED_UNICODE);
+        exit();
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Mesajlar gətirilərkən xəta baş verdi: ' . $e->getMessage(),
+            'messages' => [],
+            'total' => 0
+        ], JSON_UNESCAPED_UNICODE);
+        exit();
     }
-
-    if ($is_read !== null) {
-        $whereClauses[] = "is_read = ?";
-        $params[] = $is_read;
-    }
-
-    if (!empty($search)) {
-        $whereClauses[] = "(name LIKE ? OR email LIKE ? OR phone LIKE ? OR subject LIKE ? OR message LIKE ?)";
-        $searchTerm = "%{$search}%";
-        $params[] = $searchTerm;
-        $params[] = $searchTerm;
-        $params[] = $searchTerm;
-        $params[] = $searchTerm;
-        $params[] = $searchTerm;
-    }
-
-    $whereSql = implode(" AND ", $whereClauses);
-
-    // Get total count
-    $countStmt = $pdo->prepare("SELECT COUNT(*) FROM mdx_contact_messages WHERE {$whereSql}");
-    $countStmt->execute($params);
-    $total = (int)$countStmt->fetchColumn();
-
-    // Get paginated items
-    $sql = "SELECT id, name, email, phone, subject, message, ip_address, status, is_read, admin_notes, created_at, updated_at 
-            FROM mdx_contact_messages 
-            WHERE {$whereSql} 
-            ORDER BY created_at DESC 
-            LIMIT {$limit} OFFSET {$offset}";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
-    $messages = $stmt->fetchAll();
-
-    // Get status counts and unread count
-    $counts = [
-        'all' => (int)$pdo->query("SELECT COUNT(*) FROM mdx_contact_messages")->fetchColumn(),
-        'unread' => (int)$pdo->query("SELECT COUNT(*) FROM mdx_contact_messages WHERE is_read = 0")->fetchColumn(),
-        'yeni' => (int)$pdo->query("SELECT COUNT(*) FROM mdx_contact_messages WHERE status = 'Yeni'")->fetchColumn(),
-        'oxundu' => (int)$pdo->query("SELECT COUNT(*) FROM mdx_contact_messages WHERE status = 'Oxundu'")->fetchColumn(),
-        'cavablandirildi' => (int)$pdo->query("SELECT COUNT(*) FROM mdx_contact_messages WHERE status = 'Cavablandırıldı'")->fetchColumn(),
-        'arxiv' => (int)$pdo->query("SELECT COUNT(*) FROM mdx_contact_messages WHERE status = 'Arxiv'")->fetchColumn(),
-    ];
-
-    echo json_encode([
-        'status' => 'success',
-        'messages' => $messages,
-        'total' => $total,
-        'page' => $page,
-        'limit' => $limit,
-        'counts' => $counts
-    ], JSON_UNESCAPED_UNICODE);
-    exit();
 }
 
 if ($action === 'update_contact_message' && $_SERVER['REQUEST_METHOD'] === 'POST') {
