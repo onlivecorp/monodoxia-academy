@@ -250,6 +250,8 @@ export default {
   "club_monthly_approx": "Monthly equivalent ~$",
   "club_active_status": "Your Status is Active",
   "club_popular_badge": "Most Popular",
+  "club_hero_badge_mastermind": "Weekly Mastermind",
+  "club_hero_badge_meditation": "100+ Hours Meditation Archive",
   "club_perks_badge": "Club Privileges",
   "club_perks_title": "What Do Club Residents Receive?",
   "club_perks_desc": "More than a community, our club is an intellectual family catalyzing the mental, emotional, and professional evolution of each member.",

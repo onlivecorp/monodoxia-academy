@@ -41,14 +41,14 @@ export default function ClubPage() {
             <span className="material-symbols-outlined text-[#775a19] text-[18px]">
               {club.heroBadge2Icon || 'groups'}
             </span>
-            <span className="font-medium">{getLocalized(club, 'heroBadge2Text', currentLang, defaultLang) || 'Həftəlik Mastermind'}</span>
+            <span className="font-medium">{getLocalized(club, 'heroBadge2Text', currentLang, defaultLang, t('club_hero_badge_mastermind')) || t('club_hero_badge_mastermind') || 'Həftəlik Mastermind'}</span>
           </div>
 
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
             <span className="material-symbols-outlined text-[#775a19] text-[18px]">
               {club.heroBadge3Icon || 'spa'}
             </span>
-            <span className="font-medium">{getLocalized(club, 'heroBadge3Text', currentLang, defaultLang) || '100+ Saatlıq Meditasiya Arxivi'}</span>
+            <span className="font-medium">{getLocalized(club, 'heroBadge3Text', currentLang, defaultLang, t('club_hero_badge_meditation')) || t('club_hero_badge_meditation') || '100+ Saatlıq Meditasiya Arxivi'}</span>
           </div>
         </div>
       </PageHero>
@@ -237,13 +237,13 @@ export default function ClubPage() {
             <div className="max-w-3xl mb-12">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#c5a059]/15 border border-[#c5a059]/35 text-[#775a19] text-xs font-semibold tracking-widest uppercase mb-3">
                 <span className="material-symbols-outlined text-[15px]">diamond</span>
-                <span>{getLocalized(club, 'perksBadge', currentLang, defaultLang) || 'Klub İmtiyazları'}</span>
+                <span>{getLocalized(club, 'perksBadge', currentLang, defaultLang, t('club_perks_badge')) || t('club_perks_badge') || 'Klub İmtiyazları'}</span>
               </div>
               <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl font-medium text-[#071326] tracking-tight mb-3">
-                {getLocalized(club, 'perksTitle', currentLang, defaultLang) || 'Zənginlər Klubu Üzvlərinə Nələr Təqdim Olunur?'}
+                {getLocalized(club, 'perksTitle', currentLang, defaultLang, t('club_perks_title')) || t('club_perks_title') || 'Zənginlər Klubu Üzvlərinə Nələr Təqdim Olunur?'}
               </h2>
               <p className="text-sm sm:text-base text-[#64748b] font-light leading-relaxed">
-                {getLocalized(club, 'perksDesc', currentLang, defaultLang) || 'Klubumuz sadəcə qrup deyil, hər bir üzvünün zehni, emosional və peşəkar təkamülünü sürətləndirən intellektual ailədir.'}
+                {getLocalized(club, 'perksDesc', currentLang, defaultLang, t('club_perks_desc')) || t('club_perks_desc') || 'Klubumuz sadəcə qrup deyil, hər bir üzvünün zehni, emosional və peşəkar təkamülünü sürətləndirən intellektual ailədir.'}
               </p>
             </div>
 
@@ -299,10 +299,10 @@ export default function ClubPage() {
               </div>
               <div>
                 <h4 className="font-serif text-xl sm:text-2xl font-medium text-white mb-1.5">
-                  {getLocalized(club, 'noticeTitle', currentLang, defaultLang) || 'Məhdud Sayda Qəbul Siyasəti'}
+                  {getLocalized(club, 'noticeTitle', currentLang, defaultLang, t('club_notice_title')) || t('club_notice_title') || 'Məhdud Sayda Qəbul Siyasəti'}
                 </h4>
                 <p className="text-xs sm:text-sm text-[#cbd5e1] font-light max-w-xl leading-relaxed">
-                  {getLocalized(club, 'noticeDesc', currentLang, defaultLang) || 'Daxili intellektual təhlükəsizliyi və məxfiliyi qorumaq üçün hər ay yalnız 25 yeni Üzv qəbul edilir.'}
+                  {getLocalized(club, 'noticeDesc', currentLang, defaultLang, t('club_notice_desc')) || t('club_notice_desc') || 'Daxili intellektual təhlükəsizliyi və məxfiliyi qorumaq üçün hər ay yalnız 25 yeni Üzv qəbul edilir.'}
                 </p>
               </div>
             </div>
@@ -311,7 +311,7 @@ export default function ClubPage() {
               onClick={() => openApplication({ id: 'club-resident', title: 'Zənginlər Klubu Üzvlük Müraciəti' }, 'club')}
               className="relative z-10 px-8 py-4 rounded-xl bg-gradient-to-r from-[#c5a059] via-[#e5c57d] to-[#b38f46] text-[#071326] font-semibold text-xs sm:text-sm tracking-wider uppercase shadow-lg shadow-[#c5a059]/20 hover:shadow-xl hover:shadow-[#c5a059]/35 hover:scale-[1.02] active:scale-[0.98] transition-all shrink-0 cursor-pointer"
             >
-              {getLocalized(club, 'noticeBtnText', currentLang, defaultLang) || 'Bizimlə Əlaqə'}
+              {getLocalized(club, 'noticeBtnText', currentLang, defaultLang, t('club_notice_btn')) || t('club_notice_btn') || 'Bizimlə Əlaqə'}
             </button>
           </div>
 

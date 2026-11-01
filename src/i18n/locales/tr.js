@@ -250,6 +250,8 @@ export default {
   "club_monthly_approx": "Aylık yaklaşık ₺",
   "club_active_status": "Statünüz Aktif",
   "club_popular_badge": "En Çok Tercih Edilen",
+  "club_hero_badge_mastermind": "Haftalık Mastermind",
+  "club_hero_badge_meditation": "100+ Saatlik Meditasyon Arşivi",
   "club_perks_badge": "Kulüp Ayrıcalıkları",
   "club_perks_title": "Kulüp Üyelerine Neler Sunuluyor?",
   "club_perks_desc": "Kulübümüz sadece bir topluluk değil, üyelerinin zihinsel, duygusal ve profesyonel gelişimini hızlandıran entelektüel bir ailedir.",

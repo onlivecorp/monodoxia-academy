@@ -250,6 +250,8 @@ export default {
   "club_monthly_approx": "В месяц примерно ~₼",
   "club_active_status": "Ваш статус активен",
   "club_popular_badge": "Самый популярный",
+  "club_hero_badge_mastermind": "Еженедельный Мастермайнд",
+  "club_hero_badge_meditation": "100+ Часов Архива Медитаций",
   "club_perks_badge": "Привилегии клуба",
   "club_perks_title": "Что получают резиденты Клуба?",
   "club_perks_desc": "Наш клуб — это интеллектуальная семья, ускоряющая ментальную, эмоциональную и профессиональную эволюцию каждого участника.",

@@ -2093,6 +2093,14 @@ export const INITIAL_HOME_CONTENT = {
     tierCtaActiveText: "Aktiv Üzv",
     tierCtaActiveLink: "",
     noticeBtnText: "Bizimlə Əlaqə",
+    heroBadge1Text: "Məhdud Sayda Üzvlük",
+    heroBadge2Text: "Həftəlik Mastermind",
+    heroBadge3Text: "100+ Saatlıq Meditasiya Arxivi",
+    perksBadge: "Klub İmtiyazları",
+    perksTitle: "Zənginlər Klubu Üzvlərinə Nələr Təqdim Olunur?",
+    perksDesc: "Klubumuz sadəcə qrup deyil, hər bir üzvünün zehni, emosional və peşəkar təkamülünü sürətləndirən intellektual ailədir.",
+    noticeTitle: "Məhdud Sayda Qəbul Siyasəti",
+    noticeDesc: "Daxili intellektual təhlükəsizliyi və məxfiliyi qorumaq üçün hər ay yalnız 25 yeni Üzv qəbul edilir.",
     annualNoteText: "İllik ödənişdə 2 ay pulsuz və bütün qapalı tədbirlərə prioritet qeydiyyat haqqı verilir.",
     translations: {
       az: {
@@ -2128,6 +2136,14 @@ export const INITIAL_HOME_CONTENT = {
         tierCtaActiveText: "Aktiv Üzv",
         tierCtaActiveLink: "",
         noticeBtnText: "Bizimlə Əlaqə",
+        heroBadge1Text: "Məhdud Sayda Üzvlük",
+        heroBadge2Text: "Həftəlik Mastermind",
+        heroBadge3Text: "100+ Saatlıq Meditasiya Arxivi",
+        perksBadge: "Klub İmtiyazları",
+        perksTitle: "Zənginlər Klubu Üzvlərinə Nələr Təqdim Olunur?",
+        perksDesc: "Klubumuz sadəcə qrup deyil, hər bir üzvünün zehni, emosional və peşəkar təkamülünü sürətləndirən intellektual ailədir.",
+        noticeTitle: "Məhdud Sayda Qəbul Siyasəti",
+        noticeDesc: "Daxili intellektual təhlükəsizliyi və məxfiliyi qorumaq üçün hər ay yalnız 25 yeni Üzv qəbul edilir.",
         annualNoteText: "İllik ödənişdə 2 ay pulsuz və bütün qapalı tədbirlərə prioritet qeydiyyat haqqı verilir."
       },
       en: {
@@ -2162,6 +2178,15 @@ export const INITIAL_HOME_CONTENT = {
         tierCtaLink: "",
         tierCtaActiveText: "Active Resident",
         tierCtaActiveLink: "",
+        noticeBtnText: "Contact Us",
+        heroBadge1Text: "Limited Membership",
+        heroBadge2Text: "Weekly Mastermind",
+        heroBadge3Text: "100+ Hours Meditation Archive",
+        perksBadge: "Club Privileges",
+        perksTitle: "What Do Club Residents Receive?",
+        perksDesc: "More than a community, our club is an intellectual family catalyzing the mental, emotional, and professional evolution of each member.",
+        noticeTitle: "Limited Intake Policy",
+        noticeDesc: "To preserve intellectual safety and confidentiality, exactly 25 new members are admitted each month.",
         annualNoteText: "2 months free with annual billing and priority registration for all exclusive events."
       },
       tr: {
@@ -2196,6 +2221,15 @@ export const INITIAL_HOME_CONTENT = {
         tierCtaLink: "",
         tierCtaActiveText: "Aktif Rezidans",
         tierCtaActiveLink: "",
+        noticeBtnText: "İletişime Geç",
+        heroBadge1Text: "Sınırlı Üyelik",
+        heroBadge2Text: "Haftalık Mastermind",
+        heroBadge3Text: "100+ Saatlik Meditasyon Arşivi",
+        perksBadge: "Kulüp Ayrıcalıkları",
+        perksTitle: "Kulüp Üyelerine Neler Sunuluyor?",
+        perksDesc: "Kulübümüz sadece bir topluluk değil, üyelerinin zihinsel, duygusal ve profesyonel gelişimini hızlandıran entelektüel bir ailedir.",
+        noticeTitle: "Sınırlı Kontenjan Politikası",
+        noticeDesc: "İçsel entelektüel güvenliği ve gizliliği korumak adına her ay yalnızca 25 yeni üye kabul edilmektedir.",
         annualNoteText: "Yıllık ödemede 2 ay ücretsiz ve tüm kapalı etkinliklere öncelikli kayıt hakkı."
       },
       ru: {
@@ -2230,6 +2264,15 @@ export const INITIAL_HOME_CONTENT = {
         tierCtaLink: "",
         tierCtaActiveText: "Активный Резидент",
         tierCtaActiveLink: "",
+        noticeBtnText: "Связаться с нами",
+        heroBadge1Text: "Ограниченное членство",
+        heroBadge2Text: "Еженедельный Мастермайнд",
+        heroBadge3Text: "100+ Часов Архива Медитаций",
+        perksBadge: "Привилегии клуба",
+        perksTitle: "Что получают резиденты Клуба?",
+        perksDesc: "Наш клуб — это интеллектуальная семья, ускоряющая ментальную, эмоциональную и профессиональную эволюцию каждого участника.",
+        noticeTitle: "Политика ограниченного набора",
+        noticeDesc: "В целях сохранения интеллектуальной безопасности и конфиденциальности каждый месяц принимаются ровно 25 новых резидентов.",
         annualNoteText: "2 месяца в подарок при годовой оплате и приоритетная регистрация на все закрытые мероприятия."
       }
     }

@@ -271,6 +271,102 @@ export const STATIC_TITLE_MAP = {
     en: 'Student',
     tr: 'Öğrenci',
     ru: 'Студент'
+  },
+  'Həftəlik Mastermind': {
+    az: 'Həftəlik Mastermind',
+    en: 'Weekly Mastermind',
+    tr: 'Haftalık Mastermind',
+    ru: 'Еженедельный Мастермайнд'
+  },
+  '100+ Saatlıq Meditasiya Arxivi': {
+    az: '100+ Saatlıq Meditasiya Arxivi',
+    en: '100+ Hours Meditation Archive',
+    tr: '100+ Saatlik Meditasyon Arşivi',
+    ru: '100+ Часов Архива Медитаций'
+  },
+  'Klub İmtiyazları': {
+    az: 'Klub İmtiyazları',
+    en: 'Club Privileges',
+    tr: 'Kulüp Ayrıcalıkları',
+    ru: 'Привилегии Клуба'
+  },
+  'Zənginlər Klubu Üzvlərinə Nələr Təqdim Olunur?': {
+    az: 'Zənginlər Klubu Üzvlərinə Nələr Təqdim Olunur?',
+    en: 'What Is Offered to Wealth Club Members?',
+    tr: 'Zenginler Kulübü Üyelerine Neler Sunuluyor?',
+    ru: 'Что предлагается участникам Клуба Богатых?'
+  },
+  'Klubumuz sadəcə qrup deyil, hər bir üzvünün zehni, emosional və peşəkar təkamülünü sürətləndirən intellektual ailədir.': {
+    az: 'Klubumuz sadəcə qrup deyil, hər bir üzvünün zehni, emosional və peşəkar təkamülünü sürətləndirən intellektual ailədir.',
+    en: 'Our club is not just a group; it is an intellectual sanctuary accelerating mental, emotional, and professional evolution.',
+    tr: 'Kulübümüz sıradan bir topluluk değil; her üyenin zihinsel, duygusal ve profesyonel evrimini hızlandıran entelektüel bir ailedir.',
+    ru: 'Наш клуб — это не просто группа, а интеллектуальная семья, ускоряющая ментальную, эмоциональную и профессиональную эволюцию каждого участника.'
+  },
+  'Məhdud Sayda Qəbul Siyasəti': {
+    az: 'Məhdud Sayda Qəbul Siyasəti',
+    en: 'Limited Intake Policy',
+    tr: 'Sınırlı Kontenjan Politikası',
+    ru: 'Политика ограниченного приема'
+  },
+  'Daxili intellektual təhlükəsizliyi və məxfiliyi qorumaq üçün hər ay yalnız 25 yeni Üzv qəbul edilir.': {
+    az: 'Daxili intellektual təhlükəsizliyi və məxfiliyi qorumaq üçün hər ay yalnız 25 yeni Üzv qəbul edilir.',
+    en: 'To preserve confidentiality and high-level dialogue, only 25 new residents are admitted each month.',
+    tr: 'İç entelektüel güvenliği ve gizliliği korumak amacıyla her ay yalnızca 25 yeni üye kabul edilmektedir.',
+    ru: 'Для защиты внутренней безопасности и конфиденциальности ежемесячно принимаются только 25 новых резидентов.'
+  },
+  'Bizimlə Əlaqə': {
+    az: 'Bizimlə Əlaqə',
+    en: 'Contact Us',
+    tr: 'Bize Ulaşın',
+    ru: 'Связаться с нами'
+  },
+  'Həftəlik canlı mentorluq və mastermind sessiyaları: Təcrübəli mentorlarla birbaşa dialoq.': {
+    az: 'Həftəlik canlı mentorluq və mastermind sessiyaları: Təcrübəli mentorlarla birbaşa dialoq.',
+    en: 'Weekly live mentoring and mastermind sessions: Direct dialogue with experienced mentors.',
+    tr: 'Haftalık canlı mentorluk ve mastermind seansları: Deneyimli mentorlarla doğrudan diyalog.',
+    ru: 'Еженедельные живые менторские и мастермайнд-сессии: Прямой диалог с опытными наставниками.'
+  },
+  'Həftəlik canlı mentorluq və mastermind sessiyaları': {
+    az: 'Həftəlik canlı mentorluq və mastermind sessiyaları',
+    en: 'Weekly live mentoring and mastermind sessions',
+    tr: 'Haftalık canlı mentorluk ve mastermind seansları',
+    ru: 'Еженедельные живые менторские и мастермайнд-сессии'
+  },
+  'Özəl meditasiya və təcrübə arxivi: 100+ saatlıq audio və video bələdçilər.': {
+    az: 'Özəl meditasiya və təcrübə arxivi: 100+ saatlıq audio və video bələdçilər.',
+    en: 'Exclusive meditation and practice archive: 100+ hours of audio and video guides.',
+    tr: 'Özel meditasyon ve pratik arşivi: 100+ saatlik ses ve video rehberler.',
+    ru: 'Эксклюзивный архив медитаций и практик: 100+ часов аудио- и видеоматериалов.'
+  },
+  'Özəl meditasiya və təcrübə arxivi (100+ saat)': {
+    az: 'Özəl meditasiya və təcrübə arxivi (100+ saat)',
+    en: 'Exclusive meditation and practice archive (100+ hours)',
+    tr: 'Özel meditasyon ve pratik arşivi (100+ saat)',
+    ru: 'Эксклюзивный архив медитаций и практик (100+ часов)'
+  },
+  'Qapalı intellektual icma müzakirələri: Konfidensial təhlükəsiz platforma.': {
+    az: 'Qapalı intellektual icma müzakirələri: Konfidensial təhlükəsiz platforma.',
+    en: 'Private intellectual community discussions: Confidential secure platform.',
+    tr: 'Kapalı entelektüel topluluk tartışmaları: Gizli ve güvenli platform.',
+    ru: 'Закрытые дискуссии интеллектуального сообщества: Конфиденциальная безопасная платформа.'
+  },
+  'Qapalı intellektual icma müzakirələri': {
+    az: 'Qapalı intellektual icma müzakirələri',
+    en: 'Private intellectual community discussions',
+    tr: 'Kapalı entelektüel topluluk tartışmaları',
+    ru: 'Закрытые дискуссии интеллектуального сообщества'
+  },
+  'Oflayn tədbirlərə və retreat-lərə VIP giriş: Qapalı illik düşərgələr.': {
+    az: 'Oflayn tədbirlərə və retreat-lərə VIP giriş: Qapalı illik düşərgələr.',
+    en: 'VIP access to offline events and retreats: Exclusive annual camps.',
+    tr: 'Yüz yüze etkinliklere ve inzivalara VIP giriş: Özel yıllık kamplar.',
+    ru: 'VIP доступ к офлайн мероприятиям и ретритам: Закрытые ежегодные кемпы.'
+  },
+  'Oflayn tədbirlərə və retreat-lərə VIP giriş': {
+    az: 'Oflayn tədbirlərə və retreat-lərə VIP giriş',
+    en: 'VIP access to offline events and retreats',
+    tr: 'Yüz yüze etkinliklere ve inzivalara VIP giriş',
+    ru: 'VIP доступ к офлайн мероприятиям и ретритам'
   }
 };
 
@@ -499,11 +595,11 @@ export function getLocalized(item, field, currentLang = 'az', defaultLang = DEFA
   }
 
   // 4b. Known dynamic dictionary fallbacks for non-default languages
+  const rawT = typeof item[field] === 'string' ? item[field].trim() : (typeof item.title === 'string' ? item.title.trim() : (typeof item.name === 'string' ? item.name.trim() : ''));
+  if (rawT && STATIC_TITLE_MAP[rawT]?.[currentLang]) {
+    return STATIC_TITLE_MAP[rawT][currentLang];
+  }
   if (field === 'title' || field === 'targetTitle' || field === 'name') {
-    const rawT = (item[field] || item.title || item.name || '').trim();
-    if (STATIC_TITLE_MAP[rawT]?.[currentLang]) {
-      return STATIC_TITLE_MAP[rawT][currentLang];
-    }
     if (COACH_TITLE_MAP[rawT]?.[currentLang]) {
       return COACH_TITLE_MAP[rawT][currentLang];
     }
@@ -535,7 +631,7 @@ export function getLocalized(item, field, currentLang = 'az', defaultLang = DEFA
   if (item[field] !== undefined && item[field] !== null) {
     if (typeof item[field] === 'string' && item[field].trim() !== '' && !isCorrupted(item[field])) {
       const rawVal = item[field].trim();
-      if ((field === 'title' || field === 'targetTitle' || field === 'name') && STATIC_TITLE_MAP[rawVal]?.[currentLang]) {
+      if (STATIC_TITLE_MAP[rawVal]?.[currentLang]) {
         return STATIC_TITLE_MAP[rawVal][currentLang];
       }
       if (field === 'title' && COACH_TITLE_MAP[rawVal]?.[currentLang]) {
@@ -583,6 +679,17 @@ export function getLocalizedArray(item, field, currentLang = 'az', defaultLang =
     if (!Array.isArray(arr)) return [];
     if (field === 'specialties' && currentLang !== defaultLang) {
       return arr.map(s => translateSpecialty(s, currentLang));
+    }
+    if (currentLang !== defaultLang) {
+      return arr.map(s => {
+        if (typeof s === 'string') {
+          const trimmed = s.trim();
+          if (STATIC_TITLE_MAP[trimmed]?.[currentLang]) {
+            return STATIC_TITLE_MAP[trimmed][currentLang];
+          }
+        }
+        return s;
+      });
     }
     return arr;
   };

@@ -250,6 +250,8 @@ export default {
   "club_monthly_approx": "Aylıq cəmi ~₼",
   "club_active_status": "Statusunuz Aktivdir",
   "club_popular_badge": "Ən Çox Seçilən",
+  "club_hero_badge_mastermind": "Həftəlik Mastermind",
+  "club_hero_badge_meditation": "100+ Saatlıq Meditasiya Arxivi",
   "club_perks_badge": "Klub İmtiyazları",
   "club_perks_title": "Zənginlər Klubu Üzvlərinə Nələr Təqdim Olunur?",
   "club_perks_desc": "Klubumuz sadəcə qrup deyil, hər bir üzvünün zehni, emosional və peşəkar təkamülünü sürətləndirən intellektual ailədir.",
