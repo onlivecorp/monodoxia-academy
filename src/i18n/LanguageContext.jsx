@@ -59,12 +59,18 @@ export function LanguageProvider({ children }) {
     localStorage.setItem('monodoxia_static_translations', JSON.stringify(newTranslations));
   };
 
-  const t = (key) => {
+  const t = (key, fallback) => {
     if (customTranslations[lang]?.[key] !== undefined && customTranslations[lang][key] !== '') {
       return customTranslations[lang][key];
     }
     const dict = translations[lang] || translations[DEFAULT_LANGUAGE];
-    return dict?.[key] || translations[DEFAULT_LANGUAGE]?.[key] || key;
+    if (dict?.[key] !== undefined && dict[key] !== '') {
+      return dict[key];
+    }
+    if (translations[DEFAULT_LANGUAGE]?.[key] !== undefined && translations[DEFAULT_LANGUAGE][key] !== '') {
+      return translations[DEFAULT_LANGUAGE][key];
+    }
+    return fallback !== undefined ? fallback : key;
   };
 
   // Safe language change that validates against supported list

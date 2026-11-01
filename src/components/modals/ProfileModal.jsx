@@ -264,6 +264,68 @@ export default function ProfileModal() {
     showToast('Profil məlumatları uğurla saxlanıldı!', 'success');
   };
 
+  const getBookingStatusText = (status) => {
+    if (!status) return t('status_pending') || 'Gözləyir';
+    const s = String(status).toLowerCase();
+    if (s.includes('təsdiq') || s.includes('confirm') || s.includes('onay') || s.includes('подтвержд')) {
+      return t('booking_status_confirmed') || 'Təsdiqləndi';
+    }
+    if (s.includes('ləğv') || s.includes('cancel') || s.includes('iptal') || s.includes('отмен')) {
+      return t('booking_status_cancelled') || 'Ləğv edildi';
+    }
+    if (s.includes('gözlə') || s.includes('wait') || s.includes('pend') || s.includes('bekle') || s.includes('ожида')) {
+      return t('status_pending') || 'Gözləyir';
+    }
+    return status;
+  };
+
+  const getBookingFormatText = (format) => {
+    if (!format) return t('booking_format_online') || 'Online (Təhlükəsiz Video Otaq)';
+    if (String(format).toLowerCase().includes('online')) {
+      return t('booking_format_online') || 'Online (Təhlükəsiz Video Otaq)';
+    }
+    return format;
+  };
+
+  const getApplicationStatusText = (status) => {
+    if (!status) return t('status_pending') || 'Gözləyir';
+    const s = String(status).toLowerCase();
+    if (s.includes('təsdiq') || s.includes('confirm') || s.includes('onay') || s.includes('подтвержд')) {
+      return t('status_confirmed') || 'Təsdiqləndi';
+    }
+    if (s.includes('ləğv') || s.includes('cancel') || s.includes('iptal') || s.includes('отмен') || s.includes('rədd')) {
+      return t('status_cancelled') || 'Ləğv edildi';
+    }
+    return status;
+  };
+
+  const getPaymentStatusText = (status) => {
+    if (!status) return status;
+    const s = String(status).toLowerCase();
+    if (s.includes('ödəni') || s.includes('paid') || s.includes('ödendi') || s.includes('оплач')) {
+      return t('status_paid') || 'Ödənildi';
+    }
+    if (s.includes('qaytar') || s.includes('refund') || s.includes('iade') || s.includes('возврат')) {
+      return t('status_refunded') || 'Qaytarıldı';
+    }
+    return status;
+  };
+
+  const getAttendanceStatusText = (status) => {
+    if (!status) return status;
+    const s = String(status).toLowerCase();
+    if (s.includes('iştirak edəcək') || s.includes('will attend') || s.includes('katılacak')) {
+      return t('status_will_attend') || 'İştirak edəcək';
+    }
+    if (s.includes('iştirak etdi') || s.includes('attended') || s.includes('katıldı')) {
+      return t('status_attended') || 'İştirak etdi';
+    }
+    if (s.includes('etməyəcək') || s.includes('not attend') || s.includes('katılmayacak')) {
+      return t('status_not_attending') || 'İştirak etməyəcək';
+    }
+    return status;
+  };
+
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     if (!passwordForm.currentPassword) {
@@ -955,12 +1017,12 @@ export default function ProfileModal() {
                               b.status === 'Ləğv edildi' ? 'bg-rose-100 text-rose-800 border border-rose-300' :
                               'bg-amber-100 text-amber-800 border border-amber-300'
                             }`}>
-                              {b.status || 'Gözləyir'}
+                              {getBookingStatusText(b.status)}
                             </span>
                             <span className="text-[11px] text-slate-400 font-mono">#{b.id}</span>
                             {b.isGuest && (
                               <span className="text-[10px] bg-amber-100 text-amber-900 border border-amber-300 px-1.5 py-0.2 rounded font-semibold">
-                                Qonaq
+                                {t('guest_label') || 'Qonaq'}
                               </span>
                             )}
                           </div>
@@ -970,7 +1032,7 @@ export default function ProfileModal() {
                               <span className="material-symbols-outlined text-[13px]">schedule</span>
                               {b.slot || `${b.selectedDate || ''} ${b.startTime || ''}${b.endTime ? '-' + b.endTime : ''}`}
                             </span>
-                            <span className="text-slate-500">• {b.format || 'Online'}</span>
+                            <span className="text-slate-500">• {getBookingFormatText(b.format)}</span>
                             {b.userEmail && <span className="text-slate-400 font-mono text-[11px]">({b.userEmail})</span>}
                             {b.userPhone && (
                               <a
@@ -983,7 +1045,7 @@ export default function ProfileModal() {
                                 <span>{b.userPhone}</span>
                               </a>
                             )}
-                            {b.userAddress && <span className="text-slate-600 text-[11px] font-medium">Ünvan: {b.userAddress}</span>}
+                            {b.userAddress && <span className="text-slate-600 text-[11px] font-medium">{t('profile_field_address') || 'Ünvan'}: {b.userAddress}</span>}
                           </div>
 
                           {b.notes && (
@@ -997,7 +1059,7 @@ export default function ProfileModal() {
                           {b.status !== 'Təsdiqləndi' && (
                             <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
                               <div className="flex items-center gap-1.5">
-                                <label className="text-[10px] font-bold text-slate-600 whitespace-nowrap">Bitiş saatı:</label>
+                                <label className="text-[10px] font-bold text-slate-600 whitespace-nowrap">{t('booking_end_time_label') || 'Bitiş saatı:'}</label>
                                 <input
                                   type="time"
                                   value={bookingEndTimes[b.id] || b.endTime || (b.startTime ? (() => { const [h,m] = (b.startTime||'00:00').split(':').map(Number); return `${String(h+1).padStart(2,'0')}:${String(m).padStart(2,'0')}`; })() : '15:00')}
@@ -1013,7 +1075,7 @@ export default function ProfileModal() {
                                 title="Rezervasiyanı qəbul et və bitiş saatını təsdiqlə"
                               >
                                 <span className="material-symbols-outlined text-[16px]">check_circle</span>
-                                <span>Qəbul Et</span>
+                                <span>{t('booking_accept_short') || 'Qəbul Et'}</span>
                               </button>
                               <button
                                 type="button"
@@ -1022,7 +1084,7 @@ export default function ProfileModal() {
                                 title="Rezervasiyanı rədd et"
                               >
                                 <span className="material-symbols-outlined text-[15px]">cancel</span>
-                                <span>Rədd Et</span>
+                                <span>{t('booking_reject_short') || 'Rədd Et'}</span>
                               </button>
                             </div>
                           )}
@@ -1030,15 +1092,15 @@ export default function ProfileModal() {
                             <div className="flex items-center gap-2">
                               <span className="text-xs font-bold text-emerald-700 flex items-center gap-1">
                                 <span className="material-symbols-outlined text-[16px]">check</span>
-                                Təsdiqlənib
+                                {t('booking_status_confirmed_done') || 'Təsdiqlənib'}
                               </span>
                               <button
                                 type="button"
                                 onClick={() => updateBookingStatus(b.id, 'Ləğv edildi')}
                                 className="text-slate-400 hover:text-rose-600 text-xs transition-colors"
-                                title="Ləğv et"
+                                title={t('common_cancel') || 'Ləğv et'}
                               >
-                                Ləğv Et
+                                {t('common_cancel') || 'Ləğv Et'}
                               </button>
                             </div>
                           )}
@@ -1063,14 +1125,14 @@ export default function ProfileModal() {
               {myApplications.length > 0 && (
                 <div className="space-y-3.5">
                   <h5 className="text-[11px] font-bold uppercase tracking-wider text-slate-500 font-mono">
-                    Kurs və Tədbir Müraciətləri ({myApplications.length})
+                    {t('profile_course_event_apps') || 'Kurs və Tədbir Müraciətləri'} ({myApplications.length})
                   </h5>
                   {myApplications.map(app => {
                     const statusObj = APPLICATION_STATUSES.find(s => s.id === app.status) || {
                       badgeClass: 'bg-slate-100 text-slate-800 border-slate-200'
                     };
                     const typeObj = TARGET_TYPE_MAP[app.targetType] || {
-                      label: 'Proqram',
+                      label: t('profile_target_program') || 'Proqram',
                       icon: 'assignment',
                       color: 'text-amber-700'
                     };
@@ -1108,7 +1170,7 @@ export default function ProfileModal() {
                               app.status === 'Ləğv edildi' ? 'bg-rose-50 text-rose-800 border-rose-300' :
                               'bg-amber-50 text-amber-800 border-amber-300'
                             }`}>
-                              {app.status}
+                              {getApplicationStatusText(app.status)}
                             </span>
                           </div>
                         </div>
@@ -1116,50 +1178,50 @@ export default function ProfileModal() {
                         <div className={`grid gap-2.5 pt-3.5 text-xs text-slate-600 ${app.targetType === 'community' || app.targetType === 'forum' ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-2 sm:grid-cols-4'}`}>
                           {app.targetType !== 'community' && app.targetType !== 'forum' && (
                             <div>
-                              <span className="text-[10px] uppercase font-mono text-slate-400 block mb-0.5">Məbləğ</span>
-                              <span className="font-bold text-amber-800 font-mono">{app.price || 'Pulsuz'}</span>
+                              <span className="text-[10px] uppercase font-mono text-slate-400 block mb-0.5">{t('common_amount') || 'Məbləğ'}</span>
+                              <span className="font-bold text-amber-800 font-mono">{app.price || (t('common_free') || 'Pulsuz')}</span>
                             </div>
                           )}
                           {app.targetType === 'community' || app.targetType === 'forum' ? (
                             <>
                               <div>
-                                <span className="text-[10px] uppercase font-mono text-slate-400 block mb-0.5">Önə Çıxarma</span>
+                                <span className="text-[10px] uppercase font-mono text-slate-400 block mb-0.5">{t('community_pin_label') || 'Önə Çıxarma'}</span>
                                 <span className={`font-semibold flex items-center gap-1 ${(app.isPinned ?? app.pinned) ? 'text-amber-700' : 'text-slate-600'}`}>
                                   <span className="material-symbols-outlined text-[13px]">
                                     {(app.isPinned ?? app.pinned) ? 'push_pin' : 'remove'}
                                   </span>
-                                  <span>{(app.isPinned ?? app.pinned) ? 'Önə Çıxarılıb' : 'Standart'}</span>
+                                  <span>{(app.isPinned ?? app.pinned) ? (t('community_pinned') || 'Önə Çıxarılıb') : (t('community_standard') || 'Standart')}</span>
                                 </span>
                               </div>
                               <div>
-                                <span className="text-[10px] uppercase font-mono text-slate-400 block mb-0.5">Rəy İcazəsi</span>
+                                <span className="text-[10px] uppercase font-mono text-slate-400 block mb-0.5">{t('community_comments_label') || 'Rəy İcazəsi'}</span>
                                 <span className={`font-semibold flex items-center gap-1 ${app.allowComments === false ? 'text-rose-600' : 'text-emerald-700'}`}>
                                   <span className="material-symbols-outlined text-[13px]">
                                     {app.allowComments === false ? 'lock' : 'chat'}
                                   </span>
-                                  <span>{app.allowComments === false ? 'Bağlıdır' : 'Açıqdır'}</span>
+                                  <span>{app.allowComments === false ? (t('community_closed') || 'Bağlıdır') : (t('community_open') || 'Açıqdır')}</span>
                                 </span>
                               </div>
                             </>
                           ) : (
                             <>
                               <div>
-                                <span className="text-[10px] uppercase font-mono text-slate-400 block mb-0.5">Ödəniş Statusu</span>
+                                <span className="text-[10px] uppercase font-mono text-slate-400 block mb-0.5">{t('payment_status_label') || 'Ödəniş Statusu'}</span>
                                 <span className={`font-medium ${['Ödənildi', 'Ödənilib'].includes(app.paymentStatus) ? 'text-emerald-700 font-bold' : (['Qaytarıldı', 'İmtina edildi'].includes(app.paymentStatus) ? 'text-rose-600 font-bold' : 'text-slate-800')}`}>
-                                  {app.paymentStatus}
+                                  {getPaymentStatusText(app.paymentStatus)}
                                 </span>
                               </div>
                               <div>
-                                <span className="text-[10px] uppercase font-mono text-slate-400 block mb-0.5">İştirak Statusu</span>
+                                <span className="text-[10px] uppercase font-mono text-slate-400 block mb-0.5">{t('attendance_status_label') || 'İştirak Statusu'}</span>
                                 <span className={`font-medium ${['İştirak edəcək', 'İştirak etdi'].includes(app.attendanceStatus) ? 'text-emerald-700 font-bold' : (['İştirak etməyəcək', 'İştirak etmədi'].includes(app.attendanceStatus) ? 'text-rose-600 font-bold' : 'text-slate-800')}`}>
-                                  {app.attendanceStatus}
+                                  {getAttendanceStatusText(app.attendanceStatus)}
                                 </span>
                               </div>
                             </>
                           )}
                           <div>
-                            <span className="text-[10px] uppercase font-mono text-slate-400 block mb-0.5">Əlaqə</span>
-                            <span className="font-mono text-slate-800">{app.userPhone || 'Qeyd olunmayıb'}</span>
+                            <span className="text-[10px] uppercase font-mono text-slate-400 block mb-0.5">{t('contact_label') || 'Əlaqə'}</span>
+                            <span className="font-mono text-slate-800">{app.userPhone || (t('not_specified') || 'Qeyd olunmayıb')}</span>
                           </div>
                         </div>
 
@@ -1167,7 +1229,7 @@ export default function ProfileModal() {
                           <div className="mt-3 p-3 rounded-xl bg-amber-50/80 border border-amber-200 text-xs">
                             <span className="font-bold text-amber-800 flex items-center gap-1 mb-0.5">
                               <span className="material-symbols-outlined text-[14px]">admin_panel_settings</span>
-                              Administrator Qeydi:
+                              {t('admin_note_label') || 'Administrator Qeydi:'}
                             </span>
                             <p className="text-slate-700 italic">{app.adminNote}</p>
                           </div>
@@ -1178,7 +1240,7 @@ export default function ProfileModal() {
                             onClick={() => setExpandedAppId(isExpanded ? null : app.id)}
                             className="text-amber-800 hover:text-amber-950 flex items-center gap-1 font-semibold transition-colors"
                           >
-                            <span>{isExpanded ? 'Detalları gizlə' : 'Form detallarına bax'}</span>
+                            <span>{isExpanded ? (t('app_hide_details') || 'Detalları gizlə') : (t('app_view_details') || 'Form detallarına bax')}</span>
                             <span className="material-symbols-outlined text-[15px]">
                               {isExpanded ? 'expand_less' : 'expand_more'}
                             </span>
@@ -1194,7 +1256,7 @@ export default function ProfileModal() {
                                 className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-[11px] font-bold flex items-center gap-1.5 shadow-sm transition-all"
                               >
                                 <span className="material-symbols-outlined text-[14px]">play_circle</span>
-                                <span>Dərslərə Başla</span>
+                                <span>{t('app_start_lessons') || 'Dərslərə Başla'}</span>
                               </button>
                             )}
 
@@ -1578,17 +1640,17 @@ export default function ProfileModal() {
                 <div>
                   <h4 className="text-xs font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1.5 font-mono">
                     <span className="material-symbols-outlined text-[16px]">manage_accounts</span>
-                    Ekspert Profil və Cədvəl İdarəetməsi
+                    {t('profile_expert_title') || 'Ekspert Profil və Cədvəl İdarəetməsi'}
                   </h4>
                   <p className="text-[11px] text-slate-500 mt-0.5">
-                    Metodologiyanız, ixtisaslarınız, təqviminiz və saytdan gələn seans müraciətləri
+                    {t('profile_expert_desc') || 'Metodologiyanız, ixtisaslarınız, təqviminiz və saytdan gələn seans müraciətləri'}
                   </p>
                 </div>
 
                 {expertProfileSaved && (
                   <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2 animate-fadeIn">
                     <span className="material-symbols-outlined text-[18px]">check_circle</span>
-                    Ekspert profil məlumatlarınız və təqvim saatlarınız uğurla yadda saxlanıldı!
+                    {t('profile_expert_saved') || 'Ekspert profil məlumatlarınız və təqvim saatlarınız uğurla yadda saxlanıldı!'}
                   </div>
                 )}
 
@@ -1598,26 +1660,26 @@ export default function ProfileModal() {
                     <div>
                       <label className="block text-xs font-bold text-slate-900 flex items-center gap-1.5 font-mono uppercase tracking-wider">
                         <span className="material-symbols-outlined text-[17px] text-amber-600">inbox</span>
-                        Saytdan Gələn Rezervasiya Müraciətləri ({coachIncomingBookings.length})
+                        {t('profile_incoming_bookings_title') || 'Saytdan Gələn Rezervasiya Müraciətləri'} ({coachIncomingBookings.length})
                       </label>
                       <p className="text-[11px] text-slate-500 mt-0.5">
-                        Müraciəti "Qəbul Et" kliklədikdə həmin saat avtomatik olaraq təqvimdə <strong>DOLU / REZERV OLUNMUŞ</strong> kimi qeyd edilir.
+                        {t('profile_incoming_bookings_hint') || 'Müraciəti "Qəbul Et" kliklədikdə həmin saat avtomatik olaraq təqvimdə DOLU / REZERV OLUNMUŞ kimi qeyd edilir.'}
                       </p>
                     </div>
                     <button
                       type="button"
                       onClick={() => refreshBookings && refreshBookings()}
                       className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-amber-50 border border-amber-300 text-amber-800 text-[11px] font-semibold hover:bg-amber-100 transition-all cursor-pointer shadow-2xs"
-                      title="Rezervasiyaları yenilə"
+                      title={t('common_refresh') || 'Rezervasiyaları yenilə'}
                     >
                       <span className="material-symbols-outlined text-[15px]">refresh</span>
-                      <span>Yenilə</span>
+                      <span>{t('common_refresh') || 'Yenilə'}</span>
                     </button>
                   </div>
 
                   {coachIncomingBookings.length === 0 ? (
                     <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-500 italic">
-                      Hələlik saytdan daxil olan seans müraciəti yoxdur.
+                      {t('profile_no_incoming_bookings') || 'Hələlik saytdan daxil olan seans müraciəti yoxdur.'}
                     </div>
                   ) : (
                     <div className="space-y-2.5">
@@ -1628,13 +1690,13 @@ export default function ProfileModal() {
                         >
                           <div className="space-y-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-xs font-bold text-slate-900">{b.userName || b.user_name || 'İstifadəçi'}</span>
+                              <span className="text-xs font-bold text-slate-900">{b.userName || b.user_name || (t('profile_booking_user_fallback') || 'İstifadəçi')}</span>
                               <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                                 b.status === 'Təsdiqləndi' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' :
                                 b.status === 'Ləğv edildi' ? 'bg-rose-100 text-rose-800 border border-rose-300' :
                                 'bg-amber-100 text-amber-800 border border-amber-300'
                               }`}>
-                                {b.status || 'Gözləyir'}
+                                {getBookingStatusText(b.status)}
                               </span>
                               <span className="text-[11px] text-slate-400 font-mono">#{b.id}</span>
                             </div>
@@ -1644,11 +1706,11 @@ export default function ProfileModal() {
                                 <span className="material-symbols-outlined text-[13px]">schedule</span>
                                 {b.slot || `${b.selectedDate || ''} ${b.startTime || ''}-${b.endTime || ''}`}
                               </span>
-                              <span className="text-slate-500">• {b.format}</span>
+                              <span className="text-slate-500">• {getBookingFormatText(b.format)}</span>
                               {b.userEmail && <span className="text-slate-400 font-mono text-[11px]">({b.userEmail})</span>}
                               {b.userPhone && <span className="text-slate-600 text-[11px] font-medium">Tel: {b.userPhone}</span>}
-                              {b.userAddress && <span className="text-slate-600 text-[11px] font-medium">Ünvan: {b.userAddress}</span>}
-                              {b.isGuest && <span className="text-[10px] bg-amber-100 text-amber-900 border border-amber-300 px-1.5 py-0.2 rounded font-semibold">Qonaq</span>}
+                              {b.userAddress && <span className="text-slate-600 text-[11px] font-medium">{t('profile_field_address') || 'Ünvan'}: {b.userAddress}</span>}
+                              {b.isGuest && <span className="text-[10px] bg-amber-100 text-amber-900 border border-amber-300 px-1.5 py-0.2 rounded font-semibold">{t('guest_label') || 'Qonaq'}</span>}
                             </div>
 
                             {b.notes && (
@@ -1662,7 +1724,7 @@ export default function ProfileModal() {
                             {b.status !== 'Təsdiqləndi' && (
                               <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
                                 <div className="flex items-center gap-1.5">
-                                  <label className="text-[10px] font-bold text-slate-600 whitespace-nowrap">Bitiş saatı:</label>
+                                  <label className="text-[10px] font-bold text-slate-600 whitespace-nowrap">{t('booking_end_time_label') || 'Bitiş saatı:'}</label>
                                   <input
                                     type="time"
                                     value={bookingEndTimes[b.id] || b.endTime || (b.startTime ? (() => { const [h,m] = (b.startTime||'00:00').split(':').map(Number); return `${String(h+1).padStart(2,'0')}:${String(m).padStart(2,'0')}`; })() : '15:00')}
@@ -1678,13 +1740,13 @@ export default function ProfileModal() {
                                   title="Rezervasiyanı qəbul et və bitiş saatını təsdiqlə"
                                 >
                                   <span className="material-symbols-outlined text-[16px]">check_circle</span>
-                                  <span>Qəbul Et & Rezervlə</span>
+                                  <span>{t('booking_accept_btn') || 'Qəbul Et & Rezervlə'}</span>
                                 </button>
                               </div>
                             )}
                             {b.status === 'Təsdiqləndi' && (
                               <div className="flex items-center gap-1.5">
-                                <label className="text-[10px] font-bold text-slate-600 whitespace-nowrap">Bitiş saatı:</label>
+                                <label className="text-[10px] font-bold text-slate-600 whitespace-nowrap">{t('booking_end_time_label') || 'Bitiş saatı:'}</label>
                                 <input
                                   type="time"
                                   defaultValue={b.endTime || ''}
@@ -1697,7 +1759,7 @@ export default function ProfileModal() {
                                   className="px-2.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors"
                                 >
                                   <span className="material-symbols-outlined text-[14px]">update</span>
-                                  <span>Yenilə</span>
+                                  <span>{t('common_refresh') || 'Yenilə'}</span>
                                 </button>
                               </div>
                             )}
@@ -1709,7 +1771,7 @@ export default function ProfileModal() {
                                 title="Ləğv et və saatı boşalt"
                               >
                                 <span className="material-symbols-outlined text-[15px]">close</span>
-                                <span>Ləğv Et</span>
+                                <span>{t('common_cancel') || 'Ləğv Et'}</span>
                               </button>
                             )}
                           </div>
@@ -1726,10 +1788,10 @@ export default function ProfileModal() {
                       <div>
                         <label className="block text-xs font-bold text-slate-900 flex items-center gap-1.5 font-mono uppercase tracking-wider">
                           <span className="material-symbols-outlined text-[17px] text-amber-600">calendar_month</span>
-                          Təqvim: Dolu / Rezerv Olunmuş və Mövcud Saatlar
+                          {t('profile_schedule_title') || 'Təqvim: Dolu / Rezerv Olunmuş və Mövcud Saatlar'}
                         </label>
                         <p className="text-[11px] text-slate-500 mt-0.5">
-                          Tarix və saat aralığını (neçədən neçəyə) seçərək <strong>Dolu / Rezerv</strong> və ya <strong>Mövcud / Boş</strong> kimi qeyd edin. Dolu olan saatlar müştərilərə deaktiv görünür, digərləri rezerv edilə bilir.
+                          {t('profile_schedule_desc') || 'Tarix və saat aralığını (neçədən neçəyə) seçərək Dolu / Rezerv və ya Mövcud / Boş kimi qeyd edin. Dolu olan saatlar müştərilərə deaktiv görünür, digərləri rezerv edilə bilir.'}
                         </p>
                       </div>
                     </div>
@@ -1740,7 +1802,7 @@ export default function ProfileModal() {
                         <div>
                           <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1">
                             <span className="material-symbols-outlined text-[13px] text-amber-700">calendar_today</span>
-                            Tarix
+                            {t('schedule_date') || 'Tarix'}
                           </label>
                           <input
                             type="date"
@@ -1753,7 +1815,7 @@ export default function ProfileModal() {
 
                         <div>
                           <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                            Başlama Saatı
+                            {t('schedule_start_time') || 'Başlama Saatı'}
                           </label>
                           <input
                             type="time"
@@ -1765,7 +1827,7 @@ export default function ProfileModal() {
 
                         <div>
                           <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                            Bitmə Saatı
+                            {t('schedule_end_time') || 'Bitmə Saatı'}
                           </label>
                           <input
                             type="time"
@@ -1777,15 +1839,15 @@ export default function ProfileModal() {
 
                         <div>
                           <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                            Saat Vəziyyəti
+                            {t('schedule_slot_status') || 'Saat Vəziyyəti'}
                           </label>
                           <select
                             value={newSlotStatus}
                             onChange={e => setNewSlotStatus(e.target.value)}
                             className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500"
                           >
-                            <option value="Dolu">🔴 Dolu / Rezerv edilib</option>
-                            <option value="Mövcud">🟢 Mövcud / Boşdur</option>
+                            <option value="Dolu">{t('schedule_status_booked') || '🔴 Dolu / Rezerv edilib'}</option>
+                            <option value="Mövcud">{t('schedule_status_available') || '🟢 Mövcud / Boşdur'}</option>
                           </select>
                         </div>
                       </div>
@@ -1795,7 +1857,7 @@ export default function ProfileModal() {
                           type="text"
                           value={newSlotNote}
                           onChange={e => setNewSlotNote(e.target.value)}
-                          placeholder="Qeyd (məs: Şəxsi görüş, Fərdi seans və s. - istəyə bağlı)"
+                          placeholder={t('schedule_note_placeholder') || 'Qeyd (məs: Şəxsi görüş, Fərdi seans və s. - istəyə bağlı)'}
                           className="flex-1 w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500"
                         />
                         <button
@@ -1804,7 +1866,7 @@ export default function ProfileModal() {
                           className="w-full sm:w-auto px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm cursor-pointer transition-colors shrink-0"
                         >
                           <span className="material-symbols-outlined text-[16px]">add_circle</span>
-                          <span>+ Saat Aralığını Əlavə Et</span>
+                          <span>{t('schedule_add_slot_btn') || '+ Saat Aralığını Əlavə Et'}</span>
                         </button>
                       </div>
                     </div>
@@ -1812,15 +1874,15 @@ export default function ProfileModal() {
                     {/* Schedule Slots List */}
                     <div className="space-y-2">
                       <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
-                        <span>Cədvəldə Qeyd Edilən Saatlar ({expertSchedule.length})</span>
+                        <span>{t('schedule_recorded_slots') || 'Cədvəldə Qeyd Edilən Saatlar'} ({expertSchedule.length})</span>
                         <span className="text-[10px] font-normal lowercase">
-                          {expertSchedule.filter(s => s.isBooked).length} dolu, {expertSchedule.filter(s => !s.isBooked).length} boş
+                          {expertSchedule.filter(s => s.isBooked).length} {t('schedule_booked_count') || 'dolu'}, {expertSchedule.filter(s => !s.isBooked).length} {t('schedule_available_count') || 'boş'}
                         </span>
                       </div>
 
                       {expertSchedule.length === 0 ? (
                         <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-500 italic">
-                          Hələlik cədvələ heç bir saat aralığı əlavə edilməyib. Yuxarıdakı form vasitəsilə dolu və ya boş vaxtlarınızı qeyd edin.
+                          {t('schedule_no_slots') || 'Hələlik cədvələ heç bir saat aralığı əlavə edilməyib. Yuxarıdakı form vasitəsilə dolu və ya boş vaxtlarınızı qeyd edin.'}
                         </div>
                       ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -1841,7 +1903,7 @@ export default function ProfileModal() {
                                       ? 'bg-rose-200 text-rose-900 border border-rose-300'
                                       : 'bg-emerald-200 text-emerald-900 border border-emerald-300'
                                   }`}>
-                                    {s.isBooked ? 'Dolu / Rezerv' : 'Mövcud'}
+                                    {s.isBooked ? (t('schedule_booked_badge') || 'Dolu / Rezerv') : (t('schedule_available_badge') || 'Mövcud')}
                                   </span>
                                 </div>
                                 {(s.note || s.clientName) && (
@@ -1863,13 +1925,13 @@ export default function ProfileModal() {
                                   }`}
                                   title="Vəziyyəti dəyiş"
                                 >
-                                  {s.isBooked ? 'Boş et' : 'Dolu et'}
+                                  {s.isBooked ? (t('schedule_toggle_free') || 'Boş et') : (t('schedule_toggle_busy') || 'Dolu et')}
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => handleRemoveScheduleSlot(s.id)}
                                   className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-white transition-colors cursor-pointer"
-                                  title="Sil"
+                                  title={t('common_remove') || 'Sil'}
                                 >
                                   <span className="material-symbols-outlined text-[16px]">delete</span>
                                 </button>
@@ -1885,9 +1947,9 @@ export default function ProfileModal() {
                   <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3">
                     <label className="block text-xs font-bold text-slate-700 flex items-center gap-1.5 font-mono uppercase tracking-wider">
                       <span className="material-symbols-outlined text-[16px] text-amber-600">photo_camera</span>
-                      Profil Şəkli
+                      {t('profile_image_title') || 'Profil Şəkli'}
                     </label>
-                    <p className="text-[11px] text-slate-400">URL daxil edin və ya fayl yükləyin. Şəkil ekspert kartında görünəcək.</p>
+                    <p className="text-[11px] text-slate-400">{t('profile_image_desc') || 'URL daxil edin və ya fayl yükləyin. Şəkil ekspert kartında görünəcək.'}</p>
                     <div className="flex items-center gap-3 flex-wrap">
                       {/* Preview */}
                       <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-amber-200 bg-amber-50 flex items-center justify-center shrink-0">
@@ -1902,12 +1964,12 @@ export default function ProfileModal() {
                           type="text"
                           value={expertImage}
                           onChange={e => setExpertImage(e.target.value)}
-                          placeholder="https://... şəkil URL-i"
+                          placeholder={t('profile_image_url_ph') || 'https://... şəkil URL-i'}
                           className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 text-xs focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
                         />
                         <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold cursor-pointer transition-colors">
                           <span className="material-symbols-outlined text-[15px]">upload</span>
-                          <span>Fayl Yüklə</span>
+                          <span>{t('common_upload_file') || 'Fayl Yüklə'}</span>
                           <input
                             type="file"
                             accept="image/*"
@@ -1942,7 +2004,7 @@ export default function ProfileModal() {
                         </label>
                         {expertImage && (
                           <button type="button" onClick={() => setExpertImage('')} className="text-[11px] text-rose-500 hover:text-rose-700 underline cursor-pointer">
-                            Şəkli sil
+                            {t('common_remove_image') || 'Şəkli sil'}
                           </button>
                         )}
                       </div>
@@ -1954,14 +2016,14 @@ export default function ProfileModal() {
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5 font-mono uppercase tracking-wider">
                         <span className="material-symbols-outlined text-[16px] text-amber-600">psychology</span>
-                        Metodologiya və Təcrübə (Haqqında Mətni)
+                        {t('coach_methodology_title') || 'Metodologiya və Təcrübə (Haqqında Mətni)'}
                       </label>
-                      <p className="text-[11px] text-slate-400 mb-2">Profilinizin əsas haqqında mətni. Müştərilərin ilk gördüyü məlumatdır.</p>
+                      <p className="text-[11px] text-slate-400 mb-2">{t('coach_methodology_desc') || 'Profilinizin əsas haqqında mətni. Müştərilərin ilk gördüyü məlumatdır.'}</p>
                       <textarea
                         rows={4}
                         value={expertBio}
                         onChange={e => setExpertBio(e.target.value)}
-                        placeholder="Özünüz, metodologiyanız, təhsiliniz və təcrübəniz barədə yazın..."
+                        placeholder={t('coach_methodology_ph') || 'Özünüz, metodologiyanız, təhsiliniz və təcrübəniz barədə yazın...'}
                         className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 text-xs focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors resize-none"
                       />
                     </div>
@@ -1971,14 +2033,14 @@ export default function ProfileModal() {
                   <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3">
                     <label className="block text-xs font-bold text-slate-700 flex items-center gap-1.5 font-mono uppercase tracking-wider">
                       <span className="material-symbols-outlined text-[16px] text-amber-600">category</span>
-                      İxtisaslaşdığı Sahələr
+                      {t('coach_specialties_title') || 'İxtisaslaşdığı Sahələr'}
                     </label>
-                    <p className="text-[11px] text-slate-400">Vergüllə ayırın. Məs: <span className="font-mono">Fərdi İnkişaf, Psixologiya, Liderlik</span></p>
+                    <p className="text-[11px] text-slate-400">{t('coach_specialties_desc') || 'Vergüllə ayırın. Məs: Fərdi İnkişaf, Psixologiya, Liderlik'}</p>
                     <input
                       type="text"
                       value={expertSpecialties}
                       onChange={e => setExpertSpecialties(e.target.value)}
-                      placeholder="Fərdi İnkişaf, Psixologiya, Liderlik"
+                      placeholder={t('coach_specialties_ph') || 'Fərdi İnkişaf, Psixologiya, Liderlik'}
                       className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 text-xs focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
                     />
                     {expertSpecialties && (
@@ -1996,7 +2058,7 @@ export default function ProfileModal() {
                       className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold shadow-md shadow-amber-500/20 flex items-center gap-1.5 transition-all cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-[16px]">save</span>
-                      <span>Bütün Dəyişiklikləri Yadda Saxla</span>
+                      <span>{t('common_save_all_changes') || 'Bütün Dəyişiklikləri Yadda Saxla'}</span>
                     </button>
                   </div>
                 </form>
