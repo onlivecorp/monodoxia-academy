@@ -1809,7 +1809,7 @@ export const INITIAL_HOME_CONTENT = {
         title3: "Transform your life.",
         desc: "Monodoxia Academy is an elite growth ecosystem combining academic psychological research, ancient inner wisdom, and modern coaching methodologies. A safe intellectual haven for conscious awareness and enduring inner peace.",
         btnPrimaryText: "Discover the Academy",
-        btnSecondaryText: "Zənginlər Klubunu Kəşfet",
+        btnSecondaryText: "Explore Wealth Club",
         stat1Label: "Individual Students",
         stat2Label: "Satisfaction Rate",
         stat3Label: "Certified Coaches",
@@ -1825,7 +1825,7 @@ export const INITIAL_HOME_CONTENT = {
         title3: "Hayatını dönüştür.",
         desc: "Monodoxia Academy — akademik psikoloji araştırmalarını, kadim içsel bilgeliği ve modern koçluk metodolojilerini bir araya getiren seçkin bir gelişim ekosistemidir. Bilinçli farkındalık ve kalıcı iç huzuru için güvenli entelektüel liman.",
         btnPrimaryText: "Akademiyi Keşfet",
-        btnSecondaryText: "Zənginlər Klubunu Tanı",
+        btnSecondaryText: "Zenginler Kulübünü Tanı",
         stat1Label: "Bireysel Öğrenci",
         stat2Label: "Memnuniyet Oranı",
         stat3Label: "Sertifikalı Koçlar",
@@ -1841,7 +1841,7 @@ export const INITIAL_HOME_CONTENT = {
         title3: "Измени жизнь.",
         desc: "Monodoxia Academy — элитная экосистема развития, объединяющая академические психологические исследования, древнюю внутреннюю мудрость и современные методики коучинга. Безопасная интеллектуальная гавань для осознанности и душевного покоя.",
         btnPrimaryText: "Исследовать Академию",
-        btnSecondaryText: "Zənginlər Klubu haqqında",
+        btnSecondaryText: "О Клубе Богатых",
         stat1Label: "Студентов",
         stat2Label: "Удовлетворенность",
         stat3Label: "Сертифицированные коучи",
@@ -1911,7 +1911,7 @@ export const INITIAL_HOME_CONTENT = {
         manifestoTenet2Text: "Absolute Confidentiality",
         manifestoTenet3Text: "Transformation Guarantee",
         manifestoBtn1Text: "Explore Academy",
-        manifestoBtn2Text: "Zənginlər Klubuna Qoşul"
+        manifestoBtn2Text: "Join Wealth Club"
       },
       tr: {
         badge: "Akademinin Misyonu",
@@ -1929,7 +1929,7 @@ export const INITIAL_HOME_CONTENT = {
         manifestoTenet2Text: "Mutlak Gizlilik",
         manifestoTenet3Text: "Dönüşüm Garantisi",
         manifestoBtn1Text: "Akademiyi Keşfet",
-        manifestoBtn2Text: "Zənginlər Klubuna Katıl"
+        manifestoBtn2Text: "Zenginler Kulübüne Katıl"
       },
       ru: {
         badge: "Миссия Академии",
@@ -1947,7 +1947,7 @@ export const INITIAL_HOME_CONTENT = {
         manifestoTenet2Text: "Абсолютная конфиденциальность",
         manifestoTenet3Text: "Гарантия трансформации",
         manifestoBtn1Text: "Открыть Академию",
-        manifestoBtn2Text: "Вступить в Zənginlər Klubu"
+        manifestoBtn2Text: "Вступить в Клуб Богатых"
       }
     }
   },
@@ -2131,8 +2131,8 @@ export const INITIAL_HOME_CONTENT = {
       },
       en: {
         badge: "EXCLUSIVE RESIDENCY",
-        title: "Zənginlər Klubu — Sanctuary for Like Minds",
-        desc: "Sustainable development is the fruit of the right ecosystem. Zənginlər Klubu is an exclusive sanctuary for individuals who value intellectual depth and mutual evolution.",
+        title: "Wealth Club — Sanctuary for Like Minds",
+        desc: "Sustainable development is the fruit of the right ecosystem. Wealth Club is an exclusive sanctuary for individuals who value intellectual depth and mutual evolution.",
         perks: [
           "Weekly live mentoring and mastermind sessions: Direct dialogue with experienced mentors.",
           "Exclusive meditation and practice archive: 100+ hours of audio and video guides.",
@@ -2165,8 +2165,8 @@ export const INITIAL_HOME_CONTENT = {
       },
       tr: {
         badge: "ÖZEL ÜYELİK",
-        title: "Zənginlər Klubu — Ortak Zihinlerin Buluşma Noktası",
-        desc: "Sürdürülebilir gelişim doğru çevrenin eseridir. Zənginlər Klubu, derin sorular soran ve birbirinin gelişimine katkı sağlayan seçkin bireylerin kapalı alanıdır.",
+        title: "Zenginler Kulübü — Ortak Zihinlerin Buluşma Noktası",
+        desc: "Sürdürülebilir gelişim doğru çevrenin eseridir. Zenginler Kulübü, derin sorular soran ve birbirinin gelişimine katkı sağlayan seçkin bireylerin kapalı alanıdır.",
         perks: [
           "Haftalık canlı mentorluk ve mastermind oturumları: Deneyimli mentorlarla doğrudan diyalog.",
           "Özel meditasyon ve pratik arşivi: 100+ saatlik sesli ve görüntülü rehberler.",
@@ -2191,7 +2191,7 @@ export const INITIAL_HOME_CONTENT = {
           "Ayda 1 bireysel diagnostik oryantasyon",
           "Tam 100+ saatlik meditasyon ve video arşivi"
         ],
-        tierCtaText: "Üzv ol",
+        tierCtaText: "Üye ol",
         tierCtaLink: "",
         tierCtaActiveText: "Aktif Rezidans",
         tierCtaActiveLink: "",
@@ -2199,7 +2199,7 @@ export const INITIAL_HOME_CONTENT = {
       },
       ru: {
         badge: "ЗАКРЫТОЕ ЧЛЕНСТВО",
-        title: "Zənginlər Klubu — Пространство Единомышленников",
+        title: "Клуб Богатых — Пространство Единомышленников",
         desc: "Устойчивое развитие — результат правильного окружения. Закрытый клуб для глубоких личностей, ориентированных на рост.",
         perks: [
           "Еженедельные живые сессии менторства и мастермайнды: Прямой диалог с опытными наставниками.",

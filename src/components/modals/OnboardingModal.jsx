@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
+import { useLanguage } from '../../i18n/LanguageContext';
 import { ONBOARDING_QUESTIONS } from '../../data/mockData';
 
 export default function OnboardingModal() {
   const { onboardingOpen, setOnboardingOpen, showToast, currentUser, updateCurrentUser } = useApp();
+  const { t } = useLanguage();
   const [selected, setSelected] = useState([]);
 
   if (!onboardingOpen) return null;
@@ -19,7 +21,7 @@ export default function OnboardingModal() {
       updateCurrentUser({ focusAreas: selected });
     }
     setOnboardingOpen(false);
-    showToast('Fərdi inkişaf istiqamətləriniz qeyd edildi. Tövsiyələriniz hazırdır!', 'success');
+    showToast(t('onboard_saved_toast'), 'success');
   };
 
   return (
@@ -27,9 +29,9 @@ export default function OnboardingModal() {
       <div className="bg-surface-bright rounded-lg border border-secondary/40 shadow-2xl max-w-2xl w-full p-6 md:p-8 relative">
         <div className="text-center max-w-md mx-auto mb-6">
           <span className="w-2 h-2 rounded-full bg-secondary inline-block mb-1"></span>
-          <h3 className="font-headline-md text-primary font-serif">Fərdi İnkişaf Xəritəniz</h3>
+          <h3 className="font-headline-md text-primary font-serif">{t('onboard_title')}</h3>
           <p className="text-xs text-on-surface-variant mt-1">
-            Hansı sahələrə daha çox fokuslanmaq istərdiniz? Bu seçimlər sizə özəl tövsiyələr və proqramlar tərtib etmək üçün istifadə olunacaq.
+            {t('onboard_desc')}
           </p>
         </div>
 
@@ -63,13 +65,13 @@ export default function OnboardingModal() {
             onClick={() => setOnboardingOpen(false)}
             className="px-4 py-2 text-xs font-semibold text-outline hover:text-primary"
           >
-            Sonra seçərəm
+            {t('onboard_later')}
           </button>
           <button
             onClick={handleSave}
             className="px-6 py-2 rounded bg-primary-container text-on-primary hover:bg-[#112240] text-xs font-semibold tracking-wider transition-colors"
           >
-            Xəritəmi Yadda Saxla
+            {t('onboard_save')}
           </button>
         </div>
       </div>

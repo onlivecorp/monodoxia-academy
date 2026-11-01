@@ -216,13 +216,13 @@ export default function Header() {
           <button
             onClick={() => setSearchModalOpen(true)}
             className="hidden md:inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-outline-variant/60 hover:border-secondary bg-surface-container-low/60 hover:bg-surface-container-low text-on-surface-variant hover:text-secondary text-xs font-medium transition-all cursor-pointer shadow-2xs group shrink-0"
-            title="Qlobal Axtarış"
-            aria-label="Qlobal Axtarış"
+            title={t('nav_search_global')}
+            aria-label={t('nav_search_global')}
           >
             <span className="material-symbols-outlined text-[17px] text-[#775a19] group-hover:scale-105 transition-transform shrink-0">
               search
             </span>
-            <span className="text-slate-500 font-medium whitespace-nowrap">Axtarış...</span>
+            <span className="text-slate-500 font-medium whitespace-nowrap">{t('nav_search')}</span>
           </button>
 
           {/* Desktop Language Switcher */}
@@ -263,7 +263,7 @@ export default function Header() {
               setLang(codes[nextIdx]);
             }}
             className="sm:hidden flex items-center gap-1 px-2 py-1.5 rounded-md border border-outline-variant/70 bg-surface-container-low text-xs font-bold text-slate-700 hover:border-secondary cursor-pointer shrink-0"
-            title="Dili dəyiş"
+            title={t('nav_change_lang')}
           >
             <FlagIcon code={lang} className="w-4 h-3" />
             <span className="text-[10px] uppercase font-mono">{lang}</span>
@@ -273,8 +273,8 @@ export default function Header() {
           <button
             onClick={() => setSearchModalOpen(true)}
             className="md:hidden flex items-center justify-center w-8 h-8 rounded-lg border border-outline-variant/70 bg-surface-container-low text-slate-700 hover:text-secondary hover:border-secondary transition-colors cursor-pointer shrink-0"
-            title="Qlobal Axtarış"
-            aria-label="Qlobal Axtarış"
+            title={t('nav_search_global')}
+            aria-label={t('nav_search_global')}
           >
             <span className="material-symbols-outlined text-[19px] text-[#775a19]">search</span>
           </button>
@@ -289,7 +289,7 @@ export default function Header() {
                   setProfileModalOpen(true);
                 }}
                 className="hidden sm:flex relative p-1.5 rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors"
-                title={`Bildirişlər ${unreadNotifs > 0 ? `(${unreadNotifs} oxunmamış)` : ''}`}
+                title={`${t('nav_notifications')} ${unreadNotifs > 0 ? `(${unreadNotifs} ${t('nav_unread') || 'oxunmamış'})` : ''}`}
               >
                 <span className="material-symbols-outlined text-[20px] sm:text-[21px]">notifications</span>
                 {unreadNotifs > 0 && (
@@ -310,7 +310,7 @@ export default function Header() {
                   setProfileModalOpen(true);
                 }}
                 className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-secondary/10 border border-secondary text-secondary flex items-center justify-center font-bold text-xs uppercase hover:bg-secondary hover:text-surface-bright transition-colors shrink-0"
-                title="Hesabım və Müraciətlərim"
+                title={t('nav_profile')}
               >
                 {currentUser.avatar || currentUser.image ? (
                   <img
@@ -327,7 +327,7 @@ export default function Header() {
               <button
                 onClick={logout}
                 className="hidden sm:flex text-on-surface-variant hover:text-red-700 p-1.5 transition-colors"
-                title="Çıxış"
+                title={t('nav_logout')}
               >
                 <span className="material-symbols-outlined text-[18px]">logout</span>
               </button>
@@ -358,8 +358,8 @@ export default function Header() {
               setMobileMenuOpen(prev => !prev);
             }}
             className="lg:hidden w-9 h-9 rounded-lg bg-surface-container-low hover:bg-secondary/15 text-primary border border-outline-variant/80 hover:border-secondary flex items-center justify-center shrink-0 transition-all shadow-xs cursor-pointer ml-1 select-none"
-            aria-label="Menyu"
-            title="Naviqasiya menyusu"
+            aria-label={t('nav_menu')}
+            title={t('nav_menu')}
           >
             <span className="material-symbols-outlined text-[22px]">
               {mobileMenuOpen ? 'close' : 'menu'}
@@ -387,12 +387,13 @@ export default function Header() {
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#c5a059]" />
                 <span className="text-xs uppercase tracking-[0.2em] font-semibold text-[#775a19] font-sans">
-                  Monodoxia Menyu
+                  {t('nav_monodoxia_menu')}
                 </span>
               </div>
               <button
                 onClick={() => setMobileMenuOpen(false)}
                 className="p-1.5 rounded-lg text-slate-500 hover:text-[#070f1e] hover:bg-black/5"
+                title={t('common_close')}
               >
                 <span className="material-symbols-outlined text-[22px]">close</span>
               </button>
@@ -408,10 +409,10 @@ export default function Header() {
             >
               <div className="flex items-center gap-2.5">
                 <span className="material-symbols-outlined text-[#775a19] text-[20px]">search</span>
-                <span className="text-xs font-medium">Kurs, ekspert və ya forum axtar...</span>
+                <span className="text-xs font-medium">{t('nav_search_placeholder')}</span>
               </div>
               <kbd className="font-mono text-[10px] bg-slate-100 px-1.5 py-0.5 rounded border border-slate-300 text-slate-600">
-                Axtar
+                {t('search_button')}
               </kbd>
             </button>
 
@@ -428,7 +429,7 @@ export default function Header() {
                   </div>
                   <div className="min-w-0">
                     <p className="text-xs font-bold text-[#070f1e] truncate">{currentUser.firstName} {currentUser.lastName}</p>
-                    <p className="text-[10px] text-[#775a19] font-semibold uppercase tracking-wider">{currentUser.role || 'Tələbə'} • {userTier}</p>
+                    <p className="text-[10px] text-[#775a19] font-semibold uppercase tracking-wider">{currentUser.role || t('nav_student_role')} • {userTier}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
@@ -439,7 +440,7 @@ export default function Header() {
                       setMobileMenuOpen(false);
                     }}
                     className="relative p-2 rounded-lg text-slate-600 hover:bg-black/5"
-                    title="Bildirişlər"
+                    title={t('nav_notifications')}
                   >
                     <span className="material-symbols-outlined text-[19px]">notifications</span>
                     {unreadNotifs > 0 && (
@@ -459,7 +460,7 @@ export default function Header() {
                       setMobileMenuOpen(false);
                     }}
                     className="p-2 rounded-lg text-slate-600 hover:bg-black/5"
-                    title="Profil"
+                    title={t('nav_profile')}
                   >
                     <span className="material-symbols-outlined text-[19px]">account_circle</span>
                   </button>
@@ -528,7 +529,7 @@ export default function Header() {
             {/* Mobile Language Switcher Strip */}
             <div className="pt-2 border-t border-[#e2d9c8]/70">
               <span className="block text-[10px] font-bold tracking-[0.16em] uppercase text-slate-400 mb-2.5">
-                Dil Seçimi (Language)
+                {t('nav_select_lang')}
               </span>
               <div className="grid grid-cols-2 gap-2">
                 {validLangs.map((item) => {
@@ -585,7 +586,7 @@ export default function Header() {
                   className="w-full py-2.5 px-4 rounded-xl bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 font-semibold text-xs tracking-wider uppercase flex items-center justify-center gap-2 cursor-pointer transition-colors"
                 >
                   <span className="material-symbols-outlined text-[17px]">logout</span>
-                  <span>Çıxış Et</span>
+                  <span>{t('nav_logout')}</span>
                 </button>
               </div>
             )}

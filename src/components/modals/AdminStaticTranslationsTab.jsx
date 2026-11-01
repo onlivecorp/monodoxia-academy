@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { useApp } from '../../context/AppContext';
 
@@ -8,7 +8,7 @@ const CATEGORIES = [
   { id: 'hero', label: 'Hero Bölməsi', prefix: 'hero_' },
   { id: 'about', label: 'Haqqımızda & Dəyərlər', prefix: ['about_', 'pillar_'] },
   { id: 'areas', label: 'İnkişaf Sahələri', prefix: 'area' },
-  { id: 'academy', label: 'Kurslar & Akademiya', prefix: ['academy_', 'filter_', 'course_'] },
+  { id: 'academy', label: 'Kurslar & Akademiya', prefix: ['academy_', 'filter_', 'course_', 'player_'] },
   { id: 'club', label: 'Zənginlər Klubu', prefix: 'club_' },
   { id: 'experts', label: 'Ekspertlər & Kouçlar', prefix: ['expert', 'experts_'] },
   { id: 'community', label: 'İcma & Forum', prefix: 'community_' },
@@ -17,6 +17,10 @@ const CATEGORIES = [
   { id: 'faq', label: 'FAQ Sualları', prefix: 'faq_' },
   { id: 'newsletter', label: 'Bülleten', prefix: 'newsletter_' },
   { id: 'safety', label: 'Etik & Təhlükəsizlik', prefix: 'safety_' },
+  { id: 'modals', label: 'Modallar & Müraciətlər', prefix: ['auth_', 'app_', 'book_', 'onboard_', 'profile_'] },
+  { id: 'search', label: 'Axtarış & Sertifikat', prefix: ['search_', 'cert_'] },
+  { id: 'contact', label: 'Əlaqə & Footer', prefix: ['contact_', 'footer_'] },
+  { id: 'common', label: 'Ümumi & Texniki Qulluq', prefix: ['common_', 'maintenance_'] },
 ];
 
 export default function AdminStaticTranslationsTab() {

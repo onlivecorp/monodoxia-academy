@@ -4,13 +4,14 @@ import SearchResultItem from './SearchResultItem';
 import ExpertProfileModal from '../modals/ExpertProfileModal';
 import UserProfilePreviewModal from '../modals/UserProfilePreviewModal';
 import { useApp } from '../../context/AppContext';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 const CATEGORIES = [
-  { id: 'all', label: 'Bütün', icon: 'grid_view' },
-  { id: 'courses', label: 'Kurslar', icon: 'school' },
-  { id: 'experts', label: 'Uzmanlar & Kouçlar', icon: 'psychology' },
-  { id: 'events', label: 'Tədbirlər', icon: 'event' },
-  { id: 'forum', label: 'Forum', icon: 'forum' }
+  { id: 'all', label: 'Bütün', labelKey: 'search_cat_all', icon: 'grid_view' },
+  { id: 'courses', label: 'Kurslar', labelKey: 'search_cat_courses', icon: 'school' },
+  { id: 'experts', label: 'Uzmanlar & Kouçlar', labelKey: 'search_cat_experts', icon: 'psychology' },
+  { id: 'events', label: 'Tədbirlər', labelKey: 'search_cat_events', icon: 'event' },
+  { id: 'forum', label: 'Forum', labelKey: 'search_cat_forum', icon: 'forum' }
 ];
 
 const POPULAR_TAGS = [
@@ -25,6 +26,7 @@ const POPULAR_TAGS = [
 ];
 
 export default function GlobalSearchModal({ isOpen, onClose }) {
+  const { t } = useLanguage();
   const {
     openPlayer,
     openApplication,
@@ -210,7 +212,7 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Kurs, ekspert, mövzu və ya tədbir axtarın..."
+              placeholder={t('search_input_placeholder')}
               className="w-full bg-transparent border-0 text-[#071326] placeholder:text-[#94a3b8] text-base sm:text-lg focus:outline-hidden font-sans"
             />
 
@@ -243,6 +245,7 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
             {CATEGORIES.map(cat => {
               const isActive = category === cat.id;
               const count = counts[cat.id] || 0;
+              const label = t(cat.labelKey) || cat.label;
 
               return (
                 <button
@@ -255,7 +258,7 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
                   }`}
                 >
                   <span className="material-symbols-outlined text-[15px]">{cat.icon}</span>
-                  <span>{cat.label}</span>
+                  <span>{label}</span>
                   {count > 0 && (
                     <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
                       isActive ? 'bg-[#c5a059]/30 text-white' : 'bg-slate-200 text-slate-700'
@@ -279,13 +282,13 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
                     <div className="flex items-center justify-between mb-3 text-xs text-[#64748b]">
                       <span className="font-semibold uppercase tracking-wider flex items-center gap-1.5">
                         <span className="material-symbols-outlined text-[15px] text-[#775a19]">history</span>
-                        <span>Son Axtarışlar</span>
+                        <span>{t('search_recent')}</span>
                       </span>
                       <button
                         onClick={handleClearRecent}
                         className="text-[11px] text-[#775a19] hover:underline cursor-pointer"
                       >
-                        Hamısını sil
+                        {t('search_clear_recent')}
                       </button>
                     </div>
 
@@ -304,7 +307,7 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
                             type="button"
                             onClick={(e) => handleRemoveRecent(term, e)}
                             className="text-slate-400 hover:text-rose-600 ml-0.5"
-                            title="Sil"
+                            title={t('common_delete')}
                           >
                             <span className="material-symbols-outlined text-[14px]">close</span>
                           </button>
@@ -318,7 +321,7 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
                 <div>
                   <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-[#64748b] flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-[15px] text-[#775a19]">trending_up</span>
-                    <span>Populyar Açar Sözlər</span>
+                    <span>{t('search_popular_tags')}</span>
                   </div>
 
                   <div className="flex flex-wrap gap-2">
@@ -348,8 +351,8 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
             {query.trim() && results.length > 0 && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs text-[#64748b] pb-1 px-1">
-                  <span><strong>{total}</strong> nəticə tapıldı</span>
-                  <span className="text-[11px] text-slate-400">Naviqasiya: ↑ ↓ seç | ↵ daxil ol</span>
+                  <span><strong>{total}</strong> {t('search_results_found')}</span>
+                  <span className="text-[11px] text-slate-400">↑ ↓ {t('search_navigate_hint')} | ↵ {t('search_select_hint')}</span>
                 </div>
 
                 {results.map((item, index) => (
@@ -371,10 +374,10 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
                   <span className="material-symbols-outlined text-[32px]">search_off</span>
                 </div>
                 <h3 className="font-serif text-lg font-medium text-[#071326] mb-1">
-                  "{query}" üzrə heç nə tapılmadı
+                  "{query}" {t('search_no_results')}
                 </h3>
                 <p className="text-xs text-[#64748b] max-w-md mx-auto mb-5">
-                  Açar sözün yazılışını yoxlayın və ya daha ümumi terminlərdən (məsələn: <em>Kouçinq</em>, <em>Psixologiya</em>, <em>Meditasiya</em>) istifadə edin.
+                  {t('search_no_results_desc')}
                 </p>
 
                 <div className="flex flex-wrap items-center justify-center gap-2">
@@ -398,11 +401,11 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
               <span className="flex items-center gap-1">
                 <kbd className="font-mono bg-white px-1.5 py-0.5 rounded border border-slate-300">↑</kbd>
                 <kbd className="font-mono bg-white px-1.5 py-0.5 rounded border border-slate-300">↓</kbd>
-                <span>naviqasiya</span>
+                <span>{t('search_navigate_hint')}</span>
               </span>
               <span className="flex items-center gap-1">
                 <kbd className="font-mono bg-white px-1.5 py-0.5 rounded border border-slate-300">↵</kbd>
-                <span>seç</span>
+                <span>{t('search_select_hint')}</span>
               </span>
             </div>
 
@@ -412,7 +415,7 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
                 onClick={handleFullSearch}
                 className="ml-auto inline-flex items-center gap-1.5 text-xs font-semibold text-[#775a19] hover:text-[#071326] transition-colors cursor-pointer"
               >
-                <span>Bütün nəticələri ətraflı göstər</span>
+                <span>{t('search_results_found')} ({total})</span>
                 <span className="material-symbols-outlined text-[16px]">open_in_new</span>
               </button>
             )}

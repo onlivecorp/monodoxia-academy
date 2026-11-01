@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useApp } from '../../context/AppContext';
+import { useLanguage } from '../../i18n/LanguageContext';
 import { COACHES } from '../../data/mockData';
 
 // Generate time slots for a day in 30-min increments
@@ -27,6 +28,7 @@ function timesOverlap(aStart, aEnd, bStart, bEnd) {
 }
 
 export default function BookingModal() {
+  const { t, lang } = useLanguage();
   const {
     bookingModalOpen,
     setBookingModalOpen,
@@ -41,6 +43,9 @@ export default function BookingModal() {
     setAuthModalOpen,
     setAuthModalTab
   } = useApp();
+
+  const localeMap = { az: 'az-AZ', en: 'en-US', tr: 'tr-TR', ru: 'ru-RU' };
+  const activeLocale = localeMap[lang] || 'az-AZ';
 
   const today = new Date().toISOString().split('T')[0];
   const nowTime = new Date().toTimeString().slice(0, 5); // HH:MM
@@ -215,8 +220,20 @@ export default function BookingModal() {
     return d === 0 ? 6 : d - 1; // Monday-first
   };
 
-  const dayNames = ['B.e', 'Ç.a', 'Çər', 'C.a', 'Cüm', 'Şnb', 'Baz'];
-  const monthNames = ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'İyun', 'İyul', 'Avqust', 'Sentyabr', 'Oktyabr', 'Noyabr', 'Dekabr'];
+  const dayNames = useMemo(() => {
+    const base = new Date(2024, 0, 1); // Monday Jan 1, 2024
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(base);
+      d.setDate(base.getDate() + i);
+      return d.toLocaleDateString(activeLocale, { weekday: 'short' });
+    });
+  }, [activeLocale]);
+
+  const monthNames = useMemo(() => {
+    return Array.from({ length: 12 }, (_, i) => {
+      return new Date(calendarYear, i, 1).toLocaleDateString(activeLocale, { month: 'long' });
+    });
+  }, [calendarYear, activeLocale]);
 
   // Check if a calendar day has any available slots (not all blocked)
   const getDayMeta = useCallback((y, m, d) => {
@@ -333,14 +350,14 @@ export default function BookingModal() {
           <div className="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-3.5 shadow-sm">
             <span className="material-symbols-outlined text-[32px]">check_circle</span>
           </div>
-          <h3 className="font-serif text-xl font-bold text-slate-900 mb-2">Müraciət Göndərildi!</h3>
+          <h3 className="font-serif text-xl font-bold text-slate-900 mb-2">{t('book_success_title')}</h3>
           <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-line mb-5">{submitMessage}</p>
           <button
             type="button"
             onClick={() => { setBookingModalOpen(false); setSubmitResult(null); }}
             className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white text-xs font-bold tracking-wider shadow-md cursor-pointer"
           >
-            Bağla
+            {t('common_close')}
           </button>
         </div>
       </div>
@@ -387,7 +404,7 @@ export default function BookingModal() {
             </div>
             <div className="min-w-0">
               <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-100 text-amber-900 tracking-wider uppercase border border-amber-300">
-                Kouçinq Rezervasiyası
+                {t('book_modal_title')}
               </span>
               <h4 id="booking-modal-title" className="font-serif text-base text-slate-900 font-bold truncate leading-tight mt-0.5">
                 {activeCoach.name}
@@ -400,7 +417,8 @@ export default function BookingModal() {
             type="button"
             onClick={() => setBookingModalOpen(false)}
             className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-colors cursor-pointer shrink-0 ml-2"
-            aria-label="Bağla"
+            aria-label={t('common_close')}
+            title={t('common_close')}
           >
             <span className="material-symbols-outlined text-[19px]">close</span>
           </button>
@@ -498,10 +516,10 @@ export default function BookingModal() {
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-[16px] text-amber-600">calendar_today</span>
                 <span className="text-xs font-bold text-amber-900">
-                  Seçilmiş tarix: {formatDateAz(selectedDate)}
+                  {t('book_date')}: {formatDateAz(selectedDate)}
                 </span>
               </div>
-              <span className="text-[10px] text-amber-700 font-medium">Aşağıdan saat seçin</span>
+              <span className="text-[10px] text-amber-700 font-medium">{t('book_time')}</span>
             </div>
 
             {/* Time slots */}
@@ -509,7 +527,7 @@ export default function BookingModal() {
               <div className="flex items-center justify-between mb-1.5">
                 <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
                   <span className="material-symbols-outlined text-[15px] text-amber-600">schedule</span>
-                  Başlama Saatı Seçin
+                  {t('book_time')}
                 </label>
                 <div className="flex items-center gap-2.5 text-[10px] text-slate-500">
                   <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-emerald-200 inline-block border border-emerald-400"/> Boş</span>
@@ -747,15 +765,15 @@ export default function BookingModal() {
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
                 <span className="material-symbols-outlined text-[15px] text-amber-600">videocam</span>
-                Sessiya Formatı
+                {t('book_session_type')}
               </label>
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value)}
                 className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500"
               >
-                <option value="Online (Təhlükəsiz Video Otaq)">Onlayn (Təhlükəsiz Video Otaq - Zoom/Google Meet/WebRTC)</option>
-                <option value="Offline (Bakı Mərkəzi Ofis)">Oflayn (Bakı Mərkəzi Ofis - Nizami küç. 142)</option>
+                <option value="Online (Təhlükəsiz Video Otaq)">{t('book_online')}</option>
+                <option value="Offline (Bakı Mərkəzi Ofis)">{t('book_in_person')}</option>
               </select>
             </div>
 
@@ -763,13 +781,13 @@ export default function BookingModal() {
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
                 <span className="material-symbols-outlined text-[15px] text-amber-600">chat</span>
-                Fokus Sahəniz və ya Qeydlər
+                {t('book_notes')}
               </label>
               <textarea
                 rows="2"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Sessiyada müzakirə etmək istədiyiniz mövzu haqqında qısa qeyd..."
+                placeholder={t('book_notes_placeholder')}
                 className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
               />
             </div>
@@ -831,7 +849,7 @@ export default function BookingModal() {
                   ) : (
                     <>
                       <span className="material-symbols-outlined text-[17px]">check_circle</span>
-                      <span>Sessiyanı Təsdiqlə və Rezerv Et</span>
+                      <span>{t('book_confirm_btn')}</span>
                     </>
                   )}
                 </button>

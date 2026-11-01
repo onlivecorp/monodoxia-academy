@@ -1,5 +1,6 @@
 import React from 'react';
 import { normalizeSearchStr } from '../../utils/searchHelper';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 function HighlightText({ text, query }) {
   if (!text) return null;
@@ -33,42 +34,43 @@ function HighlightText({ text, query }) {
 }
 
 export default function SearchResultItem({ item, query, isSelected, onClick }) {
+  const { t } = useLanguage();
   const getTypeBadge = () => {
     switch (item.type) {
       case 'courses':
         return {
           icon: 'school',
-          label: 'Kurs',
+          label: t('search_cat_courses') || 'Kurs',
           color: 'bg-amber-100 text-amber-800 border-amber-300'
         };
       case 'experts':
         return {
           icon: 'psychology',
-          label: 'Ekspert',
+          label: t('search_cat_experts') || 'Ekspert',
           color: 'bg-emerald-100 text-emerald-800 border-emerald-300'
         };
       case 'users':
         return {
           icon: 'person',
-          label: 'İstifadəçi',
+          label: t('search_cat_users') || 'İstifadəçi',
           color: 'bg-slate-100 text-slate-800 border-slate-300'
         };
       case 'events':
         return {
           icon: 'event',
-          label: 'Tədbir',
+          label: t('search_cat_events') || 'Tədbir',
           color: 'bg-blue-100 text-blue-800 border-blue-300'
         };
       case 'forum':
         return {
           icon: 'forum',
-          label: 'Forum',
+          label: t('search_cat_forum') || 'Forum',
           color: 'bg-purple-100 text-purple-800 border-purple-300'
         };
       default:
         return {
           icon: 'search',
-          label: 'Məzmun',
+          label: t('search_cat_all') || 'Məzmun',
           color: 'bg-slate-100 text-slate-800 border-slate-300'
         };
     }

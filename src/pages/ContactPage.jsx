@@ -61,31 +61,31 @@ export default function ContactPage() {
     if (!text) return;
     navigator.clipboard?.writeText(text);
     setCopiedKey(key);
-    showToast('Kopyalandı: ' + text, 'info');
+    showToast((t('contact_copied') || 'Kopyalandı: ') + text, 'info');
     setTimeout(() => setCopiedKey(''), 2500);
   };
 
   const validate = () => {
     const errors = {};
     if (!formData.name.trim() || formData.name.trim().length < 2) {
-      errors.name = 'Ad və soyad ən azı 2 simvol olmalıdır.';
+      errors.name = t('contact_val_name') || 'Ad və soyad ən azı 2 simvol olmalıdır.';
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email.trim() || !emailRegex.test(formData.email.trim())) {
-      errors.email = 'Düzgün e-poçt ünvanı daxil edin.';
+      errors.email = t('contact_val_email') || 'Düzgün e-poçt ünvanı daxil edin.';
     }
 
     if (showPhoneField && requirePhoneField && !formData.phone.trim()) {
-      errors.phone = 'Əlaqə nömrəsi daxil edilməlidir.';
+      errors.phone = t('contact_val_phone') || 'Əlaqə nömrəsi daxil edilməlidir.';
     }
 
     if (showSubjectField && requireSubjectField && (!formData.subject.trim() || formData.subject.trim().length < 2)) {
-      errors.subject = 'Mövzu ən azı 2 simvol olmalıdır.';
+      errors.subject = t('contact_val_subject') || 'Mövzu ən azı 2 simvol olmalıdır.';
     }
 
     if (!formData.message.trim() || formData.message.trim().length < 5) {
-      errors.message = 'Mesaj mətni ən azı 5 simvol olmalıdır.';
+      errors.message = t('contact_val_message') || 'Mesaj mətni ən azı 5 simvol olmalıdır.';
     }
 
     setFormErrors(errors);
@@ -97,7 +97,7 @@ export default function ContactPage() {
     setSubmitError('');
 
     if (!validate()) {
-      showToast('Zəhmət olmasa formadakı xətaları düzəldin', 'warning');
+      showToast(t('contact_fix_errors') || 'Zəhmət olmasa formadakı xətaları düzəldin', 'warning');
       return;
     }
 
@@ -124,7 +124,7 @@ export default function ContactPage() {
       });
       setFormErrors({});
     } else {
-      setSubmitError(res?.message || 'Mesaj göndərilərkən xəta baş verdi. Zəhmət olmasa bir az sonra yenidən cəhd edin.');
+      setSubmitError(res?.message || t('contact_error_general') || 'Mesaj göndərilərkən xəta baş verdi. Zəhmət olmasa bir az sonra yenidən cəhd edin.');
     }
   };
 
@@ -132,25 +132,25 @@ export default function ContactPage() {
     return (
       <div className="min-h-screen bg-[#faf8f5] text-[#071326]">
         <PageHero
-          badge="Əlaqə"
-          title="Bizimlə Əlaqə"
-          description="Əlaqə xidməti hazırda müvəqqəti olaraq deaktivdir."
-          breadcrumbs={[{ label: 'Əlaqə' }]}
+          badge={t('nav_contact') || "Əlaqə"}
+          title={t('contact_inactive_title')}
+          description={t('contact_inactive_desc')}
+          breadcrumbs={[{ label: t('nav_contact') || 'Əlaqə' }]}
         />
         <div className="max-w-2xl mx-auto px-4 py-20 text-center">
           <div className="w-16 h-16 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center mx-auto mb-5">
             <span className="material-symbols-outlined text-[32px]">pause_circle</span>
           </div>
-          <h2 className="text-2xl font-bold text-[#071326] mb-3">Əlaqə Səhifəsi Müvəqqəti Dayandırılıb</h2>
+          <h2 className="text-2xl font-bold text-[#071326] mb-3">{t('contact_inactive_title')}</h2>
           <p className="text-slate-600 mb-8 leading-relaxed">
-            Hörmətli istifadəçi, əlaqə forması və əlaqə məlumatları hazırda administrator tərəfindən yenilənməkdədir. Təcili suallarınız üçün birbaşa ana səhifəyə qayıda bilərsiniz.
+            {t('contact_inactive_desc')}
           </p>
           <button
             onClick={() => navigateTo('home')}
             className="px-6 py-2.5 rounded-xl bg-[#05224a] text-white font-semibold hover:bg-[#071326] transition-colors inline-flex items-center gap-2 cursor-pointer"
           >
             <span className="material-symbols-outlined text-[18px]">home</span>
-            <span>Ana Səhifəyə Qayıt</span>
+            <span>{t('contact_back_home')}</span>
           </button>
         </div>
       </div>
@@ -212,7 +212,7 @@ export default function ContactPage() {
                   type="button"
                   onClick={() => handleCopy(phone, 'phone')}
                   className="text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
-                  title="Nömrəni kopyala"
+                  title={t('contact_copy_phone')}
                 >
                   <span className="material-symbols-outlined text-[16px]">
                     {copiedKey === 'phone' ? 'check' : 'content_copy'}
@@ -242,7 +242,7 @@ export default function ContactPage() {
                   type="button"
                   onClick={() => handleCopy(email, 'email')}
                   className="text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
-                  title="E-poçtu kopyala"
+                  title={t('contact_copy_email')}
                 >
                   <span className="material-symbols-outlined text-[16px]">
                     {copiedKey === 'email' ? 'check' : 'content_copy'}
@@ -269,7 +269,7 @@ export default function ContactPage() {
                   type="button"
                   onClick={() => handleCopy(address, 'address')}
                   className="text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
-                  title="Ünvanı kopyala"
+                  title={t('contact_copy_address')}
                 >
                   <span className="material-symbols-outlined text-[16px]">
                     {copiedKey === 'address' ? 'check' : 'content_copy'}
@@ -307,13 +307,13 @@ export default function ContactPage() {
             <div className="relative z-10 mb-8">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#c5a059]/10 text-[#775a19] text-xs font-bold tracking-wider uppercase mb-2">
                 <span className="material-symbols-outlined text-[14px]">edit_square</span>
-                <span>Bizə Yazın</span>
+                <span>{t('contact_write_us')}</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-[#05224a] tracking-tight">
-                Əlaqə Forması
+                {t('contact_form_title')}
               </h2>
               <p className="text-slate-600 text-sm mt-1.5 leading-relaxed">
-                Təlimlər, fərdi kouçinq və ya əməkdaşlıqla bağlı suallarınızı ünvanlayın. Komandamız sorğunuza diqqətlə baxacaqdır.
+                {t('contact_form_desc')}
               </p>
             </div>
 
@@ -323,10 +323,10 @@ export default function ContactPage() {
                   <span className="material-symbols-outlined text-[32px]">task_alt</span>
                 </div>
                 <h3 className="text-xl font-bold text-emerald-900 mb-2">
-                  Mesajınız Uğurla Qəbul Edildi!
+                  {t('contact_success_title')}
                 </h3>
                 <p className="text-sm text-emerald-800 leading-relaxed max-w-md mx-auto mb-6">
-                  {formConfig.successMessage || 'Mesajınız uğurla qəbul edildi! Ən qısa zamanda sizinlə əlaqə saxlayacağıq.'}
+                  {formConfig.successMessage || t('contact_success_desc')}
                 </p>
                 <button
                   type="button"
@@ -334,17 +334,17 @@ export default function ContactPage() {
                   className="px-5 py-2.5 rounded-xl bg-emerald-700 text-white text-xs font-bold hover:bg-emerald-800 transition-colors shadow-sm cursor-pointer inline-flex items-center gap-1.5"
                 >
                   <span className="material-symbols-outlined text-[16px]">add_comment</span>
-                  <span>Yeni Mesaj Göndər</span>
+                  <span>{t('contact_send_another')}</span>
                 </button>
               </div>
             ) : !isFormActive ? (
               <div className="rounded-2xl bg-amber-50 border border-amber-200 p-6 text-center">
                 <span className="material-symbols-outlined text-amber-600 text-[32px] mb-2">info</span>
                 <p className="text-sm font-semibold text-amber-900">
-                  Əlaqə forması hazırda texniki profilaktika səbəbindən bağlıdır.
+                  {t('contact_form_closed')}
                 </p>
                 <p className="text-xs text-amber-700 mt-1">
-                  Zəhmət olmasa yuxarıdakı birbaşa telefon nömrəsi və ya e-poçt ünvanı vasitəsilə bizimlə əlaqə saxlayın.
+                  {t('contact_form_closed_sub')}
                 </p>
               </div>
             ) : (
@@ -367,7 +367,7 @@ export default function ContactPage() {
                   <div className="rounded-xl bg-rose-50 border border-rose-200 p-4 text-xs text-rose-800 flex items-start gap-2.5">
                     <span className="material-symbols-outlined text-rose-600 text-[18px] shrink-0 mt-0.5">error</span>
                     <div>
-                      <div className="font-bold">Göndərilmə xətası:</div>
+                      <div className="font-bold">{t('contact_err_title')}</div>
                       <div>{submitError}</div>
                     </div>
                   </div>
@@ -377,7 +377,7 @@ export default function ContactPage() {
                   {/* Name field */}
                   <div>
                     <label htmlFor="contact_name" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                      Ad və Soyadınız <span className="text-rose-500">*</span>
+                      {t('contact_name_label')} <span className="text-rose-500">*</span>
                     </label>
                     <div className="relative">
                       <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-[18px] pointer-events-none">
@@ -393,7 +393,7 @@ export default function ContactPage() {
                           setFormData({ ...formData, name: e.target.value });
                           if (formErrors.name) setFormErrors({ ...formErrors, name: null });
                         }}
-                        placeholder="Məs: Cəmil Əliyev"
+                        placeholder={t('contact_name_placeholder')}
                         className={`w-full pl-10 pr-3.5 py-3 rounded-xl border bg-slate-50/50 text-sm text-slate-900 focus:bg-white focus:outline-none transition-all ${
                           formErrors.name
                             ? 'border-rose-400 focus:ring-2 focus:ring-rose-200'
@@ -409,7 +409,7 @@ export default function ContactPage() {
                   {/* Email field */}
                   <div>
                     <label htmlFor="contact_email" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                      E-poçt Ünvanınız <span className="text-rose-500">*</span>
+                      {t('contact_email_label')} <span className="text-rose-500">*</span>
                     </label>
                     <div className="relative">
                       <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-[18px] pointer-events-none">
@@ -425,7 +425,7 @@ export default function ContactPage() {
                           setFormData({ ...formData, email: e.target.value });
                           if (formErrors.email) setFormErrors({ ...formErrors, email: null });
                         }}
-                        placeholder="ad@example.com"
+                        placeholder={t('contact_email_placeholder')}
                         className={`w-full pl-10 pr-3.5 py-3 rounded-xl border bg-slate-50/50 text-sm text-slate-900 focus:bg-white focus:outline-none transition-all ${
                           formErrors.email
                             ? 'border-rose-400 focus:ring-2 focus:ring-rose-200'
@@ -444,7 +444,7 @@ export default function ContactPage() {
                   {showPhoneField && (
                     <div>
                       <label htmlFor="contact_phone" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Telefon Nömrəniz {requirePhoneField ? <span className="text-rose-500">*</span> : <span className="text-slate-400 font-normal lowercase">(istəyə görə)</span>}
+                        {t('contact_phone_label')} {requirePhoneField ? <span className="text-rose-500">*</span> : <span className="text-slate-400 font-normal lowercase">{t('contact_optional')}</span>}
                       </label>
                       <div className="relative">
                         <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-[18px] pointer-events-none">
@@ -459,7 +459,7 @@ export default function ContactPage() {
                             setFormData({ ...formData, phone: e.target.value });
                             if (formErrors.phone) setFormErrors({ ...formErrors, phone: null });
                           }}
-                          placeholder="+994 (50) 000 00 00"
+                          placeholder={t('contact_phone_placeholder')}
                           className={`w-full pl-10 pr-3.5 py-3 rounded-xl border bg-slate-50/50 text-sm text-slate-900 focus:bg-white focus:outline-none transition-all ${
                             formErrors.phone
                               ? 'border-rose-400 focus:ring-2 focus:ring-rose-200'
@@ -477,7 +477,7 @@ export default function ContactPage() {
                   {showSubjectField && (
                     <div className={showPhoneField ? '' : 'sm:col-span-2'}>
                       <label htmlFor="contact_subject" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Müraciətin Mövzusu {requireSubjectField ? <span className="text-rose-500">*</span> : <span className="text-slate-400 font-normal lowercase">(istəyə görə)</span>}
+                        {t('contact_subject_label')} {requireSubjectField ? <span className="text-rose-500">*</span> : <span className="text-slate-400 font-normal lowercase">{t('contact_optional')}</span>}
                       </label>
                       <div className="relative">
                         <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-[18px] pointer-events-none">
@@ -492,7 +492,7 @@ export default function ContactPage() {
                             setFormData({ ...formData, subject: e.target.value });
                             if (formErrors.subject) setFormErrors({ ...formErrors, subject: null });
                           }}
-                          placeholder="Məs: Fərdi kouçinq və ya kurs haqqında"
+                          placeholder={t('contact_subject_placeholder')}
                           className={`w-full pl-10 pr-3.5 py-3 rounded-xl border bg-slate-50/50 text-sm text-slate-900 focus:bg-white focus:outline-none transition-all ${
                             formErrors.subject
                               ? 'border-rose-400 focus:ring-2 focus:ring-rose-200'
@@ -510,7 +510,7 @@ export default function ContactPage() {
                 {/* Message field */}
                 <div>
                   <label htmlFor="contact_message" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Mesajınız <span className="text-rose-500">*</span>
+                    {t('contact_message_label')} <span className="text-rose-500">*</span>
                   </label>
                   <textarea
                     id="contact_message"
@@ -522,7 +522,7 @@ export default function ContactPage() {
                       setFormData({ ...formData, message: e.target.value });
                       if (formErrors.message) setFormErrors({ ...formErrors, message: null });
                     }}
-                    placeholder="Sualınızı, təklifinizi və ya ehtiyacınızı ətraflı qeyd edin..."
+                    placeholder={t('contact_message_placeholder')}
                     className={`w-full p-3.5 rounded-xl border bg-slate-50/50 text-sm text-slate-900 focus:bg-white focus:outline-none transition-all resize-y ${
                       formErrors.message
                         ? 'border-rose-400 focus:ring-2 focus:ring-rose-200'
@@ -533,7 +533,7 @@ export default function ContactPage() {
                     <p className="text-rose-600 text-xs mt-1 font-medium">{formErrors.message}</p>
                   )}
                   <div className="flex justify-between items-center text-[11px] text-slate-400 mt-1">
-                    <span>Məlumatlarınız tam məxfi saxlanılır.</span>
+                    <span>{t('contact_privacy_note')}</span>
                     <span>{formData.message.length} / 6000</span>
                   </div>
                 </div>
@@ -547,11 +547,11 @@ export default function ContactPage() {
                   {isSubmitting ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Göndərilir...</span>
+                      <span>{t('contact_submitting')}</span>
                     </>
                   ) : (
                     <>
-                      <span>Mesajı Göndər</span>
+                      <span>{t('contact_submit_btn')}</span>
                       <span className="material-symbols-outlined text-[18px]">send</span>
                     </>
                   )}

@@ -4,7 +4,7 @@ import { useLanguage } from '../../i18n/LanguageContext';
 import { TARGET_TYPE_MAP, APPLICATION_STATUSES } from '../../data/applicationData';
 
 export default function ApplicationModal() {
-  const { lang } = useLanguage();
+  const { lang, t } = useLanguage();
   const {
     applicationModalOpen,
     setApplicationModalOpen,
@@ -120,7 +120,7 @@ export default function ApplicationModal() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!agreed) {
-      setValidationErrors(prev => ({ ...prev, agreed: 'Davam etmək üçün qaydaları qəbul etməlisiniz.' }));
+      setValidationErrors(prev => ({ ...prev, agreed: t('app_agreement_err') }));
       return;
     }
 
@@ -133,7 +133,7 @@ export default function ApplicationModal() {
         if (!val || !String(val).trim() || (f.fieldType === 'tel' && String(val).trim() === '+994')) {
           const trans = f.translations?.[lang] || {};
           const fLabel = trans.label || f.label;
-          errors[f.id] = `${fLabel} mütləq doldurulmalıdır.`;
+          errors[f.id] = `${fLabel} ${t('app_field_required')}`;
         }
       }
     });
@@ -167,7 +167,7 @@ export default function ApplicationModal() {
             <div className="flex items-center gap-2 mb-1.5">
               <span className={`inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-surface-container ${targetMeta.color}`}>
                 <span className="material-symbols-outlined text-[15px]">{targetMeta.icon}</span>
-                {targetMeta.label} Müraciəti
+                {targetMeta.label} {t('app_modal_title_suffix')}
               </span>
               {activeApplicationTarget.price && String(activeApplicationTarget.price).trim() !== '' && (
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-secondary/10 text-secondary border border-secondary/20">
@@ -180,7 +180,7 @@ export default function ApplicationModal() {
             </h3>
             {(activeApplicationTarget.speaker || activeApplicationTarget.instructor || activeApplicationTarget.duration) && (
               <p className="text-xs text-on-surface-variant mt-1">
-                {activeApplicationTarget.instructor ? `Kouç: ${activeApplicationTarget.instructor}` : (activeApplicationTarget.speaker ? `Ekspert: ${activeApplicationTarget.speaker}` : '')}
+                {activeApplicationTarget.instructor ? `${t('book_coach')}: ${activeApplicationTarget.instructor}` : (activeApplicationTarget.speaker ? `Ekspert: ${activeApplicationTarget.speaker}` : '')}
                 {(activeApplicationTarget.instructor || activeApplicationTarget.speaker) && activeApplicationTarget.duration ? ' • ' : ''}
                 {activeApplicationTarget.duration || ''}
               </p>
@@ -189,6 +189,7 @@ export default function ApplicationModal() {
           <button
             onClick={() => setApplicationModalOpen(false)}
             className="text-outline hover:text-primary transition-colors p-1 -mr-2 -mt-2 rounded-full hover:bg-surface-container"
+            title={t('common_close')}
           >
             <span className="material-symbols-outlined text-[20px]">close</span>
           </button>
@@ -203,10 +204,10 @@ export default function ApplicationModal() {
                 <span className="material-symbols-outlined text-[28px]">lock</span>
               </div>
               <h4 className="font-headline-sm text-base text-primary font-medium mb-1">
-                Yalnız Qeydiyyatlı Üzvlər Üçün
+                {t('app_guest_title')}
               </h4>
               <p className="text-xs text-on-surface-variant max-w-md mx-auto mb-6">
-                Platformadakı kurslar, klublar, tədbirlər və müzakirələr üçün müraciətlər yalnız şəxsi hesaba sahib istifadəçilər tərəfindən həyata keçirilir.
+                {t('app_guest_desc')}
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <button
@@ -217,7 +218,7 @@ export default function ApplicationModal() {
                   }}
                   className="w-full sm:w-auto px-6 py-2.5 rounded bg-primary text-surface-bright hover:bg-[#112240] text-xs font-semibold uppercase tracking-wider transition-colors shadow-sm"
                 >
-                  Daxil Ol
+                  {t('app_guest_login')}
                 </button>
                 <button
                   onClick={() => {
@@ -227,7 +228,7 @@ export default function ApplicationModal() {
                   }}
                   className="w-full sm:w-auto px-6 py-2.5 rounded border border-secondary text-secondary hover:bg-secondary/10 text-xs font-semibold uppercase tracking-wider transition-colors"
                 >
-                  Hesab Yarat (Qeydiyyat)
+                  {t('app_guest_register')}
                 </button>
               </div>
             </div>
@@ -260,7 +261,7 @@ export default function ApplicationModal() {
                           ? 'text-amber-900 dark:text-amber-300'
                           : 'text-primary'
                       }`}>
-                        {existingApp.status === 'Təsdiqləndi' ? 'Müraciətiniz Təsdiqlənib' : 'Müraciətiniz Mövcuddur'} (#{existingApp.id})
+                        {existingApp.status === 'Təsdiqləndi' ? t('app_existing_title_approved') : t('app_existing_title_pending')} (#{existingApp.id})
                       </span>
                       <span className={`px-2 py-0.5 rounded text-[11px] font-bold border ${statusMeta?.badgeClass}`}>
                         {existingApp.status}
@@ -274,17 +275,17 @@ export default function ApplicationModal() {
                         : 'text-on-surface-variant'
                     }`}>
                       {existingApp.status === 'Təsdiqləndi'
-                        ? <>Təbriklər! <strong>{existingApp.targetTitle}</strong> üzrə qeydiyyatınız təsdiq olunub.</>
-                        : <>Siz artıq <strong>{existingApp.targetTitle}</strong> üçün müraciət göndərmisiniz. Hal-hazırda nəzərdən keçirilir.</>
+                        ? <>{t('app_existing_approved_desc')} (<strong>{existingApp.targetTitle}</strong>)</>
+                        : <>{t('app_existing_pending_desc')} (<strong>{existingApp.targetTitle}</strong>)</>
                       }
                     </p>
                     <div className="mt-3 pt-3 border-t border-outline-variant/40 text-[11px] space-y-1 text-on-surface-variant">
-                      <div><strong>Tarix:</strong> {existingApp.appliedAt}</div>
-                      <div><strong>Ödəniş Statusu:</strong> {existingApp.paymentStatus}</div>
-                      <div><strong>İştirak Statusu:</strong> {existingApp.attendanceStatus}</div>
+                      <div><strong>{t('app_date')}</strong> {existingApp.appliedAt}</div>
+                      <div><strong>{t('app_payment_status')}</strong> {existingApp.paymentStatus}</div>
+                      <div><strong>{t('app_attendance_status')}</strong> {existingApp.attendanceStatus}</div>
                       {existingApp.adminNote && (
                         <div className="p-2 rounded bg-surface-bright/70 border border-outline-variant text-xs text-primary mt-2">
-                          <strong>Admin Qeydi:</strong> {existingApp.adminNote}
+                          <strong>{t('app_admin_note')}</strong> {existingApp.adminNote}
                         </div>
                       )}
                     </div>
@@ -297,7 +298,7 @@ export default function ApplicationModal() {
                   onClick={() => setApplicationModalOpen(false)}
                   className="px-4 py-2 text-xs font-medium text-outline hover:text-primary transition-colors"
                 >
-                  Pəncərəni bağla
+                  {t('app_close_window')}
                 </button>
                 <button
                   onClick={() => {
@@ -307,7 +308,7 @@ export default function ApplicationModal() {
                   }}
                   className="px-5 py-2.5 rounded bg-primary text-surface-bright hover:bg-[#112240] text-xs font-semibold flex items-center gap-1.5 transition-colors"
                 >
-                  <span>Müraciətlərim Bölməsinə Keç</span>
+                  <span>{t('app_go_to_applications')}</span>
                   <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
                 </button>
               </div>
@@ -320,11 +321,11 @@ export default function ApplicationModal() {
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-secondary text-[18px]">verified_user</span>
                   <span className="text-on-surface-variant">
-                    Müraciətçi: <strong className="text-primary">{currentUser.firstName} {currentUser.lastName}</strong> ({currentUser.email})
+                    {t('app_applicant_info')} <strong className="text-primary">{currentUser.firstName} {currentUser.lastName}</strong> ({currentUser.email})
                   </span>
                 </div>
                 <span className="text-[10px] text-secondary font-semibold uppercase tracking-wider bg-secondary/10 px-2 py-0.5 rounded">
-                  Profil məlumatları
+                  {t('app_profile_data')}
                 </span>
               </div>
 
@@ -407,13 +408,13 @@ export default function ApplicationModal() {
               {activeApplicationTarget.type !== 'course' && (
                 <div>
                   <label className="block text-xs font-semibold text-primary mb-1">
-                    Əlavə Qeyd və ya Mentor üçün Sual (Könüllü)
+                    {t('app_note_field')}
                   </label>
                   <textarea
                     rows={2}
                     value={userNote}
                     onChange={(e) => setUserNote(e.target.value)}
-                    placeholder="Spesifik bir istəyiniz və ya sualınız varsa qeyd edə bilərsiniz..."
+                    placeholder={t('app_note_placeholder')}
                     className="w-full px-3 py-2 rounded border border-outline-variant bg-surface-bright text-xs focus:outline-none focus:border-secondary"
                   />
                 </div>
@@ -434,7 +435,7 @@ export default function ApplicationModal() {
                     className="mt-0.5 rounded text-secondary focus:ring-0"
                   />
                   <span>
-                    Göstərilən məlumatların doğruluğunu təsdiqləyirəm və Monodoxia Akademiyanın daxili etik qaydaları ilə razıyam.
+                    {t('app_agreement')}
                   </span>
                 </label>
                 {validationErrors.agreed && (
@@ -449,14 +450,14 @@ export default function ApplicationModal() {
                   onClick={() => setApplicationModalOpen(false)}
                   className="px-4 py-2 text-xs font-medium text-outline hover:text-primary transition-colors"
                 >
-                  Ləğv et
+                  {t('app_cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
                   className="px-6 py-2.5 rounded bg-primary text-surface-bright hover:bg-[#112240] text-xs font-semibold tracking-wider transition-colors shadow-sm flex items-center gap-1.5 disabled:opacity-50"
                 >
-                  <span>{submitting ? 'Göndərilir...' : 'Müraciəti Təsdiqlə və Göndər'}</span>
+                  <span>{submitting ? t('app_submitting') : t('app_confirm_submit')}</span>
                   <span className="material-symbols-outlined text-[16px]">send</span>
                 </button>
               </div>

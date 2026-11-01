@@ -36,7 +36,7 @@ export default function Footer() {
               />
             </a>
             <p className="font-body-md text-body-md text-on-primary-container max-w-sm leading-relaxed">
-              {getLocalized(footer, 'desc', currentLang, defaultLang) || 'Fərdi İnkişaf və Psixologiya Mərkəzi. İnsanın daxili azadlığı, şüur transformasiyası və ahəngdar varlığı üçün etibarlı akademik platforma.'}
+              {getLocalized(footer, 'desc', currentLang, defaultLang) || t('footer_desc')}
             </p>
             <div className="flex items-center space-x-4 pt-2">
               <span className="material-symbols-outlined text-[20px] text-secondary cursor-pointer">psychology</span>
@@ -47,7 +47,7 @@ export default function Footer() {
 
           {/* NAV LINKS */}
           <div className="lg:col-span-3 space-y-3">
-            <div className="font-label-sm text-label-sm text-secondary-fixed tracking-widest uppercase">NAVİQASİYA</div>
+            <div className="font-label-sm text-label-sm text-secondary-fixed tracking-widest uppercase">{t('footer_nav')}</div>
             <ul className="space-y-2 font-body-md text-body-md">
               <li>
                 <a
@@ -117,24 +117,24 @@ export default function Footer() {
 
           {/* CONTACT */}
           <div className="lg:col-span-4 space-y-3.5">
-            <div className="font-label-sm text-label-sm text-secondary-fixed tracking-widest uppercase">ƏLAQƏ VƏ ÜNVAN</div>
+            <div className="font-label-sm text-label-sm text-secondary-fixed tracking-widest uppercase">{t('footer_contact_info')}</div>
             <ul className="space-y-3 font-body-md text-body-md text-on-primary-container">
               <li className="flex items-start gap-2.5">
                 <span className="material-symbols-outlined text-[19px] text-secondary shrink-0 mt-0.5">location_on</span>
                 <span className="leading-snug">
-                  {getLocalized(footer, 'address', currentLang, defaultLang) || 'Nizami küçəsi 142, İntellektual İnkişaf Mərkəzi, Bakı, Azərbaycan'}
+                  {getLocalized(footer, 'address', currentLang, defaultLang) || t('footer_address')}
                 </span>
               </li>
               <li className="flex items-center gap-2.5">
                 <span className="material-symbols-outlined text-[19px] text-secondary shrink-0">mail</span>
                 <span>
-                  Əlaqə: <a href={`mailto:${contactEmail}`} className="hover:text-secondary-fixed transition-colors underline underline-offset-2 break-all">{contactEmail}</a>
+                  {t('footer_contact_label')} <a href={`mailto:${contactEmail}`} className="hover:text-secondary-fixed transition-colors underline underline-offset-2 break-all">{contactEmail}</a>
                 </span>
               </li>
               <li className="flex items-center gap-2.5">
                 <span className="material-symbols-outlined text-[19px] text-secondary shrink-0">call</span>
                 <span>
-                  Tel: <a href={`tel:${contactPhone.replace(/\s+/g, '')}`} className="hover:text-secondary-fixed transition-colors font-medium">{contactPhone}</a>
+                  {t('footer_tel_label')} <a href={`tel:${contactPhone.replace(/\s+/g, '')}`} className="hover:text-secondary-fixed transition-colors font-medium">{contactPhone}</a>
                 </span>
               </li>
             </ul>
@@ -144,7 +144,7 @@ export default function Footer() {
         {/* BOTTOM BAR */}
         <div className="border-t border-outline/30 pt-6 flex flex-col md:flex-row items-center justify-between text-xs text-on-primary-container gap-4">
           <div>
-            {getLocalized(footer, 'copyright', currentLang, defaultLang) || '© 2025 Monodoxia Academy. Fərdi İnkişaf və Psixologiya Mərkəzi. Bütün hüquqlar qorunur.'}
+            {getLocalized(footer, 'copyright', currentLang, defaultLang) || t('footer_copyright')}
           </div>
           <div className="flex items-center space-x-3">
             {(supportedLangs || []).filter(l => l.active !== false && l.enabled !== false).map(lang => (

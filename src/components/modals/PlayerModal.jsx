@@ -4,7 +4,7 @@ import { getLocalized } from '../../i18n/localize';
 import { useApp } from '../../context/AppContext';
 
 export default function PlayerModal() {
-  const { currentLang, defaultLang } = useLanguage();
+  const { currentLang, defaultLang, t } = useLanguage();
   const {
     playerModalOpen,
     setPlayerModalOpen,
@@ -34,14 +34,14 @@ export default function PlayerModal() {
             </h4>
             {activeCourse.instructor && (
               <span className="text-[11px] text-outline">
-                Kouç: <strong className="text-secondary font-medium">{activeCourse.instructor}</strong>
+                {t('player_coach')} <strong className="text-secondary font-medium">{activeCourse.instructor}</strong>
               </span>
             )}
           </div>
           <div className="flex items-center gap-4">
             <div className="hidden sm:flex items-center gap-2">
               <span className="text-xs text-secondary font-semibold">
-                {courseProg.percent}% tamamlandı
+                {courseProg.percent}% {t('player_completed')}
               </span>
               <div className="w-24 bg-surface-container h-2 rounded-full overflow-hidden">
                 <div
@@ -53,6 +53,7 @@ export default function PlayerModal() {
             <button
               onClick={() => setPlayerModalOpen(false)}
               className="text-outline hover:text-primary transition-colors"
+              title={t('common_close')}
             >
               <span className="material-symbols-outlined text-[24px]">close</span>
             </button>
@@ -68,7 +69,7 @@ export default function PlayerModal() {
                 <span className="px-2.5 py-0.5 rounded text-[10px] font-bold tracking-widest bg-secondary/10 text-secondary uppercase">
                   {activeLesson.type}
                 </span>
-                <span className="text-xs text-outline">Modul Məzmunu</span>
+                <span className="text-xs text-outline">{t('player_module_content')}</span>
               </div>
               <h3 className="font-headline-sm text-primary font-serif mb-4">
                 {lessonTitle}
@@ -87,19 +88,19 @@ export default function PlayerModal() {
                 </div>
               ) : (
                 <div className="p-6 bg-surface-container-low rounded border border-outline-variant space-y-4 mb-4">
-                  <h4 className="font-headline-sm text-primary font-serif">Məşğələ Təlimatı və Təcrübə</h4>
+                  <h4 className="font-headline-sm text-primary font-serif">{t('player_instruction_title')}</h4>
                   <p className="font-body-md text-on-surface-variant leading-relaxed">
-                    Bu dərsdə qeyd olunan nəfəs və daxili dialoq auditini yerinə yetirərkən sakit bir mühit seçin. Özünüzə qarşı mühakiməsiz, müşahidəçi mövqeyindən yanaşın.
+                    {t('player_instruction_desc')}
                   </p>
                   <div className="p-4 bg-surface-bright rounded border-l-4 border-secondary text-xs text-secondary italic">
-                    "Fərqindəlik qorxuların üzərindəki qaranlığı yox edən ilk işıqdır."
+                    {t('player_instruction_quote')}
                   </div>
                 </div>
               )}
             </div>
 
             <div className="pt-6 border-t border-outline-variant/40 flex items-center justify-between mt-6">
-              <span className="text-xs text-on-surface-variant">Tərəqqini qeydə almaq üçün dərsi tamamlayın:</span>
+              <span className="text-xs text-on-surface-variant">{t('player_mark_complete_prompt')}</span>
               <button
                 onClick={() => toggleLessonDone(activeCourse.id, activeLesson.id)}
                 className="px-5 py-2.5 rounded bg-primary-container text-on-primary hover:bg-[#112240] text-xs font-semibold tracking-wider flex items-center gap-2 transition-colors"
@@ -107,7 +108,7 @@ export default function PlayerModal() {
                 <span className="material-symbols-outlined text-[18px]">
                   {isLessonCompleted ? 'verified' : 'check'}
                 </span>
-                <span>{isLessonCompleted ? 'Tamamlandı' : 'Dərsi tamamla'}</span>
+                <span>{isLessonCompleted ? t('player_completed_btn') : t('player_mark_complete')}</span>
               </button>
             </div>
           </div>
@@ -115,7 +116,7 @@ export default function PlayerModal() {
           {/*  */}
           <div className="lg:col-span-4 bg-surface-container-low border-l border-outline-variant/60 p-5 overflow-y-auto">
             <h4 className="font-headline-sm text-xs tracking-wider uppercase text-primary font-serif mb-4 pb-2 border-b border-outline-variant/40">
-              Kursun Tədris Planı
+              {t('player_curriculum')}
             </h4>
             <div className="space-y-4">
               {activeCourse.modules.map((m, mIdx) => {
@@ -123,7 +124,7 @@ export default function PlayerModal() {
                 return (
                   <div key={m.id} className="mb-4">
                     <h5 className="text-xs font-semibold tracking-wider text-secondary uppercase mb-2">
-                      Modul {mIdx + 1}: {modTitle}
+                      {t('player_module')} {mIdx + 1}: {modTitle}
                     </h5>
                     <div className="space-y-1">
                       {m.lessons.map(l => {
