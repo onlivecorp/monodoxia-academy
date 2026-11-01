@@ -173,6 +173,10 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
       return;
     }
     const autoTrans = PERIOD_TRANSLATIONS[newTierPeriod] || {};
+    const feats = typeof newTierFeatures === 'string'
+      ? newTierFeatures.split('\n').map(s => s.trim()).filter(Boolean)
+      : (newTierFeatures || []);
+
     const mergedTranslations = {
       ...newTierTranslations,
       az: {
@@ -180,7 +184,8 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
         name: newTierName.trim(),
         desc: newTierDesc.trim(),
         offer: newTierOfferDisabled ? '' : newTierOffer.trim(),
-        period: newTierTranslations.az?.period || autoTrans.az || newTierPeriod
+        period: newTierTranslations.az?.period || autoTrans.az || newTierPeriod,
+        features: feats
       },
       en: { ...(newTierTranslations.en || {}), period: newTierTranslations.en?.period || autoTrans.en || newTierPeriod },
       tr: { ...(newTierTranslations.tr || {}), period: newTierTranslations.tr?.period || autoTrans.tr || newTierPeriod },
@@ -196,7 +201,7 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
       offerDisabled: Boolean(newTierOfferDisabled),
       period: newTierPeriod,
       popular: newTierPopular,
-      features: newTierFeatures,
+      features: feats,
       translations: mergedTranslations
     });
     setNewTierName('');
@@ -221,6 +226,10 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
   const handleSaveEditClubTier = (e) => {
     e.preventDefault();
     if (!editingTier) return;
+    const feats = typeof editingTier.features === 'string'
+      ? editingTier.features.split('\n').map(s => s.trim()).filter(Boolean)
+      : (editingTier.features || []);
+
     updateClubTier(editingTier.id, {
       name: editingTier.name,
       desc: editingTier.desc || '',
@@ -230,10 +239,18 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
       offerDisabled: Boolean(editingTier.offerDisabled),
       period: editingTier.period,
       popular: Boolean(editingTier.popular),
-      features: typeof editingTier.features === 'string'
-        ? editingTier.features.split('\n').map(s => s.trim()).filter(Boolean)
-        : editingTier.features,
-      translations: editingTier.translations || {}
+      features: feats,
+      translations: {
+        ...(editingTier.translations || {}),
+        az: {
+          ...((editingTier.translations || {}).az || {}),
+          name: editingTier.name,
+          desc: editingTier.desc || '',
+          offer: editingTier.offerDisabled ? '' : (editingTier.offer || ''),
+          period: editingTier.period,
+          features: feats
+        }
+      }
     });
     setEditingTier(null);
   };

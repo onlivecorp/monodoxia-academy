@@ -13,13 +13,22 @@ export default function AdminInlineTranslator({
   const { supportedLangs } = useLanguage();
   if (!item) return null;
 
-  const transLangs = (supportedLangs || []).filter(l => l.code !== 'az' && l.enabled !== false);
+  const transLangs = (supportedLangs && supportedLangs.length > 0)
+    ? supportedLangs.filter(l => l.enabled !== false)
+    : [
+        { code: 'az', name: 'Azərbaycan', flag: '🇦🇿' },
+        { code: 'en', name: 'English', flag: '🇬🇧' },
+        { code: 'tr', name: 'Türkçe', flag: '🇹🇷' },
+        { code: 'ru', name: 'Русский', flag: '🇷🇺' }
+      ];
   const trans = item.translations || {};
 
   const getLangStatus = (code) => {
     if (!fields || fields.length === 0) return 'missing';
     const filled = fields.filter(f => {
-      const v = trans[code]?.[f.key];
+      const v = trans[code]?.[f.key] !== undefined && trans[code]?.[f.key] !== ''
+        ? trans[code][f.key]
+        : (code === 'az' ? item[f.key] : undefined);
       if (Array.isArray(v)) return v.length > 0;
       return v && String(v).trim() !== '';
     }).length;
@@ -33,7 +42,11 @@ export default function AdminInlineTranslator({
       ...trans,
       [langCode]: { ...(trans[langCode] || {}), [fieldKey]: value }
     };
-    onUpdate({ translations: updated });
+    if (langCode === 'az') {
+      onUpdate({ [fieldKey]: value, translations: updated });
+    } else {
+      onUpdate({ translations: updated });
+    }
   };
 
   return (
@@ -58,7 +71,7 @@ export default function AdminInlineTranslator({
       >
         <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#c5a059' }}>translate</span>
-          <span style={{ fontWeight: 600 }}>Çoxdilli Tərcümə Redaktoru (i18n)</span>
+          <span style={{ fontWeight: 600 }}>Çoxdilli Tərcümə Redaktoru (4 Dil: AZ, EN, TR, RU)</span>
           <span style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: '8px' }}>
             {transLangs.map(l => {
               const st = getLangStatus(l.code);
@@ -79,7 +92,7 @@ export default function AdminInlineTranslator({
       {isOpen && (
         <div style={{ padding: '14px', background: '#f8fafc', borderTop: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <p style={{ fontSize: '11px', color: '#64748b', margin: 0 }}>
-            Azərbaycan dili (AZ) əsas dildir. Aşağıda digər dillər üçün tərcümə variantlarını daxil edin:
+            Hər bir dil üzrə məlumatları ayrıca redaktə edin. Dəyişikliklər avtomatik olaraq müvafiq dil qovluğuna yazılır:
           </p>
 
           {/* Lang tabs */}
@@ -118,7 +131,9 @@ export default function AdminInlineTranslator({
           {/* Fields for active lang */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {fields.map(f => {
-              const rawVal = trans[activeLang]?.[f.key];
+              const rawVal = trans[activeLang]?.[f.key] !== undefined
+                ? trans[activeLang][f.key]
+                : (activeLang === 'az' ? item[f.key] : '');
               const val = Array.isArray(rawVal) ? rawVal.join('\n') : (rawVal || '');
               return (
                 <div key={f.key} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>

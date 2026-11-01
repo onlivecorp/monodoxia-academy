@@ -766,4 +766,12 @@ export default {
   "status_will_attend": "İştirak edəcək",
   "status_attended": "İştirak etdi",
   "status_not_attending": "İştirak etməyəcək",
+  "type_course": "Kurs",
+  "type_club": "Klub",
+  "type_event": "Tədbir",
+  "type_webinar": "Vebinar",
+  "type_community": "İcma",
+  "type_forum": "Forum",
+  "type_coach_booking": "Ekspert / Kouç Rezervasiyası",
+  "cancel_application": "Müraciəti Ləğv Et"
 };

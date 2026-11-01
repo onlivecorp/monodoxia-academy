@@ -766,4 +766,12 @@ export default {
   "status_will_attend": "Will Attend",
   "status_attended": "Attended",
   "status_not_attending": "Will Not Attend",
+  "type_course": "Course",
+  "type_club": "Club",
+  "type_event": "Event",
+  "type_webinar": "Webinar",
+  "type_community": "Community",
+  "type_forum": "Forum",
+  "type_coach_booking": "Expert / Coach Booking",
+  "cancel_application": "Cancel Application"
 };

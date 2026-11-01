@@ -326,6 +326,19 @@ export default function ProfileModal() {
     return status;
   };
 
+  const getTargetTypeLabel = (targetType) => {
+    switch (targetType) {
+      case 'course': return t('type_course') || 'Kurs';
+      case 'club': return t('type_club') || 'Klub';
+      case 'event': return t('type_event') || 'Tədbir';
+      case 'webinar': return t('type_webinar') || 'Vebinar';
+      case 'community': return t('type_community') || 'İcma';
+      case 'forum': return t('type_forum') || 'Forum';
+      case 'coach_booking': return t('type_coach_booking') || 'Ekspert / Kouç Rezervasiyası';
+      default: return TARGET_TYPE_MAP[targetType]?.label || t('profile_target_program') || 'Proqram';
+    }
+  };
+
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     if (!passwordForm.currentPassword) {
@@ -1152,7 +1165,7 @@ export default function ProfileModal() {
                             <div>
                               <div className="flex items-center gap-2 flex-wrap">
                                 <span className="text-[10px] font-bold font-mono uppercase tracking-wider text-amber-800">
-                                  #{app.id} • {typeObj.label}
+                                  #{app.id} • {getTargetTypeLabel(app.targetType)}
                                 </span>
                                 <span className="text-[10px] text-slate-400 font-mono">
                                   {app.appliedAt}
@@ -1271,7 +1284,7 @@ export default function ProfileModal() {
                                 className="text-rose-600 hover:text-rose-800 text-[11px] font-semibold flex items-center gap-1 transition-colors px-2 py-1 rounded-lg hover:bg-rose-50"
                               >
                                 <span className="material-symbols-outlined text-[14px]">cancel</span>
-                                <span>Müraciəti Ləğv Et</span>
+                                <span>{t('cancel_application') || 'Müraciəti Ləğv Et'}</span>
                               </button>
                             )}
                             {app.status === 'Ləğv edildi' && (

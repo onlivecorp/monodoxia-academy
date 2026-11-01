@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { MultiLangEditor, LocalizedArrayField } from '../../i18n/TranslationComponents';
@@ -29,6 +29,8 @@ export default function AdminTranslationsTab() {
     updateRole,
     pillarsList = [],
     updatePillar,
+    categoriesList = [],
+    updateCategory,
     showToast
   } = useApp();
 
@@ -42,6 +44,7 @@ export default function AdminTranslationsTab() {
   const entities = [
     { id: 'roles', label: 'Rollar & Səlahiyyətlər (RBAC)', count: rolesList.length },
     { id: 'club', label: 'Zənginlər Klubu Paketləri', count: clubTiersList.length },
+    { id: 'categories', label: 'Kateqoriyalar', count: (categoriesList || []).length },
     { id: 'users', label: 'İstifadəçilər & Profillər', count: usersList.length },
     { id: 'courses', label: 'Kurslar & LMS', count: coursesList.length },
     { id: 'events', label: 'Tədbirlər & Vebinarlar', count: eventsList.length },
@@ -59,6 +62,10 @@ export default function AdminTranslationsTab() {
       { key: 'name', label: 'Rolun Adı', required: true },
       { key: 'description', label: 'Rolun Təsviri & Məqsədi', type: 'textarea' }
     ],
+    categories: [
+      { key: 'name', label: 'Kateqoriya Adı', required: true },
+      { key: 'desc', label: 'Təsvir (Qısa)', type: 'textarea' }
+    ],
     users: [
       { key: 'name', label: 'Ad və Soyad', required: true },
       { key: 'notes', label: 'Admin Qeydləri', type: 'textarea' }
@@ -72,7 +79,8 @@ export default function AdminTranslationsTab() {
     ],
     club: [
       { key: 'name', label: 'Tarifin Adı', required: true },
-      { key: 'price', label: 'Qiymət (mətn / valyuta)' },
+      { key: 'desc', label: 'Paket Təsviri (Qısa)', type: 'textarea' },
+      { key: 'offer', label: 'Xüsusi Təklif / Endirim Qeydi' },
       {
         key: 'period',
         label: 'Ödəniş Dövrü',
@@ -102,7 +110,8 @@ export default function AdminTranslationsTab() {
     areas: [
       { key: 'number', label: 'Nömrə / Kod (Məs: 01 / SAHƏ)' },
       { key: 'title', label: 'Sahə Adı', required: true },
-      { key: 'desc', label: 'İzah / Təsvir', type: 'textarea' }
+      { key: 'desc', label: 'İzah / Təsvir', type: 'textarea' },
+      { key: 'btnText', label: 'Düymə Mətni (Məs: Kəşf et)' }
     ],
     pillars: [
       { key: 'title', label: 'Kart Başlığı', required: true },
@@ -121,6 +130,7 @@ export default function AdminTranslationsTab() {
   if (transEntity === 'roles') currentItems = rolesList;
   else if (transEntity === 'users') currentItems = usersList;
   else if (transEntity === 'courses') currentItems = coursesList;
+  else if (transEntity === 'categories') currentItems = categoriesList;
   else if (transEntity === 'club') currentItems = clubTiersList;
   else if (transEntity === 'events') currentItems = eventsList;
   else if (transEntity === 'coaches') currentItems = coachesList;
@@ -156,6 +166,7 @@ export default function AdminTranslationsTab() {
     if (transEntity === 'roles') updateRole(selectedItem.id, { translations: updatedTranslations });
     else if (transEntity === 'users') updateUser(selectedItem.id, { translations: updatedTranslations });
     else if (transEntity === 'courses') updateCourse(selectedItem.id, { translations: updatedTranslations });
+    else if (transEntity === 'categories' && updateCategory) updateCategory(selectedItem.id, { translations: updatedTranslations });
     else if (transEntity === 'club') updateClubTier(selectedItem.id, { translations: updatedTranslations });
     else if (transEntity === 'events') updateEvent(selectedItem.id, { translations: updatedTranslations });
     else if (transEntity === 'coaches') updateCoach(selectedItem.id, { translations: updatedTranslations });
@@ -173,6 +184,7 @@ export default function AdminTranslationsTab() {
     if (transEntity === 'roles') updateRole(selectedItem.id, { translations: copiedTranslations });
     else if (transEntity === 'users') updateUser(selectedItem.id, { translations: copiedTranslations });
     else if (transEntity === 'courses') updateCourse(selectedItem.id, { translations: copiedTranslations });
+    else if (transEntity === 'categories' && updateCategory) updateCategory(selectedItem.id, { translations: copiedTranslations });
     else if (transEntity === 'club') updateClubTier(selectedItem.id, { translations: copiedTranslations });
     else if (transEntity === 'events') updateEvent(selectedItem.id, { translations: copiedTranslations });
     else if (transEntity === 'coaches') updateCoach(selectedItem.id, { translations: copiedTranslations });

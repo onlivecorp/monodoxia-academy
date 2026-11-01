@@ -766,4 +766,12 @@ export default {
   "status_will_attend": "Будет участвовать",
   "status_attended": "Принял участие",
   "status_not_attending": "Не будет участвовать",
+  "type_course": "Курс",
+  "type_club": "Клуб",
+  "type_event": "Мероприятие",
+  "type_webinar": "Вебинар",
+  "type_community": "Сообщество",
+  "type_forum": "Форум",
+  "type_coach_booking": "Бронирование эксперта / коуча",
+  "cancel_application": "Отменить заявку"
 };

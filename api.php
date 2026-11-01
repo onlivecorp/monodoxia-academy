@@ -1677,19 +1677,19 @@ try {
                     'name' => 'Basic Resident',
                     'desc' => 'Monthly community sessions, digital resources, and group discussions',
                     'period' => '/ monthly',
-                    'features' => ["Zənginlər Klubu standard discussion platform", "20+ hours of audio meditation library", "10% permanent student discount on courses", "1 live Q&A session per month"]
+                    'features' => ["Wealth Club standard discussion platform", "20+ hours of audio meditation library", "10% permanent student discount on courses", "1 live Q&A session per month"]
                 ],
                 'tr' => [
                     'name' => 'Basic Üye',
                     'desc' => 'Aylık topluluk oturumları, dijital materyaller ve grup etkileşimi',
                     'period' => '/ aylık',
-                    'features' => ["Zənginlər Klubu standart tartışma platformu", "20+ saatlik sesli meditasyon kütüphanesi", "Kurslarda %10 sürekli öğrenci indirimi", "Ayda 1 canlı soru-cevap oturumu"]
+                    'features' => ["Zenginler Kulübü standart tartışma platformu", "20+ saatlik sesli meditasyon kütüphanesi", "Kurslarda %10 sürekli öğrenci indirimi", "Ayda 1 canlı soru-cevap oturumu"]
                 ],
                 'ru' => [
                     'name' => 'Базовый резидент',
                     'desc' => 'Ежемесячные общие сессии, библиотека материалов и общение в группе',
                     'period' => '/ месяц',
-                    'features' => ["Стандартная дискуссионная платформа Zənginlər Klubu", "20+ часов аудиомедитаций в библиотеке", "Постоянная скидка 10% на курсы", "1 живая сессия вопросов и ответов в месяц"]
+                    'features' => ["Стандартная дискуссионная платформа Клуба Богатых", "20+ часов аудиомедитаций в библиотеке", "Постоянная скидка 10% на курсы", "1 живая сессия вопросов и ответов в месяц"]
                 ]
             ], JSON_UNESCAPED_UNICODE)
         ],
@@ -1763,7 +1763,11 @@ try {
             UPDATE mdx_club_tiers
             SET `desc` = COALESCE(NULLIF(`desc`, ''), ?),
                 description = COALESCE(NULLIF(description, ''), ?),
-                translations = CASE WHEN translations IS NULL OR translations = '' OR translations = '{}' THEN ? ELSE translations END
+                translations = CASE 
+                    WHEN translations IS NULL OR translations = '' OR translations = '{}' OR translations LIKE '%?%' OR translations LIKE '%D~%'
+                    THEN ? 
+                    ELSE translations 
+                END
             WHERE id = ?
         ");
         $uStmt->execute([$tData['desc'], $tData['desc'], $tData['translations'], $tId]);

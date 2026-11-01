@@ -1,7 +1,7 @@
-import az from './az';
-import en from './en';
-import tr from './tr';
-import ru from './ru';
+import az from './az.js';
+import en from './en.js';
+import tr from './tr.js';
+import ru from './ru.js';
 
 export const translations = {
   az,

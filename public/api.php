@@ -1627,6 +1627,151 @@ try {
 } catch (PDOException $e) {}
 try {
     $pdo->exec("ALTER TABLE mdx_club_tiers ADD COLUMN translations LONGTEXT DEFAULT NULL");
+    $pdo->exec("ALTER TABLE mdx_club_tiers ADD COLUMN `desc` TEXT DEFAULT NULL");
+    $pdo->exec("ALTER TABLE mdx_club_tiers ADD COLUMN description TEXT DEFAULT NULL");
+    $pdo->exec("ALTER TABLE mdx_club_tiers ADD COLUMN annual_price VARCHAR(50) DEFAULT NULL");
+    $pdo->exec("ALTER TABLE mdx_club_tiers ADD COLUMN offer VARCHAR(255) DEFAULT NULL");
+    $pdo->exec("ALTER TABLE mdx_club_tiers ADD COLUMN offer_disabled TINYINT(1) DEFAULT 0");
+
+    // Auto-seed missing translations & desc for default club tiers if null
+    $seedClubTiers = [
+        'free' => [
+            'desc' => 'İctimai müzakirələrə və vebinarlara dinləyici kimi giriş',
+            'translations' => json_encode([
+                'az' => [
+                    'name' => 'Giriş (Free)',
+                    'desc' => 'İctimai müzakirələrə və vebinarlara dinləyici kimi giriş',
+                    'period' => 'Ömürlük',
+                    'features' => ["Açıq bloq yazılarına və ictimai müzakirələrə giriş", "Aylıq ümumi vebinarlara dinləyici qismində qatılmaq", "Bülleten və psixoloji bələdçi bildirişləri"]
+                ],
+                'en' => [
+                    'name' => 'Intro (Free)',
+                    'desc' => 'Access to public discussions and webinars as an attendee',
+                    'period' => 'Lifetime',
+                    'features' => ["Access to public blog posts and community discussions", "Attend monthly general webinars as a listener", "Newsletter and psychological guide updates"]
+                ],
+                'tr' => [
+                    'name' => 'Giriş (Ücretsiz)',
+                    'desc' => 'Halka açık tartışmalara ve webinarlara dinleyici olarak erişim',
+                    'period' => 'Ömür boyu',
+                    'features' => ["Açık blog yazılarına ve topluluk tartışmalarına erişim", "Aylık genel webinarlara dinleyici olarak katılma", "Bülten ve psikolojik rehber bildirimleri"]
+                ],
+                'ru' => [
+                    'name' => 'Вводный (Free)',
+                    'desc' => 'Доступ к открытым статьям, обсуждениям и вебинарам в качестве слушателя',
+                    'period' => 'Бессрочно',
+                    'features' => ["Доступ к открытым статьям блога и обсуждениям", "Участие в ежемесячных вебинарах в качестве слушателя", "Рассылка и уведомления психологических гидов"]
+                ]
+            ], JSON_UNESCAPED_UNICODE)
+        ],
+        'basic' => [
+            'desc' => 'Aylıq ümumi sessiyalar, rəqəmsal materiallar və qrup',
+            'translations' => json_encode([
+                'az' => [
+                    'name' => 'Basic Üzv',
+                    'desc' => 'Aylıq ümumi sessiyalar, rəqəmsal materiallar və qrup',
+                    'period' => '/ aylıq',
+                    'features' => ["Zənginlər Klubu standart müzakirə platforması", "20+ saatlıq səsli meditasiya kitabxanası", "Kurslara 10% daimi tələbə endirimi", "Ayda 1 canlı sual-cavab sessiyası"]
+                ],
+                'en' => [
+                    'name' => 'Basic Resident',
+                    'desc' => 'Monthly community sessions, digital resources, and group discussions',
+                    'period' => '/ monthly',
+                    'features' => ["Wealth Club standard discussion platform", "20+ hours of audio meditation library", "10% permanent student discount on courses", "1 live Q&A session per month"]
+                ],
+                'tr' => [
+                    'name' => 'Basic Üye',
+                    'desc' => 'Aylık topluluk oturumları, dijital materyaller ve grup etkileşimi',
+                    'period' => '/ aylık',
+                    'features' => ["Zenginler Kulübü standart tartışma platformu", "20+ saatlik sesli meditasyon kütüphanesi", "Kurslarda %10 sürekli öğrenci indirimi", "Ayda 1 canlı soru-cevap oturumu"]
+                ],
+                'ru' => [
+                    'name' => 'Базовый резидент',
+                    'desc' => 'Ежемесячные общие сессии, библиотека материалов и общение в группе',
+                    'period' => '/ месяц',
+                    'features' => ["Стандартная дискуссионная платформа Клуба Богатых", "20+ часов аудиомедитаций в библиотеке", "Постоянная скидка 10% на курсы", "1 живая сессия вопросов и ответов в месяц"]
+                ]
+            ], JSON_UNESCAPED_UNICODE)
+        ],
+        'premium' => [
+            'desc' => 'Bütün masterklaslar, qapalı icma və VIP şəbəkə',
+            'offer' => 'İlk ödənişə 2 ay HƏDİYYƏ',
+            'translations' => json_encode([
+                'az' => [
+                    'name' => 'Premium Üzv',
+                    'desc' => 'Bütün masterklaslar, qapalı icma və VIP şəbəkə',
+                    'period' => '/ aylıq',
+                    'offer' => 'İlk ödənişə 2 ay HƏDİYYƏ',
+                    'features' => ["Bütün canlı klub tədbirləri və masterklaslar", "Telegram VIP məxfi müzakirə otağı", "Kurslara 25% fərdi endirim", "Aylıq 1 fərdi diaqnostik orientasiya", "Tam 100+ saatlıq meditasiya və video arxivi"]
+                ],
+                'en' => [
+                    'name' => 'Premium Resident',
+                    'desc' => 'All masterclasses, private community, and exclusive VIP network',
+                    'period' => '/ monthly',
+                    'offer' => '2 months free with initial billing',
+                    'features' => ["All live club events and masterclasses", "Telegram VIP private discussion group", "25% personal discount on courses", "1 monthly individual diagnostic orientation", "Full 100+ hours meditation and video archive"]
+                ],
+                'tr' => [
+                    'name' => 'Premium Üye',
+                    'desc' => 'Tüm masterclass\'lar, kapalı topluluk ve özel VIP ağı',
+                    'period' => '/ aylık',
+                    'offer' => 'İlk ödemede 2 ay HEDİYE',
+                    'features' => ["Tüm canlı kulüp etkinlikleri ve masterclasslar", "Telegram VIP gizli tartışma odası", "Kurslarda %25 kişisel indirim", "Ayda 1 bireysel diagnostik oryantasyon", "Tam 100+ saatlik meditasyon ve video arşivi"]
+                ],
+                'ru' => [
+                    'name' => 'Премиум резидент',
+                    'desc' => 'Все мастер-классы, закрытое сообщество и приватная VIP-сеть',
+                    'period' => '/ месяц',
+                    'offer' => '2 месяца в подарок при первой оплате',
+                    'features' => ["Все живые клубные мероприятия и мастер-классы", "Закрытая VIP группа в Telegram", "Персональная скидка 25% на курсы", "1 индивидуальная диагностическая ориентация в месяц", "Полный архив 100+ часов медитаций и видео"]
+                ]
+            ], JSON_UNESCAPED_UNICODE)
+        ],
+        'vip' => [
+            'desc' => 'Fərdi kouçinq sessiyaları və təsisçi ilə birbaşa əlaqə',
+            'translations' => json_encode([
+                'az' => [
+                    'name' => 'VIP Salon',
+                    'desc' => 'Fərdi kouçinq sessiyaları və təsisçi ilə birbaşa əlaqə',
+                    'period' => '/ aylıq',
+                    'features' => ["Bütün Premium imtiyazlar daxil", "Hər ay 2 fərdi ICF kouçinq sessiyası", "Oflayn illik retreat və düşərgələrə prioritet giriş", "Şəxsi inkişaf mentoru və 24/7 dəstək xətti"]
+                ],
+                'en' => [
+                    'name' => 'VIP Lounge',
+                    'desc' => '1-on-1 coaching sessions and direct mentorship with founders',
+                    'period' => '/ monthly',
+                    'features' => ["All Premium benefits included", "2 personal ICF coaching sessions each month", "Priority access to annual offline retreats and camps", "Personal development mentor and 24/7 support line"]
+                ],
+                'tr' => [
+                    'name' => 'VIP Salon',
+                    'desc' => 'Birebir koçluk seansları ve kurucu mentörlerle doğrudan temas',
+                    'period' => '/ aylık',
+                    'features' => ["Tüm Premium ayrıcalıklar dahil", "Her ay 2 bireysel ICF koçluk seansı", "Yıllık inziva ve kamplara öncelikli erişim", "Kişisel gelişim mentoru ve 7/24 destek hattı"]
+                ],
+                'ru' => [
+                    'name' => 'VIP Салон',
+                    'desc' => 'Индивидуальные коуч-сессии и прямое наставничество основателей',
+                    'period' => '/ месяц',
+                    'features' => ["Все привилегии Premium включены", "2 индивидуальные сессии ICF-коучинга каждый месяц", "Приоритетный доступ к ежегодным выездным ретритам", "Персональный ментор развития и поддержка 24/7"]
+                ]
+            ], JSON_UNESCAPED_UNICODE)
+        ]
+    ];
+
+    foreach ($seedClubTiers as $tId => $tData) {
+        $uStmt = $pdo->prepare("
+            UPDATE mdx_club_tiers
+            SET `desc` = COALESCE(NULLIF(`desc`, ''), ?),
+                description = COALESCE(NULLIF(description, ''), ?),
+                translations = CASE 
+                    WHEN translations IS NULL OR translations = '' OR translations = '{}' OR translations LIKE '%?%' OR translations LIKE '%D~%'
+                    THEN ? 
+                    ELSE translations 
+                END
+            WHERE id = ?
+        ");
+        $uStmt->execute([$tData['desc'], $tData['desc'], $tData['translations'], $tId]);
+    }
 } catch (PDOException $e) {}
 
 if ($action === 'get_roles') {
@@ -1775,6 +1920,7 @@ if ($action === 'save_club_tier' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $id = trim($input['id'] ?? ('tier-' . round(microtime(true) * 1000)));
     $name = trim($input['name'] ?? '');
+    $desc = trim($input['desc'] ?? ($input['description'] ?? ''));
     $price = trim($input['price'] ?? '0');
     $period = trim($input['period'] ?? '/ aylıq');
     $popular = !empty($input['popular']) ? 1 : 0;
@@ -1796,16 +1942,20 @@ if ($action === 'save_club_tier' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         $pdo->exec("ALTER TABLE mdx_club_tiers ADD COLUMN IF NOT EXISTS translations LONGTEXT DEFAULT NULL");
+        $pdo->exec("ALTER TABLE mdx_club_tiers ADD COLUMN IF NOT EXISTS `desc` TEXT DEFAULT NULL");
+        $pdo->exec("ALTER TABLE mdx_club_tiers ADD COLUMN IF NOT EXISTS description TEXT DEFAULT NULL");
         $pdo->exec("ALTER TABLE mdx_club_tiers ADD COLUMN IF NOT EXISTS annual_price VARCHAR(50) DEFAULT NULL");
         $pdo->exec("ALTER TABLE mdx_club_tiers ADD COLUMN IF NOT EXISTS offer VARCHAR(255) DEFAULT NULL");
         $pdo->exec("ALTER TABLE mdx_club_tiers ADD COLUMN IF NOT EXISTS offer_disabled TINYINT(1) DEFAULT 0");
     } catch (PDOException $e) {}
 
     $stmt = $pdo->prepare("
-        INSERT INTO mdx_club_tiers (id, name, price, annual_price, offer, offer_disabled, period, popular, features_json, active, translations)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO mdx_club_tiers (id, name, `desc`, description, price, annual_price, offer, offer_disabled, period, popular, features_json, active, translations)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE
             name = VALUES(name),
+            `desc` = VALUES(`desc`),
+            description = VALUES(description),
             price = VALUES(price),
             annual_price = VALUES(annual_price),
             offer = VALUES(offer),
@@ -1816,7 +1966,7 @@ if ($action === 'save_club_tier' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             active = VALUES(active),
             translations = VALUES(translations)
     ");
-    $stmt->execute([$id, $name, $price, $annualPrice, $offer, $offerDisabled, $period, $popular, $featuresJson, $active, $translationsJson]);
+    $stmt->execute([$id, $name, $desc, $desc, $price, $annualPrice, $offer, $offerDisabled, $period, $popular, $featuresJson, $active, $translationsJson]);
 
     echo json_encode(['status' => 'success', 'message' => 'Abunəlik paketi bazada saxlanıldı', 'id' => $id], JSON_UNESCAPED_UNICODE);
     exit();

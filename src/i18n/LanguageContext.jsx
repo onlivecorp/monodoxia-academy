@@ -60,6 +60,7 @@ export function LanguageProvider({ children }) {
   };
 
   const t = (key, fallback) => {
+    if (!key) return fallback !== undefined ? fallback : '';
     if (customTranslations[lang]?.[key] !== undefined && customTranslations[lang][key] !== '') {
       return customTranslations[lang][key];
     }
@@ -70,7 +71,10 @@ export function LanguageProvider({ children }) {
     if (translations[DEFAULT_LANGUAGE]?.[key] !== undefined && translations[DEFAULT_LANGUAGE][key] !== '') {
       return translations[DEFAULT_LANGUAGE][key];
     }
-    return fallback !== undefined ? fallback : key;
+    if (fallback !== undefined && fallback !== null && fallback !== '') {
+      return fallback;
+    }
+    return '';
   };
 
   // Safe language change that validates against supported list

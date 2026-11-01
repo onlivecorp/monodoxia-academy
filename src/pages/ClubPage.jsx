@@ -118,7 +118,7 @@ export default function ClubPage() {
                 ? (customAnnual && customAnnual > 0 ? customAnnual : Math.round(rawPrice * 10))
                 : rawPrice;
               const periodText = billingCycle === 'annual' && rawPrice > 0 ? (t('club_tier_period_annual') || '/ illik') : (getLocalized(tier, 'period', currentLang, defaultLang, t('club_tier_period')) || tier.period || t('club_tier_period') || '/ aylıq');
-              const tierName = getLocalized(tier, 'name', currentLang, defaultLang, tier.name) || tier.name || tier.id || 'Klub Üzvlüyü';
+              const tierName = getLocalized(tier, 'name', currentLang, defaultLang) || tier.name || tier.id || 'Klub Üzvlüyü';
               const userTierApp = currentUser && Array.isArray(applicationsList)
                 ? applicationsList.find(a => a.userId === currentUser.id && a.targetId === tier.id && !a.archived)
                 : null;
@@ -248,38 +248,42 @@ export default function ClubPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-              {(Array.isArray(club.perks) && club.perks.length > 0 ? club.perks : [
-                "Həftəlik canlı mentorluq və mastermind sessiyaları",
-                "Özəl meditasiya və təcrübə arxivi (100+ saat)",
-                "Qapalı intellektual icma müzakirələri",
-                "Oflayn tədbirlərə və retreat-lərə VIP giriş"
-              ]).map((perk, pIdx) => {
-                const perkStr = typeof perk === 'string' ? perk : (perk?.text || perk?.title || '');
-                const title = perkStr.includes(':') ? perkStr.split(':')[0] : perkStr;
-                const desc = perkStr.includes(':') ? perkStr.split(':')[1] : (perk?.desc || '');
-                return (
-                  <div 
-                    key={pIdx} 
-                    className="flex items-start gap-4 p-6 rounded-2xl bg-[#faf8f5] border border-[#c5a059]/20 hover:border-[#c5a059]/50 transition-all hover:-translate-y-1 duration-300"
-                  >
-                    <div className="w-12 h-12 rounded-xl bg-[#c5a059]/15 border border-[#c5a059]/30 text-[#775a19] flex items-center justify-center shrink-0">
-                      <span className="material-symbols-outlined text-2xl">
-                        {pIdx === 0 ? 'psychology' : pIdx === 1 ? 'graphic_eq' : pIdx === 2 ? 'forum' : 'nature_people'}
-                      </span>
+              {(() => {
+                const activePerks = getLocalizedArray(club, 'perks', currentLang, defaultLang);
+                const perkItems = (activePerks && activePerks.length > 0) ? activePerks : (Array.isArray(club.perks) && club.perks.length > 0 ? club.perks : [
+                  "Həftəlik canlı mentorluq və mastermind sessiyaları",
+                  "Özəl meditasiya və təcrübə arxivi (100+ saat)",
+                  "Qapalı intellektual icma müzakirələri",
+                  "Oflayn tədbirlərə və retreat-lərə VIP giriş"
+                ]);
+                return perkItems.map((perk, pIdx) => {
+                  const perkStr = typeof perk === 'string' ? perk : (perk?.text || perk?.title || '');
+                  const title = perkStr.includes(':') ? perkStr.split(':')[0] : perkStr;
+                  const desc = perkStr.includes(':') ? perkStr.split(':')[1] : (perk?.desc || '');
+                  return (
+                    <div 
+                      key={pIdx} 
+                      className="flex items-start gap-4 p-6 rounded-2xl bg-[#faf8f5] border border-[#c5a059]/20 hover:border-[#c5a059]/50 transition-all hover:-translate-y-1 duration-300"
+                    >
+                      <div className="w-12 h-12 rounded-xl bg-[#c5a059]/15 border border-[#c5a059]/30 text-[#775a19] flex items-center justify-center shrink-0">
+                        <span className="material-symbols-outlined text-2xl">
+                          {pIdx === 0 ? 'psychology' : pIdx === 1 ? 'graphic_eq' : pIdx === 2 ? 'forum' : 'nature_people'}
+                        </span>
+                      </div>
+                      <div>
+                        <h4 className="font-serif font-medium text-base text-[#071326] mb-1.5">
+                          {title}
+                        </h4>
+                        {desc ? (
+                          <p className="text-xs sm:text-sm text-[#475569] leading-relaxed font-light">
+                            {desc}
+                          </p>
+                        ) : null}
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-serif font-medium text-base text-[#071326] mb-1.5">
-                        {title}
-                      </h4>
-                      {desc ? (
-                        <p className="text-xs sm:text-sm text-[#475569] leading-relaxed font-light">
-                          {desc}
-                        </p>
-                      ) : null}
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                });
+              })()}
             </div>
           </div>
 

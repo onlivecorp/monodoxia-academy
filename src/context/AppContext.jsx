@@ -167,19 +167,19 @@ const INITIAL_CLUB_TIERS = [
         name: "Basic Resident",
         desc: "Monthly community sessions, digital resources, and group discussions",
         period: "/ monthly",
-        features: ["Zənginlər Klubu standard discussion platform", "20+ hours of audio meditation library", "10% permanent student discount on courses", "1 live Q&A session per month"]
+        features: ["Wealth Club standard discussion platform", "20+ hours of audio meditation library", "10% permanent student discount on courses", "1 live Q&A session per month"]
       },
       tr: {
         name: "Basic Üye",
         desc: "Aylık topluluk oturumları, dijital materyaller ve grup etkileşimi",
         period: "/ aylık",
-        features: ["Zənginlər Klubu standart tartışma platformu", "20+ saatlik sesli meditasyon kütüphanesi", "Kurslarda %10 sürekli öğrenci indirimi", "Ayda 1 canlı soru-cevap oturumu"]
+        features: ["Zenginler Kulübü standart tartışma platformu", "20+ saatlik sesli meditasyon kütüphanesi", "Kurslarda %10 sürekli öğrenci indirimi", "Ayda 1 canlı soru-cevap oturumu"]
       },
       ru: {
         name: "Базовый резидент",
         desc: "Ежемесячные общие сессии, библиотека материалов и общение в группе",
         period: "/ месяц",
-        features: ["Стандартная дискуссионная платформа Zənginlər Klubu", "20+ часов аудиомедитаций в библиотеке", "Постоянная скидка 10% на курсы", "1 живая сессия вопросов и ответов в месяц"]
+        features: ["Стандартная дискуссионная платформа Клуба Богатых", "20+ часов аудиомедитаций в библиотеке", "Постоянная скидка 10% на курсы", "1 живая сессия вопросов и ответов в месяц"]
       }
     }
   },
@@ -427,7 +427,68 @@ export function AppProvider({ children }) {
 
   const [clubTiersList, setClubTiersList] = useState(() => {
     const saved = localStorage.getItem('monodoxia_admin_tiers');
-    return saved ? JSON.parse(saved) : INITIAL_CLUB_TIERS;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const cleanField = (val, fallback) => {
+            if (typeof val === 'string' && val.trim() !== '' && !val.includes('???') && !val.includes('D~')) {
+              return val;
+            }
+            return fallback || '';
+          };
+          const cleanFeatures = (arr, fallbackArr) => {
+            if (Array.isArray(arr) && arr.length > 0 && !arr.some(s => typeof s === 'string' && (s.includes('???') || s.includes('D~')))) {
+              return arr;
+            }
+            return fallbackArr || [];
+          };
+
+          return parsed.map((item, idx) => {
+            const canonical = INITIAL_CLUB_TIERS.find(t => t.id === item.id) || INITIAL_CLUB_TIERS[idx];
+            if (!canonical) return item;
+            const itemTrans = item.translations || {};
+            const canTrans = canonical.translations || {};
+
+            return {
+              ...canonical,
+              ...item,
+              translations: {
+                az: {
+                  ...(canTrans.az || {}),
+                  ...(itemTrans.az || {}),
+                  name: cleanField(itemTrans.az?.name, canTrans.az?.name || canonical.name),
+                  desc: cleanField(itemTrans.az?.desc, canTrans.az?.desc || canonical.desc),
+                  features: cleanFeatures(itemTrans.az?.features, canTrans.az?.features || canonical.features)
+                },
+                en: {
+                  ...(canTrans.en || {}),
+                  ...(itemTrans.en || {}),
+                  name: cleanField(itemTrans.en?.name, canTrans.en?.name),
+                  desc: cleanField(itemTrans.en?.desc, canTrans.en?.desc),
+                  features: cleanFeatures(itemTrans.en?.features, canTrans.en?.features)
+                },
+                tr: {
+                  ...(canTrans.tr || {}),
+                  ...(itemTrans.tr || {}),
+                  name: cleanField(itemTrans.tr?.name, canTrans.tr?.name),
+                  desc: cleanField(itemTrans.tr?.desc, canTrans.tr?.desc),
+                  features: cleanFeatures(itemTrans.tr?.features, canTrans.tr?.features)
+                },
+                ru: {
+                  ...(canTrans.ru || {}),
+                  ...(itemTrans.ru || {}),
+                  name: cleanField(itemTrans.ru?.name, canTrans.ru?.name),
+                  desc: cleanField(itemTrans.ru?.desc, canTrans.ru?.desc),
+                  features: cleanFeatures(itemTrans.ru?.features, canTrans.ru?.features)
+                }
+              }
+            };
+          });
+        }
+      } catch (e) {}
+    }
+    return INITIAL_CLUB_TIERS;
   });
 
   const [eventsList, setEventsList] = useState(() => {
@@ -472,6 +533,30 @@ export function AppProvider({ children }) {
               items: DEFAULT_NAVBAR_ITEMS
             };
           }
+          if (parsed.areas) {
+            const defAreasTrans = INITIAL_HOME_CONTENT.areas?.translations || {};
+            parsed.areas.translations = {
+              az: { ...(defAreasTrans.az || {}), ...(parsed.areas.translations?.az || {}) },
+              en: { ...(defAreasTrans.en || {}), ...(parsed.areas.translations?.en || {}) },
+              tr: { ...(defAreasTrans.tr || {}), ...(parsed.areas.translations?.tr || {}) },
+              ru: { ...(defAreasTrans.ru || {}), ...(parsed.areas.translations?.ru || {}) }
+            };
+            if (Array.isArray(parsed.areas.items) && parsed.areas.items.length > 0) {
+              const hasDummy = parsed.areas.items.some(i => i.title && (i.title.startsWith('New Area') || i.title.startsWith('Yeni Sahə')));
+              if (hasDummy) {
+                parsed.areas.items = AREAS;
+              }
+            }
+          }
+          if (parsed.club) {
+            const defClubTrans = INITIAL_HOME_CONTENT.club?.translations || {};
+            parsed.club.translations = {
+              az: { ...(defClubTrans.az || {}), ...(parsed.club.translations?.az || {}) },
+              en: { ...(defClubTrans.en || {}), ...(parsed.club.translations?.en || {}) },
+              tr: { ...(defClubTrans.tr || {}), ...(parsed.club.translations?.tr || {}) },
+              ru: { ...(defClubTrans.ru || {}), ...(parsed.club.translations?.ru || {}) }
+            };
+          }
           return parsed;
         }
       }
@@ -511,19 +596,22 @@ export function AppProvider({ children }) {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
+          const isDummy = (t) => !t || t.startsWith('New Area') || t.startsWith('Yeni Sahə');
           return parsed.map((item, idx) => {
             const canonical = AREAS.find(a => a.id === item.id) || AREAS[idx];
             if (!canonical) return item;
             const itemTrans = item.translations || {};
-            const hasProperEn = itemTrans.en && itemTrans.en.title && !itemTrans.en.title.startsWith('New Area');
             return {
               ...canonical,
               ...item,
+              number: isDummy(item.number) ? canonical.number : item.number,
+              title: isDummy(item.title) ? canonical.title : item.title,
+              desc: isDummy(item.desc) ? canonical.desc : item.desc,
               translations: {
-                az: { ...(canonical.translations?.az || {}), ...(itemTrans.az || {}) },
-                en: hasProperEn ? itemTrans.en : (canonical.translations?.en || itemTrans.en || {}),
-                tr: (itemTrans.tr && itemTrans.tr.title && !itemTrans.tr.title.startsWith('Yeni Alan')) ? itemTrans.tr : (canonical.translations?.tr || itemTrans.tr || {}),
-                ru: (itemTrans.ru && itemTrans.ru.title && !itemTrans.ru.title.startsWith('Новая Сфера')) ? itemTrans.ru : (canonical.translations?.ru || itemTrans.ru || {})
+                az: { ...(canonical.translations?.az || {}), ...(itemTrans.az || {}), title: isDummy(itemTrans.az?.title) ? canonical.translations?.az?.title : itemTrans.az?.title },
+                en: { ...(canonical.translations?.en || {}), ...(itemTrans.en || {}), title: isDummy(itemTrans.en?.title) ? canonical.translations?.en?.title : itemTrans.en?.title },
+                tr: { ...(canonical.translations?.tr || {}), ...(itemTrans.tr || {}), title: isDummy(itemTrans.tr?.title) ? canonical.translations?.tr?.title : itemTrans.tr?.title },
+                ru: { ...(canonical.translations?.ru || {}), ...(itemTrans.ru || {}), title: isDummy(itemTrans.ru?.title) ? canonical.translations?.ru?.title : itemTrans.ru?.title }
               }
             };
           });
@@ -1212,11 +1300,48 @@ export function AppProvider({ children }) {
               }
 
               const seedTrans = seedTier?.translations || {};
+              const cleanField = (val, fallback) => {
+                if (typeof val === 'string' && val.trim() !== '' && !val.includes('???') && !val.includes('D~')) {
+                  return val;
+                }
+                return fallback || '';
+              };
+              const cleanFeatures = (arr, fallbackArr) => {
+                if (Array.isArray(arr) && arr.length > 0 && !arr.some(s => typeof s === 'string' && (s.includes('???') || s.includes('D~')))) {
+                  return arr;
+                }
+                return fallbackArr || [];
+              };
+
               const mergedTranslations = {
-                az: { ...(seedTrans.az || {}), ...(parsedTranslations.az || {}) },
-                en: { ...(seedTrans.en || {}), ...(parsedTranslations.en || {}) },
-                tr: { ...(seedTrans.tr || {}), ...(parsedTranslations.tr || {}) },
-                ru: { ...(seedTrans.ru || {}), ...(parsedTranslations.ru || {}) }
+                az: {
+                  ...(seedTrans.az || {}),
+                  ...(parsedTranslations.az || {}),
+                  name: cleanField(parsedTranslations.az?.name, seedTrans.az?.name || t.name),
+                  desc: cleanField(parsedTranslations.az?.desc, seedTrans.az?.desc || t.desc || t.description),
+                  features: cleanFeatures(parsedTranslations.az?.features, seedTrans.az?.features || parsedFeatures)
+                },
+                en: {
+                  ...(seedTrans.en || {}),
+                  ...(parsedTranslations.en || {}),
+                  name: cleanField(parsedTranslations.en?.name, seedTrans.en?.name),
+                  desc: cleanField(parsedTranslations.en?.desc, seedTrans.en?.desc),
+                  features: cleanFeatures(parsedTranslations.en?.features, seedTrans.en?.features)
+                },
+                tr: {
+                  ...(seedTrans.tr || {}),
+                  ...(parsedTranslations.tr || {}),
+                  name: cleanField(parsedTranslations.tr?.name, seedTrans.tr?.name),
+                  desc: cleanField(parsedTranslations.tr?.desc, seedTrans.tr?.desc),
+                  features: cleanFeatures(parsedTranslations.tr?.features, seedTrans.tr?.features)
+                },
+                ru: {
+                  ...(seedTrans.ru || {}),
+                  ...(parsedTranslations.ru || {}),
+                  name: cleanField(parsedTranslations.ru?.name, seedTrans.ru?.name),
+                  desc: cleanField(parsedTranslations.ru?.desc, seedTrans.ru?.desc),
+                  features: cleanFeatures(parsedTranslations.ru?.features, seedTrans.ru?.features)
+                }
               };
 
               const tierDesc = t.desc || t.description || seedTier?.desc || '';

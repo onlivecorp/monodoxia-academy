@@ -1791,7 +1791,6 @@ export const INITIAL_HOME_CONTENT = {
         title1: "Özünü tanı.",
         title2: "Özünü inkişaf etdir.",
         title3: "Həyatını dəyiş.",
-        rotatingTitles: ["Özünü tanı.", "Özünü inkişaf etdir.", "Öz zirvənə çat."],
         desc: "Monodoxia Academy — akademik psixoloji tədqiqatları, qədim daxili müdrikliyi və müasir fərdi kouçinq metodologiyasını bir araya gətirən elit inkişaf ekosistemidir. Şüurlu fərqindəlik və dayanıqlı daxili sülh üçün təhlükəsiz intellektual liman.",
         btnPrimaryText: "Akademiyanı kəşf et",
         btnSecondaryText: "Zənginlər Klubu ilə tanış ol",
@@ -1808,7 +1807,6 @@ export const INITIAL_HOME_CONTENT = {
         title1: "Know yourself.",
         title2: "Develop yourself.",
         title3: "Transform your life.",
-        rotatingTitles: ["Know yourself.", "Develop yourself.", "Reach your peak."],
         desc: "Monodoxia Academy is an elite growth ecosystem combining academic psychological research, ancient inner wisdom, and modern coaching methodologies. A safe intellectual haven for conscious awareness and enduring inner peace.",
         btnPrimaryText: "Discover the Academy",
         btnSecondaryText: "Explore Wealth Club",
@@ -1825,7 +1823,6 @@ export const INITIAL_HOME_CONTENT = {
         title1: "Kendini tanı.",
         title2: "Kendini geliştir.",
         title3: "Hayatını dönüştür.",
-        rotatingTitles: ["Kendini tanı.", "Kendini geliştir.", "Kendi zirvene ulaş."],
         desc: "Monodoxia Academy — akademik psikoloji araştırmalarını, kadim içsel bilgeliği ve modern koçluk metodolojilerini bir araya getiren seçkin bir gelişim ekosistemidir. Bilinçli farkındalık ve kalıcı iç huzuru için güvenli entelektüel liman.",
         btnPrimaryText: "Akademiyi Keşfet",
         btnSecondaryText: "Zenginler Kulübünü Tanı",
@@ -1842,7 +1839,6 @@ export const INITIAL_HOME_CONTENT = {
         title1: "Познай себя.",
         title2: "Развивай себя.",
         title3: "Измени жизнь.",
-        rotatingTitles: ["Познай себя.", "Развивай себя.", "Достигни своей вершины."],
         desc: "Monodoxia Academy — элитная экосистема развития, объединяющая академические психологические исследования, древнюю внутреннюю мудрость и современные методики коучинга. Безопасная интеллектуальная гавань для осознанности и душевного покоя.",
         btnPrimaryText: "Исследовать Академию",
         btnSecondaryText: "О Клубе Богатых",
@@ -1958,12 +1954,12 @@ export const INITIAL_HOME_CONTENT = {
   areas: {
     badge: "Fundamental Sahələr",
     title: "8 Fərdi İnkişaf İstiqaməti",
-    desc: "Özünü kəşf et, potensialını inkişaf etdir, həyatına yeni istiqamət ver.",
+    desc: "Şəxsiyyətin hər bir qatını dərindən anlamaq və harmoniyaya çatdırmaq üçün hazırlanmış tematik modullar.",
     translations: {
-      az: { badge: "Fundamental Sahələr", title: "8 Fərdi İnkişaf İstiqaməti", desc: "Özünü kəşf et, potensialını inkişaf etdir, həyatına yeni istiqamət ver." },
-      en: { badge: "Core Pillars", title: "8 Dimensions of Personal Growth", desc: "Discover yourself, unleash your potential, and give your life a new direction." },
-      tr: { badge: "Temel Alanlar", title: "8 Bireysel Gelişim Boyutu", desc: "Kendini keşfet, potansiyelini geliştir, hayatına yeni bir yön ver." },
-      ru: { badge: "Фундаментальные сферы", title: "8 направлений личностного роста", desc: "Открой себя, развивай потенциал и придай жизни новое направление." }
+      az: { badge: "Fundamental Sahələr", title: "8 Fərdi İnkişaf İstiqaməti", desc: "Şəxsiyyətin hər bir qatını dərindən anlamaq və harmoniyaya çatdırmaq üçün hazırlanmış tematik modullar." },
+      en: { badge: "Core Pillars", title: "8 Dimensions of Personal Growth", desc: "Thematic modules crafted to deeply understand and harmonize every layer of your personality." },
+      tr: { badge: "Temel Alanlar", title: "8 Bireysel Gelişim Boyutu", desc: "Kişiliğin her katmanını derinden kavramak ve dengeye ulaştırmak için hazırlanmış modüller." },
+      ru: { badge: "Фундаментальные сферы", title: "8 направлений личностного роста", desc: "Тематические модули для глубокого понимания и гармонизации каждого уровня личности." }
     }
   },
   academy: {
