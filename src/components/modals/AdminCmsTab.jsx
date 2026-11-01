@@ -1266,18 +1266,20 @@ export default function AdminCmsTab() {
         isOpen={Boolean(itemToDelete)}
         title={
           itemToDelete?.type === 'coach'
-            ? 'Koçu Sil'
+            ? 'Koçu Silmək İstəyirsiniz?'
+            : itemToDelete?.type === 'pillar'
+            ? 'Məram Kartını Silmək İstəyirsiniz?'
             : itemToDelete?.type === 'testimonial'
-            ? 'Rəyi Sil'
-            : 'Sualı Sil'
+            ? 'Rəyi Silmək İstəyirsiniz?'
+            : 'Sualı Silmək İstəyirsiniz?'
         }
-        message="Bu elementi silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarıla bilməz."
+        message="Bu elementi silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarılmır."
         itemName={
-          itemToDelete?.type === 'coach'
-            ? itemToDelete.item.name
-            : itemToDelete?.type === 'testimonial'
-            ? itemToDelete.item.author
-            : itemToDelete?.item?.question
+          itemToDelete?.item?.name ||
+          itemToDelete?.item?.title ||
+          itemToDelete?.item?.author ||
+          itemToDelete?.item?.question ||
+          ''
         }
         confirmText="Bəli, Sil"
         onConfirm={confirmDeleteAction}
@@ -6100,30 +6102,6 @@ export default function AdminCmsTab() {
           </div>
         </div>
       )}
-
-      {/* Delete Confirmation Modal */}
-      <AdminConfirmModal
-        isOpen={Boolean(itemToDelete)}
-        title={
-          itemToDelete?.type === 'coach'
-            ? 'Koçu Silmək İstəyirsiniz?'
-            : itemToDelete?.type === 'pillar'
-            ? 'Məram Kartını Silmək İstəyirsiniz?'
-            : itemToDelete?.type === 'testimonial'
-            ? 'Rəyi Silmək İstəyirsiniz?'
-            : 'Sualı Silmək İstəyirsiniz?'
-        }
-        message="Bu elementi silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarılmır."
-        itemName={
-          itemToDelete?.item?.name ||
-          itemToDelete?.item?.title ||
-          itemToDelete?.item?.author ||
-          itemToDelete?.item?.question ||
-          ''
-        }
-        onConfirm={confirmDeleteAction}
-        onCancel={() => setItemToDelete(null)}
-      />
     </div>
     </CmsFieldContext.Provider>
   );

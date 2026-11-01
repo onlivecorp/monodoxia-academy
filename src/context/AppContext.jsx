@@ -360,10 +360,8 @@ export function AppProvider({ children }) {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          const existingIds = new Set(parsed.map(u => u.id));
-          const missing = INITIAL_USERS.filter(u => !existingIds.has(u.id));
-          return missing.length > 0 ? [...parsed, ...missing] : parsed;
+        if (Array.isArray(parsed)) {
+          return parsed;
         }
         return INITIAL_USERS;
       } catch (e) {
@@ -1202,9 +1200,7 @@ export function AppProvider({ children }) {
                 translations: typeof c.translations_json === 'string' ? JSON.parse(c.translations_json || '{}') : (c.translations_json || {})
               };
             });
-            const existingIds = new Set(serverCoaches.map(sc => sc.id));
-            const mergedCoaches = [...serverCoaches, ...COACHES.filter(sc => !existingIds.has(sc.id))];
-            setCoachesList(mergedCoaches);
+            setCoachesList(serverCoaches);
           }
           if (data.cms_blocks && data.cms_blocks.length > 0) {
             const blockMap = {};
@@ -1661,6 +1657,9 @@ export function AppProvider({ children }) {
         setUserTier(user.tier);
         setAuthModalOpen(false);
         showToast(`Daxil oldunuz: ${user.firstName} (${user.role})`, 'success');
+        if (user.role === 'Kouç' || user.role === 'Admin') {
+          setTimeout(() => refreshBookings(), 100);
+        }
         return { success: true, user };
       } else {
         const errorMsg = data.message || 'Email və ya şifrə yanlışdır.';
@@ -1690,6 +1689,9 @@ export function AppProvider({ children }) {
         setUserTier(user.tier);
         setAuthModalOpen(false);
         showToast(`Daxil oldunuz: ${user.firstName} (${user.role})`, 'success');
+        if (user.role === 'Kouç' || user.role === 'Admin') {
+          setTimeout(() => refreshBookings(), 100);
+        }
         return { success: true, user };
       }
       showToast('Giriş xətası: Serverlə əlaqə qurula bilmədi.', 'error');
@@ -2117,11 +2119,12 @@ export function AppProvider({ children }) {
     } catch (e) {}
   };
 
-  // Background polling for bookings: auto-syncs coach & admin panels every 15s
+  // Background polling for bookings: auto-syncs coach & admin panels immediately and every 15s
   useEffect(() => {
     if (!currentUser) return;
     const isCoachOrAdmin = currentUser.role === 'Kouç' || currentUser.role === 'Admin';
     if (!isCoachOrAdmin) return;
+    refreshBookings();
     const timer = setInterval(() => {
       refreshBookings();
     }, 15000);
@@ -3447,7 +3450,7 @@ export function AppProvider({ children }) {
     apiCall('save_user', user).catch(() => {});
   };
 
-  const deleteUser = (id) => {
+  const deleteUser = async (id) => {
     // Prevent deleting the currently logged-in user or the last active Admin
     if (currentUser?.id === id) {
       showToast('Cari daxil olmuş admin hesabı silinə bilməz!', 'warning');
@@ -3462,10 +3465,20 @@ export function AppProvider({ children }) {
       }
     }
 
-    setUsersList(prev => prev.filter(u => u.id !== id));
-    showToast('İstifadəçi silindi', 'info');
+    setUsersList(prev => {
+      const next = prev.filter(u => u.id !== id);
+      try {
+        localStorage.setItem('monodoxia_admin_users', JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
 
-    apiCall('delete_user', { id }).catch(() => {});
+    const res = await apiCall('delete_user', { id });
+    if (res?.status === 'success') {
+      showToast('İstifadəçi silindi', 'info');
+    } else {
+      showToast(res?.message || 'İstifadəçi silinərkən xəta baş verdi', 'error');
+    }
   };
 
   // ========================================================

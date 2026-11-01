@@ -186,51 +186,63 @@ function ensureCoachProfiles($pdo) {
         $pdo->exec("UPDATE mdx_coaches SET user_id = 'usr_1792923099303' WHERE (user_id IS NULL OR user_id = '') AND (name LIKE '%Sədaqət%' OR name LIKE '%Sedaqet%')");
     } catch (PDOException $e) {}
 
-    // Seed Nargiz, Farid, Leyla if missing
+    // Seed ONLY if table is completely empty (first install) so deleted coaches do not re-spawn
     try {
-        $seedStmt = $pdo->prepare("
-            INSERT INTO mdx_coaches (id, user_id, name, title, bio, rating, reviews_count, hourly_rate, session_duration, specialties_json, is_active)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
-            ON DUPLICATE KEY UPDATE 
-                user_id = COALESCE(user_id, VALUES(user_id)),
-                name = VALUES(name)
-        ");
-        $seedStmt->execute([
-            'coach-nargiz',
-            'u-nargiz',
-            'Nərgiz Qasımova',
-            'Münasibət Kouçu | Somatik Təlimçi',
-            'Cütlüklər və fərdlər üçün münasibət dinamikası, psixosomatika və affektiv tənzimləmə üzrə mütəxəssis.',
-            5.0,
-            18,
-            '120 ₼ / saat',
-            '60 dəqiqə',
-            json_encode(['Münasibətlər', 'Bədən-zihin harmoniyası', 'Özünü bağışlama'], JSON_UNESCAPED_UNICODE)
-        ]);
-        $seedStmt->execute([
-            'coach-farid',
-            NULL,
-            'Fərid Məmmədov',
-            'ICF MCC Kouç | EQ Master',
-            'Top menecerlər və sahibkarlar üçün ekzekyutiv kouçinq, böhran idarəçiliyi və emosional liderlik üzrə baş məsləhətçi.',
-            5.0,
-            24,
-            '150 ₼ / saat',
-            '60 dəqiqə',
-            json_encode(['EQ Liderlik', 'Karyera sıçrayışı', 'Stres menecmenti'], JSON_UNESCAPED_UNICODE)
-        ]);
-        $seedStmt->execute([
-            'coach-leyla',
-            NULL,
-            'Dr. Leyla Əliyeva',
-            'PhD Psixologiya | ICF PCC',
-            'Koqnitiv fərqindəlik və şüuraltı travmalar üzrə baş ekspert.',
-            5.0,
-            32,
-            '180 ₼ / saat',
-            '60 dəqiqə',
-            json_encode(['Travma terapiyası', 'Şüuraltı inanc dəyişimi', 'Mindfulness'], JSON_UNESCAPED_UNICODE)
-        ]);
+        $cnt = (int)$pdo->query("SELECT COUNT(*) FROM mdx_coaches")->fetchColumn();
+        if ($cnt === 0) {
+            $seedStmt = $pdo->prepare("
+                INSERT INTO mdx_coaches (id, user_id, name, title, bio, rating, reviews_count, hourly_rate, session_duration, specialties_json, is_active)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+            ");
+            $seedStmt->execute([
+                'coach-1792923105867',
+                'usr_1792923099303',
+                'Sədaqət Rzayeva',
+                'Baş Kouç & Təlimçi',
+                'Fərdi inkişaf və kouçinq sahəsində peşəkar dəstək.',
+                5.0,
+                15,
+                '100 ₼ / saat',
+                '60 dəqiqə',
+                json_encode(['Şəxsi İnkişaf', 'Kouçinq', 'Motivasiya'], JSON_UNESCAPED_UNICODE)
+            ]);
+            $seedStmt->execute([
+                'coach-nargiz',
+                'u-nargiz',
+                'Nərgiz Qasımova',
+                'Münasibət Kouçu | Somatik Təlimçi',
+                'Cütlüklər və fərdlər üçün münasibət dinamikası, psixosomatika və affektiv tənzimləmə üzrə mütəxəssis.',
+                5.0,
+                18,
+                '120 ₼ / saat',
+                '60 dəqiqə',
+                json_encode(['Münasibətlər', 'Bədən-zihin harmoniyası', 'Özünü bağışlama'], JSON_UNESCAPED_UNICODE)
+            ]);
+            $seedStmt->execute([
+                'coach-farid',
+                NULL,
+                'Fərid Məmmədov',
+                'ICF MCC Kouç | EQ Master',
+                'Top menecerlər və sahibkarlar üçün ekzekyutiv kouçinq, böhran idarəçiliyi və emosional liderlik üzrə baş məsləhətçi.',
+                5.0,
+                24,
+                '150 ₼ / saat',
+                '60 dəqiqə',
+                json_encode(['EQ Liderlik', 'Karyera sıçrayışı', 'Stres menecmenti'], JSON_UNESCAPED_UNICODE)
+            ]);
+            $seedStmt->execute([
+                'coach-leyla',
+                NULL,
+                'Dr. Leyla Əliyeva',
+                'PhD Psixologiya | ICF PCC',
+                'Koqnitiv fərqindəlik və şüuraltı travmalar üzrə baş ekspert.',
+                5.0,
+                32,
+                '180 ₼ / saat',
+                '60 dəqiqə',
+                json_encode(['Travma terapiyası', 'Şüuraltı inanc dəyişimi', 'Mindfulness'], JSON_UNESCAPED_UNICODE)
+            ]);
+        }
     } catch (PDOException $e) {}
 }
 
@@ -492,28 +504,6 @@ if ($action === 'get_all') {
     };
 
     $users = $safeQuery("SELECT id, name, email, role, tier, status, joined_date FROM mdx_users");
-    $hasNargiz = false;
-    foreach ($users as $u) {
-        if (($u['id'] ?? '') === 'u-nargiz' || strtolower($u['email'] ?? '') === 'nargiz.qasimova@monodoxia.academy') {
-            $hasNargiz = true;
-            break;
-        }
-    }
-    if (!$hasNargiz && isset($pdo)) {
-        try {
-            $insU = $pdo->prepare("INSERT IGNORE INTO mdx_users (id, name, email, password_hash, role, tier, status, joined_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-            $insU->execute(['u-nargiz', 'Nərgiz Qasımova', 'nargiz.qasimova@monodoxia.academy', password_hash('coach123', PASSWORD_DEFAULT), 'Kouç', 'VIP', 'Aktiv', '2025-01-10']);
-            $users[] = [
-                'id' => 'u-nargiz',
-                'name' => 'Nərgiz Qasımova',
-                'email' => 'nargiz.qasimova@monodoxia.academy',
-                'role' => 'Kouç',
-                'tier' => 'VIP',
-                'status' => 'Aktiv',
-                'joined_date' => '2025-01-10'
-            ];
-        } catch (PDOException $e) {}
-    }
     $courses = $safeQuery("SELECT * FROM mdx_courses");
     $tiers = $safeQuery("SELECT * FROM mdx_club_tiers");
     $events = $safeQuery("SELECT * FROM mdx_events");
@@ -1365,8 +1355,35 @@ if ($action === 'delete_user' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             echo json_encode(['status' => 'error', 'message' => 'Cari daxil olmuş admin hesabı silinə bilməz!'], JSON_UNESCAPED_UNICODE);
             exit();
         }
-        $stmt = $pdo->prepare("DELETE FROM mdx_users WHERE id = ?");
-        $stmt->execute([$id]);
+        try {
+            $pdo->beginTransaction();
+            // Unlink from coach profiles
+            $uC = $pdo->prepare("UPDATE mdx_coaches SET user_id = NULL WHERE user_id = ?");
+            $uC->execute([$id]);
+
+            // Clean notifications
+            $dN = $pdo->prepare("DELETE FROM mdx_notifications WHERE user_id = ?");
+            $dN->execute([$id]);
+
+            // Clean student progress
+            $dP = $pdo->prepare("DELETE FROM mdx_student_progress WHERE user_id = ?");
+            $dP->execute([$id]);
+
+            // Clean student certificates
+            $dSc = $pdo->prepare("DELETE FROM mdx_student_certificates WHERE user_id = ?");
+            $dSc->execute([$id]);
+
+            // Delete user
+            $stmt = $pdo->prepare("DELETE FROM mdx_users WHERE id = ?");
+            $stmt->execute([$id]);
+
+            $pdo->commit();
+        } catch (PDOException $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => 'İstifadəçi silinərkən verilənlər bazası xətası: ' . $e->getMessage()], JSON_UNESCAPED_UNICODE);
+            exit();
+        }
     }
     echo json_encode(['status' => 'success', 'message' => 'İstifadəçi silindi'], JSON_UNESCAPED_UNICODE);
     exit();
