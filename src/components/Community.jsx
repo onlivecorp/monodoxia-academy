@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { getLocalized, getLocalizedArray } from '../i18n/localize';
+import { getLocalized, getLocalizedArray, translateStatus, translateTitle, translatePrice } from '../i18n/localize';
 import { useApp } from '../context/AppContext';
 
 export default function Community() {
@@ -141,11 +141,21 @@ export default function Community() {
               </button>
 
               <button
-                onClick={() => openApplication({ id: 'forum-vip', title: 'VIP İntellektual Dialoq Qrupu', price: 'Pulsuz' }, 'community')}
+                onClick={() => openApplication({
+                  id: 'forum-vip',
+                  title: t('community_vip_group_title') || 'VIP İntellektual Dialoq Qrupu',
+                  price: t('common_free') || 'Pulsuz',
+                  translations: {
+                    az: { title: 'VIP İntellektual Dialoq Qrupu', price: 'Pulsuz' },
+                    en: { title: 'VIP Intellectual Dialogue Group', price: 'Free' },
+                    tr: { title: 'VIP Entelektüel Diyalog Grubu', price: 'Ücretsiz' },
+                    ru: { title: 'VIP Группа интеллектуального диалога', price: 'Бесплатно' }
+                  }
+                }, 'community')}
                 className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white/70 hover:bg-[#c5a059]/10 text-[#070f1e] hover:text-[#775a19] text-xs font-semibold uppercase tracking-wider border border-[#c5a059]/60 hover:border-[#c5a059] shadow-sm backdrop-blur-sm hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[16px] text-[#775a19]">group_add</span>
-                <span>{userCommunityApp ? `İcma Statusu: ${userCommunityApp.status}` : 'İcmaya Müraciət Et'}</span>
+                <span>{userCommunityApp ? `${t('community_status_label') || 'İcma Statusu'}: ${translateStatus(userCommunityApp.status, currentLang)}` : (t('community_apply_btn') || 'İcmaya Müraciət Et')}</span>
               </button>
             </div>
           </div>
@@ -183,20 +193,20 @@ export default function Community() {
                         {isWeekly && (
                           <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#070f1e] text-[#e5c57d] border border-[#c5a059] flex items-center gap-1 shadow-sm">
                             <span className="material-symbols-outlined text-[13px] text-[#e5c57d]">star</span>
-                            <span>Həftənin Mövzusu</span>
+                            <span>{t('community_weekly_topic') || 'Həftənin Mövzusu'}</span>
                           </span>
                         )}
                         {topic.pinned && !isWeekly && (
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-800 border border-amber-300/40 flex items-center gap-1">
                             <span className="material-symbols-outlined text-[12px]">push_pin</span>
-                            <span>Sabit</span>
+                            <span>{t('community_pinned') || 'Sabit'}</span>
                           </span>
                         )}
                         <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-[#c5a059]/15 text-[#775a19] border border-[#c5a059]/30">
-                          {getLocalized(topic, 'badge', currentLang, defaultLang) || topic.badge || 'İcma Müzakirəsi'}
+                          {getLocalized(topic, 'badge', currentLang, defaultLang) || topic.badge || (t('community_discussion') || 'İcma Müzakirəsi')}
                         </span>
                       </div>
-                      <span className="text-xs font-mono text-slate-400">{topic.time || topic.time_ago || 'İndicə'}</span>
+                      <span className="text-xs font-mono text-slate-400">{topic.time || topic.time_ago || (t('community_just_now') || 'İndicə')}</span>
                     </div>
 
                     <h4 className="font-serif text-xl sm:text-[1.3rem] font-semibold text-[#070f1e] group-hover:text-[#775a19] transition-colors leading-snug my-2.5">
@@ -210,7 +220,7 @@ export default function Community() {
                     <div className="flex items-center justify-between pt-3 border-t border-[#e2d9c8]/50 text-xs">
                       <span className="text-slate-500 font-medium flex items-center gap-1.5">
                         <span className="material-symbols-outlined text-[15px] text-[#c5a059]">person</span>
-                        <span>Müəllif: <strong className="text-[#070f1e] font-semibold">{topic.author}</strong></span>
+                        <span>{t('community_author_label') || 'Müəllif:'} <strong className="text-[#070f1e] font-semibold">{topic.author}</strong></span>
                       </span>
 
                       <div className="flex items-center gap-3 text-slate-500">
@@ -225,7 +235,7 @@ export default function Community() {
                               ? 'bg-rose-50 text-rose-600 font-bold'
                               : 'hover:text-rose-600 hover:bg-slate-50'
                           }`}
-                          title={isLiked ? 'Bəyənməni geri götür' : 'Bəyən'}
+                          title={isLiked ? (t('community_unlike_btn') || 'Bəyənməni geri götür') : (t('community_like_btn') || 'Bəyən')}
                         >
                           <span className={`material-symbols-outlined text-[17px] ${isLiked ? 'text-rose-600 fill-current scale-110' : 'text-slate-400'}`}>
                             {isLiked ? 'favorite' : 'favorite_border'}
@@ -240,7 +250,7 @@ export default function Community() {
                             openTopicDetail(topic);
                           }}
                           className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg hover:text-[#070f1e] hover:bg-slate-50 transition-colors cursor-pointer"
-                          title="Şərhləri oxu və rəy bildir"
+                          title={t('community_read_comments_title') || 'Şərhləri oxu və rəy bildir'}
                         >
                           <span className="material-symbols-outlined text-[17px] text-[#c5a059]">chat_bubble</span>
                           <span className="font-semibold text-slate-700 text-xs">{commentsCount}</span>
@@ -256,17 +266,19 @@ export default function Community() {
                   <span className="material-symbols-outlined text-[32px]">forum</span>
                 </div>
                 <span className="inline-block px-3 py-1 rounded-full bg-[#c5a059]/15 text-[#775a19] text-[10px] font-semibold tracking-widest uppercase mb-3">
-                  Dialoq Məkanı
+                  {t('community_dialogue_space') || 'Dialoq Məkanı'}
                 </span>
-                <h4 className="font-serif text-2xl font-bold text-[#070f1e] mb-2">Həftənin Mövzusu Hazırlanır</h4>
+                <h4 className="font-serif text-2xl font-bold text-[#070f1e] mb-2">
+                  {t('community_weekly_topic_prep') || 'Həftənin Mövzusu Hazırlanır'}
+                </h4>
                 <p className="text-sm text-slate-600 max-w-md mx-auto leading-relaxed mb-6 font-normal">
-                  Akademiya və klub üzvləri üçün yeni fəlsəfi müzakirə mövzusu tezliklə təqdim olunacaqdır. İlk mövzunu siz başlada bilərsiniz.
+                  {t('community_weekly_topic_prep_desc') || 'Akademiya və klub üzvləri üçün yeni fəlsəfi müzakirə mövzusu tezliklə təqdim olunacaqdır. İlk mövzunu siz başlada bilərsiniz.'}
                 </p>
                 <button
                   onClick={handleOpenNewTopic}
                   className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-[#070f1e] text-white text-xs font-semibold tracking-wide shadow-md hover:bg-[#112240] transition-colors"
                 >
-                  <span>Mövzu Başlat</span>
+                  <span>{t('community_start_topic_btn') || 'Mövzu Başlat'}</span>
                   <span className="material-symbols-outlined text-[16px] text-[#c5a059]">edit_note</span>
                 </button>
               </div>

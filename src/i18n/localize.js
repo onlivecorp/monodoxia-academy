@@ -169,6 +169,152 @@ export function translateExperience(exp, lang = 'az') {
   return exp;
 }
 
+export const STATIC_TITLE_MAP = {
+  'VIP İntellektual Dialoq Qrupu': {
+    az: 'VIP İntellektual Dialoq Qrupu',
+    en: 'VIP Intellectual Dialogue Group',
+    tr: 'VIP Entelektüel Diyalog Grubu',
+    ru: 'VIP Группа интеллектуального диалога'
+  },
+  'Zənginlər Klubu Üzvlük Müraciəti': {
+    az: 'Zənginlər Klubu Üzvlük Müraciəti',
+    en: 'Wealth Club Membership Application',
+    tr: 'Zenginler Kulübü Üyelik Başvurusu',
+    ru: 'Заявка на членство в Клуб Богатых'
+  },
+  'Spikerlik və Əməkdaşlıq Müraciəti': {
+    az: 'Spikerlik və Əməkdaşlıq Müraciəti',
+    en: 'Speaker & Partnership Application',
+    tr: 'Konuşmacı ve İş Birliği Başvurusu',
+    ru: 'Заявка на спикерство и сотрудничество'
+  },
+  'Həftənin Mövzusu Hazırlanır': {
+    az: 'Həftənin Mövzusu Hazırlanır',
+    en: 'Topic of the Week in Preparation',
+    tr: 'Haftanın Konusu Hazırlanıyor',
+    ru: 'Тема недели готовится'
+  },
+  'Dialoq Məkanı': {
+    az: 'Dialoq Məkanı',
+    en: 'Space of Dialogue',
+    tr: 'Diyalog Alanı',
+    ru: 'Пространство диалога'
+  },
+  'Mövzu Başlat': {
+    az: 'Mövzu Başlat',
+    en: 'Start Topic',
+    tr: 'Konu Başlat',
+    ru: 'Начать тему'
+  }
+};
+
+export const STATUS_TRANSLATION_MAP = {
+  'Yeni': { az: 'Yeni', en: 'New', tr: 'Yeni', ru: 'Новая' },
+  'Baxılır': { az: 'Baxılır', en: 'Under Review', tr: 'İnceleniyor', ru: 'На рассмотрении' },
+  'Təsdiqləndi': { az: 'Təsdiqləndi', en: 'Confirmed', tr: 'Onaylandı', ru: 'Подтверждено' },
+  'Təsdiqlənib': { az: 'Təsdiqlənib', en: 'Confirmed', tr: 'Onaylandı', ru: 'Подтверждено' },
+  'Gözləmədə': { az: 'Gözləmədə', en: 'Pending', tr: 'Beklemede', ru: 'В ожидании' },
+  'Gözləyir': { az: 'Gözləyir', en: 'Pending', tr: 'Bekliyor', ru: 'В ожидании' },
+  'Rədd edildi': { az: 'Rədd edildi', en: 'Rejected', tr: 'Reddedildi', ru: 'Отклонено' },
+  'Ləğv edildi': { az: 'Ləğv edildi', en: 'Cancelled', tr: 'İptal edildi', ru: 'Отменено' },
+  'Tamamlandı': { az: 'Tamamlandı', en: 'Completed', tr: 'Tamamlandı', ru: 'Завершено' },
+  'Ödənildi': { az: 'Ödənildi', en: 'Paid', tr: 'Ödendi', ru: 'Оплачено' },
+  'Ödənilib': { az: 'Ödənilib', en: 'Paid', tr: 'Ödendi', ru: 'Оплачено' },
+  'Qaytarıldı': { az: 'Qaytarıldı', en: 'Refunded', tr: 'İade edildi', ru: 'Возвращено' },
+  'İmtina edildi': { az: 'İmtina edildi', en: 'Declined', tr: 'Reddedildi', ru: 'Отклонено' },
+  'Tələb olunmur': { az: 'Tələb olunmur', en: 'Not required', tr: 'Gerekli değil', ru: 'Не требуется' },
+  'Gözlənilir': { az: 'Gözlənilir', en: 'Expected', tr: 'Bekleniyor', ru: 'Ожидается' },
+  'İştirak edəcək': { az: 'İştirak edəcək', en: 'Will attend', tr: 'Katılacak', ru: 'Будет участвовать' },
+  'İştirak etməyəcək': { az: 'İştirak etməyəcək', en: 'Will not attend', tr: 'Katılmayacak', ru: 'Не будет участвовать' },
+  'İştirak etdi': { az: 'İştirak etdi', en: 'Attended', tr: 'Katıldı', ru: 'Принял участие' },
+  'İştirak etmədi': { az: 'İştirak etmədi', en: 'Did not attend', tr: 'Katılmadı', ru: 'Не принял участие' },
+  'Onlayn qoşuldu': { az: 'Onlayn qoşuldu', en: 'Joined online', tr: 'Çevrimiçi katıldı', ru: 'Подключился онлайн' }
+};
+
+export const TARGET_TYPE_TRANSLATIONS = {
+  course: { az: 'Kurs', en: 'Course', tr: 'Kurs', ru: 'Курс' },
+  club: { az: 'Klub', en: 'Club', tr: 'Kulüp', ru: 'Клуб' },
+  event: { az: 'Tədbir', en: 'Event', tr: 'Etkinlik', ru: 'Мероприятие' },
+  webinar: { az: 'Vebinar', en: 'Webinar', tr: 'Webinar', ru: 'Вебинар' },
+  community: { az: 'İcma', en: 'Community', tr: 'Topluluk', ru: 'Сообщество' },
+  forum: { az: 'Forum', en: 'Forum', tr: 'Forum', ru: 'Форум' },
+  coach_booking: { az: 'Ekspert / Kouç Rezervasiyası', en: 'Coach / Expert Booking', tr: 'Koç / Uzman Rezervasyonu', ru: 'Бронь коуча / эксперта' }
+};
+
+export function translateTargetType(type, lang = 'az') {
+  if (!type) return '';
+  return TARGET_TYPE_TRANSLATIONS[type]?.[lang] || type;
+}
+
+export function translateStatus(status, lang = 'az') {
+  if (!status) return '';
+  const trimmed = String(status).trim();
+  if (STATUS_TRANSLATION_MAP[trimmed]?.[lang]) {
+    return STATUS_TRANSLATION_MAP[trimmed][lang];
+  }
+  const lower = trimmed.toLowerCase();
+  for (const [key, map] of Object.entries(STATUS_TRANSLATION_MAP)) {
+    if (key.toLowerCase() === lower && map[lang]) {
+      return map[lang];
+    }
+  }
+  if (lower.includes('təsdiq') || lower.includes('confirm') || lower.includes('onay') || lower.includes('подтвержд')) {
+    return STATUS_TRANSLATION_MAP['Təsdiqləndi']?.[lang] || trimmed;
+  }
+  if (lower.includes('ləğv') || lower.includes('cancel') || lower.includes('iptal') || lower.includes('отмен')) {
+    return STATUS_TRANSLATION_MAP['Ləğv edildi']?.[lang] || trimmed;
+  }
+  if (lower.includes('gözlə') || lower.includes('wait') || lower.includes('pend') || lower.includes('ожидан')) {
+    return STATUS_TRANSLATION_MAP['Gözləmədə']?.[lang] || trimmed;
+  }
+  if (lower.includes('ödəni') || lower.includes('paid') || lower.includes('ödendi') || lower.includes('оплач')) {
+    return STATUS_TRANSLATION_MAP['Ödənildi']?.[lang] || trimmed;
+  }
+  return trimmed;
+}
+
+export function translatePrice(price, lang = 'az') {
+  if (price === undefined || price === null) return '';
+  const str = String(price).trim();
+  const lower = str.toLowerCase();
+  if (
+    lower === 'pulsuz' ||
+    lower === 'free' ||
+    lower === 'ücretsiz' ||
+    lower === 'ucretsiz' ||
+    lower === 'бесплатно' ||
+    lower === '0' ||
+    lower === '0₼' ||
+    lower === '0 azn' ||
+    lower === 'ödənişsiz' ||
+    lower === 'odenissiz'
+  ) {
+    const freeMap = {
+      az: 'Pulsuz',
+      en: 'Free',
+      tr: 'Ücretsiz',
+      ru: 'Бесплатно'
+    };
+    return freeMap[lang] || freeMap.az;
+  }
+  return str;
+}
+
+export function translateTitle(title, lang = 'az') {
+  if (!title) return '';
+  const trimmed = String(title).trim();
+  if (STATIC_TITLE_MAP[trimmed]?.[lang]) {
+    return STATIC_TITLE_MAP[trimmed][lang];
+  }
+  const lower = trimmed.toLowerCase();
+  for (const [key, map] of Object.entries(STATIC_TITLE_MAP)) {
+    if (key.toLowerCase() === lower && map[lang]) {
+      return map[lang];
+    }
+  }
+  return trimmed;
+}
+
 /**
  * Resolves localized string value with hierarchical fallback.
  * Hierarchy:
@@ -241,14 +387,25 @@ export function getLocalized(item, field, currentLang = 'az', defaultLang = DEFA
   }
 
   // 4b. Known dynamic dictionary fallbacks for non-default languages
-  if (field === 'title') {
-    const rawT = (item[field] || item.title || '').trim();
+  if (field === 'title' || field === 'targetTitle' || field === 'name') {
+    const rawT = (item[field] || item.title || item.name || '').trim();
+    if (STATIC_TITLE_MAP[rawT]?.[currentLang]) {
+      return STATIC_TITLE_MAP[rawT][currentLang];
+    }
     if (COACH_TITLE_MAP[rawT]?.[currentLang]) {
       return COACH_TITLE_MAP[rawT][currentLang];
     }
     if (rawT === 'Kouç & Ekspert' || rawT === 'Kouç və Ekspert') {
       return COACH_TITLE_MAP['Kouç & Ekspert'][currentLang] || safeFallback;
     }
+  }
+  if (field === 'price') {
+    const rawP = item[field] !== undefined ? item[field] : (item.price !== undefined ? item.price : '');
+    return translatePrice(rawP, currentLang);
+  }
+  if (field === 'status') {
+    const rawS = item[field] !== undefined ? item[field] : (item.status !== undefined ? item.status : '');
+    return translateStatus(rawS, currentLang);
   }
   if (field === 'bio') {
     const rawB = typeof item[field] === 'string' ? item[field] : (typeof item.bio === 'string' ? item.bio : '');
@@ -260,8 +417,18 @@ export function getLocalized(item, field, currentLang = 'az', defaultLang = DEFA
   // 5. Fallback to base property (authoring language)
   if (item[field] !== undefined && item[field] !== null) {
     if (typeof item[field] === 'string' && item[field].trim() !== '' && !isCorrupted(item[field])) {
-      if (field === 'title' && COACH_TITLE_MAP[item[field].trim()]?.[currentLang]) {
-        return COACH_TITLE_MAP[item[field].trim()][currentLang];
+      const rawVal = item[field].trim();
+      if ((field === 'title' || field === 'targetTitle' || field === 'name') && STATIC_TITLE_MAP[rawVal]?.[currentLang]) {
+        return STATIC_TITLE_MAP[rawVal][currentLang];
+      }
+      if (field === 'title' && COACH_TITLE_MAP[rawVal]?.[currentLang]) {
+        return COACH_TITLE_MAP[rawVal][currentLang];
+      }
+      if (field === 'price') {
+        return translatePrice(rawVal, currentLang);
+      }
+      if (field === 'status') {
+        return translateStatus(rawVal, currentLang);
       }
       return item[field];
     }

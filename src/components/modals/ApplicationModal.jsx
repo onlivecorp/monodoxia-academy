@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../i18n/LanguageContext';
-import { getLocalized, getLocalizedArray } from '../../i18n/localize';
+import { getLocalized, getLocalizedArray, translatePrice, translateTitle, translateTargetType, translateStatus } from '../../i18n/localize';
 import { TARGET_TYPE_MAP, APPLICATION_STATUSES } from '../../data/applicationData';
 
 export default function ApplicationModal() {
@@ -102,6 +102,7 @@ export default function ApplicationModal() {
     icon: 'assignment',
     color: 'text-primary'
   };
+  const targetTypeLabel = translateTargetType(activeApplicationTarget.type, currentLang) || targetMeta.label;
 
   const statusMeta = existingApp
     ? APPLICATION_STATUSES.find(s => s.id === existingApp.status) || { badgeClass: 'bg-amber-100 text-amber-800' }
@@ -166,11 +167,11 @@ export default function ApplicationModal() {
             <div className="flex items-center gap-2 mb-1.5">
               <span className={`inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-surface-container ${targetMeta.color}`}>
                 <span className="material-symbols-outlined text-[15px]">{targetMeta.icon}</span>
-                {targetMeta.label} {t('app_modal_title_suffix')}
+                {targetTypeLabel} {t('app_modal_title_suffix')}
               </span>
               {activeApplicationTarget.price && String(activeApplicationTarget.price).trim() !== '' && (
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-secondary/10 text-secondary border border-secondary/20">
-                  {activeApplicationTarget.price}
+                  {translatePrice(activeApplicationTarget.price, currentLang)}
                 </span>
               )}
             </div>
@@ -178,8 +179,9 @@ export default function ApplicationModal() {
               {activeApplicationTarget.item
                 ? (getLocalized(activeApplicationTarget.item, 'title', currentLang, defaultLang) ||
                    getLocalized(activeApplicationTarget.item, 'name', currentLang, defaultLang) ||
-                   activeApplicationTarget.title)
-                : activeApplicationTarget.title}
+                   translateTitle(activeApplicationTarget.title, currentLang))
+                : (getLocalized(activeApplicationTarget, 'title', currentLang, defaultLang) ||
+                   translateTitle(activeApplicationTarget.title, currentLang))}
             </h3>
             {(activeApplicationTarget.speaker || activeApplicationTarget.instructor || activeApplicationTarget.duration) && (
               <p className="text-xs text-on-surface-variant mt-1">
@@ -267,7 +269,7 @@ export default function ApplicationModal() {
                         {existingApp.status === 'Təsdiqləndi' ? t('app_existing_title_approved') : t('app_existing_title_pending')} (#{existingApp.id})
                       </span>
                       <span className={`px-2 py-0.5 rounded text-[11px] font-bold border ${statusMeta?.badgeClass}`}>
-                        {existingApp.status}
+                        {translateStatus(existingApp.status, currentLang)}
                       </span>
                     </div>
                     <p className={`text-xs leading-relaxed ${
@@ -278,14 +280,14 @@ export default function ApplicationModal() {
                         : 'text-on-surface-variant'
                     }`}>
                       {existingApp.status === 'Təsdiqləndi'
-                        ? <>{t('app_existing_approved_desc')} (<strong>{existingApp.targetTitle}</strong>)</>
-                        : <>{t('app_existing_pending_desc')} (<strong>{existingApp.targetTitle}</strong>)</>
+                        ? <>{t('app_existing_approved_desc')} (<strong>{translateTitle(existingApp.targetTitle, currentLang)}</strong>)</>
+                        : <>{t('app_existing_pending_desc')} (<strong>{translateTitle(existingApp.targetTitle, currentLang)}</strong>)</>
                       }
                     </p>
                     <div className="mt-3 pt-3 border-t border-outline-variant/40 text-[11px] space-y-1 text-on-surface-variant">
                       <div><strong>{t('app_date')}</strong> {existingApp.appliedAt}</div>
-                      <div><strong>{t('app_payment_status')}</strong> {existingApp.paymentStatus}</div>
-                      <div><strong>{t('app_attendance_status')}</strong> {existingApp.attendanceStatus}</div>
+                      <div><strong>{t('app_payment_status')}</strong> {translateStatus(existingApp.paymentStatus, currentLang)}</div>
+                      <div><strong>{t('app_attendance_status')}</strong> {translateStatus(existingApp.attendanceStatus, currentLang)}</div>
                       {existingApp.adminNote && (
                         <div className="p-2 rounded bg-surface-bright/70 border border-outline-variant text-xs text-primary mt-2">
                           <strong>{t('app_admin_note')}</strong> {existingApp.adminNote}

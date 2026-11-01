@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { APPLICATION_STATUSES, TARGET_TYPE_MAP, INITIAL_FORM_FIELDS } from '../../data/applicationData';
 import { useLanguage } from '../../i18n/LanguageContext';
-import { getLocalized } from '../../i18n/localize';
+import { getLocalized, translateStatus, translatePrice, translateTitle } from '../../i18n/localize';
 
 export default function ProfileModal() {
   const { currentLang, defaultLang, t } = useLanguage();
@@ -360,41 +360,17 @@ export default function ProfileModal() {
 
   const getApplicationStatusText = (status) => {
     if (!status) return t('status_pending') || 'Gözləyir';
-    const s = String(status).toLowerCase();
-    if (s.includes('təsdiq') || s.includes('confirm') || s.includes('onay') || s.includes('подтвержд')) {
-      return t('status_confirmed') || 'Təsdiqləndi';
-    }
-    if (s.includes('ləğv') || s.includes('cancel') || s.includes('iptal') || s.includes('отмен') || s.includes('rədd')) {
-      return t('status_cancelled') || 'Ləğv edildi';
-    }
-    return status;
+    return translateStatus(status, currentLang);
   };
 
   const getPaymentStatusText = (status) => {
     if (!status) return status;
-    const s = String(status).toLowerCase();
-    if (s.includes('ödəni') || s.includes('paid') || s.includes('ödendi') || s.includes('оплач')) {
-      return t('status_paid') || 'Ödənildi';
-    }
-    if (s.includes('qaytar') || s.includes('refund') || s.includes('iade') || s.includes('возврат')) {
-      return t('status_refunded') || 'Qaytarıldı';
-    }
-    return status;
+    return translateStatus(status, currentLang);
   };
 
   const getAttendanceStatusText = (status) => {
     if (!status) return status;
-    const s = String(status).toLowerCase();
-    if (s.includes('iştirak edəcək') || s.includes('will attend') || s.includes('katılacak')) {
-      return t('status_will_attend') || 'İştirak edəcək';
-    }
-    if (s.includes('iştirak etdi') || s.includes('attended') || s.includes('katıldı')) {
-      return t('status_attended') || 'İştirak etdi';
-    }
-    if (s.includes('etməyəcək') || s.includes('not attend') || s.includes('katılmayacak')) {
-      return t('status_not_attending') || 'İştirak etməyəcək';
-    }
-    return status;
+    return translateStatus(status, currentLang);
   };
 
   const getTargetTypeLabel = (targetType) => {
@@ -1243,7 +1219,7 @@ export default function ProfileModal() {
                                 </span>
                               </div>
                               <h5 className="font-serif font-bold text-slate-900 text-sm sm:text-base leading-snug mt-0.5">
-                                {app.targetTitle}
+                                {translateTitle(app.targetTitle, currentLang)}
                               </h5>
                             </div>
                           </div>
@@ -1263,7 +1239,7 @@ export default function ProfileModal() {
                           {app.targetType !== 'community' && app.targetType !== 'forum' && (
                             <div>
                               <span className="text-[10px] uppercase font-mono text-slate-400 block mb-0.5">{t('common_amount') || 'Məbləğ'}</span>
-                              <span className="font-bold text-amber-800 font-mono">{app.price || (t('common_free') || 'Pulsuz')}</span>
+                              <span className="font-bold text-amber-800 font-mono">{translatePrice(app.price, currentLang) || (t('common_free') || 'Pulsuz')}</span>
                             </div>
                           )}
                           {app.targetType === 'community' || app.targetType === 'forum' ? (
