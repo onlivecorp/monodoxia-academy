@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useApp } from '../context/AppContext';
@@ -27,6 +27,23 @@ export default function Header() {
 
   const logoUrl = homeContent?.navbar?.logoUrl || '/header_logo.svg';
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [langDropdownOpen, setLangDropdownOpen] = useState(false);
+  const langDropdownRef = useRef(null);
+
+  // Close language dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (langDropdownRef.current && !langDropdownRef.current.contains(e.target)) {
+        setLangDropdownOpen(false);
+      }
+    };
+    if (langDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [langDropdownOpen]);
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
@@ -226,33 +243,47 @@ export default function Header() {
           </button>
 
           {/* Desktop Language Switcher */}
-          <div className="relative group hidden sm:block">
-            <button className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg border border-outline-variant/60 hover:border-secondary bg-surface-container-low/60 hover:bg-surface-container-low text-on-surface-variant hover:text-secondary text-xs font-semibold transition-all cursor-pointer">
+          <div ref={langDropdownRef} className="relative hidden sm:block">
+            <button
+              type="button"
+              onClick={() => setLangDropdownOpen(prev => !prev)}
+              className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg border border-outline-variant/60 hover:border-secondary bg-surface-container-low/60 hover:bg-surface-container-low text-on-surface-variant hover:text-secondary text-xs font-semibold transition-all cursor-pointer"
+              aria-haspopup="true"
+              aria-expanded={langDropdownOpen}
+            >
               <FlagIcon code={lang} className="w-4 h-3" />
               <span className="uppercase tracking-wider font-bold">{lang}</span>
-              <span className="material-symbols-outlined text-[14px]">expand_more</span>
+              <span className={`material-symbols-outlined text-[14px] transition-transform duration-200 ${langDropdownOpen ? 'rotate-180' : ''}`}>
+                expand_more
+              </span>
             </button>
-            <div className="absolute right-0 top-full mt-1.5 hidden group-hover:block bg-white border border-[#c5a059]/40 rounded-xl shadow-xl py-1.5 w-44 z-50 animate-fadeIn">
-              {validLangs.map((item) => (
-                <button
-                  key={item.code}
-                  onClick={() => setLang(item.code)}
-                  className={`w-full text-left px-3.5 py-2 text-xs transition-colors flex items-center justify-between gap-2 cursor-pointer ${
-                    lang === item.code
-                      ? 'font-bold text-secondary bg-[#c5a059]/15'
-                      : 'text-slate-700 hover:bg-slate-50 hover:text-primary'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <FlagIcon code={item.code} className="w-4 h-3" />
-                    <span className="truncate">{item.name}</span>
-                  </div>
-                  <span className="text-[10px] font-mono font-bold uppercase text-slate-400">
-                    {item.code}
-                  </span>
-                </button>
-              ))}
-            </div>
+            {langDropdownOpen && (
+              <div className="absolute right-0 top-full mt-1.5 bg-white border border-[#c5a059]/40 rounded-xl shadow-xl py-1.5 w-44 z-50 animate-fadeIn">
+                {validLangs.map((item) => (
+                  <button
+                    key={item.code}
+                    type="button"
+                    onClick={() => {
+                      setLang(item.code);
+                      setLangDropdownOpen(false);
+                    }}
+                    className={`w-full text-left px-3.5 py-2 text-xs transition-colors flex items-center justify-between gap-2 cursor-pointer ${
+                      lang === item.code
+                        ? 'font-bold text-secondary bg-[#c5a059]/15'
+                        : 'text-slate-700 hover:bg-slate-50 hover:text-primary'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <FlagIcon code={item.code} className="w-4 h-3" />
+                      <span className="truncate">{item.name}</span>
+                    </div>
+                    <span className="text-[10px] font-mono font-bold uppercase text-slate-400">
+                      {item.code}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Mobile Quick Language Toggle */}

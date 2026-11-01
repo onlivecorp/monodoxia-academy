@@ -502,3 +502,4 @@ export default {
   maintenance_preview_admin: "Yönetici Önizleme Modu: Ziyaretçiler şu anda siteyi bu şekilde görmektedir.",
   maintenance_exit_preview: "Önizlemeden Çık"
 };
+
