@@ -98,8 +98,19 @@ export default function ClubPage() {
           {/* Membership Tiers Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20 items-stretch">
             {(clubTiersList || []).map((tier) => {
-              const currentTierStr = typeof userTier === 'string' ? userTier : (userTier?.id || userTier?.name || '');
-              const isCurrentTier = currentTierStr.toLowerCase() === (tier.id || '').toLowerCase();
+              const currentTierStr = (currentUser?.tier || (typeof userTier === 'string' ? userTier : (userTier?.id || userTier?.name)) || '').toLowerCase().trim();
+              const isCurrentTier = Boolean(
+                currentUser &&
+                currentTierStr &&
+                (
+                  currentTierStr === (tier.id || '').toLowerCase().trim() ||
+                  (tier.name && tier.name.toLowerCase().includes(currentTierStr)) ||
+                  (currentTierStr === 'free' && ((tier.id || '').toLowerCase() === 'free' || tier.name?.toLowerCase().includes('giriş'))) ||
+                  (currentTierStr === 'basic' && (tier.id || '').toLowerCase() === 'basic') ||
+                  (currentTierStr === 'premium' && (tier.id || '').toLowerCase() === 'premium') ||
+                  (currentTierStr === 'vip' && (tier.id || '').toLowerCase() === 'vip')
+                )
+              );
               const isPopular = tier.id === 'premium' || Boolean(tier.popular);
               const rawPrice = Number(tier.price) || 0;
               const customAnnual = tier.annualPrice ? Number(tier.annualPrice) : null;
@@ -185,10 +196,10 @@ export default function ClubPage() {
                     {isCurrentTier ? (
                       <button
                         disabled
-                        className="w-full py-3 px-4 rounded-xl bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-300 flex items-center justify-center gap-2 shadow-sm"
+                        className="w-full py-3 px-4 rounded-xl bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-300 flex items-center justify-center gap-2 shadow-sm cursor-not-allowed select-none opacity-90"
                       >
                         <span className="material-symbols-outlined text-[17px] text-emerald-600">verified</span>
-                        <span>Cari Üzvlüyünüz</span>
+                        <span>Statusunuz Aktivdir</span>
                       </button>
                     ) : userTierApp && userTierApp.status !== 'Ləğv edildi' && userTierApp.status !== 'Rədd edildi' ? (
                       <button

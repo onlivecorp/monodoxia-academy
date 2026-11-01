@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { getLocalized, getLocalizedArray } from '../i18n/localize';
 import { useApp } from '../context/AppContext';
@@ -46,20 +46,37 @@ export default function Club() {
   const titleText = getLocalized(club, 'title', currentLang, defaultLang) || (club.title !== undefined && club.title !== null && String(club.title).trim() !== '' ? club.title : t('club_title'));
   const descText = getLocalized(club, 'desc', currentLang, defaultLang) || (club.desc !== undefined && club.desc !== null && String(club.desc).trim() !== '' ? club.desc : t('club_desc'));
 
-  const isResident = userTier === 'Premium' || userTier === 'VIP';
+  const userPlanStr = (currentUser?.tier || userTier || '').toString().toLowerCase().trim();
+  const displayedTierId = (activePopularTier?.id || '').toString().toLowerCase().trim();
+  const displayedTierName = (activePopularTier?.name || '').toString().toLowerCase().trim();
+
+  // Istifadəçinin daxil olduğu plan burada göstərilən plan ilə eynidirmi?
+  const isSamePlan = Boolean(
+    currentUser &&
+    userPlanStr &&
+    (
+      userPlanStr === displayedTierId ||
+      displayedTierName.includes(userPlanStr) ||
+      (userPlanStr === 'free' && (displayedTierId === 'free' || displayedTierName.includes('free') || displayedTierName.includes('giriş'))) ||
+      (userPlanStr === 'basic' && (displayedTierId === 'basic' || displayedTierName.includes('basic'))) ||
+      (userPlanStr === 'premium' && (displayedTierId === 'premium' || displayedTierName.includes('premium'))) ||
+      (userPlanStr === 'vip' && (displayedTierId === 'vip' || displayedTierName.includes('vip')))
+    )
+  );
 
   // Left button text & link
-  const leftBtnText = isResident
-    ? (getLocalized(club, 'ctaBtnActiveText', currentLang, defaultLang) || club.ctaBtnActiveText || 'Üzv Statusunuz Aktivdir')
-    : (userClubApp 
+  const leftBtnText = isSamePlan
+    ? (getLocalized(club, 'ctaBtnActiveText', currentLang, defaultLang) || club.ctaBtnActiveText || 'Statusunuz Aktivdir')
+    : (userClubApp && userClubApp.status !== 'Ləğv edildi' && userClubApp.status !== 'Rədd edildi'
         ? `Müraciət: ${userClubApp.status}` 
-        : (getLocalized(club, 'ctaBtnText', currentLang, defaultLang) || club.ctaBtnText || t('club_join_btn') || 'Kluba qoşul'));
+        : 'Plana qoşulmaq üçün müraciət et');
 
-  const leftBtnLink = isResident
+  const leftBtnLink = isSamePlan
     ? (getLocalized(club, 'ctaBtnActiveLink', currentLang, defaultLang) || club.ctaBtnActiveLink)
     : (getLocalized(club, 'ctaBtnLink', currentLang, defaultLang) || club.ctaBtnLink);
 
   const handleLeftBtnClick = () => {
+    if (isSamePlan) return;
     if (leftBtnLink && typeof leftBtnLink === 'string' && leftBtnLink.trim() !== '') {
       const url = leftBtnLink.trim();
       if (url.startsWith('http://') || url.startsWith('https://')) {
@@ -81,17 +98,18 @@ export default function Club() {
   };
 
   // Right card button text & link
-  const rightBtnText = isResident
-    ? (getLocalized(club, 'tierCtaActiveText', currentLang, defaultLang) || club.tierCtaActiveText || 'Aktiv Üzv')
-    : (userClubApp 
-        ? `Müraciət Statusu: ${userClubApp.status}` 
+  const rightBtnText = isSamePlan
+    ? (getLocalized(club, 'tierCtaActiveText', currentLang, defaultLang) || club.tierCtaActiveText || 'Statusunuz Aktivdir')
+    : (userClubApp && userClubApp.status !== 'Ləğv edildi' && userClubApp.status !== 'Rədd edildi'
+        ? `Müraciət: ${userClubApp.status}` 
         : (getLocalized(club, 'tierCtaText', currentLang, defaultLang) || club.tierCtaText || tierCtaText || 'PAKETİ SEÇİN'));
 
-  const rightBtnLink = isResident
+  const rightBtnLink = isSamePlan
     ? (getLocalized(club, 'tierCtaActiveLink', currentLang, defaultLang) || club.tierCtaActiveLink)
     : (getLocalized(club, 'tierCtaLink', currentLang, defaultLang) || club.tierCtaLink);
 
   const handleRightBtnClick = () => {
+    if (isSamePlan) return;
     if (rightBtnLink && typeof rightBtnLink === 'string' && rightBtnLink.trim() !== '') {
       const url = rightBtnLink.trim();
       if (url.startsWith('http://') || url.startsWith('https://')) {
@@ -169,13 +187,20 @@ export default function Club() {
             {/* ACTION & CAPACITY STATUS */}
             <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
               <button
+                disabled={isSamePlan}
                 onClick={handleLeftBtnClick}
-                className="group relative inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-[#d4af37] via-[#e9c176] to-[#c5a059] hover:from-[#c5a059] hover:to-[#b98d2c] text-[#070f1e] font-semibold text-xs tracking-wider uppercase shadow-lg shadow-[#c5a059]/25 hover:shadow-xl hover:shadow-[#c5a059]/35 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer overflow-hidden"
+                className={`group relative inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-xs tracking-wider uppercase shadow-lg transition-all duration-300 font-semibold overflow-hidden ${
+                  isSamePlan
+                    ? 'bg-gradient-to-r from-[#d4af37]/60 via-[#e9c176]/60 to-[#c5a059]/60 text-[#070f1e]/80 cursor-not-allowed select-none opacity-85 shadow-none'
+                    : 'bg-gradient-to-r from-[#d4af37] via-[#e9c176] to-[#c5a059] hover:from-[#c5a059] hover:to-[#b98d2c] text-[#070f1e] shadow-[#c5a059]/25 hover:shadow-xl hover:shadow-[#c5a059]/35 hover:-translate-y-0.5 cursor-pointer'
+                }`}
               >
                 <span>
                   {leftBtnText}
                 </span>
-                <span className="material-symbols-outlined text-[18px]">how_to_reg</span>
+                <span className="material-symbols-outlined text-[18px]">
+                  {isSamePlan ? 'check_circle' : 'how_to_reg'}
+                </span>
               </button>
 
               <span className="text-xs text-slate-300 flex items-center gap-1.5 justify-center sm:justify-start px-3 py-2 rounded-lg bg-white/5 border border-white/10">
@@ -234,8 +259,13 @@ export default function Club() {
 
               {/* Card Action Button */}
               <button
+                disabled={isSamePlan}
                 onClick={handleRightBtnClick}
-                className="w-full py-4 text-center bg-[#070f1e] hover:bg-[#112240] text-white rounded-xl text-xs font-semibold uppercase tracking-[0.16em] border border-[#c5a059]/40 shadow-lg shadow-[#070f1e]/25 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
+                className={`w-full py-4 text-center rounded-xl text-xs font-semibold uppercase tracking-[0.16em] border transition-all duration-300 ${
+                  isSamePlan
+                    ? 'bg-slate-100 text-slate-500 border-slate-300 cursor-not-allowed select-none opacity-80'
+                    : 'bg-[#070f1e] hover:bg-[#112240] text-white border-[#c5a059]/40 shadow-lg shadow-[#070f1e]/25 hover:-translate-y-0.5 cursor-pointer'
+                }`}
               >
                 {rightBtnText}
               </button>
