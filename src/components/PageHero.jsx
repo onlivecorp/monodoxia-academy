@@ -1,5 +1,6 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
+import { useLanguage } from '../i18n/LanguageContext';
 
 export default function PageHero({
   badge,
@@ -10,6 +11,7 @@ export default function PageHero({
   children
 }) {
   const { navigateTo, currentUser, canAccessAdmin, setAdminModalOpen, setAdminModalTab } = useApp();
+  const { t } = useLanguage();
   const isAdminUser = currentUser?.role === 'Admin' || Boolean(canAccessAdmin?.(currentUser));
 
   const handleAdminEdit = () => {
@@ -31,7 +33,7 @@ export default function PageHero({
               className="hover:text-secondary flex items-center gap-1 transition-colors group cursor-pointer"
             >
               <span className="material-symbols-outlined text-[15px] group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
-              <span>Ana Səhifə</span>
+              <span>{t('common_home') || 'Ana Səhifə'}</span>
             </button>
             {breadcrumbs.map((bc, idx) => (
               <React.Fragment key={idx}>
@@ -55,10 +57,10 @@ export default function PageHero({
             <button
               onClick={handleAdminEdit}
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-secondary/10 text-secondary border border-secondary/30 hover:bg-secondary/20 transition-all cursor-pointer"
-              title="Bu səhifəni Səhifələr İdarəetməsi ekranında redaktə et"
+              title={t('hero_admin_edit_title') || 'Bu səhifəni Səhifələr İdarəetməsi ekranında redaktə et'}
             >
               <span className="material-symbols-outlined text-[14px]">edit_note</span>
-              <span>Admin: Bu Səhifəni Redaktə Et</span>
+              <span>{t('hero_admin_edit') || 'Admin: Bu Səhifəni Redaktə Et'}</span>
             </button>
           )}
         </div>

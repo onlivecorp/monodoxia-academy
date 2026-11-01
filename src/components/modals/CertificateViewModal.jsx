@@ -9,6 +9,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import CertificateTemplate from '../../certificates/CertificateTemplate';
 import { useApp } from '../../context/AppContext';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 const BASE_URL = window.location.origin;
 const CERT_W = 1491;
@@ -120,6 +121,7 @@ async function exportToJPG(element, filename = 'sertifikat.jpg') {
 
 export default function CertificateViewModal() {
   const { certViewModalOpen, setCertViewModalOpen, activeCertView, showToast } = useApp();
+  const { t } = useLanguage();
   const [exporting, setExporting] = useState(null); // null | 'pdf' | 'jpg'
   const certRef = useRef(null);
 
@@ -142,9 +144,9 @@ export default function CertificateViewModal() {
     setExporting('pdf');
     try {
       await exportToPDF(certRef.current, `${filename}.pdf`);
-      showToast('PDF uğurla yükləndi!', 'success');
+      showToast(t('cert_pdf_success') || 'PDF uğurla yükləndi!', 'success');
     } catch (err) {
-      showToast('PDF hazırlanarkən xəta baş verdi', 'error');
+      showToast(t('common_error') || 'Xəta baş verdi', 'error');
       console.error(err);
     } finally {
       setExporting(null);
@@ -156,9 +158,9 @@ export default function CertificateViewModal() {
     setExporting('jpg');
     try {
       await exportToJPG(certRef.current, `${filename}.jpg`);
-      showToast('JPG uğurla yükləndi!', 'success');
+      showToast(t('cert_jpg_success') || 'JPG uğurla yükləndi!', 'success');
     } catch (err) {
-      showToast('JPG hazırlanarkən xəta baş verdi', 'error');
+      showToast(t('common_error') || 'Xəta baş verdi', 'error');
       console.error(err);
     } finally {
       setExporting(null);
@@ -172,9 +174,9 @@ export default function CertificateViewModal() {
   const handleCopyLink = () => {
     if (!verifyUrl) return;
     navigator.clipboard.writeText(verifyUrl).then(() => {
-      showToast('Doğrulama linki kopyalandı!', 'success');
+      showToast(t('cert_link_copied') || 'Doğrulama linki kopyalandı!', 'success');
     }).catch(() => {
-      showToast('Link kopyalana bilmədi', 'error');
+      showToast(t('common_error') || 'Xəta baş verdi', 'error');
     });
   };
 
@@ -221,9 +223,9 @@ export default function CertificateViewModal() {
             }}
           >
             {exporting === 'pdf' ? (
-              <><div style={{ width: 14, height: 14, border: '2px solid #0a192f', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />Hazırlanır...</>
+              <><div style={{ width: 14, height: 14, border: '2px solid #0a192f', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />{t('cert_preparing') || 'Hazırlanır...'}</>
             ) : (
-              <><span className="material-symbols-outlined" style={{ fontSize: 16 }}>picture_as_pdf</span>PDF Yüklə</>
+              <><span className="material-symbols-outlined" style={{ fontSize: 16 }}>picture_as_pdf</span>{t('cert_download_pdf') || 'PDF Yüklə'}</>
             )}
           </button>
 
@@ -242,9 +244,9 @@ export default function CertificateViewModal() {
             }}
           >
             {exporting === 'jpg' ? (
-              <><div style={{ width: 14, height: 14, border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />Hazırlanır...</>
+              <><div style={{ width: 14, height: 14, border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />{t('cert_preparing') || 'Hazırlanır...'}</>
             ) : (
-              <><span className="material-symbols-outlined" style={{ fontSize: 16 }}>image</span>JPG Yüklə</>
+              <><span className="material-symbols-outlined" style={{ fontSize: 16 }}>image</span>{t('cert_download_jpg') || 'JPG Yüklə'}</>
             )}
           </button>
 
@@ -261,7 +263,7 @@ export default function CertificateViewModal() {
             }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: 16 }}>print</span>
-            Çap Et
+            {t('cert_print') || 'Çap Et'}
           </button>
 
           {/* Copy Link */}
@@ -278,13 +280,15 @@ export default function CertificateViewModal() {
               }}
             >
               <span className="material-symbols-outlined" style={{ fontSize: 16 }}>link</span>
-              Link Kopyala
+              {t('topic_copy_link') || 'Link Kopyala'}
             </button>
           )}
 
           {/* Close */}
           <button
             onClick={() => setCertViewModalOpen(false)}
+            title={t('common_close') || 'Bağla'}
+            aria-label={t('common_close') || 'Bağla'}
             style={{
               width: 36, height: 36,
               background: 'rgba(255,255,255,0.1)',

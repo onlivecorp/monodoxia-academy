@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
+import { useLanguage } from '../i18n/LanguageContext';
 
 /**
  * RichTextEditor Component
@@ -15,7 +16,9 @@ import React, { useRef, useState, useEffect } from 'react';
  * - Alignment (Left, Center, Right, Justify)
  * - Drag and drop image upload
  */
-export default function RichTextEditor({ value = '', onChange, placeholder = 'Məzmununuzu bura yazın...' }) {
+export default function RichTextEditor({ value = '', onChange, placeholder }) {
+  const { t } = useLanguage();
+  const effectivePlaceholder = placeholder || t('editor_placeholder') || 'Məzmununuzu bura yazın...';
   const editorRef = useRef(null);
   const fileInputRef = useRef(null);
   const [isFocused, setIsFocused] = useState(false);
@@ -73,15 +76,18 @@ export default function RichTextEditor({ value = '', onChange, placeholder = 'M�
     const cols = parseInt(prompt('Sütun sayı:', '3') || '0', 10);
     if (!rows || !cols || rows < 1 || cols < 1) return;
 
+    const thPrefix = t('editor_table_header') || 'Başlıq';
+    const tdData = t('editor_table_data') || 'Məlumat';
+
     let tableHtml = '<table class="w-full border-collapse border border-slate-300 my-4 text-xs sm:text-sm"><thead><tr>';
     for (let c = 0; c < cols; c++) {
-      tableHtml += `<th class="border border-slate-300 bg-amber-500/10 p-2 font-bold text-slate-800 text-left">Başlıq ${c + 1}</th>`;
+      tableHtml += `<th class="border border-slate-300 bg-amber-500/10 p-2 font-bold text-slate-800 text-left">${thPrefix} ${c + 1}</th>`;
     }
     tableHtml += '</tr></thead><tbody>';
     for (let r = 0; r < rows; r++) {
       tableHtml += '<tr>';
       for (let c = 0; c < cols; c++) {
-        tableHtml += '<td class="border border-slate-300 p-2 text-slate-700">Məlumat</td>';
+        tableHtml += `<td class="border border-slate-300 p-2 text-slate-700">${tdData}</td>`;
       }
       tableHtml += '</tr>';
     }
@@ -366,7 +372,7 @@ export default function RichTextEditor({ value = '', onChange, placeholder = 'M�
           }}
           onDragOver={(e) => e.preventDefault()}
           onDrop={handleDrop}
-          data-placeholder={placeholder}
+          data-placeholder={effectivePlaceholder}
           className="min-h-[280px] p-5 text-sm sm:text-base text-slate-800 outline-none leading-relaxed prose prose-amber max-w-none focus:outline-none empty:before:content-[attr(data-placeholder)] empty:before:text-slate-400 empty:before:pointer-events-none"
         />
       )}

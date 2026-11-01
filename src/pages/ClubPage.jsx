@@ -23,10 +23,10 @@ export default function ClubPage() {
     <div className="min-h-screen bg-[#faf8f5] text-[#071326]">
       {/* Editorial Page Hero */}
       <PageHero
-        badge={getLocalized(club, 'badge', currentLang, defaultLang) || 'Qapalı İcma Üzvlüyü'}
-        title={getLocalized(club, 'title', currentLang, defaultLang) || 'Zənginlər Klubu'}
-        description={getLocalized(club, 'desc', currentLang, defaultLang) || 'Davamlı inkişaf fərdi bir hadisə deyil, doğru mühitin bəhrəsidir. Dərin suallar verən seçkin şəxslərin qapalı ekosistemi.'}
-        breadcrumbs={[{ label: 'Zənginlər Klubu' }]}
+        badge={getLocalized(club, 'badge', currentLang, defaultLang) || t('club_badge') || 'Qapalı İcma Üzvlüyü'}
+        title={getLocalized(club, 'title', currentLang, defaultLang) || t('club_title') || 'Zənginlər Klubu'}
+        description={getLocalized(club, 'desc', currentLang, defaultLang) || t('club_desc') || 'Davamlı inkişaf fərdi bir hadisə deyil, doğru mühitin bəhrəsidir. Dərin suallar verən seçkin şəxslərin qapalı ekosistemi.'}
+        breadcrumbs={[{ label: t('nav_club') || 'Zənginlər Klubu' }]}
         adminCmsBlock="club"
       >
         <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-8 pt-6 border-t border-[#c5a059]/20">
@@ -34,7 +34,7 @@ export default function ClubPage() {
             <span className="material-symbols-outlined text-[#775a19] text-[18px]">
               {club.heroBadge1Icon || 'verified'}
             </span>
-            <span className="font-medium">{getLocalized(club, 'heroBadge1Text', currentLang, defaultLang) || 'Məhdud Sayda Üzvlük'}</span>
+            <span className="font-medium">{getLocalized(club, 'heroBadge1Text', currentLang, defaultLang) || t('club_limited') || 'Məhdud Sayda Üzvlük'}</span>
           </div>
 
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
@@ -71,7 +71,7 @@ export default function ClubPage() {
                     : 'text-[#64748b] hover:text-[#071326]'
                 }`}
               >
-                Aylıq Ödəniş
+                {t('club_billing_monthly') || 'Aylıq Ödəniş'}
               </button>
               <button
                 onClick={() => setBillingCycle('annual')}
@@ -81,16 +81,16 @@ export default function ClubPage() {
                     : 'text-[#64748b] hover:text-[#071326]'
                 }`}
               >
-                <span>İllik Abunəlik</span>
+                <span>{t('club_billing_annual') || 'İllik Abunəlik'}</span>
                 {!club.annualBadgeDisabled && (
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-[#c5a059] to-[#775a19] text-[#071326] tracking-wider uppercase shadow-sm">
-                    {getLocalized(club, 'annualBadgeText', currentLang, defaultLang) || '2 AY HƏDİYYƏ'}
+                    {getLocalized(club, 'annualBadgeText', currentLang, defaultLang) || t('club_annual_badge') || '2 AY HƏDİYYƏ'}
                   </span>
                 )}
               </button>
             </div>
             <p className="text-xs text-[#64748b] mt-3 font-light">
-              {getLocalized(club, 'annualNoteText', currentLang, defaultLang) || club.annualNoteText || 'İllik ödənişdə 2 ay pulsuz və bütün qapalı tədbirlərə prioritet qeydiyyat haqqı verilir.'}
+              {getLocalized(club, 'annualNoteText', currentLang, defaultLang) || club.annualNoteText || t('club_annual_note') || 'İllik ödənişdə 2 ay pulsuz və bütün qapalı tədbirlərə prioritet qeydiyyat haqqı verilir.'}
             </p>
           </div>
 
@@ -199,7 +199,7 @@ export default function ClubPage() {
                         className="w-full py-3 px-4 rounded-xl bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-300 flex items-center justify-center gap-2 shadow-sm cursor-not-allowed select-none opacity-90"
                       >
                         <span className="material-symbols-outlined text-[17px] text-emerald-600">verified</span>
-                        <span>Statusunuz Aktivdir</span>
+                        <span>{t('club_active_status') || 'Statusunuz Aktivdir'}</span>
                       </button>
                     ) : userTierApp && userTierApp.status !== 'Ləğv edildi' && userTierApp.status !== 'Rədd edildi' ? (
                       <button
@@ -207,7 +207,7 @@ export default function ClubPage() {
                         className="w-full py-3 px-4 rounded-xl bg-amber-50 text-amber-900 text-xs font-bold border border-amber-300 flex items-center justify-center gap-2 hover:bg-amber-100 transition-colors cursor-pointer shadow-sm"
                       >
                         <span className="material-symbols-outlined text-[17px] text-amber-600">pending</span>
-                        <span>Müraciət: {userTierApp.status}</span>
+                        <span>{t('profile_app_card_status') || 'Müraciət'}: {userTierApp.status}</span>
                       </button>
                     ) : (
                       <button
@@ -221,7 +221,7 @@ export default function ClubPage() {
                         <span className="material-symbols-outlined text-[17px] group-hover/btn:scale-110 transition-transform">
                           {isPopular ? 'auto_awesome' : 'stars'}
                         </span>
-                        <span>{tier.id === 'free' ? 'Qoşul (Ödənişsiz)' : 'Üzv ol'}</span>
+                        <span>{tier.id === 'free' ? (t('club_free_join') || 'Qoşul (Ödənişsiz)') : (t('club_join_btn') || 'Üzv ol')}</span>
                       </button>
                     )}
                   </div>

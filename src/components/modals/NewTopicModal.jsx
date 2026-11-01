@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
+import { useLanguage } from '../../i18n/LanguageContext';
 import RichTextEditor from '../RichTextEditor';
 
 export default function NewTopicModal() {
   const { newTopicModalOpen, setNewTopicModalOpen, submitTopicApplication, categoriesList = [], currentUser } = useApp();
+  const { t } = useLanguage();
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('İcma & Bloq');
   const [coverImage, setCoverImage] = useState('');
@@ -44,11 +46,11 @@ export default function NewTopicModal() {
 
   const handleSubmit = async (submitStatus = 'published') => {
     if (!title.trim()) {
-      alert('Zəhmət olmasa başlıq daxil edin.');
+      alert(t('topic_title_label') || 'Zəhmət olmasa başlıq daxil edin.');
       return;
     }
     if (!content.trim()) {
-      alert('Zəhmət olmasa məqalə məzmunu daxil edin.');
+      alert(t('topic_content_label') || 'Zəhmət olmasa məqalə məzmunu daxil edin.');
       return;
     }
     setIsSubmitting(true);
@@ -79,15 +81,17 @@ export default function NewTopicModal() {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-[10px] font-bold text-[#e5c57d] tracking-widest uppercase px-2.5 py-0.5 rounded-full bg-[#c5a059]/20 border border-[#c5a059]/40">
-                Bloq & İcma Nəşri
+                {t('topic_new_modal_badge') || 'Bloq & İcma Nəşri'}
               </span>
               {status === 'draft' && (
                 <span className="text-[10px] font-semibold text-slate-300 px-2 py-0.5 rounded-full bg-slate-800">
-                  Qaralama
+                  {t('topic_draft_badge') || 'Qaralama'}
                 </span>
               )}
             </div>
-            <h3 className="font-serif text-xl sm:text-2xl font-medium text-white">Yeni Məqalə / Müzakirə Yarat</h3>
+            <h3 className="font-serif text-xl sm:text-2xl font-medium text-white">
+              {t('topic_new_modal_title') || 'Yeni Məqalə / Müzakirə Yarat'}
+            </h3>
           </div>
 
           <div className="flex items-center gap-2">
@@ -101,12 +105,13 @@ export default function NewTopicModal() {
               }`}
             >
               <span className="material-symbols-outlined text-[16px]">visibility</span>
-              <span>{showPreview ? 'Redaktora qayıt' : 'Önizləmə'}</span>
+              <span>{showPreview ? (t('topic_back_editor') || 'Redaktora qayıt') : (t('topic_preview_btn') || 'Önizləmə')}</span>
             </button>
 
             <button
               onClick={() => setNewTopicModalOpen(false)}
               className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
+              aria-label={t('common_close')}
             >
               <span className="material-symbols-outlined text-[18px]">close</span>
             </button>
@@ -120,7 +125,7 @@ export default function NewTopicModal() {
             <div className="space-y-6">
               <div className="p-4 bg-amber-50 rounded-2xl border border-amber-200 text-xs text-amber-800 flex items-center gap-2">
                 <span className="material-symbols-outlined text-[18px] text-amber-700">info</span>
-                <span>Bu rejim məqalənin saytda necə görünəcəyinin canlı önizləməsidir.</span>
+                <span>{t('topic_preview_notice')}</span>
               </div>
 
               {coverImage && (
@@ -134,18 +139,18 @@ export default function NewTopicModal() {
                   #{category}
                 </span>
                 <h1 className="font-serif text-2xl sm:text-4xl text-[#071326] font-medium leading-tight">
-                  {title || 'Başlıq daxil edilməyib'}
+                  {title || (t('topic_title_placeholder') || 'Başlıq daxil edilməyib')}
                 </h1>
                 <div className="flex items-center gap-3 text-xs text-slate-500 mt-3 pt-3 border-t border-slate-100">
-                  <span>Müəllif: <strong>{currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : 'Siz'}</strong></span>
+                  <span>{t('cert_recipient') || 'Müəllif'}: <strong>{currentUser ? `${currentUser.firstName || currentUser.name || ''} ${currentUser.lastName || ''}` : 'Siz'}</strong></span>
                   <span>•</span>
-                  <span>Oxu müddəti: {readTime}</span>
+                  <span>{t('topic_read_time_label')}: {readTime}</span>
                 </div>
               </div>
 
               <div
                 className="prose prose-slate max-w-none text-slate-800 leading-relaxed pt-4 border-t border-slate-200"
-                dangerouslySetInnerHTML={{ __html: content || '<p className="italic text-slate-400">Məqalə mətni hələ yazılmayıb...</p>' }}
+                dangerouslySetInnerHTML={{ __html: content || '<p className="italic text-slate-400">...</p>' }}
               />
             </div>
           ) : (
@@ -154,14 +159,14 @@ export default function NewTopicModal() {
               {/* Title */}
               <div>
                 <label className="block text-xs font-bold text-[#071326] uppercase tracking-wider mb-1.5">
-                  Məqalə / Mövzu Başlığı *
+                  {t('topic_title_label')}
                 </label>
                 <input
                   required
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Məs: Fikirləri İdarə Etmək: Stoik Fəlsəfə və Müasir Psixologiya..."
+                  placeholder={t('topic_title_placeholder')}
                   className="w-full px-4 py-3 bg-[#faf8f5] border border-[#c5a059]/30 rounded-2xl text-sm font-medium text-[#071326] focus:border-[#775a19] focus:bg-white focus:outline-none transition-all shadow-xs"
                 />
               </div>
@@ -170,7 +175,7 @@ export default function NewTopicModal() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-[#071326] uppercase tracking-wider mb-1.5">
-                    Bölmə / Kateqoriya
+                    {t('topic_section_label')}
                   </label>
                   <select
                     value={category}
@@ -190,20 +195,20 @@ export default function NewTopicModal() {
 
                 <div>
                   <label className="block text-xs font-bold text-[#071326] uppercase tracking-wider mb-1.5">
-                    Oxu Müddəti
+                    {t('topic_read_time_label')}
                   </label>
                   <input
                     type="text"
                     value={readTime}
                     onChange={(e) => setReadTime(e.target.value)}
-                    placeholder="Məs: 4 dəqiqə"
+                    placeholder={t('topic_read_time_placeholder')}
                     className="w-full px-3.5 py-2.5 bg-[#faf8f5] border border-[#c5a059]/30 rounded-xl text-xs text-[#071326] focus:border-[#775a19] focus:outline-none"
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-[#071326] uppercase tracking-wider mb-1.5">
-                    Kover Görsəli (URL və ya Fayl)
+                    {t('topic_cover_label')}
                   </label>
                   <div className="flex items-center gap-2">
                     <input
@@ -235,7 +240,7 @@ export default function NewTopicModal() {
                     type="button"
                     onClick={() => setCoverImage('')}
                     className="absolute top-2 right-2 bg-black/60 text-white rounded-full p-1 hover:bg-black transition-colors"
-                    title="Şəkli sil"
+                    title={t('common_delete')}
                   >
                     <span className="material-symbols-outlined text-[16px]">close</span>
                   </button>
@@ -245,19 +250,19 @@ export default function NewTopicModal() {
               {/* Rich Text Editor */}
               <div>
                 <label className="block text-xs font-bold text-[#071326] uppercase tracking-wider mb-1.5">
-                  Məqalə / Məzmun Mətni (Zəngin Redaktor) *
+                  {t('topic_content_label')}
                 </label>
                 <RichTextEditor
                   value={content}
                   onChange={(html) => setContent(html)}
-                  placeholder="Məqalənizi başlıqlar, paraqraflar, şəkillər və videolarla zənginləşdirərək yazın..."
+                  placeholder={t('topic_content_placeholder')}
                 />
               </div>
 
               <div className="p-4 bg-amber-500/10 rounded-2xl border border-amber-500/20 flex items-start gap-3 text-xs text-slate-700">
                 <span className="material-symbols-outlined text-amber-700 text-[20px] shrink-0 mt-0.5">verified_user</span>
                 <div>
-                  <strong className="text-[#071326]">Yüksək Keyfiyyətli Nəşr Standartı:</strong> Məzmununuz dərc edildikdən sonra həm İcma şəbəkəsində müzakirə kimi təqdim olunacaq, həm də oxucular üçün zəngin blog formatında göstəriləcək.
+                  <strong className="text-[#071326]">{t('cert_status_verified')}:</strong> {t('community_desc')}
                 </div>
               </div>
             </form>
@@ -273,7 +278,7 @@ export default function NewTopicModal() {
               onClick={() => handleSubmit('draft')}
               className="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 text-xs font-semibold cursor-pointer transition-colors"
             >
-              Qaralama Kimi Saxla
+              {t('topic_save_draft')}
             </button>
           </div>
 
@@ -283,7 +288,7 @@ export default function NewTopicModal() {
               onClick={() => setNewTopicModalOpen(false)}
               className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
             >
-              Ləğv et
+              {t('common_cancel')}
             </button>
             <button
               type="button"
@@ -292,11 +297,11 @@ export default function NewTopicModal() {
               className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#071326] to-[#0c2242] text-[#e5c57d] hover:text-white text-xs font-bold uppercase tracking-wider shadow-md hover:shadow-lg transition-all cursor-pointer flex items-center gap-2"
             >
               {isSubmitting ? (
-                <span>Göndərilir...</span>
+                <span>{t('common_loading')}</span>
               ) : (
                 <>
                   <span className="material-symbols-outlined text-[16px]">publish</span>
-                  <span>Məqaləni Nəşr Et</span>
+                  <span>{t('topic_publish_btn')}</span>
                 </>
               )}
             </button>

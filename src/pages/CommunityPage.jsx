@@ -96,22 +96,22 @@ export default function CommunityPage() {
     <div className="min-h-screen bg-[#faf8f5] text-[#071326]">
       {/* EDITORIAL HERO */}
       <PageHero
-        badge={getLocalized(community, 'badge', currentLang, defaultLang) || 'Bloq & İcma Platforması'}
-        title={getLocalized(community, 'title', currentLang, defaultLang) || 'Bilik, Düşüncə və Təcrübə Bloqu'}
-        description={getLocalized(community, 'desc', currentLang, defaultLang) || 'Müasir psixologiya, nevrobiologiya, kouçinq və daxili inkişaf sahəsində mütəxəssislərin elmi məqalələri və açıq müzakirələri.'}
-        breadcrumbs={[{ label: 'Bloq & İcma' }]}
+        badge={getLocalized(community, 'badge', currentLang, defaultLang) || t('community_badge') || 'Bloq & İcma Platforması'}
+        title={getLocalized(community, 'title', currentLang, defaultLang) || t('community_title') || 'Bilik, Düşüncə və Təcrübə Bloqu'}
+        description={getLocalized(community, 'desc', currentLang, defaultLang) || t('community_desc') || 'Müasir psixologiya, nevrobiologiya, kouçinq və daxili inkişaf sahəsində mütəxəssislərin elmi məqalələri və açıq müzakirələri.'}
+        breadcrumbs={[{ label: t('nav_community') || 'Bloq & İcma' }]}
         adminCmsBlock="community"
       >
         <div className="flex flex-wrap items-center justify-between gap-4 mt-8 pt-6 border-t border-[#c5a059]/20">
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
               <span className="material-symbols-outlined text-[#775a19] text-[18px]">verified</span>
-              <span className="font-medium">Elmi və Praktik Məqalələr</span>
+              <span className="font-medium">{t('community_articles_badge') || 'Elmi və Praktik Məqalələr'}</span>
             </div>
 
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
               <span className="material-symbols-outlined text-[#775a19] text-[18px]">psychology</span>
-              <span className="font-medium">Dərin İntellektual Təhlillər</span>
+              <span className="font-medium">{t('community_analyses_badge') || 'Dərin İntellektual Təhlillər'}</span>
             </div>
           </div>
 
@@ -120,7 +120,7 @@ export default function CommunityPage() {
             className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#071326] to-[#0c2242] text-white hover:text-[#e5c57d] font-semibold text-xs tracking-wider uppercase transition-all flex items-center gap-2 cursor-pointer shadow-md hover:shadow-lg group/btn"
           >
             <span className="material-symbols-outlined text-[17px] text-[#e5c57d] group-hover/btn:scale-110 transition-transform">edit_note</span>
-            <span>Məqalə / Mövzu Yaz</span>
+            <span>{t('community_new_article') || 'Məqalə / Mövzu Yaz'}</span>
           </button>
         </div>
       </PageHero>
@@ -137,7 +137,7 @@ export default function CommunityPage() {
               <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[19px] text-[#775a19]">search</span>
               <input
                 type="text"
-                placeholder="Məqalə, müəllif və ya mövzu axtar..."
+                placeholder={t('community_search_placeholder') || 'Məqalə, müəllif və ya mövzu axtar...'}
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-9 py-2.5 text-xs sm:text-sm rounded-xl bg-[#faf8f5] border border-[#c5a059]/30 focus:border-[#775a19] focus:bg-white focus:outline-none transition-all placeholder-[#94a3b8] text-[#071326]"
@@ -155,13 +155,13 @@ export default function CommunityPage() {
             {/* Category Dropdown */}
             <div className="flex items-center gap-3 flex-wrap">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider hidden sm:inline">Kateqoriya:</span>
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider hidden sm:inline">{t('filter_category') || 'Kateqoriya'}:</span>
                 <select
                   value={filterCategory}
                   onChange={(e) => setFilterCategory(e.target.value)}
                   className="px-3 py-2 bg-[#faf8f5] border border-[#c5a059]/30 rounded-xl text-xs font-semibold text-[#071326] focus:border-[#775a19] focus:outline-none cursor-pointer"
                 >
-                  <option value="all">Bütün Bloq Yazıları ({visibleTopics.length})</option>
+                  <option value="all">{t('community_all_posts') || 'Bütün Bloq Yazıları'} ({visibleTopics.length})</option>
                   {allCategories.map(cat => (
                     <option key={cat} value={cat}>#{cat}</option>
                   ))}
@@ -175,8 +175,8 @@ export default function CommunityPage() {
                   onChange={(e) => setSortBy(e.target.value)}
                   className="px-3 py-2 bg-[#faf8f5] border border-[#c5a059]/30 rounded-xl text-xs font-semibold text-[#071326] focus:border-[#775a19] focus:outline-none cursor-pointer"
                 >
-                  <option value="latest">Ən Yenilər</option>
-                  <option value="popular">Ən Çox Bəyənilənlər</option>
+                  <option value="latest">{t('community_sort_latest') || 'Ən Yenilər'}</option>
+                  <option value="popular">{t('community_sort_popular') || 'Ən Çox Bəyənilənlər'}</option>
                 </select>
               </div>
 
@@ -186,7 +186,7 @@ export default function CommunityPage() {
                   type="button"
                   onClick={() => setViewMode('grid')}
                   className={`p-1.5 rounded-lg transition-colors cursor-pointer ${viewMode === 'grid' ? 'bg-white text-[#775a19] shadow-xs' : 'text-slate-400 hover:text-slate-700'}`}
-                  title="Qrid görünüşü"
+                  title={t('community_view_grid') || 'Qrid görünüşü'}
                 >
                   <span className="material-symbols-outlined text-[18px]">grid_view</span>
                 </button>
@@ -194,7 +194,7 @@ export default function CommunityPage() {
                   type="button"
                   onClick={() => setViewMode('list')}
                   className={`p-1.5 rounded-lg transition-colors cursor-pointer ${viewMode === 'list' ? 'bg-white text-[#775a19] shadow-xs' : 'text-slate-400 hover:text-slate-700'}`}
-                  title="Siyahı görünüşü"
+                  title={t('community_view_list') || 'Siyahı görünüşü'}
                 >
                   <span className="material-symbols-outlined text-[18px]">view_list</span>
                 </button>
@@ -226,7 +226,7 @@ export default function CommunityPage() {
                     <div className="absolute top-4 left-4 flex items-center gap-2">
                       <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#c5a059] text-white tracking-wider uppercase shadow-md flex items-center gap-1">
                         <span className="material-symbols-outlined text-[14px]">star</span>
-                        <span>Seçilmiş Məqalə</span>
+                        <span>{t('community_featured_article') || 'Seçilmiş Məqalə'}</span>
                       </span>
                     </div>
                   </div>
@@ -239,7 +239,7 @@ export default function CommunityPage() {
                       {!featuredCover && (
                         <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#c5a059] text-white tracking-wider uppercase shadow-sm flex items-center gap-1">
                           <span className="material-symbols-outlined text-[14px]">star</span>
-                          <span>Seçilmiş Məqalə</span>
+                          <span>{t('community_featured_article') || 'Seçilmiş Məqalə'}</span>
                         </span>
                       )}
                       <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#c5a059]/15 text-[#775a19] uppercase tracking-wider">
@@ -284,13 +284,13 @@ export default function CommunityPage() {
               <div className="w-16 h-16 rounded-2xl bg-[#c5a059]/15 text-[#775a19] flex items-center justify-center mx-auto mb-4">
                 <span className="material-symbols-outlined text-3xl">article</span>
               </div>
-              <h4 className="font-serif text-xl font-medium text-[#071326] mb-2">Axtarışa uyğun məqalə tapılmadı</h4>
-              <p className="text-sm text-slate-500 mb-6 font-light">Digər kateqoriyalara baxa və ya öz məqalənizi yarada bilərsiniz.</p>
+              <h4 className="font-serif text-xl font-medium text-[#071326] mb-2">{t('community_no_articles') || 'Axtarışa uyğun məqalə tapılmadı'}</h4>
+              <p className="text-sm text-slate-500 mb-6 font-light">{t('community_no_articles_desc') || 'Digər kateqoriyalara baxa və ya öz məqalənizi yarada bilərsiniz.'}</p>
               <button
                 onClick={handleCreateArticle}
                 className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#071326] to-[#0c2242] text-[#e5c57d] text-xs font-bold tracking-wider uppercase shadow-md transition-all cursor-pointer"
               >
-                Yeni Məqalə Yaz
+                {t('community_new_article') || 'Yeni Məqalə Yaz'}
               </button>
             </div>
           ) : viewMode === 'grid' ? (

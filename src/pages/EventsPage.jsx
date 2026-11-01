@@ -42,10 +42,10 @@ export default function EventsPage() {
     <div className="min-h-screen bg-[#faf8f5] text-[#071326]">
       {/* Editorial Page Hero */}
       <PageHero
-        badge={getLocalized(events, 'badge', currentLang, defaultLang) || 'Canlı Təqvim'}
-        title={getLocalized(events, 'title', currentLang, defaultLang) || 'Yaxınlaşan Tədbirlər və Masterklaslar'}
-        description={getLocalized(events, 'desc', currentLang, defaultLang) || 'Canlı interaktiv vebinarlar, psixoloji emalatxanalar və aparıcı mentorlarla açıq müzakirələr.'}
-        breadcrumbs={[{ label: 'Tədbirlər' }]}
+        badge={getLocalized(events, 'badge', currentLang, defaultLang) || t('events_badge') || 'Canlı Təqvim'}
+        title={getLocalized(events, 'title', currentLang, defaultLang) || t('events_title') || 'Yaxınlaşan Tədbirlər və Masterklaslar'}
+        description={getLocalized(events, 'desc', currentLang, defaultLang) || t('events_desc') || 'Canlı interaktiv vebinarlar, psixoloji emalatxanalar və aparıcı mentorlarla açıq müzakirələr.'}
+        breadcrumbs={[{ label: t('nav_events') || 'Tədbirlər' }]}
         adminCmsBlock="events"
       >
         <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-8 pt-6 border-t border-[#c5a059]/20">
@@ -53,7 +53,7 @@ export default function EventsPage() {
             <span className="material-symbols-outlined text-[#775a19] text-[18px]">
               {events.heroBadge1Icon || 'calendar_month'}
             </span>
-            <span className="font-medium">{getLocalized(events, 'heroBadge1Text', currentLang, defaultLang) || 'Canlı Təqvim Qrafiki'}</span>
+            <span className="font-medium">{getLocalized(events, 'heroBadge1Text', currentLang, defaultLang) || t('events_calendar_btn') || 'Canlı Təqvim Qrafiki'}</span>
           </div>
 
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
@@ -67,7 +67,7 @@ export default function EventsPage() {
             <span className="material-symbols-outlined text-[#775a19] text-[18px]">
               {events.heroBadge3Icon || 'mic'}
             </span>
-            <span className="font-medium">{getLocalized(events, 'heroBadge3Text', currentLang, defaultLang) || 'Spikerlik İmkanı'}</span>
+            <span className="font-medium">{getLocalized(events, 'heroBadge3Text', currentLang, defaultLang) || t('event_speaker_badge') || 'Spikerlik İmkanı'}</span>
           </div>
         </div>
       </PageHero>
@@ -84,13 +84,13 @@ export default function EventsPage() {
             <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
               <span className="text-xs font-semibold text-[#071326] mr-1 flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-[17px] text-[#775a19]">filter_list</span>
-                <span>Tədbir növü:</span>
+                <span>{t('event_type_filter') || 'Tədbir növü:'}</span>
               </span>
               {[
-                { id: 'all', label: 'Bütün Tədbirlər' },
-                { id: 'vebinar', label: 'Vebinarlar' },
-                { id: 'oflayn', label: 'Oflayn Tədbirlər' },
-                { id: 'masterklas', label: 'Masterklaslar' }
+                { id: 'all', label: t('event_all') || 'Bütün Tədbirlər' },
+                { id: 'vebinar', label: t('event_webinars') || 'Vebinarlar' },
+                { id: 'oflayn', label: t('event_offline') || 'Oflayn Tədbirlər' },
+                { id: 'masterklas', label: t('event_masterclasses') || 'Masterklaslar' }
               ].map(tab => {
                 const isActive = filterType === tab.id;
                 return (
@@ -111,7 +111,7 @@ export default function EventsPage() {
 
             <div className="flex items-center gap-2 text-xs text-[#64748b] self-end sm:self-center">
               <span className="material-symbols-outlined text-[16px] text-[#775a19]">event_available</span>
-              <span>Aktiv tədbirlər: <strong className="text-[#071326] font-semibold text-sm">{filteredEvents.length}</strong></span>
+              <span>{t('event_active_count') || 'Aktiv tədbirlər:'} <strong className="text-[#071326] font-semibold text-sm">{filteredEvents.length}</strong></span>
             </div>
           </div>
 
@@ -122,16 +122,16 @@ export default function EventsPage() {
                 <span className="material-symbols-outlined text-3xl">event_busy</span>
               </div>
               <h3 className="font-serif text-xl font-medium text-[#071326] mb-2">
-                Bu kateqoriyada aktiv tədbir tapılmadı
+                {t('event_no_events') || 'Bu kateqoriyada aktiv tədbir tapılmadı'}
               </h3>
               <p className="text-sm text-[#64748b] mb-6 max-w-sm mx-auto leading-relaxed font-light">
-                Yaxın günlərdə yeni canlı sessiyalar və emalatxanalar elan olunacaqdır.
+                {t('event_no_events_desc') || 'Yaxın günlərdə yeni canlı sessiyalar və emalatxanalar elan olunacaqdır.'}
               </p>
               <button
                 onClick={() => setFilterType('all')}
                 className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#071326] to-[#0c2242] text-[#e5c57d] text-xs font-semibold tracking-wider uppercase shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
               >
-                Bütün Tədbirləri Göstər
+                {t('event_show_all') || 'Bütün Tədbirləri Göstər'}
               </button>
             </div>
           ) : (
@@ -238,7 +238,7 @@ export default function EventsPage() {
                         userApp.status === 'Təsdiqləndi' ? (
                           <div className="w-full py-3 px-4 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 flex items-center justify-center gap-2 shadow-sm">
                             <span className="material-symbols-outlined text-[17px] text-emerald-600">verified</span>
-                            <span>Qeydiyyatınız Təsdiqlənib</span>
+                            <span>{t('event_registered_confirmed') || 'Qeydiyyatınız Təsdiqlənib'}</span>
                           </div>
                         ) : ['Yeni', 'Baxılır', 'Gözləmədə'].includes(userApp.status) ? (
                           <button
@@ -246,14 +246,14 @@ export default function EventsPage() {
                             className="w-full py-3 px-4 rounded-xl text-xs font-bold bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100 transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
                           >
                             <span className="material-symbols-outlined text-[17px] text-amber-600">hourglass_top</span>
-                            <span>Müraciətiniz Baxılır ({userApp.status})</span>
+                            <span>{t('event_applied_pending') || 'Müraciətiniz Baxılır'} ({userApp.status})</span>
                           </button>
                         ) : ['Rədd edildi', 'İmtina edildi', 'Ləğv edildi'].includes(userApp.status) ? (
                           <div className="flex flex-col gap-2">
                             <div className="w-full py-2 px-3 rounded-xl text-[11px] font-semibold bg-rose-50 text-rose-800 border border-rose-200 flex items-center justify-between">
                               <span className="flex items-center gap-1.5">
                                 <span className="material-symbols-outlined text-[16px] text-rose-600">cancel</span>
-                                <span>Müraciət: {userApp.status}</span>
+                                <span>{t('profile_app_card_status') || 'Müraciət'}: {userApp.status}</span>
                               </span>
                             </div>
                             <button
@@ -261,7 +261,7 @@ export default function EventsPage() {
                               className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#071326] to-[#0c2242] text-white hover:text-[#e5c57d] text-xs font-semibold tracking-wider uppercase transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
                             >
                               <span className="material-symbols-outlined text-[16px]">refresh</span>
-                              <span>Yenidən Müraciət Et</span>
+                              <span>{t('event_reapply') || 'Yenidən Müraciət Et'}</span>
                             </button>
                           </div>
                         ) : (
@@ -269,18 +269,18 @@ export default function EventsPage() {
                             onClick={() => openApplication(e, targetType)}
                             className="w-full py-3 px-4 rounded-xl text-xs font-bold bg-slate-100 text-[#071326] border border-slate-300 hover:bg-slate-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                           >
-                            <span>Müraciət Statusu: {userApp.status}</span>
+                            <span>{t('profile_app_card_status') || 'Müraciət Statusu'}: {userApp.status}</span>
                           </button>
                         )
                       ) : e.status === 'Tamamlandı' ? (
                         <div className="w-full py-3 px-4 rounded-xl bg-slate-100 text-[#64748b] text-xs font-semibold flex items-center justify-center gap-2">
                           <span className="material-symbols-outlined text-[17px]">event_busy</span>
-                          <span>Tədbir Başa Çatıb</span>
+                          <span>{t('event_completed') || 'Tədbir Başa Çatıb'}</span>
                         </div>
                       ) : e.status === 'Bağlıdır' ? (
                         <div className="w-full py-3 px-4 rounded-xl bg-slate-100 text-[#64748b] text-xs font-semibold flex items-center justify-center gap-2">
                           <span className="material-symbols-outlined text-[17px]">lock</span>
-                          <span>Qeydiyyat Bağlıdır</span>
+                          <span>{t('event_closed') || 'Qeydiyyat Bağlıdır'}</span>
                         </div>
                       ) : (
                         <button
@@ -288,7 +288,7 @@ export default function EventsPage() {
                           className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-[#071326] to-[#0c2242] text-white hover:text-[#e5c57d] text-xs font-semibold tracking-wider uppercase shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer group/btn"
                         >
                           <span className="material-symbols-outlined text-[17px] text-[#e5c57d] group-hover/btn:scale-110 transition-transform">how_to_reg</span>
-                          <span>Tədbirə Qeydiyyatdan Keç</span>
+                          <span>{t('event_register_cta') || 'Tədbirə Qeydiyyatdan Keç'}</span>
                         </button>
                       )}
                     </div>

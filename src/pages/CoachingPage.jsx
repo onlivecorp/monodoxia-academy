@@ -43,10 +43,10 @@ export default function CoachingPage() {
     <div className="min-h-screen bg-[#faf8f5] text-[#071326]">
       {/* Editorial Page Hero */}
       <PageHero
-        badge={getLocalized(coachesCms, 'badge', currentLang, defaultLang) || 'Ekspert Heyəti'}
-        title={getLocalized(coachesCms, 'title', currentLang, defaultLang) || 'Fərdi Kouçinq və Mentorluq'}
-        description={getLocalized(coachesCms, 'desc', currentLang, defaultLang) || 'Hər biri öz sahəsində akademik dərəcəyə və yüzlərlə saatlıq uğurlu fərdi kouçinq təcrübəsinə malik beynəlxalq sertifikatlı mentorlarımız.'}
-        breadcrumbs={[{ label: 'Kouçinq' }]}
+        badge={getLocalized(coachesCms, 'badge', currentLang, defaultLang) || t('coaches_badge') || 'Ekspert Heyəti'}
+        title={getLocalized(coachesCms, 'title', currentLang, defaultLang) || t('coaches_title') || 'Fərdi Kouçinq və Mentorluq'}
+        description={getLocalized(coachesCms, 'desc', currentLang, defaultLang) || t('coaches_desc') || 'Hər biri öz sahəsində akademik dərəcəyə və yüzlərlə saatlıq uğurlu fərdi kouçinq təcrübəsinə malik beynəlxalq sertifikatlı mentorlarımız.'}
+        breadcrumbs={[{ label: t('nav_coaching') || 'Kouçinq' }]}
         adminCmsBlock="coaches"
       >
         <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-8 pt-6 border-t border-[#c5a059]/20">
@@ -54,21 +54,21 @@ export default function CoachingPage() {
             <span className="material-symbols-outlined text-[#775a19] text-[18px]">
               {coachesCms.heroBadge1Icon || 'verified_user'}
             </span>
-            <span className="font-medium">{getLocalized(coachesCms, 'heroBadge1Text', currentLang, defaultLang) || 'ICF Etik Məcəlləsi'}</span>
+            <span className="font-medium">{getLocalized(coachesCms, 'heroBadge1Text', currentLang, defaultLang) || t('coaches_badge_icf') || 'ICF Etik Məcəlləsi'}</span>
           </div>
 
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
             <span className="material-symbols-outlined text-[#775a19] text-[18px]">
               {coachesCms.heroBadge2Icon || 'lock'}
             </span>
-            <span className="font-medium">{getLocalized(coachesCms, 'heroBadge2Text', currentLang, defaultLang) || '100% Tam Konfidensiallıq'}</span>
+            <span className="font-medium">{getLocalized(coachesCms, 'heroBadge2Text', currentLang, defaultLang) || t('coaches_badge_privacy') || '100% Tam Konfidensiallıq'}</span>
           </div>
 
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-[#c5a059]/30 text-xs text-[#071326] shadow-sm">
             <span className="material-symbols-outlined text-[#775a19] text-[18px]">
               {coachesCms.heroBadge3Icon || 'videocam'}
             </span>
-            <span className="font-medium">{getLocalized(coachesCms, 'heroBadge3Text', currentLang, defaultLang) || 'Təhlükəsiz Onlayn Otaqlar'}</span>
+            <span className="font-medium">{getLocalized(coachesCms, 'heroBadge3Text', currentLang, defaultLang) || t('coaches_badge_online') || 'Təhlükəsiz Onlayn Otaqlar'}</span>
           </div>
         </div>
       </PageHero>
@@ -85,7 +85,7 @@ export default function CoachingPage() {
             <div className="bg-white/80 backdrop-blur-md border border-[#c5a059]/25 rounded-2xl p-4 sm:p-5 shadow-[0_10px_30px_-10px_rgba(7,19,38,0.05)] mb-12 flex flex-wrap items-center gap-2">
               <span className="text-xs font-semibold text-[#071326] mr-2 flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-[17px] text-[#775a19]">tune</span>
-                <span>İxtisas sahəsi:</span>
+                <span>{t('filter_coaching') || 'İxtisas sahəsi:'}</span>
               </span>
               <button
                 onClick={() => setSelectedSpecialty('all')}
@@ -95,7 +95,7 @@ export default function CoachingPage() {
                     : 'bg-[#faf8f5] text-[#475569] hover:text-[#071326] hover:bg-white border border-[#e2e8f0]'
                 }`}
               >
-                Bütün Kouçlar ({coachesList.length})
+                {t('expert_all_coaches') || 'Bütün Kouçlar'} ({coachesList.length})
               </button>
               {allSpecialties.map(spec => {
                 const isActive = selectedSpecialty === spec;

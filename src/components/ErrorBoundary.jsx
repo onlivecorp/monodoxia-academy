@@ -1,4 +1,6 @@
 import React from 'react';
+import { translations } from '../i18n/locales';
+import { DEFAULT_LANGUAGE } from '../i18n/languages';
 
 export default class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -53,6 +55,15 @@ export default class ErrorBoundary extends React.Component {
     window.location.href = window.location.pathname + '?_t=' + Date.now();
   };
 
+  t = (key) => {
+    let lang = DEFAULT_LANGUAGE;
+    try {
+      lang = localStorage.getItem('monodoxia_lang') || DEFAULT_LANGUAGE;
+    } catch (e) {}
+    const dict = translations[lang] || translations[DEFAULT_LANGUAGE] || {};
+    return dict[key] || translations[DEFAULT_LANGUAGE]?.[key] || key;
+  };
+
   render() {
     if (this.state.hasError) {
       const errorMsg = this.state.error?.message || String(this.state.error || '');
@@ -64,46 +75,46 @@ export default class ErrorBoundary extends React.Component {
               <span className="material-symbols-outlined text-3xl">warning</span>
             </div>
             <h3 className="font-serif text-xl font-bold text-primary mb-2">
-              Səhifə yüklənərkən xəta baş verdi
+              {this.t('error_boundary_title')}
             </h3>
             <p className="text-xs text-on-surface-variant leading-relaxed mb-4">
-              Məlumatların göstərilməsi zamanı gözlənilməz texniki xəta qeydə alındı. Ana səhifəyə qayıtmaqla və ya səhifəni yeniləməklə davam edə bilərsiniz.
+              {this.t('error_boundary_desc')}
             </p>
+
+            {/* Error detail accordion for diagnostics */}
             {errorMsg && (
-              <div className="mb-5 p-2.5 rounded bg-rose-50 text-rose-700 text-[11px] font-mono text-left max-h-36 overflow-auto border border-rose-200">
-                <div className="font-bold mb-1">{errorMsg}</div>
-                {errorStack && <div className="text-[10px] opacity-75 whitespace-pre-wrap">{errorStack}</div>}
-              </div>
+              <details className="mb-6 text-left bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3 text-[11px] text-slate-600 dark:text-slate-400">
+                <summary className="font-semibold cursor-pointer select-none text-slate-700 dark:text-slate-300">
+                  Xəta təfərrüatları (Diaqnostika)
+                </summary>
+                <pre className="mt-2 p-2 bg-slate-100 dark:bg-slate-950 rounded overflow-x-auto text-[10px] text-red-600 dark:text-red-400 whitespace-pre-wrap font-mono">
+                  {errorMsg}
+                  {errorStack && `\n\nStack:\n${errorStack.slice(0, 400)}...`}
+                </pre>
+              </details>
             )}
-            <div className="flex items-center justify-center gap-2 flex-wrap">
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <button
                 onClick={this.handleReset}
-                className="px-4 py-2 rounded-lg bg-primary text-on-primary font-bold text-xs hover:bg-primary/90 transition-all cursor-pointer shadow-sm"
+                className="w-full sm:w-auto px-5 py-2.5 rounded-full bg-primary text-on-primary text-xs font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
               >
-                Yenidən Yüklə
+                <span className="material-symbols-outlined text-sm">refresh</span>
+                <span>{this.t('error_boundary_reload')}</span>
               </button>
               <button
                 onClick={this.handleCleanReset}
-                className="px-4 py-2 rounded-lg bg-secondary text-on-secondary font-bold text-xs hover:bg-secondary/90 transition-all cursor-pointer shadow-sm"
+                className="w-full sm:w-auto px-4 py-2.5 rounded-full border border-outline text-on-surface text-xs font-medium hover:bg-surface-container transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                title="Müvəqqəti keş məlumatlarını təmizləyərək yenidən aç"
               >
-                Keşi Təmizlə & Yenilə
+                <span className="material-symbols-outlined text-sm">cleaning_services</span>
+                <span>{this.t('error_boundary_clean_reset')}</span>
               </button>
-              <a
-                href="/"
-                onClick={(e) => {
-                  e.preventDefault();
-                  window.location.href = '/';
-                }}
-                className="px-4 py-2 rounded-lg border border-outline-variant text-on-surface font-semibold text-xs hover:bg-surface-container transition-all"
-              >
-                Ana Səhifə
-              </a>
             </div>
           </div>
         </div>
       );
     }
-
     return this.props.children;
   }
 }

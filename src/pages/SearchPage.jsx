@@ -5,13 +5,14 @@ import SearchResultItem from '../components/search/SearchResultItem';
 import ExpertProfileModal from '../components/modals/ExpertProfileModal';
 import UserProfilePreviewModal from '../components/modals/UserProfilePreviewModal';
 import { useApp } from '../context/AppContext';
+import { useLanguage } from '../i18n/LanguageContext';
 
 const CATEGORIES = [
-  { id: 'all', label: 'Bütün Kateqoriyalar', icon: 'grid_view' },
-  { id: 'courses', label: 'Kurslar', icon: 'school' },
-  { id: 'experts', label: 'Uzmanlar & Kouçlar', icon: 'psychology' },
-  { id: 'events', label: 'Tədbirlər & Masterklaslar', icon: 'event' },
-  { id: 'forum', label: 'İcma & Forum', icon: 'forum' }
+  { id: 'all', labelKey: 'search_cat_all', label: 'Bütün Kateqoriyalar', icon: 'grid_view' },
+  { id: 'courses', labelKey: 'search_cat_courses', label: 'Kurslar', icon: 'school' },
+  { id: 'experts', labelKey: 'search_cat_experts', label: 'Uzmanlar & Kouçlar', icon: 'psychology' },
+  { id: 'events', labelKey: 'search_cat_events', label: 'Tədbirlər & Masterklaslar', icon: 'event' },
+  { id: 'forum', labelKey: 'search_cat_forum', label: 'İcma & Forum', icon: 'forum' }
 ];
 
 export default function SearchPage() {
@@ -21,6 +22,8 @@ export default function SearchPage() {
     setSelectedTopic,
     navigateTo
   } = useApp();
+
+  const { t } = useLanguage();
 
   // Read initial query from URL search parameters if available
   const getInitialParams = () => {
@@ -111,7 +114,7 @@ export default function SearchPage() {
             type: 'event',
             id: item.rawData.id,
             title: item.rawData.title,
-            price: 'Ödənişsiz'
+            price: t('event_free') || 'Ödənişsiz'
           });
         } else {
           navigateTo('tedbirler');
@@ -134,10 +137,10 @@ export default function SearchPage() {
     <div className="min-h-screen bg-[#faf8f5] text-[#071326]">
       {/* Editorial Page Hero */}
       <PageHero
-        badge="Axtarış Mərkəzi"
-        title="Qlobal Axtarış və İndeks"
-        description="Monodoxia Academy ekosistemində tədris kursları, beynəlxalq sertifikatlı ekspertlər, tədbirlər və müzakirələr üzrə tam axtarış."
-        breadcrumbs={[{ label: 'Qlobal Axtarış' }]}
+        badge={t('search_page_badge')}
+        title={t('search_page_title')}
+        description={t('search_page_desc')}
+        breadcrumbs={[{ label: t('nav_search_global') }]}
       />
 
       <section className="py-10 sm:py-16 relative">
@@ -154,7 +157,7 @@ export default function SearchPage() {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Açar söz daxil edin (kurs, kouç, mövzu, tədbir)..."
+                placeholder={t('search_input_guide')}
                 className="w-full bg-[#faf8f5] border border-[#e2e8f0] focus:border-[#c5a059] rounded-2xl pl-14 sm:pl-16 pr-12 py-3.5 sm:py-4 text-base sm:text-lg text-[#071326] placeholder:text-slate-400 focus:outline-hidden transition-all shadow-inner font-sans"
               />
 
@@ -163,7 +166,7 @@ export default function SearchPage() {
                   type="button"
                   onClick={() => setQuery('')}
                   className="absolute right-4 text-slate-400 hover:text-slate-600 p-1"
-                  title="Təmizlə"
+                  title={t('common_close')}
                 >
                   <span className="material-symbols-outlined text-[20px]">close</span>
                 </button>
@@ -175,6 +178,7 @@ export default function SearchPage() {
               {CATEGORIES.map(cat => {
                 const isActive = category === cat.id;
                 const count = counts[cat.id] || 0;
+                const label = cat.labelKey ? (t(cat.labelKey) || cat.label) : cat.label;
 
                 return (
                   <button
@@ -187,7 +191,7 @@ export default function SearchPage() {
                     }`}
                   >
                     <span className="material-symbols-outlined text-[15px]">{cat.icon}</span>
-                    <span>{cat.label}</span>
+                    <span>{label}</span>
                     {count > 0 && (
                       <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
                         isActive ? 'bg-[#c5a059]/30 text-white' : 'bg-slate-200 text-slate-700'
@@ -206,24 +210,24 @@ export default function SearchPage() {
             <div className="text-sm text-[#475569]">
               {query.trim() ? (
                 <span>
-                  <strong>"{query}"</strong> üzrə <strong>{total}</strong> nəticə tapıldı
+                  <strong>"{query}"</strong> {t('search_results_found')}: <strong>{total}</strong>
                 </span>
               ) : (
-                <span>Axtarış üçün yuxarıdakı xanaya söz daxil edin</span>
+                <span>{t('search_prompt_guide')}</span>
               )}
             </div>
 
             {results.length > 0 && (
               <div className="flex items-center gap-2 self-end sm:self-auto text-xs">
-                <span className="text-[#64748b] font-medium">Sırala:</span>
+                <span className="text-[#64748b] font-medium">{t('search_sort_label')}</span>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
                   className="bg-white border border-[#e2e8f0] rounded-xl px-3 py-1.5 text-xs text-[#071326] font-semibold focus:outline-hidden focus:border-[#c5a059] cursor-pointer"
                 >
-                  <option value="relevance">Ən uyğun (Relevance)</option>
-                  <option value="name_asc">Başlıq üzrə (A - Z)</option>
-                  <option value="type">Növ üzrə qruplaşdır</option>
+                  <option value="relevance">{t('search_sort_relevance')}</option>
+                  <option value="name_asc">{t('search_sort_name')}</option>
+                  <option value="type">{t('search_sort_type')}</option>
                 </select>
               </div>
             )}
@@ -234,7 +238,7 @@ export default function SearchPage() {
             <div className="py-12 flex flex-col items-center justify-center text-[#775a19]">
               <div className="w-10 h-10 border-3 border-[#c5a059] border-t-transparent rounded-full animate-spin mb-3" />
               <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Axtarış aparılır...
+                {t('search_searching')}
               </p>
             </div>
           )}
@@ -261,21 +265,21 @@ export default function SearchPage() {
                 <span className="material-symbols-outlined text-[32px]">manage_search</span>
               </div>
               <h3 className="font-serif text-xl font-medium text-[#071326] mb-2">
-                Nə axtarmaq istərdiniz?
+                {t('search_prompt_title')}
               </h3>
               <p className="text-xs sm:text-sm text-[#64748b] leading-relaxed mb-6 font-light">
-                Platformadakı istənilən təhsil kursu, ICF sertifikatlı kouç, yaxınlaşan tədbir və ya forum müzakirəsini dərhal tapmaq üçün açar söz daxil edin.
+                {t('search_prompt_desc')}
               </p>
 
               {recentSearches.length > 0 && (
                 <div className="pt-6 border-t border-[#f1f5f9] text-left">
                   <div className="flex items-center justify-between mb-3 text-xs text-[#64748b]">
-                    <span className="font-semibold uppercase tracking-wider">Son Axtarışlarınız</span>
+                    <span className="font-semibold uppercase tracking-wider">{t('search_recent')}</span>
                     <button
                       onClick={handleClearRecent}
                       className="text-[#775a19] hover:underline cursor-pointer"
                     >
-                      Təmizlə
+                      {t('search_clear_recent')}
                     </button>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -301,10 +305,10 @@ export default function SearchPage() {
                 <span className="material-symbols-outlined text-[32px]">search_off</span>
               </div>
               <h3 className="font-serif text-xl font-medium text-[#071326] mb-2">
-                "{query}" üzrə uyğun nəticə tapılmadı
+                "{query}" {t('search_no_results')}
               </h3>
               <p className="text-xs text-[#64748b] leading-relaxed mb-6">
-                Zəhmət olmasa daxil etdiyiniz sözün düzgünlüyünü yoxlayın və ya kateqoriya filtrini dəyişərək yenidən yoxlayın.
+                {t('search_no_results_desc')}
               </p>
 
               <button
@@ -312,7 +316,7 @@ export default function SearchPage() {
                 onClick={() => { setQuery(''); setCategory('all'); }}
                 className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#071326] to-[#0c2242] text-[#e5c57d] text-xs font-bold uppercase tracking-wider shadow-sm cursor-pointer"
               >
-                Filtrləri Sıfırla
+                {t('search_reset_filters')}
               </button>
             </div>
           )}

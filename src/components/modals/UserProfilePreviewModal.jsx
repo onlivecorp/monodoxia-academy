@@ -1,9 +1,12 @@
-﻿import React from 'react';
+import React from 'react';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 export default function UserProfilePreviewModal({ user, isOpen, onClose }) {
+  const { t } = useLanguage();
+
   if (!isOpen || !user) return null;
 
-  const role = user.role || 'Tələbə';
+  const role = user.role || t('nav_student_role') || 'Tələbə';
   const tier = user.tier || 'Basic';
   const joinedDate = user.joinedDate || user.joined_date || '';
 
@@ -52,7 +55,7 @@ export default function UserProfilePreviewModal({ user, isOpen, onClose }) {
         <button
           onClick={onClose}
           className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-[#071326] flex items-center justify-center transition-colors cursor-pointer"
-          aria-label="Bağla"
+          aria-label={t('common_close')}
         >
           <span className="material-symbols-outlined text-[18px]">close</span>
         </button>
@@ -76,7 +79,7 @@ export default function UserProfilePreviewModal({ user, isOpen, onClose }) {
               {role}
             </span>
             <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${getTierBadgeClass(tier)}`}>
-              {tier} Üzv
+              {tier} {t('profile_member_label')}
             </span>
           </div>
 
@@ -84,7 +87,7 @@ export default function UserProfilePreviewModal({ user, isOpen, onClose }) {
             <div className="flex items-center justify-between text-xs">
               <span className="text-[#64748b] flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-[15px] text-[#775a19]">calendar_month</span>
-                <span>Üzvlük Tarixi:</span>
+                <span>{t('user_profile_member_since')}</span>
               </span>
               <span className="font-semibold text-[#071326]">{joinedDate || '2025'}</span>
             </div>
@@ -92,29 +95,20 @@ export default function UserProfilePreviewModal({ user, isOpen, onClose }) {
             <div className="flex items-center justify-between text-xs">
               <span className="text-[#64748b] flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-[15px] text-[#775a19]">verified</span>
-                <span>Hesab Statusu:</span>
+                <span>{t('user_profile_status')}</span>
               </span>
               <span className="font-semibold text-emerald-700 flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                <span>Aktiv Tələbə</span>
+                <span>{role === 'Tələbə' ? t('user_profile_active_student') : t('user_profile_active_member')}</span>
               </span>
-            </div>
-
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-[#64748b] flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[15px] text-[#775a19]">shield</span>
-                <span>Məlumat Təhlükəsizliyi:</span>
-              </span>
-              <span className="text-[11px] font-medium text-slate-500">Qorunur (Konfidensial)</span>
             </div>
           </div>
 
           <button
-            type="button"
             onClick={onClose}
-            className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold cursor-pointer transition-colors"
+            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#071326] to-[#0c2242] text-[#e5c57d] hover:text-white text-xs font-bold uppercase tracking-wider shadow-sm transition-all cursor-pointer"
           >
-            Bağla
+            {t('common_close')}
           </button>
         </div>
       </div>

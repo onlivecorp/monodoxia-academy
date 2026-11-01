@@ -11,11 +11,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import CertificateTemplate from './CertificateTemplate';
 import { useApp } from '../context/AppContext';
+import { useLanguage } from '../i18n/LanguageContext';
 
 const BASE_URL = window.location.origin;
 
 export default function CertificateVerifyPage({ publicId, certId: certIdProp }) {
   const { certificatesList = [] } = useApp();
+  const { t } = useLanguage();
   const [cert, setCert] = useState(null);
   const [status, setStatus] = useState('loading'); // loading | found | revoked | notfound
   const [searchInput, setSearchInput] = useState(certIdProp || '');
@@ -158,11 +160,11 @@ export default function CertificateVerifyPage({ publicId, certId: certIdProp }) 
               <span className="material-symbols-outlined" style={{ fontSize: 36, color: '#fbbf24' }}>verified_user</span>
               <div>
                 <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700, color: '#fff', margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  Rəsmi Elektron Sertifikat Sənədi
-                  <span style={{ fontSize: 10, background: '#10b981', color: '#fff', padding: '2px 8px', borderRadius: 100, fontWeight: 700, letterSpacing: '0.05em' }}>DƏYİŞDİRİLƏ BİLMƏZ</span>
+                  {t('cert_official_document') || 'Rəsmi Elektron Sertifikat Sənədi'}
+                  <span style={{ fontSize: 10, background: '#10b981', color: '#fff', padding: '2px 8px', borderRadius: 100, fontWeight: 700, letterSpacing: '0.05em' }}>{t('cert_immutable') || 'DƏYİŞDİRİLƏ BİLMƏZ'}</span>
                 </h1>
                 <p style={{ fontSize: 11, color: '#cbd5e1', margin: '4px 0 0', letterSpacing: '0.02em' }}>
-                  Bu sənəd Monodoxia Academy tərəfindən elektron təsdiqlənmişdir. Məlumatlar qorunur və heç bir halda redaktə edilə bilməz.
+                  {t('cert_official_notice') || 'Bu sənəd Monodoxia Academy tərəfindən elektron təsdiqlənmişdir. Məlumatlar qorunur və heç bir halda redaktə edilə bilməz.'}
                 </p>
               </div>
             </div>
@@ -184,17 +186,17 @@ export default function CertificateVerifyPage({ publicId, certId: certIdProp }) 
             marginBottom: 28
           }}>
             <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: '#0a192f', margin: '0 0 6px' }}>
-              Sertifikat Doğrulama
+              {t('cert_verify_heading') || 'Sertifikat Doğrulama'}
             </h1>
             <p style={{ fontSize: 13, color: '#64748b', margin: '0 0 16px' }}>
-              Sertifikat nömrəsi (MA-000001) və ya doğrulama kodu ilə axtarış edin.
+              {t('cert_verify_guide') || 'Sertifikat nömrəsi (MA-000001) və ya doğrulama kodu ilə axtarış edin.'}
             </p>
             <form onSubmit={handleSearch} style={{ display: 'flex', gap: 10 }}>
               <input
                 type="text"
                 value={searchInput}
                 onChange={e => setSearchInput(e.target.value)}
-                placeholder="MA-000001 və ya Doğrulama Kodu..."
+                placeholder={t('cert_search_placeholder') || 'MA-000001 və ya Doğrulama Kodu...'}
                 style={{
                   flex: 1,
                   padding: '10px 16px',
@@ -224,7 +226,7 @@ export default function CertificateVerifyPage({ publicId, certId: certIdProp }) 
                 gap: 6
               }}>
                 <span className="material-symbols-outlined" style={{ fontSize: 18 }}>search</span>
-                Axtar
+                {t('search_button') || 'Axtar'}
               </button>
             </form>
           </div>
@@ -238,7 +240,7 @@ export default function CertificateVerifyPage({ publicId, certId: certIdProp }) 
               borderRadius: '50%', margin: '0 auto 16px', animation: 'spin 1s linear infinite'
             }} />
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-            Sertifikat yoxlanılır...
+            {t('cert_checking') || 'Sertifikat yoxlanılır...'}
           </div>
         )}
 
@@ -248,8 +250,8 @@ export default function CertificateVerifyPage({ publicId, certId: certIdProp }) 
             border: '1.5px solid #fca5a5', boxShadow: '0 4px 20px rgba(239,68,68,0.08)'
           }}>
             <span className="material-symbols-outlined" style={{ fontSize: 48, color: '#ef4444', display: 'block', marginBottom: 12 }}>cancel</span>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, color: '#7f1d1d', margin: '0 0 8px' }}>Sertifikat Tapılmadı</h2>
-            <p style={{ fontSize: 13, color: '#64748b', margin: 0 }}>Bu nömrə ilə sertifikat mövcud deyil. Nömrəni yoxlayın.</p>
+            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, color: '#7f1d1d', margin: '0 0 8px' }}>{t('cert_status_notfound') || 'Sertifikat Tapılmadı'}</h2>
+            <p style={{ fontSize: 13, color: '#64748b', margin: 0 }}>{t('cert_not_found_msg') || 'Bu nömrə ilə sertifikat mövcud deyil. Nömrəni yoxlayın.'}</p>
           </div>
         )}
 
@@ -261,7 +263,7 @@ export default function CertificateVerifyPage({ publicId, certId: certIdProp }) 
           }}>
             <span className="material-symbols-outlined" style={{ fontSize: 40, color: '#dc2626' }}>block</span>
             <div>
-              <div style={{ fontSize: 16, fontWeight: 700, color: '#7f1d1d' }}>Bu sertifikat İptal Edilmişdir</div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: '#7f1d1d' }}>{t('cert_status_revoked') || 'Bu sertifikat İptal Edilmişdir'}</div>
               <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>
                 {cert.revokedReason && <>Səbəb: {cert.revokedReason} · </>}
                 {cert.revokedAt && <>Tarix: {cert.revokedAt}</>}
@@ -282,7 +284,7 @@ export default function CertificateVerifyPage({ publicId, certId: certIdProp }) 
               }}>
                 <span className="material-symbols-outlined" style={{ fontSize: 32, color: '#065f46' }}>verified</span>
                 <div>
-                  <div style={{ fontSize: 15, fontWeight: 800, color: '#065f46' }}>✓ Doğrulandı — Sertifikat Etibarlıdır</div>
+                  <div style={{ fontSize: 15, fontWeight: 800, color: '#065f46' }}>✓ {t('cert_status_verified') || 'Doğrulandı — Sertifikat Etibarlıdır'}</div>
                   <div style={{ fontSize: 12, color: '#047857', marginTop: 2 }}>
                     № {cert.number} · {cert.fields?.dateValue || cert.issuedAt} · {cert.fields?.recipientName || cert.userName}
                   </div>
@@ -342,16 +344,16 @@ export default function CertificateVerifyPage({ publicId, certId: certIdProp }) 
               border: '1px solid #e6dfc6', boxShadow: '0 2px 12px rgba(0,0,0,0.05)'
             }}>
               <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: '#0a192f', margin: '0 0 16px', fontWeight: 700 }}>
-                Sertifikat Məlumatları
+                {t('cert_verify_title') || 'Sertifikat Məlumatları'}
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
                 {[
-                  { label: 'Alıcı', value: cert.fields?.recipientName || cert.userName || '—' },
-                  { label: 'Kurs / Təlim', value: cert.fields?.courseName || '—' },
-                  { label: 'Verilmə Tarixi', value: cert.fields?.dateValue || cert.issuedAt || '—' },
-                  { label: 'Sertifikat №', value: cert.number || '—' },
-                  { label: 'Müddət', value: cert.fields?.durationValue || '—' },
-                  { label: 'Doğrulama Linki', value: verifyUrl || '—' },
+                  { label: t('cert_recipient') || 'Alıcı', value: cert.fields?.recipientName || cert.userName || '—' },
+                  { label: t('cert_course') || 'Kurs / Təlim', value: cert.fields?.courseName || '—' },
+                  { label: t('cert_issue_date') || 'Verilmə Tarixi', value: cert.fields?.dateValue || cert.issuedAt || '—' },
+                  { label: t('cert_credential_id') || 'Sertifikat №', value: cert.number || '—' },
+                  { label: t('course_curriculum') || 'Müddət', value: cert.fields?.durationValue || '—' },
+                  { label: t('topic_copy_link') || 'Doğrulama Linki', value: verifyUrl || '—' },
                 ].map(({ label, value }) => (
                   <div key={label} style={{
                     padding: '10px 14px',
@@ -374,7 +376,7 @@ export default function CertificateVerifyPage({ publicId, certId: certIdProp }) 
             border: '1px dashed #e6dfc6'
           }}>
             <span className="material-symbols-outlined" style={{ fontSize: 56, color: '#e6dfc6', display: 'block', marginBottom: 16 }}>workspace_premium</span>
-            <p style={{ color: '#94a3b8', fontSize: 14, margin: 0 }}>Sertifikat nömrəsi və ya doğrulama kodu daxil edin</p>
+            <p style={{ color: '#94a3b8', fontSize: 14, margin: 0 }}>{t('cert_verify_guide') || 'Sertifikat nömrəsi və ya doğrulama kodu daxil edin'}</p>
           </div>
         )}
       </div>
