@@ -1,5 +1,6 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
-import { LanguageProvider } from './i18n/LanguageContext';
+import { LanguageProvider, useLanguage } from './i18n/LanguageContext';
+import { getLocalized } from './i18n/localize';
 import { AppProvider, useApp } from './context/AppContext';
 
 import SafetyBanner from './components/SafetyBanner';
@@ -35,6 +36,7 @@ const SearchPage = lazyRetry(() => import('./pages/SearchPage'));
 import GlobalSearchModal from './components/search/GlobalSearchModal';
 
 function AppContent() {
+  const { t, currentLang, defaultLang } = useLanguage();
   const {
     platformSettings,
     currentUser,
@@ -80,19 +82,22 @@ function AppContent() {
   }, []);
 
   useEffect(() => {
+    const defaultTagline = t('splash_tagline') || 'Fərdi İnkişaf və Psixologiya Mərkəzi';
+    const siteTitle = getLocalized(platformSettings, 'siteTitle', currentLang, defaultLang, 'Monodoxia Academy') || platformSettings?.siteTitle || 'Monodoxia Academy';
+    const subtitle = getLocalized(platformSettings, 'subtitle', currentLang, defaultLang, defaultTagline) || platformSettings?.subtitle || defaultTagline;
     const titles = {
-      home: platformSettings?.siteTitle ? `${platformSettings.siteTitle} — ${platformSettings.subtitle || 'Fərdi İnkişaf və Psixologiya Mərkəzi'}` : 'Monodoxia Academy',
-      akademiya: 'Akademiya və Kurslar | Monodoxia Academy',
-      koucinq: 'Fərdi Kouçinq | Monodoxia Academy',
-      club: 'Zənginlər Klubu | Monodoxia Academy',
-      tedbirler: 'Tədbirlər və Masterklaslar | Monodoxia Academy',
-      icma: 'İcma və Forum | Monodoxia Academy',
-      haqqimizda: 'Haqqımızda | Monodoxia Academy',
-      elaqe: 'Əlaqə | Monodoxia Academy',
-      search: 'Qlobal Axtarış | Monodoxia Academy'
+      home: `${siteTitle} — ${subtitle}`,
+      akademiya: `${t('nav_academy') || 'Akademiya və Kurslar'} | ${siteTitle}`,
+      koucinq: `${t('nav_coaching') || 'Fərdi Kouçinq'} | ${siteTitle}`,
+      club: `${t('nav_club') || 'Zənginlər Klubu'} | ${siteTitle}`,
+      tedbirler: `${t('nav_events') || 'Tədbirlər və Masterklaslar'} | ${siteTitle}`,
+      icma: `${t('nav_community') || 'İcma və Forum'} | ${siteTitle}`,
+      haqqimizda: `${t('nav_about') || 'Haqqımızda'} | ${siteTitle}`,
+      elaqe: `${t('nav_contact') || 'Əlaqə'} | ${siteTitle}`,
+      search: `${t('search_title') || 'Qlobal Axtarış'} | ${siteTitle}`
     };
-    document.title = titles[currentPage] || platformSettings?.siteTitle || 'Monodoxia Academy';
-  }, [currentPage, platformSettings?.siteTitle, platformSettings?.subtitle]);
+    document.title = titles[currentPage] || siteTitle;
+  }, [currentPage, platformSettings?.siteTitle, platformSettings?.subtitle, currentLang, defaultLang, t]);
 
   // Global Keyboard Shortcut: Cmd+K / Ctrl+K or / to open Global Search
   useEffect(() => {

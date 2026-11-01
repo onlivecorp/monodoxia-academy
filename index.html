@@ -271,11 +271,21 @@
       var n = document.getElementById('name');
       if (!sp) return;
 
-      // Dynamic localization for Splash Screen based on saved language preference
+      // Dynamic localization for Splash Screen based on saved language preference or browser locale
       var userLang = 'az';
       try {
-        userLang = localStorage.getItem('monodoxia_user_lang') || 'az';
-      } catch (e) {}
+        userLang = localStorage.getItem('monodoxia_lang') || localStorage.getItem('monodoxia_user_lang') || '';
+        if (!userLang || ['az', 'en', 'tr', 'ru'].indexOf(userLang) === -1) {
+          var browserLang = (navigator.language || navigator.userLanguage || '').split('-')[0].toLowerCase();
+          if (['az', 'en', 'tr', 'ru'].indexOf(browserLang) !== -1) {
+            userLang = browserLang;
+          } else {
+            userLang = 'az';
+          }
+        }
+      } catch (e) {
+        userLang = 'az';
+      }
 
       var splashTags = {
         az: 'Fərdi İnkişaf və Psixologiya Mərkəzi',
@@ -289,6 +299,14 @@
         tr: 'Yükleniyor...',
         ru: 'Загрузка...'
       };
+
+      try {
+        var custom = JSON.parse(localStorage.getItem('monodoxia_static_translations') || '{}');
+        if (custom && custom[userLang]) {
+          if (custom[userLang].splash_tagline) splashTags[userLang] = custom[userLang].splash_tagline;
+          if (custom[userLang].splash_loading) splashLoads[userLang] = custom[userLang].splash_loading;
+        }
+      } catch (e) {}
 
       var tagEl = sp.querySelector('.tag');
       if (tagEl && splashTags[userLang]) {

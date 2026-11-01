@@ -23,6 +23,7 @@ export function LanguageProvider({ children }) {
 
   useEffect(() => {
     localStorage.setItem('monodoxia_lang', lang);
+    localStorage.setItem('monodoxia_user_lang', lang);
     document.documentElement.lang = lang;
     // Set dir attribute for RTL languages
     const langConfig = supportedLangs.find(l => l.code === lang);
