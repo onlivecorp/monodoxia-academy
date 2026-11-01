@@ -182,32 +182,103 @@ export default function ProfileModal() {
 
   const fallbackFieldDict = {
     fld_phone: { az: 'Əlaqə Nömrəsi (WhatsApp)', en: 'Contact Number (WhatsApp)', tr: 'İletişim Numarası (WhatsApp)', ru: 'Контактный Номер (WhatsApp)' },
+    phone: { az: 'Əlaqə Nömrəsi (WhatsApp)', en: 'Contact Number (WhatsApp)', tr: 'İletişim Numarası (WhatsApp)', ru: 'Контактный Номер (WhatsApp)' },
     fld_exp: { az: 'Təcrübə / Hazırlıq Səviyyəniz', en: 'Experience / Preparation Level', tr: 'Deneyim / Hazırlık Seviyeniz', ru: 'Опыт / Уровень Подготовки' },
+    exp: { az: 'Təcrübə / Hazırlıq Səviyyəniz', en: 'Experience / Preparation Level', tr: 'Deneyim / Hazırlık Seviyeniz', ru: 'Опыт / Уровень Подготовки' },
     fld_goal: { az: 'Müraciət Məqsədi və Gözləntiləriniz', en: 'Application Purpose & Expectations', tr: 'Başvuru Amacı ve Beklentileriniz', ru: 'Цель Заявки и Ожидания' },
+    goal: { az: 'Müraciət Məqsədi və Gözləntiləriniz', en: 'Application Purpose & Expectations', tr: 'Başvuru Amacı ve Beklentileriniz', ru: 'Цель Заявки и Ожидания' },
     fld_prof: { az: 'Peşəniz və Hazırkı Fəaliyyət Sahəniz', en: 'Profession & Current Field', tr: 'Mesleğiniz ve Mevcut Faaliyet Alanınız', ru: 'Профессия и Сфера Деятельности' },
+    prof: { az: 'Peşəniz və Hazırkı Fəaliyyət Sahəniz', en: 'Profession & Current Field', tr: 'Mesleğiniz ve Mevcut Faaliyet Alanınız', ru: 'Профессия и Сфера Деятельности' },
     fld_file: { az: 'CV / Rezüme və ya Sənəd Linki', en: 'CV / Resume or Document Link', tr: 'CV / Özgeçmiş veya Belge Bağlantısı', ru: 'CV / Резюме или Ссылка на Документ' },
+    file: { az: 'CV / Rezüme və ya Sənəd Linki', en: 'CV / Resume or Document Link', tr: 'CV / Özgeçmiş veya Belge Bağlantısı', ru: 'CV / Резюме или Ссылка на Документ' },
     fld_telegram: { az: 'Telegram İstifadəçi Adınız (@username)', en: 'Telegram Username (@username)', tr: 'Telegram Kullanıcı Adınız (@username)', ru: 'Имя Пользователя Telegram (@username)' },
-    fld_source: { az: 'Tədbir haqqında haradan eşitmisiniz?', en: 'Where did you hear about the event?', tr: 'Etkinliği nereden duydunuz?', ru: 'Откуда вы узнали о мероприятии?' }
+    telegram: { az: 'Telegram İstifadəçi Adınız (@username)', en: 'Telegram Username (@username)', tr: 'Telegram Kullanıcı Adınız (@username)', ru: 'Имя Пользователя Telegram (@username)' },
+    fld_source: { az: 'Tədbir haqqında haradan eşitmisiniz?', en: 'Where did you hear about the event?', tr: 'Etkinliği nereden duydunuz?', ru: 'Откуда вы узнали о мероприятии?' },
+    source: { az: 'Tədbir haqqında haradan eşitmisiniz?', en: 'Where did you hear about the event?', tr: 'Etkinliği nereden duydunuz?', ru: 'Откуда вы узнали о мероприятии?' },
+    // Forum / Community topic fields
+    topic_title: { az: 'Mövzu Başlığı', en: 'Topic Title', tr: 'Konu Başlığı', ru: 'Заголовок темы' },
+    fld_topic_title: { az: 'Mövzu Başlığı', en: 'Topic Title', tr: 'Konu Başlığı', ru: 'Заголовок темы' },
+    topictitle: { az: 'Mövzu Başlığı', en: 'Topic Title', tr: 'Konu Başlığı', ru: 'Заголовок темы' },
+    'topic title': { az: 'Mövzu Başlığı', en: 'Topic Title', tr: 'Konu Başlığı', ru: 'Заголовок темы' },
+    topic_content: { az: 'Mövzu Məzmunu', en: 'Topic Content', tr: 'Konu İçeriği', ru: 'Содержание темы' },
+    fld_topic_content: { az: 'Mövzu Məzmunu', en: 'Topic Content', tr: 'Konu İçeriği', ru: 'Содержание темы' },
+    topiccontent: { az: 'Mövzu Məzmunu', en: 'Topic Content', tr: 'Konu İçeriği', ru: 'Содержание темы' },
+    'topic content': { az: 'Mövzu Məzmunu', en: 'Topic Content', tr: 'Konu İçeriği', ru: 'Содержание темы' },
+    badge: { az: 'Nişan / Etiket', en: 'Badge', tr: 'Rozet / Etiket', ru: 'Значок / Бейдж' },
+    fld_badge: { az: 'Nişan / Etiket', en: 'Badge', tr: 'Rozet / Etiket', ru: 'Значок / Бейдж' },
+    cover_image: { az: 'Qapaq Şəkli', en: 'Cover Image', tr: 'Kapak Görseli', ru: 'Обложка' },
+    fld_cover_image: { az: 'Qapaq Şəkli', en: 'Cover Image', tr: 'Kapak Görseli', ru: 'Обложка' },
+    coverimage: { az: 'Qapaq Şəkli', en: 'Cover Image', tr: 'Kapak Görseli', ru: 'Обложка' },
+    'cover image': { az: 'Qapaq Şəkli', en: 'Cover Image', tr: 'Kapak Görseli', ru: 'Обложка' },
+    read_time: { az: 'Oxuma Müddəti', en: 'Read Time', tr: 'Okuma Süresi', ru: 'Время чтения' },
+    fld_read_time: { az: 'Oxuma Müddəti', en: 'Read Time', tr: 'Okuma Süresi', ru: 'Время чтения' },
+    readtime: { az: 'Oxuma Müddəti', en: 'Read Time', tr: 'Okuma Süresi', ru: 'Время чтения' },
+    'read time': { az: 'Oxuma Müddəti', en: 'Read Time', tr: 'Okuma Süresi', ru: 'Время чтения' },
+    category: { az: 'Kateqoriya', en: 'Category', tr: 'Kategori', ru: 'Категория' },
+    fld_category: { az: 'Kateqoriya', en: 'Category', tr: 'Kategori', ru: 'Категория' },
+    author: { az: 'Müəllif', en: 'Author', tr: 'Yazar', ru: 'Автор' },
+    fld_author: { az: 'Müəllif', en: 'Author', tr: 'Yazar', ru: 'Автор' },
+    title: { az: 'Başlıq', en: 'Title', tr: 'Başlık', ru: 'Заголовок' },
+    fld_title: { az: 'Başlıq', en: 'Title', tr: 'Başlık', ru: 'Заголовок' },
+    content: { az: 'Məzmun', en: 'Content', tr: 'İçerik', ru: 'Содержимое' },
+    fld_content: { az: 'Məzmun', en: 'Content', tr: 'İçerik', ru: 'Содержимое' }
   };
 
   const getFieldLabel = (fieldKey) => {
-    // 1. Check formFieldsList from AppContext
-    const foundInList = (formFieldsList || []).find(f => f.id === fieldKey || f.key === fieldKey);
+    if (!fieldKey) return '';
+    const normKey = String(fieldKey).trim().toLowerCase();
+    const cleanKey = normKey.replace(/^fld_/, '').replace(/_/g, ' ').trim();
+    const underKey = normKey.replace(/^fld_/, '').replace(/\s+/g, '_').trim();
+
+    // 1. Check fallbackFieldDict
+    if (fallbackFieldDict[normKey]) {
+      const dict = fallbackFieldDict[normKey];
+      return dict[currentLang] || dict[defaultLang] || dict.az || fieldKey;
+    }
+    if (fallbackFieldDict[cleanKey]) {
+      const dict = fallbackFieldDict[cleanKey];
+      return dict[currentLang] || dict[defaultLang] || dict.az || fieldKey;
+    }
+    if (fallbackFieldDict[underKey]) {
+      const dict = fallbackFieldDict[underKey];
+      return dict[currentLang] || dict[defaultLang] || dict.az || fieldKey;
+    }
+
+    // 2. Check formFieldsList from AppContext
+    const foundInList = (formFieldsList || []).find(f => f.id === fieldKey || f.key === fieldKey || f.id === normKey || f.key === normKey);
     if (foundInList) {
       return getLocalized(foundInList, 'label', currentLang, defaultLang, foundInList.label || fieldKey);
     }
-    // 2. Check INITIAL_FORM_FIELDS
-    const foundInInitial = (INITIAL_FORM_FIELDS || []).find(f => f.id === fieldKey || f.key === fieldKey);
+    // 3. Check INITIAL_FORM_FIELDS
+    const foundInInitial = (INITIAL_FORM_FIELDS || []).find(f => f.id === fieldKey || f.key === fieldKey || f.id === normKey || f.key === normKey);
     if (foundInInitial) {
       return getLocalized(foundInInitial, 'label', currentLang, defaultLang, foundInInitial.label || fieldKey);
     }
-    // 3. Fallback dictionary
-    if (fallbackFieldDict[fieldKey]) {
-      const dict = fallbackFieldDict[fieldKey];
-      return dict[currentLang] || dict[defaultLang] || dict.az || fieldKey;
-    }
+
     // 4. Clean up raw keys like fld_1792261416101 or underscores
-    return fieldKey.replace(/^fld_/, '').replace(/_/g, ' ');
+    return cleanKey || fieldKey;
+  };
+
+  const formatFormResponseValue = (key, val) => {
+    if (!val) return '—';
+    const sVal = String(val).trim();
+    if (key && (key.includes('read_time') || key.includes('readtime') || key === 'read time')) {
+      const numMatch = sVal.match(/\d+/);
+      if (numMatch) {
+        return `${numMatch[0]} ${t('common_minutes') || 'dəqiqə'}`;
+      }
+    }
+    return sVal;
+  };
+
+  const getTierDescription = (tier) => {
+    const tKey = `profile_tier_desc_${String(tier || 'free').toLowerCase()}`;
+    const localized = t(tKey);
+    if (localized) return localized;
+    if (tier === 'VIP') return t('profile_tier_desc_vip') || 'Bütün qapalı klub tədbirlərinə, mentor sessiyalarına və VIP arxivinə tam limitsiz giriş.';
+    if (tier === 'Premium') return t('profile_tier_desc_premium') || 'Genişləndirilmiş tədris modulları və aylıq kouçinq sessiyalarında endirimlər.';
+    if (tier === 'Basic') return t('profile_tier_desc_basic') || 'Əsas dərslərə və ictimai icma müzakirələrinə sərbəst çıxış.';
+    return t('profile_tier_desc_free') || 'Başlanğıc giriş səviyyəsi. Klub və təlimlərə qoşularaq dərəcənizi yüksəldə bilərsiniz.';
   };
 
   const handleAvatarFile = async (e) => {
@@ -435,7 +506,7 @@ export default function ProfileModal() {
                   <span className="inline-flex items-center gap-1 font-mono">
                     <span className="text-amber-600 font-bold">#</span>ID: {currentUser.id}
                   </span>
-                  {currentUser.joinedDate && <span className="text-slate-400">• Qeydiyyat: {currentUser.joinedDate}</span>}
+                  {currentUser.joinedDate && <span className="text-slate-400">• {t('profile_registered_label') || 'Qeydiyyat:'} {currentUser.joinedDate}</span>}
                   {currentUser.role === 'Admin' && (
                     <button
                       onClick={() => { setProfileModalOpen(false); setAdminModalOpen(true); }}
@@ -1308,11 +1379,11 @@ export default function ProfileModal() {
                         {isExpanded && (
                           <div className="mt-3.5 p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-2.5 animate-fadeIn">
                             <span className="font-bold text-amber-900 block border-b border-slate-200 pb-1.5 uppercase font-mono tracking-wider text-[11px]">
-                              Təqdim Edilmiş Form Cavabları:
+                              {t('submitted_form_responses') || 'Təqdim Edilmiş Form Cavabları:'}
                             </span>
                             {app.userNote && (
                               <div className="bg-white p-2.5 rounded-lg border border-slate-200/80">
-                                <strong className="text-slate-500 block text-[11px]">Müraciətçinin qeydi:</strong>
+                                <strong className="text-slate-500 block text-[11px]">{t('applicant_note_label') || 'Müraciətçinin qeydi:'}</strong>
                                 <p className="text-slate-800 mt-0.5">{app.userNote}</p>
                               </div>
                             )}
@@ -1322,7 +1393,7 @@ export default function ProfileModal() {
                                   {getFieldLabel(key)}:
                                 </strong>
                                 <span className="text-slate-900 font-medium text-xs break-words">
-                                  {String(val || '—')}
+                                  {formatFormResponseValue(key, val)}
                                 </span>
                               </div>
                             ))}
@@ -1343,10 +1414,10 @@ export default function ProfileModal() {
                 <div>
                   <h4 className="text-xs font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1.5 font-mono">
                     <span className="material-symbols-outlined text-[16px]">notifications</span>
-                    Sistem Bildirişləri
+                    {t('profile_system_notifications') || 'Sistem Bildirişləri'}
                   </h4>
                   <p className="text-[11px] text-slate-500 mt-0.5">
-                    Müraciət statusları və təlim xəbərdarlıqları
+                    {t('profile_system_notifications_desc') || 'Müraciət statusları və təlim xəbərdarlıqları'}
                   </p>
                 </div>
                 {myNotifications.length > 0 && (
@@ -1458,17 +1529,17 @@ export default function ProfileModal() {
               <div>
                 <h4 className="text-xs font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1.5 font-mono">
                   <span className="material-symbols-outlined text-[16px]">workspace_premium</span>
-                  Tədris, Sertifikatlar & Kouçinq
+                  {t('profile_learning_certs_coaching') || 'Tədris, Sertifikatlar & Kouçinq'}
                 </h4>
                 <p className="text-[11px] text-slate-500 mt-0.5">
-                  Tamamlanmış kurslar və rezerv edilmiş kouçinq sessiyaları
+                  {t('profile_learning_certs_desc') || 'Tamamlanmış kurslar və rezerv edilmiş kouçinq sessiyaları'}
                 </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div className="p-5 rounded-2xl border border-amber-200 bg-white flex items-center justify-between shadow-sm">
                   <div>
-                    <span className="text-[11px] text-slate-500 block mb-1">Qazanılmış Sertifikatlar</span>
+                    <span className="text-[11px] text-slate-500 block mb-1">{t('profile_earned_certificates') || 'Qazanılmış Sertifikatlar'}</span>
                     <strong className="text-3xl font-serif text-slate-900">{certificates.length}</strong>
                   </div>
                   <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700">
@@ -1478,7 +1549,7 @@ export default function ProfileModal() {
 
                 <div className="p-5 rounded-2xl border border-slate-200/90 bg-white flex items-center justify-between shadow-sm">
                   <div>
-                    <span className="text-[11px] text-slate-500 block mb-1">Rezerv Olunmuş Sessiyalar</span>
+                    <span className="text-[11px] text-slate-500 block mb-1">{t('profile_booked_sessions') || 'Rezerv Olunmuş Sessiyalar'}</span>
                     <strong className="text-3xl font-serif text-slate-900">{bookings.length}</strong>
                   </div>
                   <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-700">
@@ -1489,7 +1560,7 @@ export default function ProfileModal() {
 
               {bookings.length > 0 && (
                 <div className="mt-5">
-                  <h5 className="text-xs font-bold text-amber-800 uppercase tracking-wider font-mono mb-3">Kouçinq Rezervasiyaları:</h5>
+                  <h5 className="text-xs font-bold text-amber-800 uppercase tracking-wider font-mono mb-3">{t('profile_coaching_reservations') || 'Kouçinq Rezervasiyaları:'}</h5>
                   <div className="space-y-2.5">
                     {bookings.map(b => (
                       <div key={b.id} className="p-4 rounded-2xl border border-slate-200 text-xs flex justify-between items-center bg-white hover:border-amber-300 transition-colors shadow-sm">
@@ -1498,7 +1569,7 @@ export default function ProfileModal() {
                           <span className="text-[11px] text-slate-500 font-mono mt-0.5 block">{b.date} • {b.time}</span>
                         </div>
                         <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 uppercase tracking-wider">
-                          Təsdiqləndi
+                          {getBookingStatusText(b.status || 'Təsdiqləndi')}
                         </span>
                       </div>
                     ))}
@@ -1514,25 +1585,22 @@ export default function ProfileModal() {
               <div>
                 <h4 className="text-xs font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1.5 font-mono">
                   <span className="material-symbols-outlined text-[16px]">card_membership</span>
-                  Üzvlük Səviyyəsi və Üzvlük
+                  {t('profile_membership_level_title') || 'Üzvlük Səviyyəsi və Üzvlük'}
                 </h4>
                 <p className="text-[11px] text-slate-500 mt-0.5">
-                  Monodoxia Academy cəmiyyətindəki cari statusunuz və əlavə imkanlar
+                  {t('profile_membership_level_desc') || 'Monodoxia Academy cəmiyyətindəki cari statusunuz və əlavə imkanlar'}
                 </p>
               </div>
 
               <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-amber-50 via-white to-amber-50/60 border border-amber-300/80 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-48 h-48 bg-amber-400/10 rounded-full blur-3xl pointer-events-none" />
                 <div className="relative z-10">
-                  <span className="text-[10px] uppercase font-bold font-mono tracking-widest text-amber-800 block mb-1">Cari Status</span>
+                  <span className="text-[10px] uppercase font-bold font-mono tracking-widest text-amber-800 block mb-1">{t('profile_current_status_label') || 'Cari Status'}</span>
                   <h3 className="font-serif text-2xl sm:text-3xl font-bold text-slate-900 leading-tight">
-                    {userTier || currentUser.tier || 'Free'} Üzv
+                    {userTier || currentUser.tier || 'Free'} {t('profile_member_label') || 'Üzv'}
                   </h3>
                   <p className="text-xs text-slate-600 mt-2 max-w-md leading-relaxed">
-                    {userTier === 'VIP' ? 'Bütün qapalı klub tədbirlərinə, mentor sessiyalarına və VIP arxivinə tam limitsiz giriş.' :
-                     userTier === 'Premium' ? 'Genişləndirilmiş tədris modulları və aylıq kouçinq sessiyalarında endirimlər.' :
-                     userTier === 'Basic' ? 'Əsas dərslərə və ictimai icma müzakirələrinə sərbəst çıxış.' :
-                     'Başlanğıc giriş səviyyəsi. Klub və təlimlərə qoşularaq dərəcənizi yüksəldə bilərsiniz.'}
+                    {getTierDescription(userTier || currentUser.tier)}
                   </p>
                 </div>
                 <button
@@ -1544,7 +1612,7 @@ export default function ProfileModal() {
                   }}
                   className="px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-amber-500/20 shrink-0 self-start sm:self-center cursor-pointer relative z-10"
                 >
-                  Paketi Yüksəlt
+                  {t('profile_upgrade_plan_btn') || 'Paketi Yüksəlt'}
                 </button>
               </div>
             </div>
@@ -2096,15 +2164,15 @@ export default function ProfileModal() {
                 <div className="flex items-center justify-between">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1.5 font-mono">
                     <span className="material-symbols-outlined text-[16px]">workspace_premium</span>
-                    Sertifikatlarım
+                    {t('profile_my_certificates') || 'Sertifikatlarım'}
                   </h4>
-                  <span className="text-[11px] text-slate-500">{myCerts.length} sertifikat</span>
+                  <span className="text-[11px] text-slate-500">{myCerts.length} {t('cert_unit_count') || 'sertifikat'}</span>
                 </div>
 
                 {myCerts.length === 0 ? (
                   <div className="p-10 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex flex-col items-center gap-3">
                     <span className="material-symbols-outlined text-[48px] text-amber-200">workspace_premium</span>
-                    <p className="text-xs text-slate-500 text-center">Hələ sertifikatınız yoxdur.<br />Kursları tamamladıqca sertifikatlarınız burada görünəcək.</p>
+                    <p className="text-xs text-slate-500 text-center">{t('profile_no_certs_title') || 'Hələ sertifikatınız yoxdur.'}<br />{t('profile_no_certs_desc') || 'Kursları tamamladıqca sertifikatlarınız burada görünəcək.'}</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 gap-4">
@@ -2217,10 +2285,10 @@ export default function ProfileModal() {
                         <div>
                           <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5 font-mono">
                             <span className="material-symbols-outlined text-[16px] text-amber-600">verified</span>
-                            Ekspert Sertifikatlarım ({myCustomCerts.length})
+                            {t('profile_expert_certs_heading') || 'Ekspert Sertifikatlarım'} ({myCustomCerts.length})
                           </h4>
                           <p className="text-[11px] text-slate-500">
-                            Profilinizdə və ekspert kartınızda görünəcək peşəkar akkreditasiyalarınız
+                            {t('profile_expert_certs_subdesc') || 'Profilinizdə və ekspert kartınızda görünəcək peşəkar akkreditasiyalarınız'}
                           </p>
                         </div>
                         <button
@@ -2231,7 +2299,7 @@ export default function ProfileModal() {
                           <span className="material-symbols-outlined text-[15px]">
                             {showCoachCertForm ? 'close' : 'add'}
                           </span>
-                          <span>{showCoachCertForm ? 'Bağla' : '+ Sertifikat Əlavə Et'}</span>
+                          <span>{showCoachCertForm ? (t('common_close') || 'Bağla') : (t('profile_add_cert_btn') || '+ Sertifikat Əlavə Et')}</span>
                         </button>
                       </div>
 
@@ -2325,7 +2393,7 @@ export default function ProfileModal() {
 
                       {myCustomCerts.length === 0 ? (
                         <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-500 italic">
-                          Hələlik peşəkar sertifikat əlavə edilməyib.
+                          {t('profile_no_custom_certs_desc') || 'Hələlik peşəkar sertifikat əlavə edilməyib.'}
                         </div>
                       ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

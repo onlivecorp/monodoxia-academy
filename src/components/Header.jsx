@@ -93,11 +93,12 @@ export default function Header() {
 
   const navLinks = activeNavItems.map(item => {
     let label = item.translations?.[lang];
-    if (!label) {
-      if (item.labelKey) {
+    const isCorruptedOrRawAz = !label || (lang !== 'az' && (label === item.translations?.az || label.includes('?') || label.includes('D~')));
+    if (isCorruptedOrRawAz) {
+      if (item.labelKey && t(item.labelKey)) {
         label = t(item.labelKey);
       } else {
-        label = item.label || item.id;
+        label = item.translations?.[lang] || item.translations?.az || item.label || item.id;
       }
     }
 

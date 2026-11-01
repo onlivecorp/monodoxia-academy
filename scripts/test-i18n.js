@@ -67,12 +67,28 @@ const corruptedTier = {
 };
 assert(!getLocalized(corruptedTier, 'name', 'ru', 'az').includes('???'), 'Corrupted question marks are rejected in localized output');
 
-console.log('\n--- 5. Testing Target Type Locales ---');
-['type_course', 'type_club', 'type_event', 'type_webinar', 'type_community'].forEach(key => {
+console.log('\n--- 5. Testing Target Type & Profile Locales ---');
+[
+  'type_course', 'type_club', 'type_event', 'type_webinar', 'type_community',
+  'profile_registered_label', 'submitted_form_responses', 'applicant_note_label',
+  'profile_system_notifications', 'profile_learning_certs_coaching',
+  'profile_earned_certificates', 'profile_booked_sessions', 'profile_coaching_reservations',
+  'profile_membership_level_title', 'profile_current_status_label', 'profile_upgrade_plan_btn',
+  'profile_member_label', 'profile_no_certs_title', 'profile_expert_certs_heading',
+  'nav_club', 'nav_contact'
+].forEach(key => {
   ['az', 'en', 'tr', 'ru'].forEach(lang => {
     assert(Boolean(translations[lang]?.[key]), `Key "${key}" exists in [${lang}]: "${translations[lang]?.[key]}"`);
   });
 });
+
+console.log('\n--- 6. Testing Navigation Club & Contact Translations ---');
+assert(translations.en.nav_club === 'Wealth Club', `English nav_club is Wealth Club: "${translations.en.nav_club}"`);
+assert(translations.tr.nav_club === 'Zenginler Kulübü', `Turkish nav_club is Zenginler Kulübü: "${translations.tr.nav_club}"`);
+assert(translations.ru.nav_club === 'Клуб Богатых', `Russian nav_club is Клуб Богатых: "${translations.ru.nav_club}"`);
+assert(translations.en.nav_contact === 'Contact', `English nav_contact is Contact`);
+assert(translations.tr.nav_contact === 'İletişim', `Turkish nav_contact is İletişim`);
+assert(translations.ru.nav_contact === 'Контакты', `Russian nav_contact is Контакты`);
 
 if (failed > 0) {
   console.error(`\n❌ Total failures: ${failed}`);
@@ -80,3 +96,4 @@ if (failed > 0) {
 } else {
   console.log('\n🎉 ALL TESTS PASSED SUCCESSFULLY!');
 }
+

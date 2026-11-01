@@ -532,6 +532,26 @@ export function AppProvider({ children }) {
               ...(parsed.navbar || {}),
               items: DEFAULT_NAVBAR_ITEMS
             };
+          } else {
+            parsed.navbar.items = parsed.navbar.items.map(item => {
+              const def = DEFAULT_NAVBAR_ITEMS.find(d => d.id === item.id);
+              if (def) {
+                return {
+                  ...def,
+                  ...item,
+                  labelKey: item.labelKey || def.labelKey,
+                  translations: {
+                    ...(def.translations || {}),
+                    ...(item.translations || {})
+                  }
+                };
+              }
+              return item;
+            });
+            if (!parsed.navbar.items.some(i => i.id === 'elaqe')) {
+              const defElaqe = DEFAULT_NAVBAR_ITEMS.find(d => d.id === 'elaqe');
+              if (defElaqe) parsed.navbar.items.push(defElaqe);
+            }
           }
           if (parsed.areas) {
             const defAreasTrans = INITIAL_HOME_CONTENT.areas?.translations || {};
