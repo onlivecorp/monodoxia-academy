@@ -21,30 +21,30 @@ export default function Club() {
   const clubPerks = getLocalizedArray(club, 'perks', currentLang, defaultLang);
   const perks = clubPerks && clubPerks.length > 0 ? clubPerks : (club.perks && club.perks.length > 0 ? club.perks : defaultPerks);
 
-  const tierBadge = getLocalized(club, 'tierBadge', currentLang, defaultLang) || 'XÜSUSİ TƏKLİF';
-  const tierName = activePopularTier ? getLocalized(activePopularTier, 'name', currentLang, defaultLang) : (getLocalized(club, 'tierTitle', currentLang, defaultLang) || t('club_tier_title'));
-  const tierSubtitle = getLocalized(club, 'tierSubtitle', currentLang, defaultLang) || 'Aylıq və ya illik ödəniş əsasında';
+  const tierBadge = getLocalized(club, 'tierBadge', currentLang, defaultLang, t('club_popular_badge')) || t('club_popular_badge') || 'XÜSUSİ TƏKLİF';
+  const tierName = activePopularTier ? getLocalized(activePopularTier, 'name', currentLang, defaultLang, t('club_tier_title')) : (getLocalized(club, 'tierTitle', currentLang, defaultLang, t('club_tier_title')) || t('club_tier_title'));
+  const tierSubtitle = getLocalized(club, 'tierSubtitle', currentLang, defaultLang, t('club_tier_sub')) || t('club_tier_sub') || 'Aylıq və ya illik ödəniş əsasında';
   const tierPrice = activePopularTier ? activePopularTier.price : ((club.tierPrice !== undefined && club.tierPrice !== null && String(club.tierPrice).trim() !== '') ? club.tierPrice : '75');
-  const tierPeriod = activePopularTier ? getLocalized(activePopularTier, 'period', currentLang, defaultLang) : (getLocalized(club, 'tierPeriod', currentLang, defaultLang) || (t('club_tier_period') || '/ aylıq'));
+  const tierPeriod = activePopularTier ? getLocalized(activePopularTier, 'period', currentLang, defaultLang, t('club_tier_period')) : (getLocalized(club, 'tierPeriod', currentLang, defaultLang, t('club_tier_period')) || (t('club_tier_period') || '/ aylıq'));
 
   // Xüsusi təklif / endirim qeydi (deaktiv edilibsə və ya dəyişdirilibsə)
   const isOfferDisabled = activePopularTier?.offerDisabled;
   const tierOffer = isOfferDisabled
     ? ''
     : (activePopularTier
-      ? (getLocalized(activePopularTier, 'offer', currentLang, defaultLang) || activePopularTier.offer || getLocalized(club, 'tierOffer', currentLang, defaultLang) || t('club_tier_offer') || 'İlk ödənişə 2 ay HƏDİYYƏ')
-      : (getLocalized(club, 'tierOffer', currentLang, defaultLang) || t('club_tier_offer') || 'İlk ödənişə 2 ay HƏDİYYƏ'));
+      ? (getLocalized(activePopularTier, 'offer', currentLang, defaultLang, t('club_tier_offer')) || activePopularTier.offer || getLocalized(club, 'tierOffer', currentLang, defaultLang, t('club_tier_offer')) || t('club_tier_offer') || 'İlk ödənişə 2 ay HƏDİYYƏ')
+      : (getLocalized(club, 'tierOffer', currentLang, defaultLang, t('club_tier_offer')) || t('club_tier_offer') || 'İlk ödənişə 2 ay HƏDİYYƏ'));
 
   const popularFeatures = activePopularTier ? getLocalizedArray(activePopularTier, 'features', currentLang, defaultLang) : [];
   const clubFeatures = getLocalizedArray(club, 'tierFeatures', currentLang, defaultLang);
   const tierFeatures = (popularFeatures && popularFeatures.length > 0)
     ? popularFeatures
     : (clubFeatures && clubFeatures.length > 0 ? clubFeatures : []);
-  const tierCtaText = getLocalized(club, 'tierCtaText', currentLang, defaultLang) || 'PAKETİ SEÇİN';
+  const tierCtaText = getLocalized(club, 'tierCtaText', currentLang, defaultLang, t('club_tier_cta')) || t('club_tier_cta') || 'PAKETİ SEÇİN';
 
-  const badgeText = getLocalized(club, 'badge', currentLang, defaultLang) || (club.badge !== undefined && club.badge !== null && String(club.badge).trim() !== '' ? club.badge : t('club_badge'));
-  const titleText = getLocalized(club, 'title', currentLang, defaultLang) || (club.title !== undefined && club.title !== null && String(club.title).trim() !== '' ? club.title : t('club_title'));
-  const descText = getLocalized(club, 'desc', currentLang, defaultLang) || (club.desc !== undefined && club.desc !== null && String(club.desc).trim() !== '' ? club.desc : t('club_desc'));
+  const badgeText = getLocalized(club, 'badge', currentLang, defaultLang, t('club_badge')) || t('club_badge');
+  const titleText = getLocalized(club, 'title', currentLang, defaultLang, t('club_title')) || t('club_title');
+  const descText = getLocalized(club, 'desc', currentLang, defaultLang, t('club_desc')) || t('club_desc');
 
   const userPlanStr = (currentUser?.tier || userTier || '').toString().toLowerCase().trim();
   const displayedTierId = (activePopularTier?.id || '').toString().toLowerCase().trim();
@@ -99,10 +99,10 @@ export default function Club() {
 
   // Right card button text & link
   const rightBtnText = isSamePlan
-    ? (getLocalized(club, 'tierCtaActiveText', currentLang, defaultLang) || club.tierCtaActiveText || 'Statusunuz Aktivdir')
+    ? (getLocalized(club, 'tierCtaActiveText', currentLang, defaultLang, t('club_active_status')) || club.tierCtaActiveText || t('club_active_status') || 'Statusunuz Aktivdir')
     : (userClubApp && userClubApp.status !== 'Ləğv edildi' && userClubApp.status !== 'Rədd edildi'
-      ? `Müraciət: ${userClubApp.status}`
-      : (getLocalized(club, 'tierCtaText', currentLang, defaultLang) || club.tierCtaText || tierCtaText || 'PAKETİ SEÇİN'));
+      ? `${t('profile_app_card_status') || 'Müraciət'}: ${userClubApp.status}`
+      : (getLocalized(club, 'tierCtaText', currentLang, defaultLang, t('club_tier_cta')) || club.tierCtaText || tierCtaText || t('club_tier_cta') || 'PAKETİ SEÇİN'));
 
   const rightBtnLink = isSamePlan
     ? (getLocalized(club, 'tierCtaActiveLink', currentLang, defaultLang) || club.tierCtaActiveLink)

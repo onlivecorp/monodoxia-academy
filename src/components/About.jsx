@@ -17,11 +17,11 @@ export default function About() {
   const isVideo = about.mediaType === 'video' && Boolean(about.videoUrl);
   const showBadges = about.showBadges !== false && (Boolean(about.imageBadgeLeft) || Boolean(about.imageBadgeRight) || !about.showBadges);
 
-  const badgeText = getLocalized(about, 'badge', currentLang, defaultLang) || (about.badge !== undefined && about.badge !== null && String(about.badge).trim() !== '' ? about.badge : t('about_badge'));
-  const titleText = getLocalized(about, 'title', currentLang, defaultLang) || (about.title !== undefined && about.title !== null && String(about.title).trim() !== '' ? about.title : t('about_title'));
-  const descText = getLocalized(about, 'desc', currentLang, defaultLang) || (about.desc !== undefined && about.desc !== null && String(about.desc).trim() !== '' ? about.desc : t('about_desc'));
-  const badgeLeft = getLocalized(about, 'imageBadgeLeft', currentLang, defaultLang) || (about.imageBadgeLeft !== undefined && about.imageBadgeLeft !== null && String(about.imageBadgeLeft).trim() !== '' ? about.imageBadgeLeft : 'Gündəlik Fərqindəlik');
-  const badgeRight = getLocalized(about, 'imageBadgeRight', currentLang, defaultLang) || (about.imageBadgeRight !== undefined && about.imageBadgeRight !== null && String(about.imageBadgeRight).trim() !== '' ? about.imageBadgeRight : '01 / SÜKUT');
+  const badgeText = getLocalized(about, 'badge', currentLang, defaultLang, t('about_badge')) || t('about_badge');
+  const titleText = getLocalized(about, 'title', currentLang, defaultLang, t('about_title')) || t('about_title');
+  const descText = getLocalized(about, 'desc', currentLang, defaultLang, t('about_desc')) || t('about_desc');
+  const badgeLeft = getLocalized(about, 'imageBadgeLeft', currentLang, defaultLang, t('about_badge_left')) || 'Gündəlik Fərqindəlik';
+  const badgeRight = getLocalized(about, 'imageBadgeRight', currentLang, defaultLang, t('about_badge_right')) || '01 / SÜKUT';
 
   return (
     <section className="relative overflow-hidden py-16 md:py-24 bg-[#fbf9f5] border-b border-[#e2d9c8]/70" id="haqqimizda">

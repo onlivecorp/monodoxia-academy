@@ -72,21 +72,9 @@ export default function Hero() {
 
   // Dynamic rotating titles for high-end kinetic headline
   const rotatingTitles = useMemo(() => {
-    const defaultTitle = typeof title3 === 'string' && title3.trim() ? title3 : 'Həyatını dəyiş.';
+    const defaultTitle = typeof title3 === 'string' && title3.trim() ? title3 : (currentLang === 'az' ? 'Həyatını dəyiş.' : currentLang === 'ru' ? 'Преобрази свою жизнь.' : currentLang === 'tr' ? 'Hayatını dönüştür.' : 'Transform your life.');
     if (!isRotatingEnabled) {
       return [defaultTitle];
-    }
-    const customArray = getLocalizedArray(hero, 'rotatingTitles', currentLang, defaultLang);
-    if (Array.isArray(customArray) && customArray.length > 0) {
-      const items = customArray.map(s => String(s).trim()).filter(Boolean);
-      if (items.length > 0) return items;
-    }
-    const rawVal = getLocalized(hero, 'rotatingTitles', currentLang, defaultLang) || hero.rotatingTitles;
-    if (rawVal) {
-      const items = (Array.isArray(rawVal) ? rawVal : String(rawVal).split(/\r?\n|,/))
-        .map(s => String(s).trim())
-        .filter(Boolean);
-      if (items.length > 0) return items;
     }
     const listByLang = {
       az: [
@@ -115,8 +103,39 @@ export default function Hero() {
       ]
     };
     const langKey = currentLang && listByLang[currentLang] ? currentLang : 'az';
+
+    // 1. Explicit translation object for current language
+    if (hero.translations && hero.translations[currentLang] && hero.translations[currentLang].rotatingTitles) {
+      const val = hero.translations[currentLang].rotatingTitles;
+      const items = (Array.isArray(val) ? val : String(val).split(/\r?\n|,/))
+        .map(s => String(s).trim())
+        .filter(Boolean);
+      if (items.length > 0) return items;
+    }
+
+    // 2. Direct property like rotatingTitles_en
+    const directKey = `rotatingTitles_${currentLang}`;
+    if (hero[directKey]) {
+      const val = hero[directKey];
+      const items = (Array.isArray(val) ? val : String(val).split(/\r?\n|,/))
+        .map(s => String(s).trim())
+        .filter(Boolean);
+      if (items.length > 0) return items;
+    }
+
+    // 3. For default language (az), use base authoring property if defined
+    if (currentLang === defaultLang && hero.rotatingTitles) {
+      const items = (Array.isArray(hero.rotatingTitles) ? hero.rotatingTitles : String(hero.rotatingTitles).split(/\r?\n|,/))
+        .map(s => String(s).trim())
+        .filter(Boolean);
+      if (items.length > 0) return items;
+    }
+
+    // 4. High-quality curated presets for current language
     const presets = listByLang[langKey] || listByLang.az;
-    return presets.length > 0 ? presets : [defaultTitle];
+    if (presets && presets.length > 0) return presets;
+
+    return [defaultTitle];
   }, [title3, currentLang, isRotatingEnabled, hero.rotatingTitles, hero.translations, defaultLang]);
 
   const [activeTitleIdx, setActiveTitleIdx] = useState(0);

@@ -11,10 +11,10 @@ export default function Areas() {
     ? areas.items
     : (areasList && areasList.length > 0 ? areasList : []);
 
-  const badgeText = getLocalized(areas, 'badge', currentLang, defaultLang) || (areas.badge !== undefined && areas.badge !== null && String(areas.badge).trim() !== '' ? areas.badge : t('areas_badge'));
-  const titleText = getLocalized(areas, 'title', currentLang, defaultLang) || (areas.title !== undefined && areas.title !== null && String(areas.title).trim() !== '' ? areas.title : t('areas_title'));
-  const descText = getLocalized(areas, 'desc', currentLang, defaultLang) || (areas.desc !== undefined && areas.desc !== null && String(areas.desc).trim() !== '' ? areas.desc : t('areas_desc'));
-  const generalBtnText = getLocalized(areas, 'btnText', currentLang, defaultLang) || (areas.btnText !== undefined && areas.btnText !== null && String(areas.btnText).trim() !== '' ? areas.btnText : '');
+  const badgeText = getLocalized(areas, 'badge', currentLang, defaultLang, t('areas_badge')) || t('areas_badge');
+  const titleText = getLocalized(areas, 'title', currentLang, defaultLang, t('areas_title')) || t('areas_title');
+  const descText = getLocalized(areas, 'desc', currentLang, defaultLang, t('areas_desc')) || t('areas_desc');
+  const generalBtnText = getLocalized(areas, 'btnText', currentLang, defaultLang, t('area_explore')) || t('area_explore');
   const generalLink = areas.link || areas.exploreLink || '';
 
   const handleLinkClick = (e, targetLink) => {

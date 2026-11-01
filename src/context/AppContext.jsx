@@ -481,12 +481,56 @@ export function AppProvider({ children }) {
 
   const [pillarsList, setPillarsList] = useState(() => {
     const saved = localStorage.getItem('monodoxia_pillars');
-    return saved ? JSON.parse(saved) : INITIAL_PILLARS;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map((item, idx) => {
+            const canonical = INITIAL_PILLARS.find(p => p.id === item.id) || INITIAL_PILLARS[idx];
+            if (!canonical) return item;
+            return {
+              ...canonical,
+              ...item,
+              translations: {
+                az: { ...(canonical.translations?.az || {}), ...(item.translations?.az || {}) },
+                en: { ...(canonical.translations?.en || {}), ...(item.translations?.en || {}) },
+                tr: { ...(canonical.translations?.tr || {}), ...(item.translations?.tr || {}) },
+                ru: { ...(canonical.translations?.ru || {}), ...(item.translations?.ru || {}) }
+              }
+            };
+          });
+        }
+      } catch (e) {}
+    }
+    return INITIAL_PILLARS;
   });
 
   const [areasList, setAreasList] = useState(() => {
     const saved = localStorage.getItem('monodoxia_areas');
-    return saved ? JSON.parse(saved) : AREAS;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map((item, idx) => {
+            const canonical = AREAS.find(a => a.id === item.id) || AREAS[idx];
+            if (!canonical) return item;
+            const itemTrans = item.translations || {};
+            const hasProperEn = itemTrans.en && itemTrans.en.title && !itemTrans.en.title.startsWith('New Area');
+            return {
+              ...canonical,
+              ...item,
+              translations: {
+                az: { ...(canonical.translations?.az || {}), ...(itemTrans.az || {}) },
+                en: hasProperEn ? itemTrans.en : (canonical.translations?.en || itemTrans.en || {}),
+                tr: (itemTrans.tr && itemTrans.tr.title && !itemTrans.tr.title.startsWith('Yeni Alan')) ? itemTrans.tr : (canonical.translations?.tr || itemTrans.tr || {}),
+                ru: (itemTrans.ru && itemTrans.ru.title && !itemTrans.ru.title.startsWith('Новая Сфера')) ? itemTrans.ru : (canonical.translations?.ru || itemTrans.ru || {})
+              }
+            };
+          });
+        }
+      } catch (e) {}
+    }
+    return AREAS;
   });
 
   const [coachesList, setCoachesList] = useState(() => {
@@ -1145,6 +1189,7 @@ export function AppProvider({ children }) {
           }
           if (Array.isArray(data.club_tiers)) {
             const mappedTiers = data.club_tiers.map(t => {
+              const seedTier = INITIAL_CLUB_TIERS.find(st => st.id === t.id);
               let parsedFeatures = [];
               if (typeof t.features_json === 'string' && t.features_json.trim()) {
                 try { parsedFeatures = JSON.parse(t.features_json); } catch (e) {}
@@ -1152,6 +1197,9 @@ export function AppProvider({ children }) {
                 parsedFeatures = t.features;
               } else if (Array.isArray(t.features_json)) {
                 parsedFeatures = t.features_json;
+              }
+              if ((!parsedFeatures || parsedFeatures.length === 0) && seedTier) {
+                parsedFeatures = seedTier.features || [];
               }
 
               let parsedTranslations = {};
@@ -1163,19 +1211,29 @@ export function AppProvider({ children }) {
                 try { parsedTranslations = JSON.parse(t.translations_json); } catch (e) {}
               }
 
+              const seedTrans = seedTier?.translations || {};
+              const mergedTranslations = {
+                az: { ...(seedTrans.az || {}), ...(parsedTranslations.az || {}) },
+                en: { ...(seedTrans.en || {}), ...(parsedTranslations.en || {}) },
+                tr: { ...(seedTrans.tr || {}), ...(parsedTranslations.tr || {}) },
+                ru: { ...(seedTrans.ru || {}), ...(parsedTranslations.ru || {}) }
+              };
+
+              const tierDesc = t.desc || t.description || seedTier?.desc || '';
+
               return {
                 id: t.id,
-                name: t.name,
-                price: t.price,
-                annualPrice: t.annual_price || t.annualPrice || '',
-                offer: t.offer !== undefined ? t.offer : '',
+                name: t.name || seedTier?.name || '',
+                price: t.price || seedTier?.price || '0',
+                annualPrice: t.annual_price || t.annualPrice || seedTier?.annualPrice || '',
+                offer: t.offer !== undefined ? t.offer : (seedTier?.offer || ''),
                 offerDisabled: Boolean(Number(t.offer_disabled !== undefined ? t.offer_disabled : t.offerDisabled)),
-                period: t.period,
+                period: t.period || seedTier?.period || '/ aylıq',
                 popular: Boolean(Number(t.popular)),
                 active: t.active !== undefined ? Boolean(Number(t.active)) : true,
-                desc: t.desc || '',
+                desc: tierDesc,
                 features: parsedFeatures,
-                translations: parsedTranslations
+                translations: mergedTranslations
               };
             });
             if (mappedTiers.length > 0) {
@@ -1243,12 +1301,17 @@ export function AppProvider({ children }) {
               Object.keys(blockMap).forEach(key => {
                 const incoming = blockMap[key] || {};
                 const current = updatedContent[key] || INITIAL_HOME_CONTENT[key] || {};
+                const baseTrans = INITIAL_HOME_CONTENT[key]?.translations || {};
+                const curTrans = current.translations || {};
+                const incTrans = incoming.translations || {};
                 updatedContent[key] = {
                   ...current,
                   ...incoming,
                   translations: {
-                    ...(current.translations || {}),
-                    ...(incoming.translations || {})
+                    az: { ...(baseTrans.az || {}), ...(curTrans.az || {}), ...(incTrans.az || {}) },
+                    en: { ...(baseTrans.en || {}), ...(curTrans.en || {}), ...(incTrans.en || {}) },
+                    tr: { ...(baseTrans.tr || {}), ...(curTrans.tr || {}), ...(incTrans.tr || {}) },
+                    ru: { ...(baseTrans.ru || {}), ...(curTrans.ru || {}), ...(incTrans.ru || {}) }
                   }
                 };
               });
@@ -4322,13 +4385,19 @@ export function AppProvider({ children }) {
   // Home Content CMS Block Editor
   const updateHomeBlock = (blockKey, blockData) => {
     const currentBlock = homeContent?.[blockKey] || {};
+    const baseTrans = INITIAL_HOME_CONTENT[blockKey]?.translations || {};
+    const curTrans = currentBlock.translations || {};
+    const newTrans = blockData?.translations || {};
+    const mergedTranslations = {
+      az: { ...(baseTrans.az || {}), ...(curTrans.az || {}), ...(newTrans.az || {}) },
+      en: { ...(baseTrans.en || {}), ...(curTrans.en || {}), ...(newTrans.en || {}) },
+      tr: { ...(baseTrans.tr || {}), ...(curTrans.tr || {}), ...(newTrans.tr || {}) },
+      ru: { ...(baseTrans.ru || {}), ...(curTrans.ru || {}), ...(newTrans.ru || {}) }
+    };
     const mergedBlock = {
       ...currentBlock,
       ...blockData,
-      translations: {
-        ...(currentBlock.translations || {}),
-        ...(blockData?.translations || {})
-      }
+      translations: mergedTranslations
     };
 
     setHomeContent(prev => {
@@ -4336,10 +4405,7 @@ export function AppProvider({ children }) {
       const updated = {
         ...prevBlock,
         ...blockData,
-        translations: {
-          ...(prevBlock.translations || {}),
-          ...(blockData?.translations || {})
-        }
+        translations: mergedTranslations
       };
       const nextContent = {
         ...prev,

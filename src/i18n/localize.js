@@ -45,20 +45,25 @@ export function getLocalized(item, field, currentLang = 'az', defaultLang = DEFA
     return item[directKey];
   }
 
-  // 4. Fallback to base property
+  // 4. Safe fallback for caller's localized dictionary text (avoids showing Azerbaijani on EN/TR/RU)
+  if (safeFallback !== undefined && safeFallback !== null && typeof safeFallback === 'string' && safeFallback.trim() !== '') {
+    return safeFallback;
+  }
+
+  // 5. Fallback to base property (authoring language)
   if (item[field] !== undefined && item[field] !== null) {
     if (typeof item[field] === 'string' && item[field].trim() !== '') return item[field];
     if (typeof item[field] === 'number') return String(item[field]);
   }
 
-  // 5. Fallback to default language translation object
+  // 6. Fallback to default language translation object
   if (item.translations && item.translations[defaultLang] && item.translations[defaultLang][field] !== undefined) {
     const val = item.translations[defaultLang][field];
     if (typeof val === 'string' && val.trim() !== '') return val;
     if (typeof val === 'number') return String(val);
   }
 
-  // 6. Direct property for default language (e.g. title_az)
+  // 7. Direct property for default language (e.g. title_az)
   const defaultDirectKey = `${field}_${defaultLang}`;
   if (item[defaultDirectKey] !== undefined && typeof item[defaultDirectKey] === 'string' && item[defaultDirectKey].trim() !== '') {
     return item[defaultDirectKey];
@@ -70,8 +75,8 @@ export function getLocalized(item, field, currentLang = 'az', defaultLang = DEFA
 /**
  * Resolves localized array (e.g., features, perks, specialties)
  */
-export function getLocalizedArray(item, field, currentLang = 'az', defaultLang = DEFAULT_LANGUAGE) {
-  if (!item || !field) return [];
+export function getLocalizedArray(item, field, currentLang = 'az', defaultLang = DEFAULT_LANGUAGE, safeFallbackArray = []) {
+  if (!item || !field) return Array.isArray(safeFallbackArray) ? safeFallbackArray : [];
 
   // When viewing in default language, base array is primary
   if (currentLang === defaultLang) {
@@ -86,7 +91,7 @@ export function getLocalizedArray(item, field, currentLang = 'az', defaultLang =
       if (Array.isArray(val) && val.length > 0) return val;
       if (typeof val === 'string' && val.trim() !== '') return val.split('\n').map(s => s.trim()).filter(Boolean);
     }
-    return [];
+    return Array.isArray(safeFallbackArray) ? safeFallbackArray : [];
   }
 
   // 1. Nested translations for non-default language
@@ -96,7 +101,21 @@ export function getLocalizedArray(item, field, currentLang = 'az', defaultLang =
     if (typeof val === 'string' && val.trim() !== '') return val.split('\n').map(s => s.trim()).filter(Boolean);
   }
 
-  // 2. Base array property fallback
+  // 2. Direct property like features_en
+  const directKey = `${field}_${currentLang}`;
+  if (item[directKey] !== undefined) {
+    if (Array.isArray(item[directKey]) && item[directKey].length > 0) return item[directKey];
+    if (typeof item[directKey] === 'string' && item[directKey].trim() !== '') {
+      return item[directKey].split('\n').map(s => s.trim()).filter(Boolean);
+    }
+  }
+
+  // 3. Safe fallback array if provided
+  if (Array.isArray(safeFallbackArray) && safeFallbackArray.length > 0) {
+    return safeFallbackArray;
+  }
+
+  // 4. Base array property fallback
   if (Array.isArray(item[field]) && item[field].length > 0) {
     return item[field];
   }
@@ -104,14 +123,14 @@ export function getLocalizedArray(item, field, currentLang = 'az', defaultLang =
     return item[field].split('\n').map(s => s.trim()).filter(Boolean);
   }
 
-  // 3. Fallback to default language translations
+  // 5. Fallback to default language translations
   if (item.translations && item.translations[defaultLang] && item.translations[defaultLang][field] !== undefined) {
     const val = item.translations[defaultLang][field];
     if (Array.isArray(val) && val.length > 0) return val;
     if (typeof val === 'string' && val.trim() !== '') return val.split('\n').map(s => s.trim()).filter(Boolean);
   }
 
-  return [];
+  return Array.isArray(safeFallbackArray) ? safeFallbackArray : [];
 }
 
 /**

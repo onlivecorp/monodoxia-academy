@@ -761,16 +761,40 @@ export default function AdminClubTab({ initialCreate, onResetInitialCreate }) {
                     {t.name}
                   </h5>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    {t.translations && Object.keys(t.translations).length > 0 && (
-                      <span style={{ fontSize: '9px', fontWeight: 700, padding: '2px 6px', background: '#eff6ff', color: '#2563eb', borderRadius: '4px', border: '1px solid #bfdbfe' }} title="Çoxdilli tərcümələri mövcuddur">
-                        i18n
-                      </span>
-                    )}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                      {['az', 'en', 'tr', 'ru'].map(lng => {
+                        const hasLang = Boolean(t.translations?.[lng]?.name || (lng === 'az' && t.name));
+                        return (
+                          <span
+                            key={lng}
+                            style={{
+                              fontSize: '9px',
+                              fontWeight: 700,
+                              padding: '1px 5px',
+                              borderRadius: '3px',
+                              background: hasLang ? '#dcfce7' : '#fee2e2',
+                              color: hasLang ? '#15803d' : '#b91c1c',
+                              border: `1px solid ${hasLang ? '#86efac' : '#fca5a5'}`,
+                              textTransform: 'uppercase'
+                            }}
+                            title={`${lng.toUpperCase()}: ${hasLang ? 'Tərcümə mövcuddur' : 'Tərcümə daxil edilməyib'}`}
+                          >
+                            {lng}
+                          </span>
+                        );
+                      })}
+                    </div>
                     {t.popular && (
                       <span className="admin-badge-gold">POPULAR</span>
                     )}
                   </div>
                 </div>
+
+                {t.desc && (
+                  <p style={{ fontSize: '12px', color: '#64748b', margin: '0 0 10px 0', lineHeight: 1.4 }}>
+                    {t.desc}
+                  </p>
+                )}
 
                 <div style={{ padding: '10px 0', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', marginBottom: '12px' }}>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>

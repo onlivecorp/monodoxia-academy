@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../i18n/LanguageContext';
-import { getLocalized } from '../../i18n/localize';
+import { getLocalized, getLocalizedArray } from '../../i18n/localize';
 import { TARGET_TYPE_MAP, APPLICATION_STATUSES } from '../../data/applicationData';
 
 export default function ApplicationModal() {
@@ -82,8 +82,7 @@ export default function ApplicationModal() {
       // Set defaults for select fields
       const initialResp = {};
       relevantFields.forEach(f => {
-        const trans = f.translations?.[lang] || {};
-        const opts = (trans.options && trans.options.length > 0) ? trans.options : (f.options || []);
+        const opts = getLocalizedArray(f, 'options', currentLang, defaultLang, f.options || []);
         if (f.fieldType === 'select' && opts.length > 0) {
           initialResp[f.id] = opts[0];
         } else if (f.id === 'fld_phone' || f.fieldType === 'tel') {
@@ -132,8 +131,7 @@ export default function ApplicationModal() {
       if (f.isRequired) {
         const val = formResponses[f.id];
         if (!val || !String(val).trim() || (f.fieldType === 'tel' && String(val).trim() === '+994')) {
-          const trans = f.translations?.[lang] || {};
-          const fLabel = trans.label || f.label;
+          const fLabel = getLocalized(f, 'label', currentLang, defaultLang, f.label) || f.label;
           errors[f.id] = `${fLabel} ${t('app_field_required')}`;
         }
       }
@@ -339,14 +337,9 @@ export default function ApplicationModal() {
               {relevantFields.map(field => {
                 const isRequired = field.isRequired;
                 const err = validationErrors[field.id];
-                const trans = field.translations?.[lang] || {};
-                const label = trans.label || field.label;
-                const placeholder = trans.placeholder !== undefined && trans.placeholder !== ''
-                  ? trans.placeholder
-                  : (field.placeholder || '');
-                const options = (trans.options && trans.options.length > 0)
-                  ? trans.options
-                  : (field.options || []);
+                const label = getLocalized(field, 'label', currentLang, defaultLang, field.label) || field.label;
+                const placeholder = getLocalized(field, 'placeholder', currentLang, defaultLang, field.placeholder || '');
+                const options = getLocalizedArray(field, 'options', currentLang, defaultLang, field.options || []);
 
                 if (field.fieldType === 'select') {
                   return (
