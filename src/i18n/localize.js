@@ -1,6 +1,6 @@
 // Monodoxia Academy - Universal Localizer & Translation Engine
 import { DEFAULT_LANGUAGE } from './languages.js';
-import { COACHES } from '../data/mockData.js';
+import { COACHES, AREAS } from '../data/mockData.js';
 
 export const COACH_TITLE_MAP = {
   'Kouç & Ekspert': {
@@ -543,8 +543,32 @@ export function getLocalized(item, field, currentLang = 'az', defaultLang = DEFA
 
   const isDummyEnglishArea = (val) => {
     if (typeof val !== 'string') return false;
-    return val.startsWith('New Area') || val.includes('/ PILLAR') || val.startsWith('Detailed information about this personal');
+    return val.startsWith('New Area') || val.includes('/ PILLAR') || val.startsWith('Detailed information about this personal') || val.startsWith('Yeni Sahə');
   };
+
+  // If this item is a dummy area ("New Area 1", etc.), resolve from canonical AREAS
+  if (item && (isDummyEnglishArea(item.title) || isDummyEnglishArea(item.number) || isDummyEnglishArea(item.desc))) {
+    let canonical = item.id ? AREAS.find(a => a.id === item.id) : null;
+    if (!canonical) {
+      const numMatch = (String(item.title || '') + ' ' + String(item.number || '')).match(/\d+/);
+      if (numMatch) {
+        const idx = parseInt(numMatch[0], 10) - 1;
+        if (AREAS[idx]) canonical = AREAS[idx];
+      }
+    }
+    if (canonical) {
+      if (canonical.translations?.[currentLang]?.[field]) {
+        return canonical.translations[currentLang][field];
+      }
+      if (currentLang === defaultLang && canonical[field]) {
+        return canonical[field];
+      }
+      if (field === 'btnText') {
+        const btnMap = { az: 'Kəşf et', en: 'Explore', tr: 'Keşfet', ru: 'Исследовать' };
+        return btnMap[currentLang] || 'Explore';
+      }
+    }
+  }
 
   // 1. When viewing in default language (AZ)
   if (currentLang === defaultLang) {

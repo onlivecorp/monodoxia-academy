@@ -2,14 +2,39 @@ import React from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { getLocalized } from '../i18n/localize';
 import { useApp } from '../context/AppContext';
+import { AREAS } from '../data/mockData';
 
 export default function Areas() {
   const { t, currentLang, defaultLang } = useLanguage();
   const { homeContent, areasList, navigateTo } = useApp();
   const areas = homeContent?.areas || {};
-  const activeAreas = (areas?.items && Array.isArray(areas.items) && areas.items.length > 0)
+
+  const isDummyArea = (item) => {
+    if (!item) return true;
+    const str = String(item.title || item.translations?.en?.title || item.translations?.az?.title || '');
+    return str.startsWith('New Area') || str.startsWith('Yeni Sahə');
+  };
+
+  const rawList = (areas?.items && Array.isArray(areas.items) && areas.items.length > 0)
     ? areas.items
-    : (areasList && areasList.length > 0 ? areasList : []);
+    : (areasList && areasList.length > 0 ? areasList : AREAS);
+
+  const activeAreas = rawList.map((a, idx) => {
+    const canonical = AREAS[idx] || AREAS.find(c => c.id === a.id) || a;
+    if (isDummyArea(a) || !a.translations) {
+      return canonical;
+    }
+    return {
+      ...canonical,
+      ...a,
+      translations: {
+        az: { ...(canonical.translations?.az || {}), ...(a.translations?.az || {}) },
+        en: { ...(canonical.translations?.en || {}), ...(a.translations?.en || {}) },
+        tr: { ...(canonical.translations?.tr || {}), ...(a.translations?.tr || {}) },
+        ru: { ...(canonical.translations?.ru || {}), ...(a.translations?.ru || {}) }
+      }
+    };
+  });
 
   const badgeText = getLocalized(areas, 'badge', currentLang, defaultLang, t('areas_badge')) || t('areas_badge');
   const titleText = getLocalized(areas, 'title', currentLang, defaultLang, t('areas_title')) || t('areas_title');
@@ -143,7 +168,7 @@ export default function Areas() {
               onClick={(e) => handleLinkClick(e, generalLink || '#haqqimizda')}
               className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-xl bg-gradient-to-r from-[#070f1e] to-[#112240] text-[#e5c57d] hover:text-white font-medium text-xs sm:text-sm tracking-wider uppercase shadow-md hover:shadow-xl hover:shadow-[#070f1e]/20 transition-all duration-300 hover:-translate-y-0.5 border border-[#c5a059]/30 cursor-pointer group"
             >
-              <span>{generalBtnText || 'Kəşf et'}</span>
+              <span>{generalBtnText || t('area_explore') || 'Kəşf et'}</span>
               <span className="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
             </a>
           </div>

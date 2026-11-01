@@ -717,6 +717,21 @@ if ($action === 'get_all') {
     }
     unset($cItem);
     $cms_blocks = $safeQuery("SELECT block_key, content_json FROM mdx_cms_blocks");
+    foreach ($cms_blocks as &$cb) {
+        if ($cb['block_key'] === 'areas') {
+            if (strpos($cb['content_json'], 'New Area') !== false || strpos($cb['content_json'], 'Yeni Sahə') !== false) {
+                $decoded = json_decode($cb['content_json'], true);
+                if (is_array($decoded) && isset($decoded['items'])) {
+                    unset($decoded['items']);
+                    $cb['content_json'] = json_encode($decoded, JSON_UNESCAPED_UNICODE);
+                    try {
+                        $pdo->prepare("UPDATE mdx_cms_blocks SET content_json = ? WHERE block_key = 'areas'")->execute([$cb['content_json']]);
+                    } catch (PDOException $e) {}
+                }
+            }
+        }
+    }
+    unset($cb);
 
     $student_progress = [];
     $student_certificates = [];

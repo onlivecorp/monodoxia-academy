@@ -1470,6 +1470,12 @@ export function AppProvider({ children }) {
                   }
                 };
               });
+              if (updatedContent.areas && Array.isArray(updatedContent.areas.items)) {
+                const hasDummy = updatedContent.areas.items.some(i => i.title && (i.title.startsWith('New Area') || i.title.startsWith('Yeni Sahə')));
+                if (hasDummy || updatedContent.areas.items.length === 0) {
+                  updatedContent.areas.items = AREAS;
+                }
+              }
               return updatedContent;
             });
           }
